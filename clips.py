@@ -105,7 +105,7 @@ def choose_clip(keyword, seconds, used_ids):
             portrait = h > w
             long_enough = (hit.get("duration") or 0) >= seconds
             candidates.append(((portrait, long_enough), hit, url, portrait))
-                if candidates:
+        if candidates:
             candidates.sort(key=lambda c: c[0], reverse=True)
             _, hit, url, portrait = random.choice(candidates[:6])
             return query, hit, url, portrait
