@@ -124,7 +124,7 @@ def generate_script():
         raise RuntimeError("GEMINI_API_KEY is not set")
     client = genai.Client(api_key=api_key)
     used = load_used()
-    content_type = CONTENT_TYPES[datetime.date.today().toordinal() % len(CONTENT_TYPES)]
+           content_type = CONTENT_TYPES[len(used) % len(CONTENT_TYPES)]
     prompt = build_prompt(content_type, used)
 
     for attempt in range(1, 4):
