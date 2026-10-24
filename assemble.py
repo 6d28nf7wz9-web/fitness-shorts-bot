@@ -10,15 +10,22 @@ FINAL = "output/final.mp4"
 MUSIC_VOLUME = 0.12
 FONT = "DejaVu Sans"
 
+# Caption fitting. Lower MAX_TEXT_WIDTH if text still touches the edges.
+MAX_TEXT_WIDTH = 840   # pixels; keeps text clear of the side buttons
+BASE_SIZE = 92         # biggest font size, used for short captions
+MIN_SIZE = 50          # never go smaller than this
+CHAR_WIDTH = 0.80      # average capital letter width as a fraction of font size
+MAX_CHARS = 16         # max characters grouped into one caption
+
 HEADER = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {W}
 PlayResY: {H}
-WrapStyle: 2
+WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,{FONT},96,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,8,2,2,60,60,560,1
+Style: Cap,{FONT},{BASE_SIZE},&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,8,2,2,120,120,560,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -38,16 +45,25 @@ def clean(text):
 
 
 def chunk_words(text):
+    """Group words into captions of at most 2 words and MAX_CHARS characters."""
     words = text.replace("\n", " ").split()
-    chunks, current = [], []
+    chunks, current = [], ""
     for w in words:
-        current.append(w)
-        if len(current) == 2 or len(w) > 8:
-            chunks.append(" ".join(current))
-            current = []
+        if not current:
+            current = w
+        elif len(current) + 1 + len(w) <= MAX_CHARS and len(current.split()) < 2:
+            current += " " + w
+        else:
+            chunks.append(current)
+            current = w
     if current:
-        chunks.append(" ".join(current))
+        chunks.append(current)
     return chunks
+
+
+def fit_size(chunk):
+    size = int(MAX_TEXT_WIDTH / (max(len(chunk), 1) * CHAR_WIDTH))
+    return max(MIN_SIZE, min(BASE_SIZE, size))
 
 
 def build_captions(script, audio):
@@ -65,8 +81,9 @@ def build_captions(script, audio):
         for c, w in zip(chunks, weights):
             d = duration * w / total_w
             color = yellow if k % 3 == 2 else ""
+            fs = "{\\fs%d}" % fit_size(c)
             lines.append(
-                f"Dialogue: 0,{ass_time(t)},{ass_time(t + d)},Cap,,0,0,0,,{pop}{color}{c}"
+                f"Dialogue: 0,{ass_time(t)},{ass_time(t + d)},Cap,,0,0,0,,{pop}{color}{fs}{c}"
             )
             t += d
             k += 1
