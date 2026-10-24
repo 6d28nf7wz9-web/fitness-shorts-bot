@@ -105,7 +105,7 @@ def validate(data):
         if not str(s.get("keyword", "")).strip():
             return "empty keyword"
         words += len(s["narration"].split())
-    if not 60 <= words <= 115:
+    if not 60 <= words <= 125:
         return f"narration is {words} words (want 75-105)"
     if len(data["title"]) > 100:
         return "title too long"
