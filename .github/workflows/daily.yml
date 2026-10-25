@@ -46,7 +46,7 @@ jobs:
         run: python voice.py
 
       - name: Fetch clips
-        run: python clips.py
+        run: python clips_fast.py
 
       - name: Assemble video
         run: python assemble.py

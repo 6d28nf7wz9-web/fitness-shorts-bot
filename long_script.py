@@ -62,10 +62,12 @@ Return ONLY valid JSON, no markdown, with exactly these keys:
 
 Rules:
 - 5 to 8 sections. Total narration between 450 and 700 words.
-- Section 1 is a hook of 25-45 words: create curiosity and say what the viewer will learn.
-- Middle sections: one clear point each, with a concrete example and a short, accurate reason. 70-120 words each. Include one simple thing the viewer can do today.
-- The last section is a short recap that ends with "Subscribe for more tips like this."
-- Each keyword must describe something filmable, like "man lifting dumbbells", "woman running outdoors", "healthy meal prep", "person sleeping". No brand names, no people's names.
+- Section 1 is a hook of 25-45 words. Start with the most surprising or useful result, promise what the viewer will learn, and open one loop that you close near the end, for example "and the last tip is the one most people skip".
+- Each middle section is 70-120 words: one clear point, one concrete example, one short accurate reason, and one simple thing to do today. End each section with a one-sentence bridge that makes the viewer want the next section.
+- Vary the rhythm: a short question, a surprising fact, or a quick "here is the mistake" moment in every section, so the energy never stays flat.
+- Speak directly to "you", use contractions and everyday words, keep sentences under 16 words, and sound like a friend explaining.
+- The last section is a short recap that closes the loop from the hook, asks one simple question for the comments, and ends with "Subscribe for more tips like this."
+- Each section has 4 or 5 different keywords for stock footage, each describing something you can film, like "man lifting dumbbells", "woman running outdoors", "healthy meal prep", "person sleeping". No brand names, no people's names.
 - Only well-established, evidence-based advice (progressive overload, adequate protein, calorie balance, sleep, consistency). Acknowledge that results vary between people.
 - Never mention steroids, supplements, fat burners, detoxes, medical conditions, or spot reduction.
 - Never promise results or timeframes.

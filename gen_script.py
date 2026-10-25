@@ -65,20 +65,22 @@ Topics already used (do NOT repeat or closely overlap): {recent}
 Return ONLY valid JSON, no markdown, with exactly these keys:
 {{
   "topic": "short unique label, 3-6 words",
-  "title": "max 60 characters, catchy but truthful",
+  "title": "max 60 characters, starts with a strong word or a number, includes the main keyword, creates curiosity, truthful and not misleading",
   "description": "two short sentences summarizing the tip",
   "hashtags": ["4 to 6 relevant hashtags without the # symbol"],
   "scenes": [
-    {{"narration": "one or two short spoken sentences", "keyword": "2-3 plain English words for a stock video search"}}
+    {{"narration": "one or two short spoken sentences", "keyword": "2 or 3 filmable stock searches separated by a vertical bar"}}
   ]
 }}
 
 Rules:
-- 4 to 6 scenes. Total narration between 75 and 105 words (about 35 seconds spoken).
-- Scene 1 is a hook of at most 12 words that grabs attention in 3 seconds.
-- The last scene is a call to action ending with "Follow for a daily tip."
-- Middle scenes give the tip and one short, accurate reason.
-- Each keyword must describe something filmable, like "man lifting dumbbells", "woman running outdoors", "healthy meal prep", "person sleeping". No brand names, no people's names.
+- 4 to 6 scenes. Total narration between 70 and 100 words (about 30 seconds spoken).
+- Scene 1 is the hook: at most 12 words, no greeting, no "hey guys". Open with a specific mistake, a surprising fact, a myth, or a bold claim the viewer wants to check. Style examples: "You are doing cardio at the wrong time." or "This one habit quietly stalls your muscle growth."
+- Scene 2 promises the payoff in one short sentence, so the viewer knows why to keep watching.
+- Middle scenes: one clear point, one concrete example, and one simple action to do today. Speak directly to "you". Sentences under 14 words. Use contractions and everyday words, like a friend explaining.
+- Use a number or a specific detail whenever it is well established and accurate.
+- The last scene is a loop ending: its final sentence should flow naturally back into the hook, so the video feels continuous when it replays. Add a very short follow line only if there is room, like "Follow for tomorrow's tip."
+- Each keyword field names 2 or 3 different filmable searches separated by a vertical bar, for example "man lifting dumbbells | gym close up | person resting". Describe things you can see. No brand names, no people's names.
 - Only well-established, evidence-based advice (progressive overload, adequate protein, calorie balance, sleep, consistency).
 - Never mention steroids, supplements, fat burners, detoxes, medical conditions, or spot reduction.
 - Never promise results or timeframes (no "lose 10 kg in a week").
