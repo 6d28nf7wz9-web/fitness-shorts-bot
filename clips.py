@@ -182,4 +182,5 @@ def main():
     print("\nSaved to output/clips_info.json")
 
 
-main()
+if __name__ == "__main__":
+    main()
