@@ -1,0 +1,92 @@
+name: AI Long Video
+
+on:
+  schedule:
+    - cron: "41 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ai-long
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+      YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+      YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+      YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+      UPLOAD_PRIVACY: private
+      SHORTS_PER_LONG: "2"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Cache speech model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: whisper-base-en
+
+      - name: Write long script
+        run: python long_script.py
+
+      - name: AI voiceover
+        run: |
+          export LONG_ID=$(cat output/long_id.txt)
+          python long_voice.py
+
+      - name: Time the voiceover
+        run: |
+          export LONG_ID=$(cat output/long_id.txt)
+          export LONG_REC=output/long/ai_voice.mp3
+          python long_transcribe.py
+
+      - name: Fetch footage
+        run: python long_clips.py
+
+      - name: Assemble video
+        run: python long_assemble.py
+
+      - name: Upload long video
+        run: python long_upload.py
+
+      - name: Cut and upload Shorts
+        run: python long_shorts.py
+
+      - name: Save status
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add queue used_long_topics.json
+          git diff --staged --quiet || git commit -m "AI long video done"
+          git pull --rebase
+          git push
+
+      - name: Keep video if something failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-long-video
+          path: output/long/final_long.mp4
+          retention-days: 2
+          if-no-files-found: ignore
