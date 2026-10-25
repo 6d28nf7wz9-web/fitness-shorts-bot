@@ -6,6 +6,8 @@ import re
 
 from faster_whisper import WhisperModel
 
+from ffaudio import load_audio
+
 QUEUE_DIR = "queue"
 REC_DIR = "recordings"
 OUT_DIR = "output/long"
@@ -55,7 +57,7 @@ def transcribe(path):
     model = WhisperModel(MODEL_SIZE, device="cpu", compute_type="int8")
     print("Transcribing...")
     segments, info = model.transcribe(
-        path, language=LANGUAGE, word_timestamps=True, vad_filter=True, beam_size=5
+        load_audio(path), language=LANGUAGE, word_timestamps=True, vad_filter=True, beam_size=5
     )
     words = []
     for seg in segments:
