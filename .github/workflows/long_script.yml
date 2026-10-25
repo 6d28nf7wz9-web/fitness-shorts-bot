@@ -1,0 +1,49 @@
+name: Long Video Script
+
+on:
+  schedule:
+    - cron: "23 6 * * 1,3,5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: long-script
+  cancel-in-progress: false
+
+jobs:
+  write-script:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Write long script
+        run: python long_script.py
+
+      - name: Save script to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add queue used_long_topics.json
+          git commit -m "New long video script"
+          git pull --rebase
+          git push
+
+      - name: Notify me with an Issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --title "$(cat output/long_id.txt) $(cat output/long_issue_title.txt)" --body-file "queue/$(cat output/long_id.txt).txt"
