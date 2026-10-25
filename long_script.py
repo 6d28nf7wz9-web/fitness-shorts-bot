@@ -7,6 +7,7 @@ from google import genai
 from google.genai import types
 
 from gen_script import BANNED, DISCLAIMER, MODEL_CANDIDATES, parse_json
+from topics import all_used, too_similar
 
 USED_FILE = "used_long_topics.json"
 QUEUE_DIR = "queue"
@@ -98,7 +99,7 @@ def validate(data, used):
     for bad in BANNED:
         if bad in everything:
             return f"contains banned phrase: {bad}"
-    if data["topic"].strip().lower() in [u.lower() for u in used]:
+    if too_similar(data["topic"], all_used()):
         return "topic already used"
     return None
 
@@ -109,7 +110,7 @@ def generate(used, trends):
         raise RuntimeError("GEMINI_API_KEY is not set")
     client = genai.Client(api_key=api_key)
     print(f"Trending topics available: {len(trends)}")
-    prompt = build_prompt(used, trends)
+    prompt = build_prompt(all_used(), trends)
     for attempt in range(1, 4):
         for model in MODEL_CANDIDATES:
             try:

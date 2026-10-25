@@ -7,6 +7,8 @@ import time
 from google import genai
 from google.genai import types
 
+from topics import all_used, too_similar
+
 CONTENT_TYPES = [
     "a muscle-building tip (progressive overload, rep ranges, rest, form)",
     "a fat-loss tip (protein, calorie balance, daily steps, sleep, habits)",
@@ -113,7 +115,7 @@ def validate(data):
     for bad in BANNED:
         if bad in everything:
             return f"contains banned phrase: {bad}"
-    if data["topic"].strip().lower() in [u.lower() for u in load_used()]:
+    if too_similar(data["topic"], all_used()):
         return "topic already used"
     return None
 
@@ -125,7 +127,7 @@ def generate_script():
     client = genai.Client(api_key=api_key)
     used = load_used()
     content_type = CONTENT_TYPES[len(used) % len(CONTENT_TYPES)]
-    prompt = build_prompt(content_type, used)
+    prompt = build_prompt(content_type, all_used())
 
     for attempt in range(1, 4):
         for model in MODEL_CANDIDATES:
