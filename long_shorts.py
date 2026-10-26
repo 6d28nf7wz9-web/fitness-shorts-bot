@@ -6,6 +6,7 @@ import subprocess
 
 from gen_script import DISCLAIMER
 from yt import upload_video
+from avatar import add_avatar
 
 OUT_DIR = "output/long"
 SHORT_DIR = f"{OUT_DIR}/shorts"
@@ -30,7 +31,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,{FONT},{BASE_SIZE},&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,8,2,2,120,120,560,1
+Style: Cap,{FONT},{BASE_SIZE},&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,8,2,2,120,120,700,1
 Style: Head,{FONT},62,&H00FFFFFF,&H000000FF,&H99000000,&H00000000,-1,0,0,0,100,100,0,0,3,18,0,8,100,100,230,1
 
 [Events]
@@ -190,6 +191,7 @@ def main():
     for n, si in enumerate(picks, 1):
         sec = tl["sections"][si - 1]
         out, dur = render(tl, chunks, si, n, random.choice(music_files))
+        add_avatar(out, tl["recording"], tl["audio_start"] + sec["start"], dur, "short")
         print(f"Rendered {out} ({dur:.0f}s): {sec['heading']}")
         if os.getenv("SKIP_UPLOAD"):
             continue

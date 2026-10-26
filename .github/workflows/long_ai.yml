@@ -64,7 +64,9 @@ jobs:
         run: python long_clips.py
 
       - name: Assemble video
-        run: python long_assemble.py
+        run: |
+          python long_assemble.py
+          python avatar.py long
 
       - name: Upload long video
         run: python long_upload.py

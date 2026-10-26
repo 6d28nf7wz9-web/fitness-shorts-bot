@@ -49,7 +49,9 @@ jobs:
         run: python clips_fast.py
 
       - name: Assemble video
-        run: python assemble.py
+        run: |
+          python assemble.py
+          python avatar.py short
 
       - name: Upload to YouTube
         run: python upload.py

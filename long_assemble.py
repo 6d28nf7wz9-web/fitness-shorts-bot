@@ -19,7 +19,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,{FONT},52,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,5,2,2,160,160,70,1
+Style: Cap,{FONT},52,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,5,2,2,100,520,70,1
 Style: Title,{FONT},60,&H00FFFFFF,&H000000FF,&H99000000,&H00000000,-1,0,0,0,100,100,0,0,3,16,0,7,90,90,80,1
 
 [Events]
@@ -68,7 +68,7 @@ def build_ass(tl):
         nxt = lines[i + 1][0]["s"] if i + 1 < len(lines) else end + 0.5
         end = max(min(nxt, end + 0.25), start + 0.4)
         text = clean(" ".join(w["w"] for w in line))
-        size = min(52, int(1500 / (max(len(text), 1) * 0.62)))
+        size = min(52, int(1250 / (max(len(text), 1) * 0.62)))
         out.append(
             f"Dialogue: 0,{ass_time(start)},{ass_time(end)},Cap,,0,0,0,,{{\\fs{size}}}{text}"
         )
