@@ -10,16 +10,26 @@ from PIL import Image
 from ffaudio import load_audio
 
 SR = 16000
-STATE_FPS = 25
+STATE_FPS = 30
 OUT_FPS = 30
 AVATAR_DIR = os.getenv("AVATAR_DIR", "avatar")
 CACHE_DIR = "output/avatar_cache"
-BOB = 5  # pixels of gentle up and down movement
+BOB = 6  # pixels of gentle up and down movement
 
+# h = height of the presenter on the video, bottom = gap from the bottom edge
 LAYOUTS = {
-    "short": {"h": 520, "x": "(W-w)/2", "bottom": 170},
-    "long": {"h": 500, "x": "W-w-40", "bottom": 30},
+    "short": {"h": 470, "x": "(W-w)/2", "bottom": 150},
+    "long": {"h": 380, "x": "W-w-40", "bottom": 24},
 }
+
+NAMES = ["closed", "mid", "open", "wide", "round"]   # codes 0..4
+
+# Tuning knobs for how the mouth reacts to the voice
+SILENCE = 0.08      # below this loudness the mouth is closed
+WIDE_RATIO = 0.30   # higher = fewer wide (ee, s) mouths
+ROUND_CENTROID = 820  # lower = fewer round (oo) mouths
+BIG_OPEN = 0.55     # loudness needed for the fully open mouth
+FALLBACK = {"mid": "open", "wide": "open", "round": "mid", "blink": "closed"}
 
 
 def video_duration(path):
@@ -32,51 +42,116 @@ def video_duration(path):
 
 
 def load_states(height):
-    files = {"closed": "closed.png", "mid": "mid.png", "open": "open.png", "blink": "blink.png"}
-    raw = {k: os.path.join(AVATAR_DIR, v) for k, v in files.items()
-           if os.path.exists(os.path.join(AVATAR_DIR, v))}
+    """Resize every presenter picture once and cache it. Missing pictures fall back."""
+    raw = {}
+    for key in NAMES + ["blink"]:
+        p = os.path.join(AVATAR_DIR, key + ".png")
+        if os.path.exists(p):
+            raw[key] = p
     if "closed" not in raw or "open" not in raw:
-        raise SystemExit("avatar/closed.png and avatar/open.png are required. Run: python make_avatar.py")
-    raw.setdefault("mid", raw["open"])
+        raise SystemExit("avatar/closed.png and avatar/open.png are required")
+    for key in ["mid", "wide", "round", "blink"]:
+        k = key
+        while k not in raw:
+            k = FALLBACK[k]
+        raw.setdefault(key, raw[k])
     os.makedirs(CACHE_DIR, exist_ok=True)
     base = Image.open(raw["closed"]).convert("RGBA")
     width = max(2, int(round(base.width * height / base.height / 2)) * 2)
-    out = {}
+    out, done = {}, {}
     for key, path in raw.items():
-        im = Image.open(path).convert("RGBA").resize((width, height), Image.LANCZOS)
-        dest = f"{CACHE_DIR}/h{height}_{key}.png"
-        im.save(dest)
-        out[key] = os.path.abspath(dest)
+        stamp = int(os.path.getmtime(path))
+        dest = f"{CACHE_DIR}/h{height}_{key}_{stamp}.png"
+        if path not in done:
+            if not os.path.exists(dest):
+                Image.open(path).convert("RGBA").resize((width, height), Image.LANCZOS).save(dest)
+            done[path] = os.path.abspath(dest)
+        out[key] = done[path]
     return out
 
 
-def mouth_levels(samples):
+def analyze(samples):
+    """Return one mouth code (0 closed, 1 mid, 2 open, 3 wide, 4 round) per frame."""
     hop = SR // STATE_FPS
+    win = 640
     n = len(samples) // hop
-    if n < 1:
-        return np.zeros(1, dtype=int)
-    frames = samples[: n * hop].reshape(n, hop)
-    rms = np.sqrt(np.mean(frames ** 2, axis=1))
-    ref = max(float(np.percentile(rms, 95)), 1e-4)
-    x = rms / ref
-    levels = np.zeros(n, dtype=int)
-    levels[x > 0.20] = 1
-    levels[x > 0.50] = 2
-    smooth = levels.copy()
+    if n < 3:
+        return np.zeros(max(n, 1), dtype=int)
+    pad = np.pad(samples, (0, win + hop)).astype(np.float32)
+    window = np.hanning(win).astype(np.float32)
+    freqs = np.fft.rfftfreq(win, 1.0 / SR)
+    voice = (freqs >= 200) & (freqs < 4000)
+    high = (freqs >= 4000) & (freqs < 7500)
+    f1_band = (freqs >= 200) & (freqs < 1000)
+    f2_band = (freqs >= 1800) & (freqs < 3500)
+    rms = np.zeros(n)
+    cent = np.zeros(n)
+    hi_ratio = np.zeros(n)
+    zcr = np.zeros(n)
+    r2 = np.zeros(n)
     for i in range(n):
-        window = sorted(levels[max(0, i - 1): i + 2])
-        smooth[i] = window[len(window) // 2]
-    return smooth
+        start = i * hop + hop // 2 - win // 2
+        seg = np.zeros(win, dtype=np.float32)
+        lo = max(start, 0)
+        part = pad[lo: start + win]
+        seg[lo - start: lo - start + len(part)] = part
+        rms[i] = np.sqrt(np.mean(seg ** 2))
+        zcr[i] = np.mean(np.abs(np.diff(np.sign(seg)))) / 2.0
+        spec = np.abs(np.fft.rfft(seg * window)) ** 2
+        total = spec[freqs >= 100].sum() + 1e-12
+        v = spec[voice].sum() + 1e-12
+        cent[i] = (freqs[voice] * spec[voice]).sum() / v
+        hi_ratio[i] = spec[high].sum() / total
+        r2[i] = spec[f2_band].sum() / (spec[f1_band].sum() + 1e-12)
+    ref = max(float(np.percentile(rms, 95)), 1e-4)
+    lvl = rms / ref
+
+    codes = np.zeros(n, dtype=int)
+    for i in range(n):
+        L = lvl[i]
+        if L < SILENCE:
+            codes[i] = 0
+        elif hi_ratio[i] > 0.30 or zcr[i] > 0.28:      # s, sh, f, t: teeth showing
+            codes[i] = 3
+        elif r2[i] > WIDE_RATIO:                       # ee, eh: wide lips
+            codes[i] = 3
+        elif cent[i] < ROUND_CENTROID and L > 0.15:     # oo, oh: rounded lips
+            codes[i] = 4
+        elif L > BIG_OPEN:                             # ah: wide open
+            codes[i] = 2
+        else:
+            codes[i] = 1
+
+    # short closures between syllables (m, b, p): a sharp dip between two loud parts
+    for i in range(2, n - 2):
+        if codes[i] != 0:
+            before = lvl[max(0, i - 5): i].max()
+            after = lvl[i + 1: i + 6].max()
+            peak = min(before, after)
+            if peak > 0.5 and lvl[i] < 0.30 * peak:
+                codes[i] = 0
+
+    # remove single-frame blips so the mouth does not flicker
+    out = list(codes)
+    i = 0
+    while i < n:
+        j = i
+        while j < n and out[j] == out[i]:
+            j += 1
+        if j - i < 2 and i > 0:
+            for k in range(i, j):
+                out[k] = out[i - 1]
+        i = j
+    return np.array(out, dtype=int)
 
 
-def frame_states(levels, can_blink):
-    names = ["closed", "mid", "open"]
-    states = [names[int(v)] for v in levels]
+def frame_states(codes, can_blink):
+    states = [NAMES[int(c)] for c in codes]
     n = len(states)
     if can_blink:
-        i = random.randint(40, 90)
+        i = random.randint(50, 100)
         while i < n:
-            limit = min(i + 25, n)
+            limit = min(i + 30, n)
             k = i
             while k < limit and states[k] != "closed":
                 k += 1
@@ -84,7 +159,7 @@ def frame_states(levels, can_blink):
                 for j in range(k, min(k + 4, n)):
                     if states[j] == "closed":
                         states[j] = "blink"
-            i += random.randint(60, 120)
+            i += random.randint(70, 140)
     return states
 
 
@@ -117,7 +192,12 @@ def render(video, samples, layout):
     samples = samples[:need]
 
     paths = load_states(cfg["h"])
-    states = frame_states(mouth_levels(samples), "blink" in paths)
+    codes = analyze(samples)
+    states = frame_states(codes, True)
+    total = max(len(states), 1)
+    shares = ", ".join(f"{k} {states.count(k) * 100 // total}%" for k in NAMES + ["blink"])
+    print("Mouth shapes used:", shares)
+
     os.makedirs(CACHE_DIR, exist_ok=True)
     list_path = f"{CACHE_DIR}/list_{os.getpid()}.txt"
     write_list(states, paths, list_path)
