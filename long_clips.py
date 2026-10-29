@@ -4,6 +4,7 @@ import random
 import subprocess
 
 from clips import download, keyword_variants, pick_file, search
+from relevance import popularity, relevance
 
 OUT_DIR = "output/long"
 RAW_DIR = f"{OUT_DIR}/raw"
@@ -12,8 +13,9 @@ W, H, FPS = 1920, 1080, 30
 TARGET_CHUNK = 7.0  # seconds per clip
 
 
-def choose(keyword, seconds, used_ids):
-    for query in keyword_variants(keyword):
+def choose(keyword, seconds, used_ids, context=""):
+    last_resort = None
+    for query in keyword_variants(keyword, context):
         hits = search(query)
         cands = []
         for hit in hits:
@@ -24,15 +26,23 @@ def choose(keyword, seconds, used_ids):
                 continue
             url, w, h = f
             landscape = w >= h
+            rel = relevance(hit, query)
+            if rel == 0:
+                if last_resort is None:
+                    last_resort = (query, hit, url, landscape)
+                continue
             long_enough = (hit.get("duration") or 0) >= seconds
-            cands.append(((landscape, long_enough), hit, url, landscape))
+            cands.append(((rel, landscape, long_enough), hit, url, landscape))
         if cands:
-            cands.sort(key=lambda c: c[0], reverse=True)
-            best = cands[0][0]
-            pool = [c for c in cands if c[0] == best][:6]
-            _, hit, url, landscape = random.choice(pool)
+            cands.sort(key=lambda c: (c[0], popularity(c[1])), reverse=True)
+            top = cands[:6]
+            weights = [4 if c[0][0] == 2 else 1 for c in top]     # clips matching the keyword are 4x more likely
+            _, hit, url, landscape = random.choices(top, weights=weights)[0]
             return query, hit, url, landscape
-        print(f"    no usable results for '{query}', trying next keyword")
+        print(f"    no on-topic results for '{query}', trying the next search")
+    if last_resort:
+        print("    warning: nothing on topic was found, using the closest clip")
+        return last_resort
     raise RuntimeError(f"No clip found for keyword: {keyword}")
 
 
@@ -76,7 +86,7 @@ def main():
         for p in range(parts):
             n += 1
             kw = sec["keywords"][p % len(sec["keywords"])]
-            query, hit, url, landscape = choose(kw, each, used_ids)
+            query, hit, url, landscape = choose(kw, each, used_ids, sec["heading"])
             used_ids.add(hit.get("id"))
             raw = f"{RAW_DIR}/c{n:03d}.mp4"
             out = f"{CHUNK_DIR}/c{n:03d}.mp4"
@@ -86,22 +96,18 @@ def main():
             process(raw, out, each, landscape, start)
             os.remove(raw)
             chunks.append({
-                "file": out,
-                "start": round(t, 2),
-                "end": round(t + each, 2),
-                "section": si,
-                "query": query,
-                "pixabay_id": hit.get("id"),
-                "page": hit.get("pageURL"),
-                "author": hit.get("user"),
+                "file": out, "start": round(t, 2), "end": round(t + each, 2),
+                "section": si, "query": query, "pixabay_id": hit.get("id"),
+                "page": hit.get("pageURL"), "author": hit.get("user"), "tags": hit.get("tags"),
             })
             t += each
             kind = "wide" if landscape else "vertical (blur-fit)"
-            print(f"  {n:02d} '{query}' -> {kind}, id {hit.get('id')}")
+            print(f"  {n:02d} '{query}' -> {kind}, id {hit.get('id')}  tags: {str(hit.get('tags', ''))[:60]}")
 
     with open(f"{OUT_DIR}/chunks.json", "w", encoding="utf-8") as f:
         json.dump(chunks, f, indent=2)
     print(f"\nSaved {len(chunks)} clips to {CHUNK_DIR}")
 
 
-main()
+if __name__ == "__main__":
+    main()

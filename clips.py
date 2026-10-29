@@ -6,12 +6,13 @@ import time
 
 import requests
 
+from relevance import (fallbacks_for, keyword_is_relevant, popularity, relevance)
+
 API_URL = "https://pixabay.com/api/videos/"
 RAW_DIR = "output/raw"
 CLIPS_DIR = "output/clips"
 CACHE_FILE = "output/search_cache.json"
 W, H, FPS = 1080, 1920, 30
-FALLBACK_KEYWORDS = ["gym workout", "healthy food", "running outdoors", "fitness training"]
 
 
 def load_cache():
@@ -39,7 +40,7 @@ def search(query):
     params = {
         "key": key,
         "q": query,
-        "per_page": 30,
+        "per_page": 50,          # a bigger pool, so the on-topic filter still has plenty to choose from
         "video_type": "film",
         "safesearch": "true",
         "min_width": 720,
@@ -70,19 +71,24 @@ def pick_file(hit):
         if not v.get("url"):
             continue
         if name == "large" and (v.get("size") or 0) > 45_000_000:
-            continue  # too big, try medium
+            continue
         return v["url"], int(v.get("width") or 0), int(v.get("height") or 0)
     return None
 
 
-def keyword_variants(keyword):
+def keyword_variants(keyword, context=""):
+    """Searches to try, best first. Anything not about training or food is dropped."""
     words = keyword.split()
-    variants = [keyword]
-    if len(words) > 2:
-        variants.append(" ".join(words[-2:]))
-    if len(words) > 1:
-        variants.append(words[-1])
-    variants += FALLBACK_KEYWORDS
+    variants = []
+    if keyword_is_relevant(keyword):
+        variants.append(keyword)
+        if len(words) > 2 and keyword_is_relevant(" ".join(words[-2:])):
+            variants.append(" ".join(words[-2:]))
+        if len(words) > 1 and keyword_is_relevant(words[-1]):
+            variants.append(words[-1])
+    else:
+        print(f"  note: '{keyword}' is not about training or food, using safe searches instead")
+    variants += fallbacks_for(f"{keyword} {context}")
     seen, result = set(), []
     for v in variants:
         if v not in seen:
@@ -91,8 +97,9 @@ def keyword_variants(keyword):
     return result
 
 
-def choose_clip(keyword, seconds, used_ids):
-    for query in keyword_variants(keyword):
+def choose_clip(keyword, seconds, used_ids, context=""):
+    last_resort = None
+    for query in keyword_variants(keyword, context):
         hits = search(query)
         candidates = []
         for hit in hits:
@@ -103,13 +110,23 @@ def choose_clip(keyword, seconds, used_ids):
                 continue
             url, w, h = f
             portrait = h > w
+            rel = relevance(hit, query)
+            if rel == 0:                       # off topic: never use it unless nothing else exists
+                if last_resort is None:
+                    last_resort = (query, hit, url, portrait)
+                continue
             long_enough = (hit.get("duration") or 0) >= seconds
-            candidates.append(((portrait, long_enough), hit, url, portrait))
+            candidates.append(((rel, portrait, long_enough), hit, url, portrait))
         if candidates:
-            candidates.sort(key=lambda c: c[0], reverse=True)
-            _, hit, url, portrait = random.choice(candidates[:6])
+            candidates.sort(key=lambda c: (c[0], popularity(c[1])), reverse=True)
+            top = candidates[:6]
+            weights = [4 if c[0][0] == 2 else 1 for c in top]     # clips matching the keyword are 4x more likely
+            _, hit, url, portrait = random.choices(top, weights=weights)[0]
             return query, hit, url, portrait
-        print(f"  no usable results for '{query}', trying next keyword")
+        print(f"  no on-topic results for '{query}', trying the next search")
+    if last_resort:
+        print("  warning: nothing on topic was found, using the closest clip")
+        return last_resort
     raise RuntimeError(f"No clip found for keyword: {keyword}")
 
 
@@ -130,8 +147,10 @@ def download(url, path):
 
 
 def process(raw, out, seconds, portrait):
-    base = ["ffmpeg", "-y", "-loglevel", "error", "-stream_loop", "-1", "-i", raw, "-t", str(seconds), "-an"]
-    encode = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-r", str(FPS), "-pix_fmt", "yuv420p", out]
+    base = ["ffmpeg", "-y", "-loglevel", "error", "-stream_loop", "-1", "-i", raw,
+            "-t", str(seconds), "-an"]
+    encode = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
+              "-r", str(FPS), "-pix_fmt", "yuv420p", out]
     if portrait:
         vf = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},setsar=1"
         cmd = base + ["-vf", vf] + encode
@@ -158,8 +177,9 @@ def main():
 
     for i, scene in enumerate(script["scenes"], 1):
         seconds = audio[i - 1]["seconds"]
-        print(f"\nScene {i} ({seconds}s) keyword: {scene['keyword']}")
-        query, hit, url, portrait = choose_clip(scene["keyword"], seconds, used_ids)
+        keyword = str(scene["keyword"]).split("|")[0].strip() or "gym workout"
+        print(f"\nScene {i} ({seconds}s) keyword: {keyword}")
+        query, hit, url, portrait = choose_clip(keyword, seconds, used_ids, scene.get("narration", ""))
         used_ids.add(hit.get("id"))
         raw = f"{RAW_DIR}/scene_{i}.mp4"
         out = f"{CLIPS_DIR}/scene_{i}.mp4"
@@ -167,14 +187,11 @@ def main():
         process(raw, out, seconds, portrait)
         kind = "vertical" if portrait else "wide (blur-fit)"
         print(f"  used '{query}' -> {kind} clip, id {hit.get('id')}")
+        print(f"  tags: {str(hit.get('tags', ''))[:90]}")
         info.append({
-            "scene": i,
-            "file": out,
-            "seconds": seconds,
-            "query": query,
-            "pixabay_id": hit.get("id"),
-            "page": hit.get("pageURL"),
-            "author": hit.get("user"),
+            "scene": i, "file": out, "seconds": seconds, "query": query,
+            "pixabay_id": hit.get("id"), "page": hit.get("pageURL"), "author": hit.get("user"),
+            "tags": hit.get("tags"),
         })
 
     with open("output/clips_info.json", "w", encoding="utf-8") as f:
