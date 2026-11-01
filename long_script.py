@@ -55,7 +55,7 @@ Return ONLY valid JSON, no markdown, with exactly these keys:
     {{
       "heading": "2-5 word on-screen title",
       "narration": "what the speaker says in this section",
-      "keywords": ["3 to 5 different plain English searches for stock footage"]
+      "keywords": ["3 to 5 different searches, each showing training or food"]
     }}
   ]
 }}
@@ -67,7 +67,7 @@ Rules:
 - Vary the rhythm: a short question, a surprising fact, or a quick "here is the mistake" moment in every section, so the energy never stays flat.
 - Speak directly to "you", use contractions and everyday words, keep sentences under 16 words, and sound like a friend explaining.
 - The last section is a short recap that closes the loop from the hook, asks one simple question for the comments, and ends with "Subscribe for more tips like this."
-- Each section has 4 or 5 different keywords for stock footage, each describing something you can film, like "man lifting dumbbells", "woman running outdoors", "healthy meal prep", "person sleeping". No brand names, no people's names.
+- Each section has 4 or 5 different keywords for stock footage. EVERY search must show training or food: a person exercising, gym equipment, an athlete, running or stretching, cooking, a healthy meal, fresh ingredients, or someone eating healthy food. Always include a concrete training or food word such as dumbbell, barbell, squat, treadmill, chicken, eggs, salad, rice, meal prep. Never use abstract or unrelated scenes such as people thinking, hungry faces, offices, cities, nature, money, crowds or friends hanging out. Examples: "man lifting dumbbells", "barbell close up", "cooking chicken breast", "healthy meal prep". No brand names, no people's names.
 - Only well-established, evidence-based advice (progressive overload, adequate protein, calorie balance, sleep, consistency). Acknowledge that results vary between people.
 - Never mention steroids, supplements, fat burners, detoxes, medical conditions, or spot reduction.
 - Never promise results or timeframes.

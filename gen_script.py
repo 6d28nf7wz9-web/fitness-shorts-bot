@@ -1,4 +1,3 @@
-import datetime
 import json
 import os
 import re
@@ -7,14 +6,37 @@ import time
 from google import genai
 from google.genai import types
 
-from topics import all_used, too_similar
+try:
+    from topics import all_used, too_similar
+except ImportError:                      # topics.py is optional
+    def all_used():
+        out = []
+        for name in ("used_topics.json", "used_long_topics.json"):
+            try:
+                with open(name, encoding="utf-8") as f:
+                    out += [str(x) for x in json.load(f)]
+            except Exception:
+                pass
+        return out
 
+    def too_similar(topic, used):
+        return topic.strip().lower() in [u.strip().lower() for u in used]
+
+try:
+    from relevance import keyword_is_relevant
+except ImportError:                      # relevance.py is optional
+    def keyword_is_relevant(text):
+        return True
+
+# Shorts are built for the Shorts feed: one sharp idea, a strong hook, nothing cut from long videos.
 CONTENT_TYPES = [
-    "a muscle-building tip (progressive overload, rep ranges, rest, form)",
-    "a fat-loss tip (protein, calorie balance, daily steps, sleep, habits)",
-    "a myth vs fact about fitness",
-    "a common gym mistake and how to fix it",
-    "a simple meal or daily habit tip for body composition",
+    "a myth that sounds true but is wrong, and what actually works",
+    "a common mistake people make in the gym or with food, and the simple fix",
+    "a this-versus-that comparison (two foods, two exercises or two habits) with a clear winner and why",
+    "a quick food swap or an easy high-protein meal idea, using only well known and rounded numbers",
+    "one form cue that makes a popular exercise work better and feel safer",
+    "a surprising but well established fact about muscle, fat loss, sleep or recovery",
+    "a simple rule of thumb the viewer can use today, like how much protein, how many steps or how long to rest",
 ]
 
 # Tried in order. Set GEMINI_MODEL as a secret to force a specific one.
@@ -47,20 +69,39 @@ def load_used():
 
 
 def mark_used(topic):
-    """Called later by main.py after a successful upload."""
+    """Called by upload.py after a successful upload."""
     used = load_used()
     used.append(topic)
     with open("used_topics.json", "w", encoding="utf-8") as f:
         json.dump(used, f, ensure_ascii=False, indent=2)
 
 
-def build_prompt(content_type, used):
-    recent = ", ".join(used[-60:]) if used else "none yet"
-    return f"""You write scripts for a YouTube Shorts channel that gives daily evidence-based tips for building muscle and losing fat.
+def load_trends():
+    try:
+        with open("output/trends.json", encoding="utf-8") as f:
+            data = json.load(f)
+        return [t for t in data if isinstance(t, dict) and t.get("topic")]
+    except Exception:
+        return []
+
+
+def build_prompt(content_type, used, trends):
+    recent = ", ".join(used[-80:]) if used else "none yet"
+    trend_block = ""
+    if trends:
+        lines = "\n".join(
+            f"- {t.get('topic')} (safe angle: {t.get('safe_angle', '')})" for t in trends[:8]
+        )
+        trend_block = f"""
+Topics people are searching for right now. Use ONE if it fits today's video type, following its safe angle:
+{lines}
+Never follow a fad, supplement, extreme diet, detox or medical claim. Never copy anyone's title.
+"""
+    return f"""You write scripts for a YouTube Shorts channel about building muscle and losing fat. These Shorts stand alone: they are NOT clips of long videos, so the very first second must grab attention.
 
 Today's video type: {content_type}.
-
-Topics already used (do NOT repeat or closely overlap): {recent}
+{trend_block}
+Topics already used on this channel, including the long videos (do NOT repeat or closely overlap any of them): {recent}
 
 Return ONLY valid JSON, no markdown, with exactly these keys:
 {{
@@ -69,18 +110,18 @@ Return ONLY valid JSON, no markdown, with exactly these keys:
   "description": "two short sentences summarizing the tip",
   "hashtags": ["4 to 6 relevant hashtags without the # symbol"],
   "scenes": [
-    {{"narration": "one or two short spoken sentences", "keyword": "2 or 3 filmable stock searches separated by a vertical bar"}}
+    {{"narration": "one or two short spoken sentences", "keyword": "2 or 3 searches separated by a vertical bar, each showing training or food"}}
   ]
 }}
 
 Rules:
 - 4 to 6 scenes. Total narration between 70 and 100 words (about 30 seconds spoken).
-- Scene 1 is the hook: at most 12 words, no greeting, no "hey guys". Open with a specific mistake, a surprising fact, a myth, or a bold claim the viewer wants to check. Style examples: "You are doing cardio at the wrong time." or "This one habit quietly stalls your muscle growth."
-- Scene 2 promises the payoff in one short sentence, so the viewer knows why to keep watching.
-- Middle scenes: one clear point, one concrete example, and one simple action to do today. Speak directly to "you". Sentences under 14 words. Use contractions and everyday words, like a friend explaining.
-- Use a number or a specific detail whenever it is well established and accurate.
-- The last scene is a loop ending: its final sentence should flow naturally back into the hook, so the video feels continuous when it replays. Add a very short follow line only if there is room, like "Follow for tomorrow's tip."
-- Each keyword field names 2 or 3 different filmable searches separated by a vertical bar, for example "man lifting dumbbells | gym close up | person resting". Describe things you can see. No brand names, no people's names.
+- Scene 1 is the hook: at most 12 words, no greeting. Pick ONE pattern: "Stop doing X if you want Y.", "Nobody tells you this about X.", "You have been doing X wrong.", "This one swap changes X.", "Gym myth: X.", or "X versus Y: there is a clear winner." Be specific, never vague.
+- Scene 2 promises the payoff in one short sentence so the viewer keeps watching.
+- Middle scenes: one clear point, one concrete example, one simple action to do today. Speak directly to "you". Sentences under 14 words. Everyday words, contractions, like a friend explaining.
+- Use a number or a specific detail only when it is well established and accurate. Round numbers and say "about". Never invent statistics or studies.
+- The last scene is a loop ending: its final sentence flows back into the hook so the video feels continuous when it replays.
+- Each keyword field names 2 or 3 different filmable searches separated by a vertical bar. EVERY search must show training or food: a person exercising, gym equipment, an athlete, running or stretching, cooking, a healthy meal, fresh ingredients, or someone eating healthy food. Always include a concrete training or food word such as dumbbell, barbell, squat, treadmill, chicken, eggs, salad, rice, meal prep. Never use abstract or unrelated scenes such as people thinking, hungry faces, offices, cities, nature, money, crowds or friends hanging out. Examples: "man lifting dumbbells | barbell close up | gym workout" and "cooking chicken breast | healthy meal prep | fresh vegetables". No brand names, no people's names.
 - Only well-established, evidence-based advice (progressive overload, adequate protein, calorie balance, sleep, consistency).
 - Never mention steroids, supplements, fat burners, detoxes, medical conditions, or spot reduction.
 - Never promise results or timeframes (no "lose 10 kg in a week").
@@ -106,19 +147,26 @@ def validate(data):
     for s in scenes:
         if not str(s.get("narration", "")).strip():
             return "empty narration"
-        if not str(s.get("keyword", "")).strip():
+        kw = [k.strip() for k in str(s.get("keyword", "")).split("|") if k.strip()]
+        if not kw:
             return "empty keyword"
+        good = sum(1 for k in kw if keyword_is_relevant(k))
+        if not keyword_is_relevant(kw[0]) or good * 2 < len(kw):
+            return f"keyword not about training or food: {s.get('keyword')}"
         words += len(s["narration"].split())
     if not 60 <= words <= 125:
-        return f"narration is {words} words (want 75-105)"
+        return f"narration is {words} words (want 70-100)"
     if len(data["title"]) > 100:
         return "title too long"
+    first = scenes[0]["narration"].split()
+    if len(first) > 18:
+        return "the hook is too long"
     everything = json.dumps(data).lower()
     for bad in BANNED:
         if bad in everything:
             return f"contains banned phrase: {bad}"
     if too_similar(data["topic"], all_used()):
-        return "topic already used"
+        return "topic too close to one already used"
     return None
 
 
@@ -128,8 +176,10 @@ def generate_script():
         raise RuntimeError("GEMINI_API_KEY is not set")
     client = genai.Client(api_key=api_key)
     used = load_used()
+    trends = load_trends()
     content_type = CONTENT_TYPES[len(used) % len(CONTENT_TYPES)]
-    prompt = build_prompt(content_type, all_used())
+    print(f"Video type: {content_type}")
+    prompt = build_prompt(content_type, all_used(), trends)
 
     for attempt in range(1, 4):
         for model in MODEL_CANDIDATES:
@@ -138,7 +188,7 @@ def generate_script():
                     model=model,
                     contents=prompt,
                     config=types.GenerateContentConfig(
-                        temperature=0.9,
+                        temperature=0.95,
                         response_mime_type="application/json",
                     ),
                 )

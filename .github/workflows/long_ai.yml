@@ -2,7 +2,7 @@ name: AI Long Video
 
 on:
   schedule:
-    - cron: "41 10 * * *"
+    - cron: "41 10 * * 1,3,5"
   workflow_dispatch:
 
 permissions:
@@ -71,8 +71,6 @@ jobs:
       - name: Upload long video
         run: python long_upload.py
 
-      - name: Cut and upload Shorts
-        run: python long_shorts.py
 
       - name: Save status
         if: always()
