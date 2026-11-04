@@ -1,3 +1,4 @@
+"""Generate short, retention-focused FitFuel YouTube Shorts scripts."""
 import json
 import os
 import re
@@ -8,7 +9,7 @@ from google.genai import types
 
 try:
     from topics import all_used, too_similar
-except ImportError:                      # topics.py is optional
+except ImportError:
     def all_used():
         out = []
         for name in ("used_topics.json", "used_long_topics.json"):
@@ -20,8 +21,14 @@ except ImportError:                      # topics.py is optional
         return out
 
     def too_similar(topic, used):
-        return topic.strip().lower() in [u.strip().lower() for u in used]
-
+        topic_words = set(re.findall(r"[a-z0-9]+", topic.lower()))
+        for old in used:
+            old_words = set(re.findall(r"[a-z0-9]+", str(old).lower()))
+            if topic.strip().lower() == str(old).strip().lower():
+                return True
+            if len(topic_words) >= 3 and len(topic_words & old_words) / len(topic_words) >= 0.8:
+                return True
+        return False
 
 try:
     from relevance import keyword_is_relevant, fallbacks_for
@@ -30,51 +37,34 @@ except ImportError:
         return True
 
     def fallbacks_for(text):
-        return [
-            "gym workout",
-            "weight training",
-            "healthy food",
-            "cooking healthy meal",
-            "meal prep",
-        ]
+        return ["gym workout", "weight training", "healthy food", "cooking healthy meal", "meal prep"]
 
-
-# Shorts are built for the Shorts feed: one sharp idea, a strong hook, nothing cut from long videos.
 CONTENT_TYPES = [
-    "a myth that sounds true but is wrong, and what actually works",
-    "a common mistake people make in the gym or with food, and the simple fix",
-    "a this-versus-that comparison (two foods, two exercises or two habits) with a clear winner and why",
-    "a quick food swap or an easy high-protein meal idea, using only well known and rounded numbers",
-    "one form cue that makes a popular exercise work better and feel safer",
-    "a surprising but well established fact about muscle, fat loss, sleep or recovery",
-    "a simple rule of thumb the viewer can use today, like how much protein, how many steps or how long to rest",
+    "a common gym mistake and the exact correction",
+    "a fitness myth versus what actually works",
+    "a simple food swap that supports a calorie deficit",
+    "one practical exercise form cue",
+    "a high-protein meal idea using familiar foods",
+    "a simple muscle-building or fat-loss rule people can use today",
+    "a comparison between two common exercises, foods, or habits",
 ]
 
-# Tried in order. Set GEMINI_MODEL as a secret to force a specific one.
-MODEL_CANDIDATES = [
-    m for m in [
-        os.getenv("GEMINI_MODEL"),
-        "gemini-flash-latest",
-        "gemini-3.1-flash-lite",
-        "gemini-3-flash-preview",
-    ] if m
-]
+MODEL_CANDIDATES = [m for m in [
+    os.getenv("GEMINI_MODEL"), "gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-3-flash-preview"
+] if m]
 
 BANNED = [
     "steroid", "sarm", "fat burner", "fat-burner", "detox", "guaranteed",
     "spot reduc", "miracle", "overnight", "in 7 days", "in a week",
 ]
-
-DISCLAIMER = (
-    "General fitness information, not medical advice. "
-    "Consult a doctor before starting a new program."
-)
+DISCLAIMER = "General fitness information, not medical advice. Consult a qualified professional if you have a health concern."
 
 
 def load_used():
     try:
         with open("used_topics.json", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+        return data if isinstance(data, list) else []
     except Exception:
         return []
 
@@ -82,7 +72,8 @@ def load_used():
 def mark_used(topic):
     """Called by upload.py after a successful upload."""
     used = load_used()
-    used.append(topic)
+    if topic and topic not in used:
+        used.append(topic)
     with open("used_topics.json", "w", encoding="utf-8") as f:
         json.dump(used, f, ensure_ascii=False, indent=2)
 
@@ -97,251 +88,191 @@ def load_trends():
 
 
 def build_prompt(content_type, used, trends):
-    recent = ", ".join(used[-80:]) if used else "none yet"
+    recent = ", ".join(str(x) for x in used[-80:]) if used else "none yet"
     trend_block = ""
     if trends:
         lines = "\n".join(
             f"- {t.get('topic')} (safe angle: {t.get('safe_angle', '')})" for t in trends[:8]
         )
-        trend_block = f"""
-Topics people are searching for right now. Use ONE if it fits today's video type, following its safe angle:
-{lines}
-Never follow a fad, supplement, extreme diet, detox or medical claim. Never copy anyone's title.
-"""
-    return f"""You write scripts for a YouTube Shorts channel about building muscle and losing fat. These Shorts stand alone: they are NOT clips of long videos, so the very first second must grab attention.
+        trend_block = f"\nPotential timely topics (use only if relevant and evidence-based):\n{lines}\n"
 
-Today's video type: {content_type}.
+    return f'''You are the short-form video scriptwriter for FitFuel, a practical fitness channel about building muscle and losing fat.
+Your job is to make viewers STOP scrolling, understand one useful idea instantly, and stay until the payoff.
+
+TODAY'S ANGLE: {content_type}
 {trend_block}
-Topics already used on this channel, including the long videos (do NOT repeat or closely overlap any of them): {recent}
+Recently used topics (avoid repeating or closely copying): {recent}
 
-Return ONLY valid JSON, no markdown, with exactly these keys:
+Return ONLY valid JSON with exactly these keys:
 {{
-  "topic": "short unique label, 3-6 words",
-  "title": "max 60 characters, starts with a strong word or a number, includes the main keyword, creates curiosity, truthful and not misleading",
-  "description": "two short sentences summarizing the tip",
-  "hashtags": ["4 to 6 relevant hashtags without the # symbol"],
+  "topic": "unique 3-6 word label",
+  "title": "clear, curiosity-driven title, maximum 60 characters",
+  "description": "one or two concise sentences",
+  "hashtags": ["4 to 6 relevant hashtags without #"],
   "scenes": [
-    {{"narration": "one or two short spoken sentences", "keyword": "2 or 3 searches separated by a vertical bar, each showing training or food"}}
+    {{"narration": "spoken words for this scene", "keyword": "filmable search 1 | filmable search 2 | filmable search 3"}}
   ]
 }}
 
-Rules:
-- 4 to 6 scenes. Total narration between 70 and 100 words (about 30 seconds spoken).
-- Scene 1 is the hook: at most 12 words, no greeting. Pick ONE pattern: "Stop doing X if you want Y.", "Nobody tells you this about X.", "You have been doing X wrong.", "This one swap changes X.", "Gym myth: X.", or "X versus Y: there is a clear winner." Be specific, never vague.
-- Scene 2 promises the payoff in one short sentence so the viewer keeps watching.
-- Middle scenes: one clear point, one concrete example, one simple action to do today. Speak directly to "you". Sentences under 14 words. Everyday words, contractions, like a friend explaining.
-- Use a number or a specific detail only when it is well established and accurate. Round numbers and say "about". Never invent statistics or studies.
-- The last scene is a loop ending: its final sentence flows back into the hook so the video feels continuous when it replays.
-- Each keyword field names 2 or 3 different filmable searches separated by a vertical bar. EVERY search must show training or food: a person exercising, gym equipment, an athlete, running or stretching, cooking, a healthy meal, fresh ingredients, or someone eating healthy food. Always include a concrete training or food word such as dumbbell, barbell, squat, treadmill, chicken, eggs, salad, rice, meal prep. Never use abstract or unrelated scenes such as people thinking, hungry faces, offices, cities, nature, money, crowds or friends hanging out. Examples: "man lifting dumbbells | barbell close up | gym workout" and "cooking chicken breast | healthy meal prep | fresh vegetables". No brand names, no people's names.
-- Only well-established, evidence-based advice (progressive overload, adequate protein, calorie balance, sleep, consistency).
-- Never mention steroids, supplements, fat burners, detoxes, medical conditions, or spot reduction.
-- Never promise results or timeframes (no "lose 10 kg in a week").
-- Simple words, energetic tone, no emojis.
-"""
+RETENTION STRUCTURE â follow this order:
+1) HOOK (first 1-2 seconds): 4-9 spoken words. Start with a specific problem, surprising contrast, direct challenge, or useful result. No greeting, channel name, setup, or generic openings like âHere are three tipsâ. Examples of style (do not copy): âYour squat may be missing this.â / âStop rushing your rest periods.â / âThis snack has more protein.â
+2) PAYOFF PROMISE: tell viewers exactly what they will learn or fix. Do not say âwatch until the endâ.
+3) VALUE: explain one main idea with a concrete example and a simple action. Keep each scene focused on one thought.
+4) PAYOFF / LOOP: deliver the promised answer. End with a short phrase that naturally echoes the opening idea, without an awkward repeated sentence or fake cliffhanger.
+
+STRICT SCRIPT RULES:
+- Create 4 or 5 scenes only.
+- Total narration: 45-65 words, designed for roughly 18-27 seconds at a natural speaking pace.
+- Hook scene: 4-9 words. It must make sense with no context.
+- Each later scene: usually 8-17 words. Use short, natural spoken sentences.
+- One video = one idea. Do not cram multiple tips or listicles into one Short.
+- Use âyouâ and everyday language. Be specific, energetic, and conversational; contractions are welcome.
+- Deliver a real answer. No exaggerated claims, fake urgency, unsupported statistics, or empty motivational lines.
+- Use numbers only when reliable and useful; qualify approximate values with âaboutâ. Never invent studies or statistics.
+- No long intro, greeting, recap, âlike and subscribeâ, or spoken disclaimer.
+- Title must accurately match the video and include the main topic naturally. No misleading clickbait.
+- Description: concise, relevant, no keyword stuffing. Hashtags: 4-6 relevant tags.
+- Only established, evidence-based fitness advice: progressive overload, calorie balance, adequate protein, exercise technique, sleep, recovery, and consistency.
+- Never promote steroids, SARMs, fat burners, detoxes, miracle products, extreme diets, medical treatment, or spot reduction. Never promise a result or timeframe.
+
+VISUAL SEARCH RULES:
+- Every scene needs 2-3 DIFFERENT, realistic, filmable stock-footage searches separated by |.
+- Every search must visibly show exercise, gym equipment, cooking, ingredients, or a healthy meal.
+- Include concrete terms such as dumbbell, squat, barbell, treadmill, chicken, eggs, rice, salad, or meal prep.
+- No abstract concepts, text graphics, offices, cities, nature, money, crowds, or named people/brands.
+- Match the footage to that scene's spoken point, not generic gym footage in every scene.
+
+Return JSON only. No markdown and no extra keys.'''
 
 
 def parse_json(text):
     text = text.strip()
-    text = re.sub(r"^```(?:json)?|```$", "", text, flags=re.MULTILINE).strip()
+    text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.MULTILINE).strip()
     return json.loads(text)
 
 
 def repair_keywords(data):
-    """
-    Repair invalid scene keywords instead of rejecting the entire script.
-    Each scene gets 2-3 relevant searches.
-    """
     for scene in data.get("scenes", []):
         original = str(scene.get("keyword", ""))
-
-        # Split keywords separated by |
-        keywords = [
-            k.strip()
-            for k in original.split("|")
-            if k.strip()
-        ]
-
-        # Keep only relevant keywords
         valid = []
-        for keyword in keywords:
-            if keyword_is_relevant(keyword):
-                if keyword.lower() not in [v.lower() for v in valid]:
-                    valid.append(keyword)
-
-        # Add safe fallback searches if needed
+        for keyword in (k.strip() for k in original.split("|")):
+            if keyword and keyword_is_relevant(keyword) and keyword.lower() not in [v.lower() for v in valid]:
+                valid.append(keyword)
         for fallback in fallbacks_for(scene.get("narration", "")):
             if len(valid) >= 3:
                 break
-
-            if keyword_is_relevant(fallback):
-                if fallback.lower() not in [v.lower() for v in valid]:
-                    valid.append(fallback)
-
-        # Ensure at least one usable keyword
+            if keyword_is_relevant(fallback) and fallback.lower() not in [v.lower() for v in valid]:
+                valid.append(fallback)
         if not valid:
             valid = ["gym workout", "healthy food"]
-
-        # Save repaired keywords
         scene["keyword"] = " | ".join(valid[:3])
-
     return data
-    
 
 
 def validate(data):
-    """Return a problem description, or None if the script is fine."""
-
-    for key in ("topic", "title", "description", "hashtags", "scenes"):
+    required = ("topic", "title", "description", "hashtags", "scenes")
+    for key in required:
         if key not in data:
             return f"missing key: {key}"
 
-    scenes = data["scenes"]
+    if not isinstance(data["scenes"], list) or not 4 <= len(data["scenes"]) <= 5:
+        return "needs 4 or 5 scenes"
+    if not isinstance(data["hashtags"], list) or not 4 <= len(data["hashtags"]) <= 6:
+        return "needs 4 to 6 hashtags"
 
-    if not isinstance(scenes, list) or not 4 <= len(scenes) <= 6:
-        return "needs 4 to 6 scenes"
-
-    words = 0
-
-    for s in scenes:
-        if not isinstance(s, dict):
+    word_counts = []
+    for scene in data["scenes"]:
+        if not isinstance(scene, dict):
             return "invalid scene format"
-
-        if not str(s.get("narration", "")).strip():
+        narration = str(scene.get("narration", "")).strip()
+        if not narration:
             return "empty narration"
-
-        kw = [
-            k.strip()
-            for k in str(s.get("keyword", "")).split("|")
-            if k.strip()
-        ]
-
-        if not kw:
+        count = len(narration.split())
+        word_counts.append(count)
+        keywords = [k.strip() for k in str(scene.get("keyword", "")).split("|") if k.strip()]
+        if not keywords:
             return "empty keyword"
+        if not any(keyword_is_relevant(k) for k in keywords):
+            return f"keyword not about training or food: {scene.get('keyword')}"
 
-        good = sum(
-            1 for k in kw
-            if keyword_is_relevant(k)
-        )
+    total_words = sum(word_counts)
+    if not 45 <= total_words <= 65:
+        return f"narration is {total_words} words (target 45-65)"
+    if not 4 <= word_counts[0] <= 9:
+        return f"hook is {word_counts[0]} words (target 4-9)"
+    if len(str(data["title"]).strip()) > 60:
+        return "title exceeds 60 characters"
+    if len(str(data["topic"]).split()) < 2:
+        return "topic label is too vague"
 
-        if good == 0:
-            return f"keyword not about training or food: {s.get('keyword')}"
-
-        words += len(s["narration"].split())
-
-    if not 60 <= words <= 125:
-        return f"narration is {words} words (want 70-100)"
-
-    if len(data["title"]) > 100:
-        return "title too long"
-
-    first = scenes[0]["narration"].split()
-
-    if len(first) > 18:
-        return "the hook is too long"
-
-    everything = json.dumps(data).lower()
-
+    everything = json.dumps(data, ensure_ascii=False).lower()
     for bad in BANNED:
         if bad in everything:
             return f"contains banned phrase: {bad}"
-
-    if too_similar(data["topic"], all_used()):
+    if too_similar(str(data["topic"]), all_used()):
         return "topic too close to one already used"
-
     return None
-
-
 
 
 def generate_script():
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY is not set")
-
     client = genai.Client(api_key=api_key)
     used = load_used()
     trends = load_trends()
-
     content_type = CONTENT_TYPES[len(used) % len(CONTENT_TYPES)]
     print(f"Video type: {content_type}")
-
     prompt = build_prompt(content_type, all_used(), trends)
-
-    max_attempts = 5
+    max_attempts = 4
     last_problem = "Unknown error"
 
     for attempt in range(1, max_attempts + 1):
         print(f"\nGeneration attempt {attempt}/{max_attempts}")
-
         for model in MODEL_CANDIDATES:
             try:
                 response = client.models.generate_content(
                     model=model,
                     contents=prompt,
                     config=types.GenerateContentConfig(
-                        temperature=0.8,
+                        temperature=0.95,
                         response_mime_type="application/json",
                     ),
                 )
-
                 if not response.text:
                     last_problem = "Empty Gemini response"
                     print(f"{model}: {last_problem}")
                     continue
-
-                data = parse_json(response.text)
-                data = repair_keywords(data)
+                data = repair_keywords(parse_json(response.text))
                 problem = validate(data)
-
                 if problem:
                     last_problem = problem
                     print(f"{model}: Invalid script: {problem}")
-
-                    # Ask Gemini to correct the previous failure
-                    prompt += f"""
-
-IMPORTANT: Your previous script failed validation:
-{problem}
-
-Generate a completely new script that fixes this issue.
-Follow every original requirement.
-"""
+                    prompt += f"\n\nThe previous output failed: {problem}. Generate a completely NEW script and obey every constraint. Return JSON only."
                     continue
-
                 print(f"Successfully generated script using: {model}")
+                print(f"Validated narration length: {sum(len(s['narration'].split()) for s in data['scenes'])} words")
                 return data
-
-            except Exception as e:
-                last_problem = str(e)
+            except Exception as exc:
+                last_problem = str(exc)
                 print(f"{model} failed: {last_problem[:250]}")
-                continue
-
-        # Exponential backoff: 5, 10, 20, 40 seconds
         if attempt < max_attempts:
-            delay = min(5 * (2 ** (attempt - 1)), 40)
+            delay = min(5 * (2 ** (attempt - 1)), 30)
             print(f"Waiting {delay} seconds before retry...")
             time.sleep(delay)
-
-    raise RuntimeError(
-        f"Could not generate a valid script after "
-        f"{max_attempts} attempts. Last error: {last_problem}"
-    )
-
+    raise RuntimeError(f"Could not generate a valid script after {max_attempts} attempts. Last error: {last_problem}")
 
 
 def finalize(data):
     tags = []
-    for h in data["hashtags"]:
-        tag = "#" + str(h).strip().lstrip("#").replace(" ", "")
+    for hashtag in data["hashtags"]:
+        tag = "#" + str(hashtag).strip().lstrip("#").replace(" ", "")
         if tag not in tags:
             tags.append(tag)
     if "#Shorts" not in tags:
         tags.append("#Shorts")
-    data["description"] = (
-        f"{data['description'].strip()}\n\n{' '.join(tags)}\n\n"
-        f"{DISCLAIMER}\n\nVideo clips and music: Pixabay."
-    )
-    data["title"] = data["title"].strip()[:100]
+    data["description"] = f"{data['description'].strip()}\n\n{' '.join(tags)}\n\n{DISCLAIMER}\n\nVideo clips and music: Pixabay."
+    data["title"] = data["title"].strip()[:60]
     return data
 
 
@@ -352,6 +283,6 @@ if __name__ == "__main__":
         json.dump(script, f, ensure_ascii=False, indent=2)
     print("\nTITLE:", script["title"])
     print("TOPIC:", script["topic"])
-    for i, s in enumerate(script["scenes"], 1):
-        print(f"\nScene {i} [{s['keyword']}]\n{s['narration']}")
+    for i, scene in enumerate(script["scenes"], 1):
+        print(f"\nScene {i} [{scene['keyword']}]\n{scene['narration']}")
     print("\nSaved to output/script.json")
