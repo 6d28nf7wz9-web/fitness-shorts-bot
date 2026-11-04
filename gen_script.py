@@ -187,49 +187,69 @@ def repair_keywords(data):
     return data
     
 
+
 def validate(data):
     """Return a problem description, or None if the script is fine."""
+
     for key in ("topic", "title", "description", "hashtags", "scenes"):
         if key not in data:
             return f"missing key: {key}"
+
     scenes = data["scenes"]
+
     if not isinstance(scenes, list) or not 4 <= len(scenes) <= 6:
         return "needs 4 to 6 scenes"
+
     words = 0
+
     for s in scenes:
+        if not isinstance(s, dict):
+            return "invalid scene format"
+
         if not str(s.get("narration", "")).strip():
             return "empty narration"
-        kw = [k.strip() for k in str(s.get("keyword", "")).split("|") if k.strip()]
+
+        kw = [
+            k.strip()
+            for k in str(s.get("keyword", "")).split("|")
+            if k.strip()
+        ]
+
         if not kw:
             return "empty keyword"
-        
 
+        good = sum(
+            1 for k in kw
+            if keyword_is_relevant(k)
+        )
 
-good = sum(
-    1 for k in kw
-    if keyword_is_relevant(k)
-)
-
-if good == 0:
-    return f"keyword not about training or food: {s.get('keyword')}"
-
-
+        if good == 0:
+            return f"keyword not about training or food: {s.get('keyword')}"
 
         words += len(s["narration"].split())
+
     if not 60 <= words <= 125:
         return f"narration is {words} words (want 70-100)"
+
     if len(data["title"]) > 100:
         return "title too long"
+
     first = scenes[0]["narration"].split()
+
     if len(first) > 18:
         return "the hook is too long"
+
     everything = json.dumps(data).lower()
+
     for bad in BANNED:
         if bad in everything:
             return f"contains banned phrase: {bad}"
+
     if too_similar(data["topic"], all_used()):
         return "topic too close to one already used"
+
     return None
+
 
 
 
