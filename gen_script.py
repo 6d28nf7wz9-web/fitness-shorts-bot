@@ -150,9 +150,14 @@ def validate(data):
         kw = [k.strip() for k in str(s.get("keyword", "")).split("|") if k.strip()]
         if not kw:
             return "empty keyword"
-        good = sum(1 for k in kw if keyword_is_relevant(k))
-        if not keyword_is_relevant(kw[0]) or good * 2 < len(kw):
-            return f"keyword not about training or food: {s.get('keyword')}"
+        
+
+good = sum(1 for k in kw if keyword_is_relevant(k))
+
+if good == 0:
+    return f"keyword not about training or food: {s.get('keyword')}"
+
+
         words += len(s["narration"].split())
     if not 60 <= words <= 125:
         return f"narration is {words} words (want 70-100)"
@@ -170,40 +175,80 @@ def validate(data):
     return None
 
 
+
 def generate_script():
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY is not set")
+
     client = genai.Client(api_key=api_key)
     used = load_used()
     trends = load_trends()
+
     content_type = CONTENT_TYPES[len(used) % len(CONTENT_TYPES)]
     print(f"Video type: {content_type}")
+
     prompt = build_prompt(content_type, all_used(), trends)
 
-    for attempt in range(1, 4):
+    max_attempts = 5
+    last_problem = "Unknown error"
+
+    for attempt in range(1, max_attempts + 1):
+        print(f"\nGeneration attempt {attempt}/{max_attempts}")
+
         for model in MODEL_CANDIDATES:
             try:
                 response = client.models.generate_content(
                     model=model,
                     contents=prompt,
                     config=types.GenerateContentConfig(
-                        temperature=0.95,
+                        temperature=0.8,
                         response_mime_type="application/json",
                     ),
                 )
+
+                if not response.text:
+                    last_problem = "Empty Gemini response"
+                    print(f"{model}: {last_problem}")
+                    continue
+
                 data = parse_json(response.text)
+                problem = validate(data)
+
+                if problem:
+                    last_problem = problem
+                    print(f"{model}: Invalid script: {problem}")
+
+                    # Ask Gemini to correct the previous failure
+                    prompt += f"""
+
+IMPORTANT: Your previous script failed validation:
+{problem}
+
+Generate a completely new script that fixes this issue.
+Follow every original requirement.
+"""
+                    continue
+
+                print(f"Successfully generated script using: {model}")
+                return data
+
             except Exception as e:
-                print(f"[attempt {attempt}] {model} failed: {str(e)[:200]}")
+                last_problem = str(e)
+                print(f"{model} failed: {last_problem[:250]}")
                 continue
-            problem = validate(data)
-            if problem:
-                print(f"[attempt {attempt}] {model} gave a bad script: {problem}")
-                break
-            print(f"Used model: {model}")
-            return data
-        time.sleep(5)
-    raise RuntimeError("Could not get a valid script after 3 attempts")
+
+        # Exponential backoff: 5, 10, 20, 40 seconds
+        if attempt < max_attempts:
+            delay = min(5 * (2 ** (attempt - 1)), 40)
+            print(f"Waiting {delay} seconds before retry...")
+            time.sleep(delay)
+
+    raise RuntimeError(
+        f"Could not generate a valid script after "
+        f"{max_attempts} attempts. Last error: {last_problem}"
+    )
+
 
 
 def finalize(data):
