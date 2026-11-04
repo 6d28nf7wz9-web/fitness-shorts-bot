@@ -66,9 +66,43 @@ def keyword_words(keyword):
     return words_of(keyword) - _FILLER
 
 
+
 def keyword_is_relevant(text):
-    w = words_of(text)
-    return bool(w & (_STRONG | _WEAK))
+    w = keyword_words(text)
+
+    # Direct training or food keywords
+    if w & _STRONG:
+        return True
+
+    # Weak words require a fitness context
+    if w & _WEAK and w & _CONTEXT:
+        return True
+
+    # Common fitness concepts
+    phrases = [
+        "muscle gain",
+        "muscle growth",
+        "fat loss",
+        "weight loss",
+        "calorie deficit",
+        "strength training",
+        "weight training",
+        "resistance training",
+        "meal prep",
+        "high protein",
+        "protein rich",
+        "healthy eating",
+        "body composition",
+        "personal trainer",
+    ]
+
+    normalized_text = str(text).lower()
+
+    return any(
+        phrase in normalized_text
+        for phrase in phrases
+    )
+
 
 
 def relevance(hit, keyword):
