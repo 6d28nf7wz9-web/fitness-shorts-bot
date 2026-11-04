@@ -22,11 +22,22 @@ except ImportError:                      # topics.py is optional
     def too_similar(topic, used):
         return topic.strip().lower() in [u.strip().lower() for u in used]
 
+
 try:
-    from relevance import keyword_is_relevant
-except ImportError:                      # relevance.py is optional
+    from relevance import keyword_is_relevant, fallbacks_for
+except ImportError:
     def keyword_is_relevant(text):
         return True
+
+    def fallbacks_for(text):
+        return [
+            "gym workout",
+            "weight training",
+            "healthy food",
+            "cooking healthy meal",
+            "meal prep",
+        ]
+
 
 # Shorts are built for the Shorts feed: one sharp idea, a strong hook, nothing cut from long videos.
 CONTENT_TYPES = [
@@ -135,6 +146,47 @@ def parse_json(text):
     return json.loads(text)
 
 
+def repair_keywords(data):
+    """
+    Repair invalid scene keywords instead of rejecting the entire script.
+    Each scene gets 2-3 relevant searches.
+    """
+    for scene in data.get("scenes", []):
+        original = str(scene.get("keyword", ""))
+
+        # Split keywords separated by |
+        keywords = [
+            k.strip()
+            for k in original.split("|")
+            if k.strip()
+        ]
+
+        # Keep only relevant keywords
+        valid = []
+        for keyword in keywords:
+            if keyword_is_relevant(keyword):
+                if keyword.lower() not in [v.lower() for v in valid]:
+                    valid.append(keyword)
+
+        # Add safe fallback searches if needed
+        for fallback in fallbacks_for(scene.get("narration", "")):
+            if len(valid) >= 3:
+                break
+
+            if keyword_is_relevant(fallback):
+                if fallback.lower() not in [v.lower() for v in valid]:
+                    valid.append(fallback)
+
+        # Ensure at least one usable keyword
+        if not valid:
+            valid = ["gym workout", "healthy food"]
+
+        # Save repaired keywords
+        scene["keyword"] = " | ".join(valid[:3])
+
+    return data
+    
+
 def validate(data):
     """Return a problem description, or None if the script is fine."""
     for key in ("topic", "title", "description", "hashtags", "scenes"):
@@ -152,10 +204,15 @@ def validate(data):
             return "empty keyword"
         
 
-good = sum(1 for k in kw if keyword_is_relevant(k))
+
+good = sum(
+    1 for k in kw
+    if keyword_is_relevant(k)
+)
 
 if good == 0:
     return f"keyword not about training or food: {s.get('keyword')}"
+
 
 
         words += len(s["narration"].split())
