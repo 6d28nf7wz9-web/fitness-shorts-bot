@@ -270,6 +270,7 @@ def generate_script():
                     continue
 
                 data = parse_json(response.text)
+                data = repair_keywords(data)
                 problem = validate(data)
 
                 if problem:
