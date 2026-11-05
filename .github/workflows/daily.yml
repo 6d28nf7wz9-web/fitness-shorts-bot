@@ -58,12 +58,16 @@ jobs:
       - name: Upload to YouTube
         run: python upload.py
 
-      - name: Record used topic
+      - name: Save learning data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add used_topics.json
-          git diff --staged --quiet || git commit -m "Record used topic"
+
+          git add used_topics.json performance_memory.json
+          git add -f output/uploaded_videos.json
+
+          git diff --staged --quiet || git commit -m "Save video history and performance memory"
+
           git pull --rebase
           git push
 
