@@ -1,6 +1,8 @@
+
 import json
 import os
 import time
+from datetime import datetime, timezone
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -11,17 +13,27 @@ from googleapiclient.http import MediaFileUpload
 from gen_script import mark_used
 
 FINAL = "output/final.mp4"
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
-PRIVACY = os.getenv("UPLOAD_PRIVACY", "private")  # private, unlisted or public
+
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/yt-analytics.readonly",
+]
+
+PRIVACY = os.getenv("UPLOAD_PRIVACY", "private")
+UPLOAD_LOG = "output/uploaded_videos.json"
 
 
 def get_credentials():
     refresh = os.getenv("YT_REFRESH_TOKEN")
+
     if not refresh and os.path.exists("token.json"):
-        with open("token.json") as f:
+        with open("token.json", encoding="utf-8") as f:
             refresh = json.load(f)["refresh_token"]
+
     if not refresh:
         raise SystemExit("No refresh token found. Run auth.py first.")
+
     creds = Credentials(
         token=None,
         refresh_token=refresh,
@@ -30,13 +42,45 @@ def get_credentials():
         client_secret=os.environ["YT_CLIENT_SECRET"],
         scopes=SCOPES,
     )
+
     try:
         creds.refresh(Request())
     except Exception as e:
         raise SystemExit(
             "Login expired or invalid. Run auth.py again.\n" + str(e)[:200]
         )
+
     return creds
+
+
+def save_upload(video_id, script):
+    os.makedirs("output", exist_ok=True)
+
+    try:
+        with open(UPLOAD_LOG, encoding="utf-8") as f:
+            records = json.load(f)
+        if not isinstance(records, list):
+            records = []
+    except (FileNotFoundError, json.JSONDecodeError):
+        records = []
+
+    if any(item.get("video_id") == video_id for item in records):
+        print("Video already exists in upload history.")
+        return
+
+    records.append({
+        "video_id": video_id,
+        "title": script.get("title", ""),
+        "topic": script.get("topic", ""),
+        "uploaded_at": datetime.now(timezone.utc).isoformat(),
+        "privacy": PRIVACY,
+        "status": "uploaded",
+    })
+
+    with open(UPLOAD_LOG, "w", encoding="utf-8") as f:
+        json.dump(records, f, ensure_ascii=False, indent=2)
+
+    print(f"Saved upload record: {video_id}")
 
 
 def main():
@@ -45,24 +89,41 @@ def main():
 
     youtube = build("youtube", "v3", credentials=get_credentials())
 
-    tags = [str(t).lstrip("#") for t in script.get("hashtags", [])][:10]
+    tags = [
+        str(t).lstrip("#")
+        for t in script.get("hashtags", [])
+    ][:10]
+
     body = {
         "snippet": {
             "title": script["title"],
             "description": script["description"],
             "tags": tags,
-            "categoryId": "17",  # Sports
+            "categoryId": "17",
         },
         "status": {
             "privacyStatus": PRIVACY,
             "selfDeclaredMadeForKids": False,
         },
     }
-    media = MediaFileUpload(FINAL, mimetype="video/mp4", chunksize=-1, resumable=True)
-    request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
+
+    media = MediaFileUpload(
+        FINAL,
+        mimetype="video/mp4",
+        chunksize=-1,
+        resumable=True,
+    )
+
+    request = youtube.videos().insert(
+        part="snippet,status",
+        body=body,
+        media_body=media,
+    )
 
     print(f"Uploading '{script['title']}' as {PRIVACY}...")
+
     response, retries = None, 0
+
     while response is None:
         try:
             _, response = request.next_chunk()
@@ -75,10 +136,15 @@ def main():
             raise
 
     video_id = response["id"]
+
+    save_upload(video_id, script)
     mark_used(script["topic"])
-    print("\nUploaded!")
+
+    print("\nUploaded successfully!")
     print("Watch:  https://www.youtube.com/watch?v=" + video_id)
     print("Studio: https://studio.youtube.com/video/" + video_id + "/edit")
+    print("History: " + UPLOAD_LOG)
 
 
-main()
+if __name__ == "__main__":
+    main()
