@@ -252,7 +252,9 @@ def choose_content_type(used, memory):
         selected = preferred[(index + 1) % len(preferred)]
 
     return selected
-    def performance_context(memory):
+
+
+def performance_context(memory):
     baseline = memory.get("baseline", {})
     signals = memory.get("topic_signals", [])
 
@@ -681,4 +683,4 @@ if __name__ == "__main__":
     print("TOPIC:", script["topic"])
     for i, scene in enumerate(script["scenes"], 1):
         print(f"\nScene {i} [{scene['keyword']}]\n{scene['narration']}")
-    print("\nSaved to output/script.json")    print("\nSaved to output/script.json")
+    print("\nSaved to output/script.json")

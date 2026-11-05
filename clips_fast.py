@@ -2,7 +2,13 @@ import json
 import os
 import subprocess
 
-from clips import CLIPS_DIR, RAW_DIR, choose_clip, download, process
+from clips import (
+    CLIPS_DIR,
+    RAW_DIR,
+    choose_clip,
+    download,
+    process,
+)
 
 PART_SECONDS = float(os.getenv("PART_SECONDS", "2.6"))
 MAX_PARTS = 4
@@ -21,106 +27,77 @@ def main():
     used_ids = set()
     info = []
 
-    for i, scene in enumerate(script["scenes"], 1):
-        seconds = audio[i - 1]["seconds"]
+    for scene_index, scene in enumerate(scenes, 1):
+        seconds = float(audio[scene_index - 1].get("seconds", 0))
+        if seconds <= 0:
+            raise RuntimeError(f"Scene {scene_index} has invalid audio duration: {seconds}")
 
-        keywords = [
-            k.strip()
-            for k in str(scene["keyword"]).split("|")
-            if k.strip()
-        ]
-
-        if not keywords:
-            keywords = ["gym workout"]
-
-        parts = max(
-            1,
-            min(MAX_PARTS, round(seconds / PART_SECONDS))
-        )
-
+        narration = str(scene.get("narration", "")).strip()
+        keywords = _ordered_keywords(scene)
+        parts = max(MIN_PARTS, min(MAX_PARTS, round(seconds / PART_SECONDS)))
         each = seconds / parts
 
-        print(f"\nScene {i} ({seconds}s, {parts} cuts)")
+        print(f"\nScene {scene_index} ({seconds:.2f}s, {parts} cuts)")
+        print(f"  narration: {narration}")
+        print(f"  search priority: {', '.join(keywords)}")
 
         part_files = []
-        ids = []
+        scene_clips = []
 
-        for p in range(parts):
-            kw = keywords[p % len(keywords)]
-
+        for part_index in range(parts):
+            # Rotate across the best narration-related terms to vary the visuals.
+            keyword = keywords[part_index % len(keywords)]
             query, hit, url, portrait = choose_clip(
                 kw,
                 each,
-                used_ids
+                used_ids,
+                context=narration,
             )
 
             used_ids.add(hit.get("id"))
 
-            raw = f"{RAW_DIR}/s{i}_{p}.mp4"
-            part = f"{CLIPS_DIR}/s{i}_{p}.mp4"
+            raw_file = os.path.join(RAW_DIR, f"s{scene_index}_{part_index}.mp4")
+            part_file = os.path.join(CLIPS_DIR, f"s{scene_index}_{part_index}.mp4")
 
-            download(url, raw)
-            process(raw, part, each, portrait)
+            try:
+                download(url, raw_file)
+                process(raw_file, part_file, each, portrait)
+            finally:
+                if os.path.exists(raw_file):
+                    os.remove(raw_file)
 
-            os.remove(raw)
-
-            part_files.append(part)
-            ids.append(hit.get("id"))
+            part_files.append(part_file)
+            scene_clips.append({
+                "query": query,
+                "keyword": keyword,
+                "pixabay_id": hit.get("id"),
+                "page": hit.get("pageURL"),
+                "author": hit.get("user"),
+                "tags": hit.get("tags"),
+                "orientation": "vertical" if portrait else "wide_blur_fit",
+                "seconds": round(each, 2),
+            })
 
             kind = "vertical" if portrait else "wide (blur-fit)"
+            print(f"  cut {part_index + 1}: '{query}' -> {kind}, id {hit.get('id')}")
+            print(f"    tags: {str(hit.get('tags', ''))[:120]}")
 
-            print(
-                f"  cut {p + 1}: '{query}' -> "
-                f"{kind}, id {hit.get('id')}"
-            )
-
-        out = f"{CLIPS_DIR}/scene_{i}.mp4"
-
-        if len(part_files) == 1:
-            os.replace(part_files[0], out)
-
-        else:
-            list_path = f"{CLIPS_DIR}/list_{i}.txt"
-
-            with open(list_path, "w", encoding="utf-8") as f:
-                for pf in part_files:
-                    f.write(
-                        f"file '{os.path.abspath(pf)}'\n"
-                    )
-
-            subprocess.run(
-                [
-                    "ffmpeg",
-                    "-y",
-                    "-loglevel",
-                    "error",
-                    "-f",
-                    "concat",
-                    "-safe",
-                    "0",
-                    "-i",
-                    list_path,
-                    "-c",
-                    "copy",
-                    out,
-                ],
-                check=True,
-            )
-
-            for pf in part_files:
-                os.remove(pf)
-
-            os.remove(list_path)
+        output_file = os.path.join(CLIPS_DIR, f"scene_{scene_index}.mp4")
+        _concat_parts(part_files, output_file, scene_index)
 
         info.append({
-            "scene": i,
-            "file": out,
+            "scene": scene_index,
+            "narration": narration,
+            "keywords": keywords,
+            "file": output_file,
             "seconds": seconds,
-            "pixabay_ids": ids,
+            "clips": scene_clips,
+            # Keep the previous field for compatibility with any downstream script.
+            "pixabay_ids": [clip["pixabay_id"] for clip in scene_clips],
         })
 
     with open("output/clips_info.json", "w", encoding="utf-8") as f:
-        json.dump(info, f, indent=2)
+        json.dump(info, f, ensure_ascii=False, indent=2)
 
     print("\nSaved to output/clips_info.json")
 

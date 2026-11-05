@@ -1,9 +1,11 @@
 
+import json
 import os
 
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
+
+# Needed because the redirect address is http://localhost
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
@@ -11,42 +13,65 @@ SCOPES = [
     "https://www.googleapis.com/auth/yt-analytics.readonly",
 ]
 
-CLIENT_SECRET_FILE = "client_secret.json"
-TOKEN_FILE = "token.json"
+REDIRECT = "http://localhost:8080/"
 
+config = {
+    "installed": {
+        "client_id": os.environ["YT_CLIENT_ID"],
+        "client_secret": os.environ["YT_CLIENT_SECRET"],
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "redirect_uris": [REDIRECT],
+    }
+}
 
-def authenticate():
-    creds = None
+flow = Flow.from_client_config(
+    config,
+    scopes=SCOPES,
+    redirect_uri=REDIRECT,
+)
 
-    if os.path.exists(TOKEN_FILE):
-        creds = Credentials.from_authorized_user_file(
-            TOKEN_FILE,
-            SCOPES
-        )
+url, _ = flow.authorization_url(
+    access_type="offline",
+    prompt="consent",
+    include_granted_scopes="true",
+)
 
-    if not creds or not creds.valid:
+os.makedirs("output", exist_ok=True)
 
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+with open("output/auth_url.txt", "w", encoding="utf-8") as f:
+    f.write(url)
 
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                CLIENT_SECRET_FILE,
-                SCOPES
-            )
+print("\n1) Open this link in a NEW browser tab:\n")
+print(url)
 
-            creds = flow.run_local_server(
-                port=8080,
-                access_type="offline",
-                prompt="consent"
-            )
+print("\n2) Sign in with the YouTube channel owner account.")
+print("3) Approve all requested permissions.")
+print("4) Copy the FULL address from the final browser page.")
 
-        with open(TOKEN_FILE, "w", encoding="utf-8") as token:
-            token.write(creds.to_json())
+response = input("\nPaste the full address here: ").strip()
 
-    return creds
+if "code=" not in response:
+    raise SystemExit("Authorization code not found in the supplied URL.")
 
+flow.fetch_token(authorization_response=response)
 
-if __name__ == "__main__":
-    authenticate()
-    print("YouTube authentication successful!")
+creds = flow.credentials
+
+if not creds.refresh_token:
+    raise SystemExit(
+        "No refresh token returned. Revoke the previous app access "
+        "and run auth.py again with consent."
+    )
+
+with open("token.json", "w", encoding="utf-8") as f:
+    json.dump(
+        {"refresh_token": creds.refresh_token},
+        f,
+        indent=2,
+    )
+
+print("\nAuthorization successful!")
+print("New refresh token saved in token.json.")
+print("Update the YT_REFRESH_TOKEN GitHub Secret with this token.")
+print("\nSaved token.json. You can now run upload.py")

@@ -1,41 +1,67 @@
-"""Keeps the background clips on topic: every clip must be about training or food."""
+"""Scene-aware relevance scoring for fitness and nutrition stock footage."""
+
 import re
 
 TRAINING = {
-    "gym", "workout", "exercise", "fitness", "training", "weight", "weights", "weightlifting",
-    "lifting", "dumbbell", "barbell", "kettlebell", "squat", "deadlift", "pushup", "pullup",
-    "plank", "cardio", "treadmill", "running", "runner", "jogging", "jogger", "sprint",
-    "cycling", "swimming", "yoga", "stretching", "muscle", "bodybuilding", "bodybuilder",
-    "athlete", "athletic", "sport", "crossfit", "boxing", "abs", "biceps", "trainer",
-    "calisthenics", "powerlifting", "strength", "warmup", "pilates", "aerobic", "treadmill",
-}
-FOOD = {
-    "food", "meal", "healthy", "nutrition", "diet", "protein", "chicken", "egg", "salad",
-    "vegetable", "fruit", "rice", "oats", "oatmeal", "breakfast", "lunch", "dinner", "cooking",
-    "cook", "kitchen", "fish", "salmon", "meat", "beef", "steak", "nuts", "avocado", "smoothie",
-    "yogurt", "grilled", "recipe", "eating", "ingredients", "organic", "vegan", "tuna", "beans",
-    "lentils", "potato", "banana", "apple", "berries", "broccoli", "tomato", "juice", "snack",
-    "cuisine", "dish", "vegetables", "fruits", "spinach", "carrot", "cheese", "milk",
-}
-# only accepted when the clip also has a health / fitness context tag
-WEAK = {
-    "walking", "walk", "hiking", "sleep", "sleeping", "bed", "resting", "recovery", "water",
-    "bottle", "scale", "measuring", "steps", "stairs",
-}
-HEALTH_CONTEXT = {
-    "fitness", "health", "healthy", "sport", "exercise", "workout", "training", "wellness",
-    "lifestyle", "active", "athlete", "gym", "diet", "nutrition", "food", "meal",
-}
-FILLER = {
-    "person", "people", "man", "woman", "men", "women", "looking", "close", "slow", "motion",
-    "view", "outdoors", "outdoor", "with", "and", "the", "front", "back", "side", "top", "young",
-    "happy", "friends", "group", "someone", "his", "her", "for", "from", "into", "over", "one",
+    "gym", "workout", "exercise", "fitness", "training", "weight",
+    "weights", "weightlifting", "lifting", "dumbbell", "barbell",
+    "kettlebell", "squat", "deadlift", "pushup", "pullup", "plank",
+    "cardio", "treadmill", "running", "runner", "jogging", "cycling",
+    "swimming", "yoga", "stretching", "muscle", "bodybuilding",
+    "bodybuilder", "athlete", "sport", "crossfit", "boxing", "abs",
+    "biceps", "trainer", "calisthenics", "powerlifting", "strength",
+    "warmup", "pilates", "aerobic", "lat", "pulldown", "bench",
+    "press", "rowing", "row", "lunge", "lunges", "glute", "shoulder",
+    "chest", "triceps", "curl", "curls"
 }
 
-TRAINING_FALLBACKS = ["gym workout", "weight training", "man lifting weights",
-                      "woman running outdoors", "fitness training"]
-FOOD_FALLBACKS = ["healthy food", "cooking healthy meal", "salad vegetables",
-                  "cooking chicken", "meal prep"]
+FOOD = {
+    "food", "meal", "healthy", "nutrition", "diet", "protein",
+    "chicken", "egg", "salad", "vegetable", "fruit", "rice",
+    "oats", "oatmeal", "breakfast", "lunch", "dinner", "cooking",
+    "cook", "kitchen", "fish", "salmon", "meat", "beef", "steak",
+    "nuts", "avocado", "smoothie", "yogurt", "grilled", "recipe",
+    "eating", "ingredients", "organic", "vegan", "tuna", "beans",
+    "lentils", "potato", "banana", "apple", "berries", "broccoli",
+    "tomato", "juice", "snack", "vegetables", "fruits", "spinach",
+    "carrot", "cheese", "milk", "mealprep"
+}
+
+WEAK = {
+    "walking", "walk", "hiking", "sleep", "sleeping", "bed",
+    "resting", "recovery", "water", "bottle", "scale",
+    "measuring", "steps", "stairs"
+}
+
+HEALTH_CONTEXT = {
+    "fitness", "health", "healthy", "sport", "exercise", "workout",
+    "training", "wellness", "lifestyle", "active", "athlete",
+    "gym", "diet", "nutrition", "food", "meal"
+}
+
+FILLER = {
+    "person", "people", "man", "woman", "men", "women",
+    "looking", "close", "slow", "motion", "view", "outdoors",
+    "outdoor", "with", "and", "the", "front", "back", "side",
+    "top", "young", "happy", "friends", "group", "someone",
+    "his", "her", "for", "from", "into", "over", "one",
+    "doing", "using", "showing", "video", "footage", "clip",
+    "professional", "indoors"
+}
+
+GENERIC = {
+    "gym", "workout", "fitness", "training", "exercise",
+    "healthy", "health", "food", "meal", "nutrition", "diet",
+    "sport", "person", "people", "weight", "weights", "body"
+}
+
+TRAINING_FALLBACKS = [
+    "gym workout", "weight training", "fitness training"
+]
+
+FOOD_FALLBACKS = [
+    "healthy food", "cooking healthy meal", "meal prep"
+]
 
 
 def norm(word):
@@ -55,6 +81,7 @@ _STRONG = _TRAIN | _FOOD
 _WEAK = {norm(w) for w in WEAK}
 _CONTEXT = {norm(w) for w in HEALTH_CONTEXT}
 _FILLER = {norm(w) for w in FILLER}
+_GENERIC = {norm(w) for w in GENERIC}
 
 
 def hit_words(hit):
@@ -66,68 +93,73 @@ def keyword_words(keyword):
     return words_of(keyword) - _FILLER
 
 
+def scene_terms(keyword, context=""):
+    terms = (words_of(keyword) | words_of(context)) - _FILLER
+    specific = terms - _GENERIC
+
+    # If no distinctive term exists, retain the original terms
+    # rather than making matching impossible.
+    return specific if specific else terms
+
 
 def keyword_is_relevant(text):
     w = keyword_words(text)
 
-    # Direct training or food keywords
     if w & _STRONG:
         return True
 
-    # Weak words require a fitness context
     if w & _WEAK and w & _CONTEXT:
         return True
 
-    # Common fitness concepts
     phrases = [
-        "muscle gain",
-        "muscle growth",
-        "fat loss",
-        "weight loss",
-        "calorie deficit",
-        "strength training",
-        "weight training",
-        "resistance training",
-        "meal prep",
-        "high protein",
-        "protein rich",
-        "healthy eating",
-        "body composition",
-        "personal trainer",
+        "muscle gain", "muscle growth", "fat loss", "weight loss",
+        "calorie deficit", "strength training", "weight training",
+        "resistance training", "meal prep", "high protein",
+        "protein rich", "healthy eating", "body composition",
+        "personal trainer"
     ]
 
-    normalized_text = str(text).lower()
-
-    return any(
-        phrase in normalized_text
-        for phrase in phrases
-    )
+    return any(p in str(text).lower() for p in phrases)
 
 
+def relevance(hit, keyword, context=""):
+    """0=off-topic, 1=category-only, 2=scene-specific match."""
 
-def relevance(hit, keyword):
-    """0 = off topic, 1 = a training or food clip, 2 = also matches the scene keyword."""
     hw = hit_words(hit)
-    kw = keyword_words(keyword)
-    strong = hw & _STRONG
-    weak_ok = bool(hw & _WEAK & kw) and bool(hw & _CONTEXT)
-    if not strong and not weak_ok:
+
+    if not (hw & _STRONG or (hw & _WEAK and hw & _CONTEXT)):
         return 0
-    return 2 if (hw & kw) else 1
+
+    terms = scene_terms(keyword, context)
+
+    if hw & terms:
+        return 2
+
+    return 1
 
 
 def category(text):
     w = words_of(text)
-    return "food" if len(w & _FOOD) > len(w & _TRAIN) else "training"
+
+    return (
+        "food"
+        if len(w & _FOOD) > len(w & _TRAIN)
+        else "training"
+    )
 
 
 def fallbacks_for(text):
-    return FOOD_FALLBACKS + TRAINING_FALLBACKS if category(text) == "food" \
-        else TRAINING_FALLBACKS + FOOD_FALLBACKS
+    if category(text) == "food":
+        return FOOD_FALLBACKS + TRAINING_FALLBACKS
+
+    return TRAINING_FALLBACKS + FOOD_FALLBACKS
 
 
 def popularity(hit):
     try:
-        return int(hit.get("downloads") or 0) + 3 * int(hit.get("likes") or 0)
+        return (
+            int(hit.get("downloads") or 0)
+            + 3 * int(hit.get("likes") or 0)
+        )
     except (TypeError, ValueError):
         return 0

@@ -221,3 +221,6 @@ __marimo__/
 output/
 token.json
 output/auth_url.txt
+token.txt
+token.json
+client_secret.json
