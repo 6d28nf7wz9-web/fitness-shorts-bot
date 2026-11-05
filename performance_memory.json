@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "source": "Initial channel analytics shared by owner; topic-level summary",
+  "baseline": {
+    "total_views": 7248,
+    "watch_hours": 13.86,
+    "subscribers": 60,
+    "impressions": 7454,
+    "ctr_percent": 2.07,
+    "viewed_vs_swiped_percent": 38.2,
+    "average_percentage_viewed": 31
+  },
+  "topic_signals": [
+    {"topic": "NEAT and daily movement", "category": "fat_loss_habits", "signal": "strong_views_and_subscribers", "confidence": "medium"},
+    {"topic": "hunger, hormones and satiety", "category": "nutrition_and_hunger", "signal": "strong_views", "confidence": "medium"},
+    {"topic": "muscle building methods and muscle growth", "category": "muscle_building", "signal": "strong_views_and_subscribers", "confidence": "medium"},
+    {"topic": "eating late at night and fat gain", "category": "fat_loss_myths", "signal": "strong_views_and_subscribers", "confidence": "medium"},
+    {"topic": "water and hydration for training", "category": "training_recovery", "signal": "strong_views_and_good_ctr", "confidence": "medium"},
+    {"topic": "loaded stretch and exercise technique", "category": "exercise_technique", "signal": "good_ctr_and_subscribers", "confidence": "low"}
+  ],
+  "avoid_overusing": ["generic gym motivation", "generic workout footage", "repeated muscle growth myths"],
+  "learning_note": "Initial topic-level signals only. Add per-video metrics later to improve ranking confidence."
+}

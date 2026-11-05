@@ -1,3 +1,4 @@
+
 """Generate retention-focused FitFuel Shorts using channel performance memory."""
 
 import json
@@ -12,6 +13,7 @@ from google.genai import types
 try:
     from topics import all_used, too_similar
 except ImportError:
+
     def all_used():
         out = []
 
@@ -50,32 +52,27 @@ except ImportError:
 
 try:
     from relevance import keyword_is_relevant, fallbacks_for
-
 except ImportError:
+
     def keyword_is_relevant(text):
         return True
 
     def fallbacks_for(text):
-        return [
-            "gym workout",
-            "weight training",
-            "healthy food",
-            "cooking healthy meal",
-            "meal prep",
-        ]
+        return ["gym workout", "weight training", "healthy food", "cooking healthy meal", "meal prep"]
 
-
-MODEL_CANDIDATES = [
-    model
-    for model in [
-        os.getenv("GEMINI_MODEL"),
-        "gemini-flash-latest",
-        "gemini-3.1-flash-lite",
-        "gemini-3-flash-preview",
-    ]
-    if model
+CONTENT_TYPES = [
+    "a common gym mistake and the exact correction",
+    "a fitness myth versus what actually works",
+    "a simple food swap that supports a calorie deficit",
+    "one practical exercise form cue",
+    "a high-protein meal idea using familiar foods",
+    "a simple muscle-building or fat-loss rule people can use today",
+    "a comparison between two common exercises, foods, or habits",
 ]
 
+MODEL_CANDIDATES = [m for m in [
+    os.getenv("GEMINI_MODEL"), "gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-3-flash-preview"
+] if m]
 
 MEMORY_FILE = "performance_memory.json"
 
@@ -399,17 +396,11 @@ STRICT SCRIPT RULES:
 - Never promise a result or timeframe.
 
 VISUAL SEARCH RULES:
-
-- Every scene needs 2-3 DIFFERENT, realistic,
-  filmable stock-footage searches separated by |.
-- Every search must visibly show the exact action,
-  food, or equipment being discussed.
-- Include concrete terms such as dumbbell, squat, barbell,
-  chicken breast, eggs, rice, salad, or meal prep when relevant.
-- No abstract concepts, text graphics, offices, cities,
-  nature, money, crowds, or named people/brands.
-- Match the footage to that scene's spoken point,
-  not generic gym footage in every scene.
+- Every scene needs 2-3 DIFFERENT, realistic, filmable stock-footage searches separated by |.
+- Every search must visibly show the exact action, food, or equipment being discussed.
+- Include concrete terms such as dumbbell, squat, barbell, chicken breast, eggs, rice, salad, or meal prep when relevant.
+- No abstract concepts, text graphics, offices, cities, nature, money, crowds, or named people/brands.
+- Match the footage to that scene's spoken point, not generic gym footage in every scene.
 
 Return JSON only. No markdown and no extra keys.
 '''
@@ -434,41 +425,25 @@ def parse_json(response_text):
 
 
 def repair_keywords(data):
+    """
+    Keep relevant scene keywords without forcing generic fallbacks.
+    One strong keyword is acceptable.
+    """
+
     for scene in data.get("scenes", []):
         original = str(scene.get("keyword", ""))
 
         valid = []
-
-        for keyword in (
-            item.strip()
-            for item in original.split("|")
-        ):
-            if (
-                keyword
-                and keyword_is_relevant(keyword)
-                and keyword.lower() not in [
-                    value.lower() for value in valid
-                ]
-            ):
+        for keyword in (k.strip() for k in original.split("|")):
+            if keyword and keyword_is_relevant(keyword) and keyword.lower() not in [v.lower() for v in valid]:
                 valid.append(keyword)
-
-        for fallback in fallbacks_for(
-            scene.get("narration", "")
-        ):
+        for fallback in fallbacks_for(scene.get("narration", "")):
             if len(valid) >= 3:
                 break
-
-            if (
-                keyword_is_relevant(fallback)
-                and fallback.lower() not in [
-                    value.lower() for value in valid
-                ]
-            ):
+            if keyword_is_relevant(fallback) and fallback.lower() not in [v.lower() for v in valid]:
                 valid.append(fallback)
-
         if not valid:
             valid = ["gym workout", "healthy food"]
-
         scene["keyword"] = " | ".join(valid[:3])
 
     return data
@@ -513,27 +488,11 @@ def validate(data):
             return "empty narration"
 
         word_counts.append(len(narration.split()))
-
-        keywords = [
-            keyword.strip()
-            for keyword in str(
-                scene.get("keyword", "")
-            ).split("|")
-            if keyword.strip()
-        ]
-
+        keywords = [k.strip() for k in str(scene.get("keyword", "")).split("|") if k.strip()]
         if not keywords:
             return "empty keyword"
-
-        if not any(
-            keyword_is_relevant(keyword)
-            for keyword in keywords
-        ):
-            return (
-                "keyword not about training or food: "
-                f"{scene.get('keyword')}"
-            )
-
+        if not any(keyword_is_relevant(k) for k in keywords):
+            return f"keyword not about training or food: {scene.get('keyword')}"
     total_words = sum(word_counts)
 
     if not 45 <= total_words <= 65:
@@ -716,29 +675,10 @@ if __name__ == "__main__":
     script = finalize(generate_script())
 
     os.makedirs("output", exist_ok=True)
-
-    with open(
-        "output/script.json",
-        "w",
-        encoding="utf-8"
-    ) as f:
-        json.dump(
-            script,
-            f,
-            ensure_ascii=False,
-            indent=2,
-        )
-
+    with open("output/script.json", "w", encoding="utf-8") as f:
+        json.dump(script, f, ensure_ascii=False, indent=2)
     print("\nTITLE:", script["title"])
     print("TOPIC:", script["topic"])
-
-    for i, scene in enumerate(
-        script["scenes"],
-        1
-    ):
-        print(
-            f"\nScene {i} [{scene['keyword']}]\n"
-            f"{scene['narration']}"
-        )
-
-    print("\nSaved to output/script.json")
+    for i, scene in enumerate(script["scenes"], 1):
+        print(f"\nScene {i} [{scene['keyword']}]\n{scene['narration']}")
+    print("\nSaved to output/script.json")    print("\nSaved to output/script.json")
