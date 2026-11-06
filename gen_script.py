@@ -1,4 +1,3 @@
-
 """Generate retention-focused FitFuel Shorts using channel performance memory."""
 
 import json
@@ -13,7 +12,6 @@ from google.genai import types
 try:
     from topics import all_used, too_similar
 except ImportError:
-
     def all_used():
         out = []
 
@@ -52,27 +50,32 @@ except ImportError:
 
 try:
     from relevance import keyword_is_relevant, fallbacks_for
-except ImportError:
 
+except ImportError:
     def keyword_is_relevant(text):
         return True
 
     def fallbacks_for(text):
-        return ["gym workout", "weight training", "healthy food", "cooking healthy meal", "meal prep"]
+        return [
+            "gym workout",
+            "weight training",
+            "healthy food",
+            "cooking healthy meal",
+            "meal prep",
+        ]
 
-CONTENT_TYPES = [
-    "a common gym mistake and the exact correction",
-    "a fitness myth versus what actually works",
-    "a simple food swap that supports a calorie deficit",
-    "one practical exercise form cue",
-    "a high-protein meal idea using familiar foods",
-    "a simple muscle-building or fat-loss rule people can use today",
-    "a comparison between two common exercises, foods, or habits",
+
+MODEL_CANDIDATES = [
+    model
+    for model in [
+        os.getenv("GEMINI_MODEL"),
+        "gemini-flash-latest",
+        "gemini-3.1-flash-lite",
+        "gemini-3-flash-preview",
+    ]
+    if model
 ]
 
-MODEL_CANDIDATES = [m for m in [
-    os.getenv("GEMINI_MODEL"), "gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-3-flash-preview"
-] if m]
 
 MEMORY_FILE = "performance_memory.json"
 
@@ -252,8 +255,6 @@ def choose_content_type(used, memory):
         selected = preferred[(index + 1) % len(preferred)]
 
     return selected
-
-
 def performance_context(memory):
     baseline = memory.get("baseline", {})
     signals = memory.get("topic_signals", [])
@@ -398,11 +399,17 @@ STRICT SCRIPT RULES:
 - Never promise a result or timeframe.
 
 VISUAL SEARCH RULES:
-- Every scene needs 2-3 DIFFERENT, realistic, filmable stock-footage searches separated by |.
-- Every search must visibly show the exact action, food, or equipment being discussed.
-- Include concrete terms such as dumbbell, squat, barbell, chicken breast, eggs, rice, salad, or meal prep when relevant.
-- No abstract concepts, text graphics, offices, cities, nature, money, crowds, or named people/brands.
-- Match the footage to that scene's spoken point, not generic gym footage in every scene.
+
+- Every scene needs 2-3 DIFFERENT, realistic,
+  filmable stock-footage searches separated by |.
+- Every search must visibly show the exact action,
+  food, or equipment being discussed.
+- Include concrete terms such as dumbbell, squat, barbell,
+  chicken breast, eggs, rice, salad, or meal prep when relevant.
+- No abstract concepts, text graphics, offices, cities,
+  nature, money, crowds, or named people/brands.
+- Match the footage to that scene's spoken point,
+  not generic gym footage in every scene.
 
 Return JSON only. No markdown and no extra keys.
 '''
@@ -427,25 +434,41 @@ def parse_json(response_text):
 
 
 def repair_keywords(data):
-    """
-    Keep relevant scene keywords without forcing generic fallbacks.
-    One strong keyword is acceptable.
-    """
-
     for scene in data.get("scenes", []):
         original = str(scene.get("keyword", ""))
 
         valid = []
-        for keyword in (k.strip() for k in original.split("|")):
-            if keyword and keyword_is_relevant(keyword) and keyword.lower() not in [v.lower() for v in valid]:
+
+        for keyword in (
+            item.strip()
+            for item in original.split("|")
+        ):
+            if (
+                keyword
+                and keyword_is_relevant(keyword)
+                and keyword.lower() not in [
+                    value.lower() for value in valid
+                ]
+            ):
                 valid.append(keyword)
-        for fallback in fallbacks_for(scene.get("narration", "")):
+
+        for fallback in fallbacks_for(
+            scene.get("narration", "")
+        ):
             if len(valid) >= 3:
                 break
-            if keyword_is_relevant(fallback) and fallback.lower() not in [v.lower() for v in valid]:
+
+            if (
+                keyword_is_relevant(fallback)
+                and fallback.lower() not in [
+                    value.lower() for value in valid
+                ]
+            ):
                 valid.append(fallback)
+
         if not valid:
             valid = ["gym workout", "healthy food"]
+
         scene["keyword"] = " | ".join(valid[:3])
 
     return data
@@ -490,11 +513,27 @@ def validate(data):
             return "empty narration"
 
         word_counts.append(len(narration.split()))
-        keywords = [k.strip() for k in str(scene.get("keyword", "")).split("|") if k.strip()]
+
+        keywords = [
+            keyword.strip()
+            for keyword in str(
+                scene.get("keyword", "")
+            ).split("|")
+            if keyword.strip()
+        ]
+
         if not keywords:
             return "empty keyword"
-        if not any(keyword_is_relevant(k) for k in keywords):
-            return f"keyword not about training or food: {scene.get('keyword')}"
+
+        if not any(
+            keyword_is_relevant(keyword)
+            for keyword in keywords
+        ):
+            return (
+                "keyword not about training or food: "
+                f"{scene.get('keyword')}"
+            )
+
     total_words = sum(word_counts)
 
     if not 45 <= total_words <= 65:
@@ -531,6 +570,45 @@ def validate(data):
         return "topic too close to one already used"
 
     return None
+
+
+def _is_temporary_gemini_error(exc):
+    """Return True for rate limits and temporary Gemini service failures."""
+    message = str(exc).lower()
+    status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    temporary_markers = (
+        "503", "unavailable", "high demand", "429",
+        "resource_exhausted", "rate limit", "500", "502", "504",
+        "internal error", "deadline exceeded", "temporarily",
+    )
+    return status in (429, 500, 502, 503, 504) or any(
+        marker in message for marker in temporary_markers
+    )
+
+
+def _generate_with_retry(client, model, prompt, retries=5):
+    """Retry transient Gemini failures with exponential backoff."""
+    for retry in range(retries + 1):
+        try:
+            return client.models.generate_content(
+                model=model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=0.85,
+                    response_mime_type="application/json",
+                ),
+            )
+        except Exception as exc:
+            if not _is_temporary_gemini_error(exc) or retry >= retries:
+                raise
+            delay = min(3 * (2 ** retry), 45)
+            print(
+                f"Temporary Gemini error for {model} "
+                f"(retry {retry + 1}/{retries}): {str(exc)[:160]}"
+            )
+            print(f"Retrying in {delay} seconds...")
+            time.sleep(delay)
+
 
 
 def generate_script():
@@ -570,13 +648,8 @@ def generate_script():
 
         for model in MODEL_CANDIDATES:
             try:
-                response = client.models.generate_content(
-                    model=model,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        temperature=0.85,
-                        response_mime_type="application/json",
-                    ),
+                response = _generate_with_retry(
+                    client, model, prompt, retries=5
                 )
 
                 if not response.text:
@@ -677,10 +750,29 @@ if __name__ == "__main__":
     script = finalize(generate_script())
 
     os.makedirs("output", exist_ok=True)
-    with open("output/script.json", "w", encoding="utf-8") as f:
-        json.dump(script, f, ensure_ascii=False, indent=2)
+
+    with open(
+        "output/script.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+        json.dump(
+            script,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
     print("\nTITLE:", script["title"])
     print("TOPIC:", script["topic"])
-    for i, scene in enumerate(script["scenes"], 1):
-        print(f"\nScene {i} [{scene['keyword']}]\n{scene['narration']}")
+
+    for i, scene in enumerate(
+        script["scenes"],
+        1
+    ):
+        print(
+            f"\nScene {i} [{scene['keyword']}]\n"
+            f"{scene['narration']}"
+        )
+
     print("\nSaved to output/script.json")
