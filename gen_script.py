@@ -65,16 +65,43 @@ except ImportError:
         ]
 
 
-MODEL_CANDIDATES = [
-    model
-    for model in [
-        os.getenv("GEMINI_MODEL"),
-        "gemini-flash-latest",
-        "gemini-3.1-flash-lite",
-        "gemini-3-flash-preview",
-    ]
-    if model
-]
+def get_model_candidates():
+    """Build a de-duplicated primary + fallback model list.
+
+    Override the fallback order with GEMINI_FALLBACK_MODELS,
+    a comma-separated list of model IDs available to your API key.
+    """
+    primary = os.getenv(
+        "GEMINI_MODEL",
+        "gemini-flash-latest"
+    ).strip()
+
+    configured = os.getenv(
+        "GEMINI_FALLBACK_MODELS",
+        ""
+    ).strip()
+
+    if configured:
+        fallbacks = [
+            item.strip()
+            for item in configured.split(",")
+            if item.strip()
+        ]
+    else:
+        fallbacks = [
+            "gemini-3.8-flash",
+            "gemini-3.7-flash",
+            "gemini-3.6-flash",
+            "gemini-3.5-flash-lite",
+        ]
+
+    candidates = []
+
+    for model in [primary, *fallbacks]:
+        if model and model not in candidates:
+            candidates.append(model)
+
+    return candidates
 
 
 MEMORY_FILE = "performance_memory.json"
@@ -255,6 +282,8 @@ def choose_content_type(used, memory):
         selected = preferred[(index + 1) % len(preferred)]
 
     return selected
+
+
 def performance_context(memory):
     baseline = memory.get("baseline", {})
     signals = memory.get("topic_signals", [])
@@ -575,19 +604,35 @@ def validate(data):
 def _is_temporary_gemini_error(exc):
     """Return True for rate limits and temporary Gemini service failures."""
     message = str(exc).lower()
-    status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    status = (
+        getattr(exc, "code", None)
+        or getattr(exc, "status_code", None)
+    )
+
     temporary_markers = (
-        "503", "unavailable", "high demand", "429",
-        "resource_exhausted", "rate limit", "500", "502", "504",
-        "internal error", "deadline exceeded", "temporarily",
+        "503",
+        "unavailable",
+        "high demand",
+        "429",
+        "resource_exhausted",
+        "rate limit",
+        "500",
+        "502",
+        "504",
+        "internal error",
+        "deadline exceeded",
+        "temporarily",
     )
-    return status in (429, 500, 502, 503, 504) or any(
-        marker in message for marker in temporary_markers
+
+    return (
+        status in (429, 500, 502, 503, 504)
+        or any(marker in message for marker in temporary_markers)
     )
 
 
-def _generate_with_retry(client, model, prompt, retries=5):
-    """Retry transient Gemini failures with exponential backoff."""
+def _generate_with_retry(client, model, prompt, retries=1):
+    """Try a model briefly; let the caller move to a fallback quickly."""
+
     for retry in range(retries + 1):
         try:
             return client.models.generate_content(
@@ -598,17 +643,27 @@ def _generate_with_retry(client, model, prompt, retries=5):
                     response_mime_type="application/json",
                 ),
             )
+
         except Exception as exc:
-            if not _is_temporary_gemini_error(exc) or retry >= retries:
+            if (
+                not _is_temporary_gemini_error(exc)
+                or retry >= retries
+            ):
                 raise
-            delay = min(3 * (2 ** retry), 45)
+
+            delay = min(3 * (2 ** retry), 6)
+
             print(
                 f"Temporary Gemini error for {model} "
-                f"(retry {retry + 1}/{retries}): {str(exc)[:160]}"
+                f"(retry {retry + 1}/{retries}): "
+                f"{str(exc)[:160]}"
             )
-            print(f"Retrying in {delay} seconds...")
-            time.sleep(delay)
 
+            print(
+                f"Retrying this model once in {delay} seconds..."
+            )
+
+            time.sleep(delay)
 
 
 def generate_script():
@@ -638,6 +693,13 @@ def generate_script():
         memory,
     )
 
+    model_candidates = get_model_candidates()
+
+    print(
+        "Gemini model fallback order:",
+        " -> ".join(model_candidates)
+    )
+
     max_attempts = 4
     last_problem = "Unknown error"
 
@@ -646,10 +708,15 @@ def generate_script():
             f"\nGeneration attempt {attempt}/{max_attempts}"
         )
 
-        for model in MODEL_CANDIDATES:
+        api_failures = 0
+
+        for model in model_candidates:
             try:
                 response = _generate_with_retry(
-                    client, model, prompt, retries=5
+                    client,
+                    model,
+                    prompt,
+                    retries=1
                 )
 
                 if not response.text:
@@ -696,10 +763,20 @@ def generate_script():
 
             except Exception as exc:
                 last_problem = str(exc)
+                api_failures += 1
 
                 print(
-                    f"{model} failed: {last_problem[:250]}"
+                    f"{model} failed; moving to next model: "
+                    f"{last_problem[:220]}"
                 )
+
+        if api_failures == len(model_candidates):
+            raise RuntimeError(
+                "All configured Gemini models failed. "
+                "Check model access/quota or set GEMINI_MODEL and "
+                "GEMINI_FALLBACK_MODELS to model IDs enabled for your API key. "
+                f"Last error: {last_problem}"
+            )
 
         if attempt < max_attempts:
             delay = min(
