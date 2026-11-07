@@ -6,7 +6,7 @@ import time
 
 import requests
 
-from relevance import keyword_is_relevant, popularity, relevance
+from relevance import keyword_is_relevant, popularity, relevance, fallbacks_for
 
 API_URL = "https://pixabay.com/api/videos/"
 RAW_DIR = "output/raw"
@@ -106,30 +106,24 @@ def keyword_variants(keyword, context=""):
 
     for term in str(keyword).split("|"):
         term = term.strip()
-
         if term and keyword_is_relevant(term):
             variants.append(term)
         elif term:
             print(f"  ignoring unrelated keyword: {term}")
 
-    # Use a short narration fragment only if it is itself relevant.
-    context_words = [
-        w for w in str(context).lower().replace(",", " ").split()
-        if len(w) > 3
-    ]
-
-    useful_context = " ".join(context_words[:4])
-
-    if useful_context and keyword_is_relevant(useful_context):
-        variants.append(useful_context)
+    # Add category-specific backup searches after the original keywords.
+    for term in fallbacks_for(keyword):
+        if term not in variants:
+            variants.append(term)
 
     seen = set()
     result = []
 
-    for v in variants:
-        if v.lower() not in seen:
-            seen.add(v.lower())
-            result.append(v)
+    for term in variants:
+        key = term.lower()
+        if key not in seen:
+            seen.add(key)
+            result.append(term)
 
     return result
 
@@ -138,13 +132,12 @@ def choose_clip(keyword, seconds, used_ids, context=""):
     variants = keyword_variants(keyword, context)
 
     if not variants:
-        raise RuntimeError(
-            f"No usable scene keywords: {keyword}"
-        )
+        raise RuntimeError(f"No usable scene keywords: {keyword}")
 
     candidates = {}
 
     for query in variants:
+        print(f"  Pixabay search: {query}")
         hits = search(query)
 
         for hit in hits:
@@ -154,11 +147,11 @@ def choose_clip(keyword, seconds, used_ids, context=""):
                 continue
 
             file_info = pick_file(hit)
-
             if not file_info:
                 continue
 
-            score = relevance(hit, keyword, context)
+            # Score against the actual search query, not narration words.
+            score = relevance(hit, keyword)
 
             if score == 0:
                 continue
@@ -176,7 +169,6 @@ def choose_clip(keyword, seconds, used_ids, context=""):
             )
 
             previous = candidates.get(hit_id)
-
             if previous is None or rank > previous[0]:
                 candidates[hit_id] = (
                     rank, query, hit, url, portrait
@@ -187,30 +179,27 @@ def choose_clip(keyword, seconds, used_ids, context=""):
         if item[0][0] == 2
     ]
 
-    broad_allowed = (
-        os.getenv("ALLOW_BROAD_CLIP_FALLBACK", "0") == "1"
-    )
+    category_matches = [
+        item for item in candidates.values()
+        if item[0][0] == 1
+    ]
 
     if exact:
         pool = exact
-    elif broad_allowed:
-        pool = [
-            item for item in candidates.values()
-            if item[0][0] == 1
-        ]
+        print(f"  Using {len(pool)} specific matching clips.")
+    elif category_matches:
+        pool = category_matches
+        print(
+            f"  No specific match; using "
+            f"{len(pool)} same-category clips."
+        )
     else:
-        pool = []
-
-    if not pool:
         raise RuntimeError(
-            f"No scene-specific clip found for: {keyword}. "
-            f"Searches tried: {', '.join(variants)}. "
-            "Improve the scene keywords or enable "
-            "ALLOW_BROAD_CLIP_FALLBACK=1."
+            f"No relevant clip found for: {keyword}. "
+            f"Searches tried: {', '.join(variants)}"
         )
 
     pool.sort(key=lambda item: item[0], reverse=True)
-
     top = pool[:6]
 
     weights = [

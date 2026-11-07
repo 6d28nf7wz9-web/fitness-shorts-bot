@@ -144,9 +144,7 @@ def main():
         scene_clips = []
 
         for part_index in range(parts):
-            keyword = keywords[
-                part_index % len(keywords)
-            ]
+            keyword = "|".join(keywords)
 
             query, hit, url, portrait = choose_clip(
                 keyword,
