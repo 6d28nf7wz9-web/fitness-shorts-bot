@@ -27,7 +27,20 @@ jobs:
       UPLOAD_PRIVACY: public
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Debug checked-out version
+        run: |
+          echo "========== GITHUB RUN INFO =========="
+          echo "Branch: $GITHUB_REF"
+          echo "Commit: $GITHUB_SHA"
+          git log -1 --oneline
 
+          echo "========== CLIPS_FAST.PY =========="
+          grep -n "scenes =" clips_fast.py || true
+          grep -n "enumerate(scenes" clips_fast.py || true
+
+          echo "========== FILE CONTENT =========="
+          nl -ba clips_fast.py | sed -n '1,125p'
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
