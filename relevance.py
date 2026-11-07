@@ -140,17 +140,17 @@ def relevance(hit, keyword, context=""):
     if len(matched) >= 2:
         return 2
 
-    # Category fallback: only accept footage from the same category.
-    target_category = category(keyword)
+    # Category fallback is allowed only for generic searches.
+    if not query_specific:
+        target_category = category(keyword)
 
-    if target_category == "food" and hw & _FOOD:
-        return 1
+        if target_category == "food" and hw & _FOOD:
+            return 1
 
-    if target_category == "training" and hw & _TRAIN:
-        return 1
+        if target_category == "training" and hw & _TRAIN:
+            return 1
 
     return 0
-
 
 def category(text):
     w = words_of(text)
