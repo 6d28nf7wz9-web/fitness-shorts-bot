@@ -60,28 +60,19 @@ jobs:
       - name: Voiceover
         run: python voice.py
 
-           - name: Fetch clips
-             run: |
+      - name: Fetch clips
+        run: |
           echo "========== DEBUG INFO =========="
           echo "Branch: $GITHUB_REF"
           echo "Commit: $GITHUB_SHA"
-          echo "Working directory:"
+          git log -1 --oneline
+          echo "========== FILE CHECK =========="
           pwd
-
-          echo "========== ACTUAL FILE =========="
-          ls -l clips_fast.py
           sha256sum clips_fast.py
-
-          echo "========== SCENES DEFINITION =========="
           grep -n "scenes =" clips_fast.py || true
-
-          echo "========== LOOP LOCATION =========="
           grep -n "enumerate(scenes" clips_fast.py || true
-
-          echo "========== FIRST 120 LINES =========="
-          nl -ba clips_fast.py | sed -n '1,120p'
-
-          echo "========== RUNNING SCRIPT =========="
+          nl -ba clips_fast.py | sed -n '1,125p'
+          echo "========== RUN SCRIPT =========="
           python clips_fast.py
 
       - name: Assemble video
