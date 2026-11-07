@@ -123,19 +123,33 @@ def keyword_is_relevant(text):
 
 
 def relevance(hit, keyword, context=""):
-    """0=off-topic, 1=category-only, 2=scene-specific match."""
+    """0=off-topic, 1=category match, 2=specific keyword match."""
 
     hw = hit_words(hit)
+    query_words = keyword_words(keyword)
 
-    if not (hw & _STRONG or (hw & _WEAK and hw & _CONTEXT)):
-        return 0
+    ambiguous = {
+        "bench", "press", "row", "lat",
+        "water", "bottle", "weight"
+    }
 
-    terms = scene_terms(keyword, context)
+    query_specific = query_words - _GENERIC - _WEAK - ambiguous
+    matched = hw & query_specific
 
-    if hw & terms:
+    # Require at least two specific matching words.
+    if len(matched) >= 2:
         return 2
 
-    return 1
+    # Category fallback: only accept footage from the same category.
+    target_category = category(keyword)
+
+    if target_category == "food" and hw & _FOOD:
+        return 1
+
+    if target_category == "training" and hw & _TRAIN:
+        return 1
+
+    return 0
 
 
 def category(text):
