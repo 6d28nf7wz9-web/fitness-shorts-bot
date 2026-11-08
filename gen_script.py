@@ -308,11 +308,43 @@ def performance_context(memory):
         "not targets guaranteed for every Short."
     )
 
+    # Real per-video Analytics are more useful than a static channel baseline.
+    videos = memory.get("analytics", {}).get("videos", {})
+    if isinstance(videos, dict) and videos:
+        uploads = memory.get("video_performance", [])
+        metadata = {
+            item.get("video_id"): item
+            for item in uploads
+            if isinstance(item, dict) and item.get("video_id")
+        }
+        ranked = sorted(
+            videos.items(),
+            key=lambda pair: (
+                pair[1].get("average_view_percentage", 0),
+                pair[1].get("engaged_views", 0),
+                pair[1].get("views", 0),
+            ),
+            reverse=True,
+        )
+        lines.append(
+            "Recent video-level evidence (28-day reporting window; "
+            "compare videos at similar age; NOT causal):"
+        )
+        for video_id, stats in ranked[:5]:
+            item = metadata.get(video_id, {})
+            lines.append(
+                f"- {item.get('topic') or item.get('title') or video_id}: "
+                f"{stats.get('views', 0)} views, "
+                f"{stats.get('engaged_views', 0)} engaged views, "
+                f"{stats.get('average_view_percentage', 0)}% average viewed, "
+                f"{stats.get('average_view_duration_seconds', 0)}s average duration, "
+                f"{stats.get('subscribers_gained', 0)} subscribers gained."
+            )
+
     if lines:
         return (
             baseline_text
-            + "\nTopic performance clues "
-            "(use as soft guidance, not guarantees):\n"
+            + "\nPerformance evidence (soft guidance only):\n"
             + "\n".join(lines)
         )
 
