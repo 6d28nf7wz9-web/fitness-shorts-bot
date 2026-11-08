@@ -19,7 +19,7 @@ SCRIPTS = [
     "gen_script.py", "voice.py", "clips_fast.py", "assemble.py", "upload.py",
     "long_script.py", "long_voice.py", "long_transcribe.py", "long_clips.py",
     "long_assemble.py", "long_upload.py", "long_shorts.py", "avatar.py", "yt.py",
-    "ffaudio.py", "topics.py",
+    "ffaudio.py", "topics.py", "analytics_sync.py",
 ]
 PACKAGES = [
     "google-genai", "edge-tts", "requests", "google-api-python-client",
@@ -27,6 +27,7 @@ PACKAGES = [
 ]
 EXPECTED = {
     "daily.yml": ["gen_script.py", "voice.py", "clips_fast.py", "assemble.py", "upload.py"],
+    "analytics.yml": ["analytics_sync.py"],
     "long_ai.yml": [
         "long_script.py", "long_voice.py", "long_transcribe.py", "long_clips.py",
         "long_assemble.py", "avatar.py", "long_upload.py", "long_shorts.py",
@@ -171,7 +172,7 @@ def check_workflows():
             say("FAIL", f"{fname} is missing")
             continue
         crons = CRON_RE.findall(text)
-        expected_crons = {"daily.yml": 3, "long_ai.yml": 1}.get(fname, 1)
+        expected_crons = {"daily.yml": 3, "long_ai.yml": 1, "analytics.yml": 1}.get(fname, 1)
         if len(crons) == expected_crons:
             say("OK", f"{fname}: {len(crons)} schedule(s) ({'; '.join(crons)} UTC)")
         else:
