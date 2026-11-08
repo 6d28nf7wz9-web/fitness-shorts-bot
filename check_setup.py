@@ -18,7 +18,7 @@ DAILY_QUOTA = 10000
 SCRIPTS = [
     "gen_script.py", "voice.py", "clips_fast.py", "assemble.py", "upload.py",
     "long_script.py", "long_voice.py", "long_transcribe.py", "long_clips.py",
-    "long_assemble.py", "long_upload.py", "yt.py",
+    "long_assemble.py", "long_upload.py", "long_shorts.py", "avatar.py", "yt.py",
     "ffaudio.py", "topics.py",
 ]
 PACKAGES = [
