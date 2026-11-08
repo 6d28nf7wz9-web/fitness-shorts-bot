@@ -52,4 +52,6 @@ def main():
     print(f"Voiceover: {int(secs // 60)}:{int(secs % 60):02d}  ->  {OUT}")
 
 
-main()
+
+if __name__ == "__main__":
+    main()

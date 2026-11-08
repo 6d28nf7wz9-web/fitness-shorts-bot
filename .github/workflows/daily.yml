@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: daily-short
+  group: fitness-video-pipelines
   cancel-in-progress: false
 
 jobs:

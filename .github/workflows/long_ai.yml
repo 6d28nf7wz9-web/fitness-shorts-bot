@@ -15,7 +15,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: ai-long
+  group: fitness-video-pipelines
   cancel-in-progress: false
 
 jobs:
@@ -49,6 +49,9 @@ jobs:
 
       - name: Validate Python files
         run: python -m compileall -q .
+
+      - name: Preflight project checks
+        run: python check_setup.py
 
       - name: Cache speech model
         uses: actions/cache@v4

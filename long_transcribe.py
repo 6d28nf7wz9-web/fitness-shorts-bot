@@ -178,4 +178,6 @@ def main():
         print("\nWarning: the recording differs a lot from the script, so section timing may be off.")
 
 
-main()
+
+if __name__ == "__main__":
+    main()

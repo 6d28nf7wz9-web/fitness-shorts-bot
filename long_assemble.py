@@ -170,4 +170,6 @@ def main():
     print("Chapters:\n" + (chapters or "(none, too few long sections)"))
 
 
-main()
+
+if __name__ == "__main__":
+    main()
