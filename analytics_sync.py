@@ -248,6 +248,7 @@ def main():
             "synced_at": datetime.now(timezone.utc).isoformat(),
         }
 
+    first_week = build_first_week_metrics(api, uploads, end)
     enriched = []
     for item in uploads:
         if not isinstance(item, dict):
@@ -256,6 +257,8 @@ def main():
         video_id = copy.get("video_id")
         if video_id in videos:
             copy["analytics"] = videos[video_id]
+        if video_id in first_week:
+            copy["first_week_analytics"] = first_week[video_id]
         enriched.append(copy)
 
     synced_at = datetime.now(timezone.utc).isoformat()
@@ -269,6 +272,14 @@ def main():
     }
     memory["video_performance"] = enriched
     memory["topic_insights"] = build_topic_insights(enriched)
+    memory["first_week_topic_insights"] = build_first_week_topic_insights(enriched)
+    memory["first_week_analytics"] = {
+        "source": "YouTube Analytics API daily video report",
+        "window_days": 7,
+        "comparison_method": "First 7 calendar days after each video's upload date",
+        "complete_video_windows": sum(1 for stats in first_week.values() if stats.get("first_7_days_complete")),
+        "videos": first_week,
+    }
     memory["learning_note"] = (
         "Per-video metrics synced from YouTube Analytics. Compare videos at similar age; "
         "use retention and engaged views, not raw views alone. Topic averages are descriptive "
@@ -277,7 +288,11 @@ def main():
     with open(MEMORY_PATH, "w", encoding="utf-8") as handle:
         json.dump(memory, handle, ensure_ascii=False, indent=2)
 
-    print(f"Synced {len(videos)} videos and {len(memory['topic_insights'])} topic groups into {MEMORY_PATH}")
+    print(
+        f"Synced {len(videos)} rolling-window videos, {len(first_week)} first-week video records, "
+        f"{len(memory['topic_insights'])} rolling topic groups, and "
+        f"{len(memory['first_week_topic_insights'])} first-week topic groups into {MEMORY_PATH}"
+    )
     if not videos:
         print("No report rows returned (API delay or no views in selected period).")
 
