@@ -193,7 +193,8 @@ def main():
         out, dur = render(tl, chunks, si, n, random.choice(music_files))
         add_avatar(out, tl["recording"], tl["audio_start"] + sec["start"], dur, "short")
         print(f"Rendered {out} ({dur:.0f}s): {sec['heading']}")
-        if os.getenv("SKIP_UPLOAD"):
+        if os.getenv("SKIP_UPLOAD", "").strip().lower() in {"1", "true", "yes"}:
+            print("SKIP_UPLOAD is enabled: Short remains local.")
             continue
         description = (
             f"{sec['heading']}. Part of: {queue['title']}{link}\n\n{tag_line}\n\n"
