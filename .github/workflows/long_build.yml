@@ -20,7 +20,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: build-long
+  group: fitness-video-pipelines
   cancel-in-progress: false
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
       UPLOAD_PRIVACY: public
-      SKIP_UPLOAD: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
+      SKIP_UPLOAD: ${{ (github.event_name != 'workflow_dispatch' || inputs.dry_run) && '1' || '' }}
       LONG_ID: ${{ inputs.long_id }}
     steps:
       - uses: actions/checkout@v4
@@ -53,6 +53,9 @@ jobs:
 
       - name: Validate Python files
         run: python -m compileall -q .
+
+      - name: Preflight project checks
+        run: python check_setup.py
 
       - name: Cache speech model
         uses: actions/cache@v4
