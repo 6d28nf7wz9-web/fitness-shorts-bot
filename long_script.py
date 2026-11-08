@@ -201,4 +201,6 @@ def main():
     print(f"Reading script: {QUEUE_DIR}/{video_id}.txt")
 
 
-main()
+
+if __name__ == "__main__":
+    main()
