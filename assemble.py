@@ -97,6 +97,19 @@ def main():
     with open("output/audio_info.json", encoding="utf-8") as f:
         audio = json.load(f)
 
+    scenes = script.get("scenes", [])
+    if not scenes or len(scenes) != len(audio):
+        raise SystemExit(f"Preflight failed: {len(scenes)} script scenes but {len(audio)} audio files")
+    for i, item in enumerate(audio, 1):
+        clip = f"output/clips/scene_{i}.mp4"
+        voice = item.get("file", "")
+        for path in (clip, voice):
+            if not path or not os.path.isfile(path) or os.path.getsize(path) < 10000:
+                raise SystemExit(f"Preflight failed: missing or invalid file: {path}")
+        if item.get("scene") != i or item.get("seconds", 0) <= 0:
+            raise SystemExit(f"Preflight failed: invalid audio metadata for scene {i}")
+    print(f"Preflight passed: {len(scenes)} scenes, all clips and audio files verified.")
+
     n = len(audio)
     secs = [a["seconds"] for a in audio]
     total = round(sum(secs), 2)

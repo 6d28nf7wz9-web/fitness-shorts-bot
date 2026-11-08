@@ -14,25 +14,27 @@ TARGET_CHUNK = 7.0  # seconds per clip
 
 
 def choose(keyword, seconds, used_ids, context=""):
-    last_resort = None
-    for query in keyword_variants(keyword, context):
+    variants = keyword_variants(keyword, context)
+    if not variants:
+        raise RuntimeError(f"No usable keywords for long section: {keyword}")
+
+    for query in variants:
         hits = search(query)
         cands = []
         for hit in hits:
-            if hit.get("id") in used_ids:
+            hit_id = hit.get("id")
+            if hit_id is None or hit_id in used_ids:
                 continue
             f = pick_file(hit)
             if not f:
                 continue
             url, w, h = f
             landscape = w >= h
-            rel = relevance(hit, query)
+            rel = relevance(hit, query, context)
             if rel == 0:
-                if last_resort is None:
-                    last_resort = (query, hit, url, landscape)
                 continue
             long_enough = (hit.get("duration") or 0) >= seconds
-            cands.append(((rel, landscape, long_enough), hit, url, landscape))
+            cands.append(((rel, long_enough, landscape), hit, url, landscape))
         if cands:
             cands.sort(key=lambda c: (c[0], popularity(c[1])), reverse=True)
             top = cands[:6]
@@ -40,13 +42,14 @@ def choose(keyword, seconds, used_ids, context=""):
             _, hit, url, landscape = random.choices(top, weights=weights)[0]
             return query, hit, url, landscape
         print(f"    no on-topic results for '{query}', trying the next search")
-    if last_resort:
-        print("    warning: nothing on topic was found, using the closest clip")
-        return last_resort
-    raise RuntimeError(f"No clip found for keyword: {keyword}")
+    raise RuntimeError(
+        f"No relevant clip found for long section: {keyword}. "
+        f"Searches tried: {', '.join(variants)}"
+    )
 
 
 def process(raw, out, seconds, landscape, start):
+    temp_out = out + ".tmp.mp4"
     base = [
         "ffmpeg", "-y", "-loglevel", "error",
         "-ss", f"{start:.2f}", "-stream_loop", "-1", "-i", raw,
@@ -54,47 +57,90 @@ def process(raw, out, seconds, landscape, start):
     ]
     encode = [
         "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
-        "-r", str(FPS), "-pix_fmt", "yuv420p", out,
+        "-r", str(FPS), "-pix_fmt", "yuv420p", temp_out,
     ]
-    if landscape:
-        vf = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},setsar=1"
-        cmd = base + ["-vf", vf] + encode
-    else:
-        fc = (
-            f"[0:v]split[a][b];"
-            f"[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},boxblur=30:5,eq=brightness=-0.15[bg];"
-            f"[b]scale=-2:{H}[fg];"
-            f"[bg][fg]overlay=(W-w)/2:(H-h)/2,fps={FPS},setsar=1[v]"
-        )
-        cmd = base + ["-filter_complex", fc, "-map", "[v]"] + encode
-    subprocess.run(cmd, check=True)
+
+    try:
+        if landscape:
+            vf = (
+                f"scale={W}:{H}:force_original_aspect_ratio=increase,"
+                f"crop={W}:{H},fps={FPS},setsar=1"
+            )
+            cmd = base + ["-vf", vf] + encode
+        else:
+            fc = (
+                f"[0:v]split[a][b];"
+                f"[a]scale={W}:{H}:force_original_aspect_ratio=increase,"
+                f"crop={W}:{H},boxblur=30:5,eq=brightness=-0.15[bg];"
+                f"[b]scale=-2:{H}[fg];"
+                f"[bg][fg]overlay=(W-w)/2:(H-h)/2,"
+                f"fps={FPS},setsar=1[v]"
+            )
+            cmd = base + ["-filter_complex", fc, "-map", "[v]"] + encode
+
+        subprocess.run(cmd, check=True)
+
+        if not os.path.exists(temp_out) or os.path.getsize(temp_out) <= 10_000:
+            raise RuntimeError(f"FFmpeg produced an invalid chunk: {temp_out}")
+
+        os.replace(temp_out, out)
+
+    finally:
+        if os.path.exists(temp_out):
+            os.remove(temp_out)
 
 
 def main():
     with open(f"{OUT_DIR}/timeline.json", encoding="utf-8") as f:
         tl = json.load(f)
+
+    sections = tl.get("sections") or []
+    if not sections:
+        raise RuntimeError("Timeline has no sections.")
+
     os.makedirs(RAW_DIR, exist_ok=True)
     os.makedirs(CHUNK_DIR, exist_ok=True)
 
     used_ids, chunks, n = set(), [], 0
-    for si, sec in enumerate(tl["sections"], 1):
-        dur = sec["end"] - sec["start"]
+    for si, sec in enumerate(sections, 1):
+        try:
+            section_start = float(sec["start"])
+            section_end = float(sec["end"])
+        except (KeyError, TypeError, ValueError):
+            raise RuntimeError(f"Section {si} has invalid start/end values.")
+
+        dur = section_end - section_start
+        if dur <= 0:
+            raise RuntimeError(f"Section {si} has non-positive duration: {dur}")
+
+        keywords = sec.get("keywords") or []
+        if not keywords:
+            raise RuntimeError(f"Section {si} has no search keywords.")
+
         parts = max(1, round(dur / TARGET_CHUNK))
         each = dur / parts
         print(f"\nSection {si}: {sec['heading']} ({dur:.0f}s, {parts} clips)")
-        t = sec["start"]
+        t = section_start
         for p in range(parts):
             n += 1
-            kw = sec["keywords"][p % len(sec["keywords"])]
-            query, hit, url, landscape = choose(kw, each, used_ids, sec["heading"])
-            used_ids.add(hit.get("id"))
+            kw = keywords[p % len(keywords)]
+            query, hit, url, landscape = choose(
+                kw, each, used_ids, sec.get("heading", "")
+            )
+
             raw = f"{RAW_DIR}/c{n:03d}.mp4"
             out = f"{CHUNK_DIR}/c{n:03d}.mp4"
-            download(url, raw)
-            clip_len = hit.get("duration") or 0
-            start = random.uniform(0, max(0.0, clip_len - each - 0.3))
-            process(raw, out, each, landscape, start)
-            os.remove(raw)
+
+            try:
+                download(url, raw)
+                clip_len = hit.get("duration") or 0
+                start = random.uniform(0, max(0.0, clip_len - each - 0.3))
+                process(raw, out, each, landscape, start)
+            finally:
+                if os.path.exists(raw):
+                    os.remove(raw)
+
+            used_ids.add(hit["id"])
             chunks.append({
                 "file": out, "start": round(t, 2), "end": round(t + each, 2),
                 "section": si, "query": query, "pixabay_id": hit.get("id"),

@@ -65,12 +65,14 @@ def search(query):
 
             hits = r.json().get("hits", [])
 
-            cache[query] = {
-                "time": time.time(),
-                "hits": hits
-            }
+            # Do not cache empty results; they may be transient.
+            if hits:
+                cache[query] = {
+                    "time": time.time(),
+                    "hits": hits
+                }
+                save_cache(cache)
 
-            save_cache(cache)
             return hits
 
         except requests.RequestException as e:
@@ -102,29 +104,17 @@ def pick_file(hit):
 
 
 def keyword_variants(keyword, context=""):
-    variants = []
-
-    for term in str(keyword).split("|"):
-        term = term.strip()
-        if term and keyword_is_relevant(term):
-            variants.append(term)
-        elif term:
-            print(f"  ignoring unrelated keyword: {term}")
-
-    # Add category-specific backup searches after the original keywords.
-    for term in fallbacks_for(keyword):
-        if term not in variants:
-            variants.append(term)
-
-    seen = set()
-    result = []
-
+    variants=[]
+    for value in (keyword, context):
+        for term in str(value or "").split("|"):
+            term=term.strip()
+            if term and keyword_is_relevant(term): variants.append(term)
+    for value in (keyword, context):
+        variants.extend(fallbacks_for(value))
+    seen=set(); result=[]
     for term in variants:
-        key = term.lower()
-        if key not in seen:
-            seen.add(key)
-            result.append(term)
-
+        key=term.lower().strip()
+        if key and key not in seen: seen.add(key); result.append(term)
     return result
 
 
@@ -135,6 +125,7 @@ def choose_clip(keyword, seconds, used_ids, context=""):
         raise RuntimeError(f"No usable scene keywords: {keyword}")
 
     candidates = {}
+    reusable = {}
 
     for query in variants:
         print(f"  Pixabay search: {query}")
@@ -143,15 +134,18 @@ def choose_clip(keyword, seconds, used_ids, context=""):
         for hit in hits:
             hit_id = hit.get("id")
 
-            if hit_id in used_ids:
+            # Pixabay results without an ID cannot be tracked safely.
+            if hit_id is None:
                 continue
+
+            is_reused = hit_id in used_ids
 
             file_info = pick_file(hit)
             if not file_info:
                 continue
 
             # Score against the actual search query, not narration words.
-            score = relevance(hit, keyword)
+            score = relevance(hit, query, context)
 
             if score == 0:
                 continue
@@ -168,11 +162,16 @@ def choose_clip(keyword, seconds, used_ids, context=""):
                 popularity(hit)
             )
 
-            previous = candidates.get(hit_id)
+            target = reusable if is_reused else candidates
+            previous = target.get(hit_id)
             if previous is None or rank > previous[0]:
-                candidates[hit_id] = (
+                target[hit_id] = (
                     rank, query, hit, url, portrait
                 )
+
+    if not candidates and reusable:
+        candidates = reusable
+        print("  WARNING: Reusing relevant clips because no unused matches were found.")
 
     exact = [
         item for item in candidates.values()
@@ -216,8 +215,13 @@ def choose_clip(keyword, seconds, used_ids, context=""):
 
 
 def download(url, path):
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+
     for attempt in range(1, 4):
         try:
+            if os.path.exists(path):
+                os.remove(path)
+
             with requests.get(
                 url,
                 stream=True,
@@ -227,58 +231,80 @@ def download(url, path):
 
                 with open(path, "wb") as f:
                     for chunk in r.iter_content(1 << 20):
-                        f.write(chunk)
+                        if chunk:
+                            f.write(chunk)
 
-            if os.path.getsize(path) > 10000:
+            if os.path.isfile(path) and os.path.getsize(path) > 10000:
                 return
 
-        except requests.RequestException as e:
+            raise RuntimeError("Downloaded file is empty or too small")
+
+        except (requests.RequestException, OSError, RuntimeError) as e:
+            if os.path.exists(path):
+                os.remove(path)
+
             print(f"[attempt {attempt}] download failed: {str(e)[:150]}")
-            time.sleep(3)
+
+            if attempt < 3:
+                time.sleep(3)
 
     raise RuntimeError(f"Could not download {url}")
 
 
 def process(raw, out, seconds, portrait):
-    base = [
-        "ffmpeg", "-y", "-loglevel", "error",
-        "-stream_loop", "-1", "-i", raw,
-        "-t", str(seconds), "-an"
-    ]
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+    temp_out = f"{out}.tmp.mp4"
 
-    encode = [
-        "-c:v", "libx264",
-        "-preset", "veryfast",
-        "-crf", "20",
-        "-r", str(FPS),
-        "-pix_fmt", "yuv420p",
-        out
-    ]
+    try:
+        if os.path.exists(temp_out):
+            os.remove(temp_out)
 
-    if portrait:
-        vf = (
-            f"scale={W}:{H}:force_original_aspect_ratio=increase,"
-            f"crop={W}:{H},fps={FPS},setsar=1"
-        )
+        base = [
+            "ffmpeg", "-y", "-loglevel", "error",
+            "-stream_loop", "-1", "-i", raw,
+            "-t", str(seconds), "-an"
+        ]
 
-        cmd = base + ["-vf", vf] + encode
+        encode = [
+            "-c:v", "libx264",
+            "-preset", "veryfast",
+            "-crf", "20",
+            "-r", str(FPS),
+            "-pix_fmt", "yuv420p",
+            temp_out
+        ]
 
-    else:
-        fc = (
-            f"[0:v]split[a][b];"
-            f"[a]scale={W}:{H}:force_original_aspect_ratio=increase,"
-            f"crop={W}:{H},boxblur=30:5,eq=brightness=-0.15[bg];"
-            f"[b]crop='min(iw,ih)':'min(iw,ih)',scale={W}:{W}[fg];"
-            f"[bg][fg]overlay=(W-w)/2:(H-h)/2,"
-            f"fps={FPS},setsar=1[v]"
-        )
+        if portrait:
+            vf = (
+                f"scale={W}:{H}:force_original_aspect_ratio=increase,"
+                f"crop={W}:{H},fps={FPS},setsar=1"
+            )
+            cmd = base + ["-vf", vf] + encode
+        else:
+            fc = (
+                f"[0:v]split[a][b];"
+                f"[a]scale={W}:{H}:force_original_aspect_ratio=increase,"
+                f"crop={W}:{H},boxblur=30:5,eq=brightness=-0.15[bg];"
+                f"[b]crop='min(iw,ih)':'min(iw,ih)',scale={W}:{W}[fg];"
+                f"[bg][fg]overlay=(W-w)/2:(H-h)/2,"
+                f"fps={FPS},setsar=1[v]"
+            )
+            cmd = base + [
+                "-filter_complex", fc,
+                "-map", "[v]"
+            ] + encode
 
-        cmd = base + [
-            "-filter_complex", fc,
-            "-map", "[v]"
-        ] + encode
+        subprocess.run(cmd, check=True)
 
-    subprocess.run(cmd, check=True)
+        if not os.path.isfile(temp_out) or os.path.getsize(temp_out) <= 10000:
+            raise RuntimeError(f"FFmpeg produced an invalid output: {temp_out}")
+
+        os.replace(temp_out, out)
+
+    except Exception:
+        if os.path.exists(temp_out):
+            os.remove(temp_out)
+        raise
 
 
 def main():
@@ -309,13 +335,17 @@ def main():
             narration
         )
 
-        used_ids.add(hit.get("id"))
-
         raw = f"{RAW_DIR}/scene_{i}.mp4"
         out = f"{CLIPS_DIR}/scene_{i}.mp4"
 
-        download(url, raw)
-        process(raw, out, seconds, portrait)
+        try:
+            download(url, raw)
+            process(raw, out, seconds, portrait)
+            if hit.get("id") is not None:
+                used_ids.add(hit["id"])
+        finally:
+            if os.path.exists(raw):
+                os.remove(raw)
 
         print(
             f"  selected '{query}' | "

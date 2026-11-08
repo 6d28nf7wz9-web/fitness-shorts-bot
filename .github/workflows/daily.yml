@@ -65,13 +65,15 @@ jobs:
           echo "========== DEBUG INFO =========="
           echo "Branch: $GITHUB_REF"
           echo "Commit: $GITHUB_SHA"
-          git log -1 --oneline
-          echo "========== FILE CHECK =========="
+          echo "Working directory:"
           pwd
+          echo "========== ACTUAL FILE =========="
+          ls -l clips_fast.py
           sha256sum clips_fast.py
+          echo "========== SCENES DEFINITION =========="
           grep -n "scenes =" clips_fast.py || true
+          echo "========== LOOP LOCATION =========="
           grep -n "enumerate(scenes" clips_fast.py || true
-          nl -ba clips_fast.py | sed -n '1,125p'
           echo "========== RUN SCRIPT =========="
           python clips_fast.py
 

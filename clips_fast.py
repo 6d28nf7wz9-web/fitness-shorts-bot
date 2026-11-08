@@ -155,9 +155,6 @@ def main():
 
             clip_id = hit.get("id")
 
-            if clip_id is not None:
-                used_ids.add(clip_id)
-
             raw_file = os.path.join(
                 RAW_DIR,
                 f"s{scene_index}_{part_index}.mp4"
@@ -177,6 +174,9 @@ def main():
                     each,
                     portrait,
                 )
+
+                if clip_id is not None:
+                    used_ids.add(clip_id)
 
             finally:
                 if os.path.exists(raw_file):

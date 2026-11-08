@@ -127,47 +127,53 @@ def relevance(hit, keyword, context=""):
 
     hw = hit_words(hit)
     query_words = keyword_words(keyword)
-
-    ambiguous = {
-        "bench", "press", "row", "lat",
-        "water", "bottle", "weight"
-    }
-
+    ambiguous = {"bench", "press", "row", "lat", "water", "bottle", "weight"}
     query_specific = query_words - _GENERIC - _WEAK - ambiguous
-    matched = hw & query_specific
 
-    # Require at least two specific matching words.
-    if len(matched) >= 2:
+    # Only distinctive terms count as direct keyword matches.
+    direct_matches = hw & query_specific
+    if len(direct_matches) >= 2:
         return 2
 
-    # Category fallback is allowed only for generic searches.
-    if not query_specific:
-        target_category = category(keyword)
+    # One distinctive query-word match is enough for a specific match.
+    if query_specific and (hw & query_specific):
+        return 2
 
-        if target_category == "food" and hw & _FOOD:
-            return 1
+    # Use narration as supporting evidence, not as a replacement for the search query.
+    context_specific = scene_terms(keyword, context) - _GENERIC - _WEAK - ambiguous
+    if len(hw & context_specific) >= 2:
+        return 2
 
-        if target_category == "training" and hw & _TRAIN:
-            return 1
+    target_category = category(keyword)
+    if target_category not in ("food", "training"):
+        target_category = category(context)
+
+    if target_category == "food" and hw & _FOOD:
+        return 1
+    if target_category == "training" and hw & _TRAIN:
+        return 1
 
     return 0
 
 def category(text):
     w = words_of(text)
+    food_score = len(w & _FOOD)
+    training_score = len(w & _TRAIN)
 
-    return (
-        "food"
-        if len(w & _FOOD) > len(w & _TRAIN)
-        else "training"
-    )
+    if food_score > training_score:
+        return "food"
+    if training_score > food_score:
+        return "training"
+    return None
 
 
 def fallbacks_for(text):
-    if category(text) == "food":
-        return FOOD_FALLBACKS + TRAINING_FALLBACKS
-
+    target = category(text)
+    if target == "food":
+        return FOOD_FALLBACKS
+    if target == "training":
+        return TRAINING_FALLBACKS
     return TRAINING_FALLBACKS + FOOD_FALLBACKS
-
 
 def popularity(hit):
     try:
