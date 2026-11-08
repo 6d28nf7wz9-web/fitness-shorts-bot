@@ -73,7 +73,7 @@ def get_model_candidates():
     """
     primary = os.getenv(
         "GEMINI_MODEL",
-        "gemini-flash-latest"
+        "gemini-3.8-flash"
     ).strip()
 
     configured = os.getenv(
