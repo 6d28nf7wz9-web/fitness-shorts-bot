@@ -49,15 +49,27 @@ def load_json(path, default):
 
 
 def query_report(api, start, end, metrics, dimensions=None):
+    """Fetch every page when a dimension such as video is requested."""
     kwargs = {
         "ids": "channel==MINE",
         "startDate": start.isoformat(),
         "endDate": end.isoformat(),
         "metrics": metrics,
+        "maxResults": 200,
     }
     if dimensions:
         kwargs["dimensions"] = dimensions
-    return api.reports().query(**kwargs).execute()
+    rows = []
+    headers = None
+    while True:
+        response = api.reports().query(**kwargs).execute()
+        headers = response.get("columnHeaders", headers)
+        rows.extend(response.get("rows", []))
+        token = response.get("nextPageToken")
+        if not token:
+            break
+        kwargs["pageToken"] = token
+    return {"columnHeaders": headers or [], "rows": rows}
 
 
 def main():
