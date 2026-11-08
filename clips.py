@@ -186,15 +186,16 @@ def choose_clip(keyword, seconds, used_ids, context=""):
     if exact:
         pool = exact
         print(f"  Using {len(pool)} specific matching clips.")
-    elif category_matches:
+    elif category_matches and os.getenv("ALLOW_CATEGORY_ONLY_CLIPS", "0") == "1":
         pool = category_matches
         print(
-            f"  No specific match; using "
-            f"{len(pool)} same-category clips."
+            f"  WARNING: no specific match; category-only footage explicitly enabled "
+            f"({len(pool)} candidates)."
         )
     else:
         raise RuntimeError(
-            f"No relevant clip found for: {keyword}. "
+            f"No specific footage match for: {keyword}. "
+            f"Category-only fallback is disabled to prevent unrelated visuals. "
             f"Searches tried: {', '.join(variants)}"
         )
 

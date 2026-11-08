@@ -31,7 +31,7 @@ def choose(keyword, seconds, used_ids, context=""):
             url, w, h = f
             landscape = w >= h
             rel = relevance(hit, query, context)
-            if rel == 0:
+            if rel == 0 or (rel < 2 and os.getenv("ALLOW_CATEGORY_ONLY_CLIPS", "0") != "1"):
                 continue
             long_enough = (hit.get("duration") or 0) >= seconds
             cands.append(((rel, long_enough, landscape), hit, url, landscape))
@@ -43,7 +43,7 @@ def choose(keyword, seconds, used_ids, context=""):
             return query, hit, url, landscape
         print(f"    no on-topic results for '{query}', trying the next search")
     raise RuntimeError(
-        f"No relevant clip found for long section: {keyword}. "
+        f"No specific clip found for long section: {keyword}. Category-only fallback is disabled. "
         f"Searches tried: {', '.join(variants)}"
     )
 
