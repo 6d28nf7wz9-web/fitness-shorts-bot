@@ -29,7 +29,7 @@ EXPECTED = {
     "daily.yml": ["gen_script.py", "voice.py", "clips_fast.py", "assemble.py", "upload.py"],
     "long_ai.yml": [
         "long_script.py", "long_voice.py", "long_transcribe.py", "long_clips.py",
-        "long_assemble.py", "long_upload.py",
+        "long_assemble.py", "avatar.py", "long_upload.py", "long_shorts.py",
     ],
 }
 SECRETS = ["GEMINI_API_KEY", "PIXABAY_API_KEY", "YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN"]
