@@ -211,4 +211,6 @@ def main():
         raise SystemExit("All Short uploads failed")
 
 
-main()
+
+if __name__ == "__main__":
+    main()
