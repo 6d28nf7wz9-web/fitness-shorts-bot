@@ -331,6 +331,63 @@ def performance_context(memory):
                 f"{item.get('avg_engaged_views_per_video')} average engaged views per video."
             )
 
+    # First-week metrics make new Shorts comparable at the same age.
+    first_week = memory.get("first_week_analytics", {}).get("videos", {})
+    if isinstance(first_week, dict) and first_week:
+        uploads = memory.get("video_performance", [])
+        metadata = {
+            item.get("video_id"): item
+            for item in uploads
+            if isinstance(item, dict) and item.get("video_id")
+        }
+        completed = [
+            (video_id, stats) for video_id, stats in first_week.items()
+            if stats.get("first_7_days_complete")
+        ]
+        completed.sort(
+            key=lambda pair: (
+                pair[1].get("average_view_percentage_first_7_days", 0),
+                pair[1].get("engaged_views_first_7_days", 0),
+            ),
+            reverse=True,
+        )
+        if completed:
+            lines.append(
+                "Comparable first-seven-day results (only complete windows; "
+                "compare hook/topic patterns, not causation):"
+            )
+            for video_id, stats in completed[:5]:
+                item = metadata.get(video_id, {})
+                lines.append(
+                    f"- {item.get('topic') or item.get('title') or video_id}: "
+                    f"{stats.get('views_first_7_days', 0)} views and "
+                    f"{stats.get('engaged_views_first_7_days', 0)} engaged views "
+                    f"in the first 7 days; "
+                    f"{stats.get('average_view_percentage_first_7_days', 0)}% average viewed. "
+                    f"Hook: {item.get('hook', 'not recorded')}"
+                )
+
+    first_week_topics = memory.get("first_week_topic_insights", [])
+    comparable_topics = [
+        item for item in first_week_topics
+        if isinstance(item, dict) and int(item.get("videos", 0) or 0) >= 2
+    ]
+    if comparable_topics:
+        comparable_topics.sort(
+            key=lambda item: (
+                item.get("avg_view_percentage_first_7_days", 0),
+                item.get("avg_engaged_views_first_7_days", 0),
+            ),
+            reverse=True,
+        )
+        lines.append("Topic patterns from complete first-seven-day windows (minimum 2 videos):")
+        for item in comparable_topics[:5]:
+            lines.append(
+                f"- {item.get('topic')}: {item.get('videos')} videos; "
+                f"{item.get('avg_view_percentage_first_7_days')}% average viewed; "
+                f"{item.get('avg_engaged_views_first_7_days')} average engaged views."
+            )
+
     # Individual examples are useful for studying hooks, but compare similar-age videos.
     videos = memory.get("analytics", {}).get("videos", {})
     if isinstance(videos, dict) and videos:

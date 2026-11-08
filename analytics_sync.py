@@ -74,6 +74,115 @@ def build_topic_insights(uploads):
     ), reverse=True)
 
 
+
+def build_first_week_metrics(api, uploads, report_end):
+    """Compare Shorts over their first seven calendar days after publication."""
+    published = {}
+    for item in uploads:
+        if not isinstance(item, dict) or not item.get("video_id") or not item.get("uploaded_at"):
+            continue
+        try:
+            published[str(item["video_id"])] = date.fromisoformat(str(item["uploaded_at"])[:10])
+        except ValueError:
+            continue
+    if not published:
+        return {}
+
+    start = max(min(published.values()), report_end - timedelta(days=89))
+    query = {
+        "ids": "channel==MINE",
+        "startDate": start.isoformat(),
+        "endDate": report_end.isoformat(),
+        "dimensions": "video,day",
+        "metrics": "views,engagedViews,averageViewDuration,averageViewPercentage",
+        "maxResults": 200,
+    }
+    headers = None
+    rows = []
+    while True:
+        page = api.reports().query(**query).execute()
+        headers = page.get("columnHeaders", headers)
+        rows.extend(page.get("rows", []))
+        token = page.get("nextPageToken")
+        if not token:
+            break
+        query["pageToken"] = token
+
+    grouped = defaultdict(list)
+    names = [column["name"] for column in (headers or [])]
+    for row in rows:
+        values = dict(zip(names, row))
+        video_id = str(values.get("video", ""))
+        if video_id not in published:
+            continue
+        try:
+            day = date.fromisoformat(str(values.get("day", "")))
+        except ValueError:
+            continue
+        age = (day - published[video_id]).days
+        if 0 <= age < 7:
+            grouped[video_id].append(values)
+
+    result = {}
+    for video_id, daily_rows in grouped.items():
+        total_views = sum(int(row.get("views", 0) or 0) for row in daily_rows)
+        total_engaged = sum(int(row.get("engagedViews", 0) or 0) for row in daily_rows)
+        if total_views:
+            avg_pct = sum(
+                float(row.get("averageViewPercentage", 0) or 0) * int(row.get("views", 0) or 0)
+                for row in daily_rows
+            ) / total_views
+            avg_duration = sum(
+                float(row.get("averageViewDuration", 0) or 0) * int(row.get("views", 0) or 0)
+                for row in daily_rows
+            ) / total_views
+        else:
+            avg_pct = avg_duration = 0
+        upload_day = published[video_id]
+        complete = report_end >= upload_day + timedelta(days=6)
+        result[video_id] = {
+            "views_first_7_days": total_views,
+            "engaged_views_first_7_days": total_engaged,
+            "average_view_percentage_first_7_days": round(avg_pct, 2),
+            "average_view_duration_seconds_first_7_days": round(avg_duration, 2),
+            "days_since_upload_in_report": min(max((report_end - upload_day).days + 1, 0), 7),
+            "first_7_days_complete": complete,
+            "period_start": upload_day.isoformat(),
+            "period_end": min(upload_day + timedelta(days=6), report_end).isoformat(),
+        }
+    return result
+
+
+def build_first_week_topic_insights(uploads):
+    grouped = defaultdict(list)
+    for item in uploads:
+        if not isinstance(item, dict) or not item.get("topic"):
+            continue
+        stats = item.get("first_week_analytics", {})
+        if stats.get("first_7_days_complete"):
+            grouped[str(item["topic"]).strip()].append(stats)
+
+    insights = []
+    for topic, rows in grouped.items():
+        count = len(rows)
+        views = sum(row.get("views_first_7_days", 0) for row in rows)
+        engaged = sum(row.get("engaged_views_first_7_days", 0) for row in rows)
+        insights.append({
+            "topic": topic,
+            "videos": count,
+            "avg_views_first_7_days": round(views / count),
+            "avg_engaged_views_first_7_days": round(engaged / count),
+            "avg_view_percentage_first_7_days": round(sum(
+                row.get("average_view_percentage_first_7_days", 0) for row in rows
+            ) / count, 2),
+            "sample_note": "Only complete first-seven-day windows; descriptive, not causal.",
+        })
+    return sorted(insights, key=lambda row: (
+        row["avg_view_percentage_first_7_days"],
+        row["avg_engaged_views_first_7_days"],
+    ), reverse=True)
+
+
 def main():
     memory = read_json(MEMORY_PATH, {})
     uploads = read_json(UPLOAD_LOG, [])
@@ -139,6 +248,7 @@ def main():
             "synced_at": datetime.now(timezone.utc).isoformat(),
         }
 
+    first_week = build_first_week_metrics(api, uploads, end)
     enriched = []
     for item in uploads:
         if not isinstance(item, dict):
@@ -147,6 +257,8 @@ def main():
         video_id = copy.get("video_id")
         if video_id in videos:
             copy["analytics"] = videos[video_id]
+        if video_id in first_week:
+            copy["first_week_analytics"] = first_week[video_id]
         enriched.append(copy)
 
     synced_at = datetime.now(timezone.utc).isoformat()
@@ -160,6 +272,14 @@ def main():
     }
     memory["video_performance"] = enriched
     memory["topic_insights"] = build_topic_insights(enriched)
+    memory["first_week_topic_insights"] = build_first_week_topic_insights(enriched)
+    memory["first_week_analytics"] = {
+        "source": "YouTube Analytics API daily video report",
+        "window_days": 7,
+        "comparison_method": "First 7 calendar days after each video's upload date",
+        "complete_video_windows": sum(1 for stats in first_week.values() if stats.get("first_7_days_complete")),
+        "videos": first_week,
+    }
     memory["learning_note"] = (
         "Per-video metrics synced from YouTube Analytics. Compare videos at similar age; "
         "use retention and engaged views, not raw views alone. Topic averages are descriptive "
@@ -168,7 +288,11 @@ def main():
     with open(MEMORY_PATH, "w", encoding="utf-8") as handle:
         json.dump(memory, handle, ensure_ascii=False, indent=2)
 
-    print(f"Synced {len(videos)} videos and {len(memory['topic_insights'])} topic groups into {MEMORY_PATH}")
+    print(
+        f"Synced {len(videos)} rolling-window videos, {len(first_week)} first-week video records, "
+        f"{len(memory['topic_insights'])} rolling topic groups, and "
+        f"{len(memory['first_week_topic_insights'])} first-week topic groups into {MEMORY_PATH}"
+    )
     if not videos:
         print("No report rows returned (API delay or no views in selected period).")
 
