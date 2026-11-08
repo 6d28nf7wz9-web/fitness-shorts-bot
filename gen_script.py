@@ -287,7 +287,6 @@ def choose_content_type(used, memory):
 def performance_context(memory):
     baseline = memory.get("baseline", {})
     signals = memory.get("topic_signals", [])
-
     lines = []
 
     for item in signals[:10]:
@@ -304,11 +303,35 @@ def performance_context(memory):
         f"viewed vs swiped; "
         f"{baseline.get('average_percentage_viewed', 'unknown')}% "
         f"average percentage viewed. "
-        "Treat these as channel-level baselines, "
-        "not targets guaranteed for every Short."
+        "Treat these as channel-level baselines, not targets guaranteed for every Short."
     )
 
-    # Real per-video Analytics are more useful than a static channel baseline.
+    topic_insights = memory.get("topic_insights", [])
+    reliable_topics = [
+        item for item in topic_insights
+        if isinstance(item, dict) and int(item.get("videos", 0) or 0) >= 2
+    ]
+    if reliable_topics:
+        ranked_topics = sorted(
+            reliable_topics,
+            key=lambda item: (
+                item.get("avg_view_percentage", 0),
+                item.get("avg_engaged_views_per_video", 0),
+            ),
+            reverse=True,
+        )
+        lines.append(
+            "Topic-level patterns (only topics with at least 2 measured videos; "
+            "descriptive, small-sample evidence—not causal):"
+        )
+        for item in ranked_topics[:5]:
+            lines.append(
+                f"- {item.get('topic')}: {item.get('videos')} videos; "
+                f"{item.get('avg_view_percentage')}% average viewed; "
+                f"{item.get('avg_engaged_views_per_video')} average engaged views per video."
+            )
+
+    # Individual examples are useful for studying hooks, but compare similar-age videos.
     videos = memory.get("analytics", {}).get("videos", {})
     if isinstance(videos, dict) and videos:
         uploads = memory.get("video_performance", [])
@@ -347,14 +370,8 @@ def performance_context(memory):
         )
 
     if lines:
-        return (
-            baseline_text
-            + "\nPerformance evidence (soft guidance only):\n"
-            + "\n".join(lines)
-        )
-
+        return baseline_text + chr(10) + "Performance evidence (soft guidance only):" + chr(10) + chr(10).join(lines)
     return baseline_text
-
 
 def build_prompt(content_type, used, trends, memory):
     recent = (
