@@ -370,11 +370,7 @@ def performance_context(memory):
         )
 
     if lines:
-        return (
-            baseline_text
-            + "\\nPerformance evidence (soft guidance only):\\n"
-            + "\\n".join(lines)
-        )
+        return baseline_text + chr(10) + "Performance evidence (soft guidance only):" + chr(10) + chr(10).join(lines)
     return baseline_text
 
 def build_prompt(content_type, used, trends, memory):
