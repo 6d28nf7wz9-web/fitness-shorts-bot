@@ -614,6 +614,17 @@ def validate(data):
             "(target 4-9)"
         )
 
+    hook = str(data["scenes"][0].get("narration", "")).strip().lower()
+    weak_openers = (
+        "hey guys", "hello everyone", "welcome back",
+        "in this video", "today we are", "today i'm going",
+        "did you know", "let's talk about",
+    )
+    if any(hook.startswith(opening) for opening in weak_openers):
+        return "hook starts with a generic greeting/setup; lead with the viewer problem or payoff"
+    if hook.endswith("?") and len(hook.split()) < 5:
+        return "hook question is too short to establish a specific curiosity"
+
     if len(str(data["title"]).strip()) > 60:
         return "title exceeds 60 characters"
 
