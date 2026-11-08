@@ -6,7 +6,7 @@ import time
 from google import genai
 from google.genai import types
 
-from gen_script import BANNED, DISCLAIMER, MODEL_CANDIDATES, parse_json
+from gen_script import BANNED, DISCLAIMER, get_model_candidates, parse_json
 from topics import all_used, too_similar
 
 USED_FILE = "used_long_topics.json"
@@ -114,7 +114,7 @@ def generate(used, trends):
     print(f"Trending topics available: {len(trends)}")
     prompt = build_prompt(all_used(), trends)
     for attempt in range(1, 4):
-        for model in MODEL_CANDIDATES:
+        for model in get_model_candidates():
             try:
                 response = client.models.generate_content(
                     model=model,
