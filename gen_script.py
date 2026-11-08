@@ -338,8 +338,13 @@ def performance_context(memory):
                 f"{stats.get('engaged_views', 0)} engaged views, "
                 f"{stats.get('average_view_percentage', 0)}% average viewed, "
                 f"{stats.get('average_view_duration_seconds', 0)}s average duration, "
-                f"{stats.get('subscribers_gained', 0)} subscribers gained."
+                f"{stats.get('subscribers_gained', 0)} subscribers gained. "
+                f"Opening hook: {item.get('hook', 'not recorded')}"
             )
+        lines.append(
+            "Use these hooks as examples to study specificity and curiosity; "
+            "do not copy wording or infer causation from a single video."
+        )
 
     if lines:
         return (
