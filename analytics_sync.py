@@ -89,15 +89,26 @@ def main():
     api = build("youtubeAnalytics", "v2", credentials=get_credentials())
 
     try:
-        report = api.reports().query(
-            ids="channel==MINE",
-            startDate=start.isoformat(),
-            endDate=end.isoformat(),
-            dimensions="video",
-            metrics="views,engagedViews,averageViewDuration,averageViewPercentage,likes,comments,shares,subscribersGained,subscribersLost",
-            sort="-views",
-            maxResults=200,
-        ).execute()
+        query = {
+            "ids": "channel==MINE",
+            "startDate": start.isoformat(),
+            "endDate": end.isoformat(),
+            "dimensions": "video",
+            "metrics": "views,engagedViews,averageViewDuration,averageViewPercentage,likes,comments,shares,subscribersGained,subscribersLost",
+            "sort": "-views",
+            "maxResults": 200,
+        }
+        rows = []
+        headers = None
+        while True:
+            page = api.reports().query(**query).execute()
+            headers = page.get("columnHeaders", headers)
+            rows.extend(page.get("rows", []))
+            next_token = page.get("nextPageToken")
+            if not next_token:
+                break
+            query["pageToken"] = next_token
+        report = {"columnHeaders": headers or [], "rows": rows}
     except HttpError as error:
         if error.resp.status in (401, 403):
             raise SystemExit(
