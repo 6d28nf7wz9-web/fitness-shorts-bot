@@ -31,6 +31,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Sync video analytics
         run: python analytics_sync.py
+      - name: Build monetization progress report
+        run: python monetization_report.py
       - name: Commit learning data
         run: |
           git config user.name "github-actions[bot]"
