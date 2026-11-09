@@ -16,13 +16,18 @@ def args():
     p.add_argument("--exercise",default="")
     return p.parse_args(av)
 
-A=args(); W,H=(720,1280) if A.orientation=="portrait" else (1280,720)
-FPS=24; FRAMES=max(48,int(A.duration*FPS))
+A=args()
+FAST_PREVIEW=os.getenv("FITFUEL_PREVIEW_FAST","0")=="1"
+W,H=((360,640) if A.orientation=="portrait" else (640,360)) if FAST_PREVIEW else ((720,1280) if A.orientation=="portrait" else (1280,720))
+FPS=12 if FAST_PREVIEW else 24
+SAMPLES=8 if FAST_PREVIEW else 24
+FRAMES=max(12,int(A.duration*FPS))
 bpy.ops.object.select_all(action="SELECT"); bpy.ops.object.delete(use_global=False)
 scene=bpy.context.scene
 scene.render.engine="BLENDER_EEVEE"
 scene.eevee.use_gtao=True; scene.eevee.gtao_distance=3; scene.eevee.gtao_factor=1.35
 scene.render.resolution_x=W; scene.render.resolution_y=H; scene.render.resolution_percentage=100
+scene.eevee.taa_render_samples=SAMPLES
 scene.render.fps=FPS; scene.frame_start=1; scene.frame_end=FRAMES
 scene.render.image_settings.file_format="FFMPEG"; scene.render.ffmpeg.format="MPEG4"; scene.render.ffmpeg.codec="H264"; scene.render.ffmpeg.constant_rate_factor="MEDIUM"
 scene.render.filepath=os.path.abspath(A.output); scene.render.use_file_extension=True
