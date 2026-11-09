@@ -186,7 +186,18 @@ def draw_exercise(d, p, t, exercise="SQUAT"):
     d.line((130,1510,950,1510),fill=MUTED,width=7)
     def joint(x,y):
         d.ellipse((x-22,y-22,x+22,y+22),fill=CYAN,outline=WHITE,width=4)
-    if "bench" in key or "chest press" in key:
+    if "overhead press" in key or "shoulder press" in key:
+        # Standing press: bar travels overhead; deltoids are highlighted.
+        d.line(((520,760),(520,1190)),fill=(235,220,195),width=48)
+        d.ellipse((465,640,575,750),fill=(235,220,195),outline=WHITE,width=3)
+        d.ellipse((430,760,610,930),fill=(205,65,75),outline=ORANGE,width=5)
+        bar_y=620-int(130*pulse)
+        d.line((350,bar_y,690,bar_y),fill=WHITE,width=18)
+        for x in (370,670): d.rounded_rectangle((x-22,bar_y-70,x+22,bar_y+70),radius=10,fill=ORANGE)
+        d.line(((450,820),(390,bar_y+5)),fill=(235,220,195),width=30)
+        d.line(((590,820),(650,bar_y+5)),fill=(235,220,195),width=30)
+        centered(d,"DELTOIDS • TRICEPS",1390,font(30,True),ORANGE,800)
+    elif "bench" in key or "chest press" in key:
         # Supine press: torso horizontal, bar moves vertically over the chest.
         d.rounded_rectangle((230,1130,820,1220),radius=35,fill=(235,220,195),outline=WHITE,width=3)
         d.ellipse((760,1050,850,1140),fill=(235,220,195),outline=WHITE,width=3)
@@ -223,6 +234,28 @@ def draw_exercise(d, p, t, exercise="SQUAT"):
         d.line((250,bar_y,900,bar_y),fill=WHITE,width=16)
         for x in (280,870): d.rounded_rectangle((x-28,bar_y-75,x+28,bar_y+75),radius=10,fill=ORANGE)
         centered(d,"GLUTES • HAMSTRINGS • BACK",700,font(28,True),ORANGE,900)
+    elif "row" in key:
+        # Bent-over row: torso hinges, elbows pull toward the ribs; upper back highlighted.
+        d.line(((680,780),(520,1080)),fill=(235,220,195),width=48)
+        d.ellipse((640,680,740,780),fill=(235,220,195),outline=WHITE,width=3)
+        d.ellipse((500,930,650,1120),fill=(205,65,75),outline=ORANGE,width=5)
+        d.line(((520,1080),(400,1410)),fill=(235,220,195),width=38)
+        d.line(((520,1080),(740,1400)),fill=(235,220,195),width=38)
+        elbow_y=1080-int(100*pulse)
+        d.line(((630,900),(700,elbow_y)),fill=(235,220,195),width=30)
+        d.line(((700,elbow_y),(700,1250-int(100*pulse))),fill=(235,220,195),width=28)
+        d.line(((700,1250-int(100*pulse)),(900,1250-int(100*pulse))),fill=WHITE,width=14)
+        centered(d,"LATS • RHOMBOIDS • BICEPS",1390,font(28,True),ORANGE,900)
+    elif "lunge" in key:
+        # Split stance: front knee bends while the rear leg extends.
+        d.line(((520,760),(520,1080)),fill=(235,220,195),width=45)
+        d.ellipse((465,640,575,750),fill=(235,220,195),outline=WHITE,width=3)
+        d.ellipse((430,900,610,1100),fill=(205,65,75),outline=ORANGE,width=5)
+        d.line(((520,1080),(350,1270)),fill=(205,65,75),width=42)
+        d.line(((350,1270),(330,1460)),fill=(235,220,195),width=34)
+        d.line(((520,1080),(740,1240)),fill=(205,65,75),width=42)
+        d.line(((740,1240),(900,1420)),fill=(235,220,195),width=34)
+        centered(d,"QUADRICEPS • GLUTES",1390,font(30,True),ORANGE,800)
     elif "push" in key:
         # Push-up plank: elbows flex and extend; chest/triceps highlighted.
         shoulder=(330,1050); hip=(650,1120); ankle=(900,1190)
