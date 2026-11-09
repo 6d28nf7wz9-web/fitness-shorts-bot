@@ -1,0 +1,26 @@
+name: 3D Anatomy Animation Prototype (No Upload)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender and FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg
+      - name: Render 3D mannequin animation
+        run: |
+          mkdir -p output
+          blender -b -P blender_3d_prototype.py
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/3d_prototype.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-3d-animation-prototype
+          path: output/3d_prototype.mp4
+          if-no-files-found: error
+          retention-days: 7
