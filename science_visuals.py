@@ -507,6 +507,21 @@ def visual_beat_durations(seconds, target=BEAT_SECONDS):
 
 def render_scene(scene,index,seconds,outfile):
     os.makedirs(os.path.dirname(outfile),exist_ok=True)
+    # Production path: use shared Blender CGI, never the legacy Pillow 2D scene.
+    if os.getenv("VISUAL_ENGINE", "blender3d").lower() == "blender3d":
+        title, subtitle, narration, instruction = scene_text(scene)
+        kind = classify_scene(scene)
+        exercise = " ".join([title, narration, instruction])[:110]
+        cmd = ["blender", "-b", "-P", "blender_3d_scenes.py", "--",
+               "--kind", kind, "--duration", str(float(seconds)),
+               "--output", outfile, "--orientation", "portrait",
+               "--text", title, "--exercise", exercise]
+        print("[science 3D] scene", index, "->", kind)
+        subprocess.run(cmd, check=True)
+        if not os.path.isfile(outfile) or os.path.getsize(outfile) < 10000:
+            raise SystemExit("Blender 3D renderer produced no valid Short scene: " + outfile)
+        return {"scene":index,"type":kind,"title":title,"file":outfile,
+                "seconds":round(seconds,2),"animation":"blender-3d-cgi-reference-style"}
     durations=visual_beat_durations(seconds)
     temp=outfile+".beats"
     os.makedirs(temp,exist_ok=True)
