@@ -332,7 +332,7 @@ def classify_scene(scene):
              "protein_synthesis","energy_metabolism","hydration","recovery_sleep",
              "food_nutrition","process"}
     # Specific biological/exercise cues override a broad model label.
-    if re.search(r"dietary fiber|fibre|fiber|gut|intestin|digest|microbiome|prebiotic|whole grain|oat|legume",text):
+    if re.search(r"dietary fiber|dietary fibre|fiber-rich|fibre-rich|gut|intestin|digest|microbiome|prebiotic|whole grain|oat|legume",text):
         return "digestion_fiber"
     if re.search(r"squat|deadlift|bench press|lunge|curl|row exercise|push.?up|pull.?up|exercise form|range of motion|joint angle",text):
         return "exercise_biomechanics"
@@ -345,7 +345,7 @@ def classify_scene(scene):
     if re.search(r"sleep|recovery|rest day|fatigue",text):
         return "recovery_sleep"
     if requested in allowed: return requested
-    if re.search(r"muscle|hypertrophy|resistance|strength|lifting|training|biceps|quadriceps|glute|hamstring|chest",text):
+    if re.search(r"muscle|muscle fiber|muscle fibre|hypertrophy|resistance|strength|lifting|training|biceps|quadriceps|glute|hamstring|chest",text):
         return "muscle_anatomy"
     if re.search(r"food|meal|eat|nutrition|carb|carbohydrate|vegetable|fruit|protein source",text):
         return "food_nutrition"
@@ -373,7 +373,7 @@ def draw_diagram(scene, index, frame, frames):
     elif kind=="muscle_anatomy":
         draw_muscle_anatomy(d,p,t)
     elif kind=="exercise_biomechanics":
-        exercise="SQUAT" if re.search(r"squat",narration.lower()) else "EXERCISE MECHANICS"
+        exercise=(title.upper()[:28] if title else ("SQUAT" if re.search(r"squat",narration.lower()) else "EXERCISE MECHANICS"))
         draw_exercise(d,p,t,exercise)
     elif kind=="protein_synthesis":
         draw_protein_synthesis(d,p,t)
