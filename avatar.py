@@ -18,7 +18,7 @@ BOB = 6  # pixels of gentle up and down movement
 
 # h = height of the presenter on the video, bottom = gap from the bottom edge
 LAYOUTS = {
-    "short": {"h": 470, "x": "(W-w)/2", "bottom": 150},
+    "short": {"h": 370, "x": "W-w-32", "bottom": 1130},
     "long": {"h": 380, "x": "W-w-40", "bottom": 24},
 }
 

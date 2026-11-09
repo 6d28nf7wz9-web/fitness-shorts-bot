@@ -430,7 +430,7 @@ def performance_context(memory):
         return baseline_text + chr(10) + "Performance evidence (soft guidance only):" + chr(10) + chr(10).join(lines)
     return baseline_text
 
-def build_prompt(content_type, used, trends, memory):
+def build_prompt(content_type, used, trends, memory, research):
     recent = (
         ", ".join(str(topic) for topic in used[-80:])
         if used
@@ -451,6 +451,11 @@ def build_prompt(content_type, used, trends, memory):
             "(use only if relevant and evidence-based):\n"
             f"{lines}\n"
         )
+
+    research_block = chr(10).join(
+        f"- PMID {p['pmid']} | {p.get('title', '')} | {p.get('journal', '')} ({p.get('year', '')}) | DOI: {p.get('doi') or 'none'} | Abstract: {p.get('abstract', '')}"
+        for p in research
+    ) or "No PubMed records retrieved. Use conservative established guidance only and return sources=[]; never fabricate citations."
 
     return f'''
 You are the short-form video scriptwriter for FitFuel,
@@ -476,13 +481,17 @@ Optimize for viewer satisfaction and clarity, not clickbait.
 Recently used topics (avoid repeating or closely copying):
 {recent}
 
+SCIENTIFIC SOURCES FROM PUBMED (verified records):
+{research_block}
+Use only these papers as evidence. Claims must not exceed their abstracts. Never invent statistics, PMIDs, DOIs, authors, or journals. Include 1-4 supplied PMIDs supporting the main claims in sources; if none, use [].
+
 Return ONLY valid JSON with exactly these keys:
 
 {{
   "topic": "unique 3-6 word label",
   "title": "clear, curiosity-driven title, maximum 60 characters",
   "description": "one or two concise sentences",
-  "hashtags": ["4 to 6 relevant hashtags without #"],
+  "hashtags": ["4 to 6 relevant hashtags without #"],\n  "sources": ["PubMed PMID from supplied list"],
   "scenes": [
     {{"narration": "spoken words for this scene", "keyword": "filmable search 1 | filmable search 2 | filmable search 3"}}
   ]
@@ -616,6 +625,7 @@ def repair_keywords(data):
 
 def validate(data):
     required = (
+        "sources",
         "topic",
         "title",
         "description",
@@ -673,6 +683,15 @@ def validate(data):
                 "keyword not about training or food: "
                 f"{scene.get('keyword')}"
             )
+
+    if not isinstance(data.get("sources"), list):
+        return "sources must be a list of PubMed PMIDs"
+    known_pmids = {str(p.get("pmid")) for p in load_json("output/research_sources.json", []) if isinstance(p, dict)}
+    cited = [str(p).strip() for p in data.get("sources", [])]
+    if any(p not in known_pmids for p in cited):
+        return "sources contains PMID not retrieved from PubMed"
+    if len(cited) > 5:
+        return "maximum 5 references"
 
     total_words = sum(word_counts)
 
@@ -808,11 +827,15 @@ def generate_script():
     print(f"Video angle: {content_type}")
     print("Using channel performance memory:", MEMORY_FILE)
 
+    from research_sources import research_for_topic
+    research = research_for_topic(content_type)
+
     prompt = build_prompt(
         content_type,
         all_used(),
         trends,
         memory,
+        research,
     )
 
     model_candidates = get_model_candidates()
@@ -920,28 +943,27 @@ def generate_script():
 
 def finalize(data):
     tags = []
-
     for hashtag in data["hashtags"]:
-        tag = (
-            "#"
-            + str(hashtag).strip().lstrip("#").replace(" ", "")
-        )
-
+        tag = "#" + str(hashtag).strip().lstrip("#").replace(" ", "")
         if tag not in tags:
             tags.append(tag)
-
     if "#Shorts" not in tags:
         tags.append("#Shorts")
 
+    from research_sources import references_block
+    all_papers = load_json("output/research_sources.json", [])
+    cited_pmids = {str(x) for x in data.get("sources", [])}
+    cited_papers = [p for p in all_papers if str(p.get("pmid")) in cited_pmids]
+    data["references"] = cited_papers
+    ref_text = references_block(cited_papers)
     data["description"] = (
         f"{data['description'].strip()}\n\n"
         f"{' '.join(tags)}\n\n"
         f"{DISCLAIMER}\n\n"
-        "Video clips and music: Pixabay."
+        f"{ref_text}\n\n"
+        "Educational illustrations; not medical advice."
     )
-
     data["title"] = data["title"].strip()[:60]
-
     return data
 
 
