@@ -128,6 +128,29 @@ def draw_fiber_system(d, p, t):
     centered(d,"FIBER REACHES THE COLON",1780,font(30,True),GREEN,850)
 
 
+def draw_food_nutrition(d, p, t):
+    # A clear food plate with portions appearing progressively.
+    d.ellipse((180,700,900,1420),fill=(235,240,235),outline=WHITE,width=10)
+    d.ellipse((220,740,860,1380),fill=(24,43,58),outline=CYAN,width=5)
+    # three food groups, revealed left-to-right
+    if p>.05:
+        d.pieslice((260,780,820,1340),90,210,fill=(90,155,90),outline=WHITE,width=4)
+        centered(d,"VEGETABLES",1130,font(24,True),WHITE,300)
+    if p>.28:
+        d.pieslice((260,780,820,1340),210,300,fill=(195,145,85),outline=WHITE,width=4)
+        centered(d,"CARBS",1280,font(24,True),WHITE,250)
+    if p>.52:
+        d.pieslice((260,780,820,1340),300,450,fill=(185,95,95),outline=WHITE,width=4)
+        centered(d,"PROTEIN",890,font(24,True),WHITE,250)
+    # small animated nutrient particles move from plate toward a body-cell icon
+    arrow(d,(900,1050),(990,1050),GREEN,8)
+    d.ellipse((930,680,1060,810),fill=(18,48,65),outline=CYAN,width=6)
+    for i in range(int(2+p*7)):
+        x=960+(i*29+int(t*55))%70; y=720+(i*43)%55
+        d.ellipse((x-7,y-7,x+7,y+7),fill=[ORANGE,GREEN,CYAN][i%3])
+    centered(d,"FOOD → NUTRIENTS",1530,font(30,True),GREEN,800)
+
+
 def draw_muscle_anatomy(d, p, t):
     # Stylized anatomical muscle with fascicle bundle and a magnified fiber.
     d.ellipse((145,570,660,1280),fill=(55,31,43),outline=(245,145,155),width=8)
@@ -360,7 +383,7 @@ def draw_diagram(scene, index, frame, frames):
     elif kind=="recovery_sleep":
         draw_recovery(d,p,t)
     elif kind=="food_nutrition":
-        draw_fiber_system(d,p,t)
+        draw_food_nutrition(d,p,t)
     else:
         draw_process(d,p,t,title,subtitle)
     # Animated stroke/reveal marker tracks the spoken scene.
