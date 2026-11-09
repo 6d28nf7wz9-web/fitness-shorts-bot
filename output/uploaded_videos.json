@@ -82,5 +82,17 @@
     "uploaded_at": "2026-11-09T09:04:06.902509+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "NyJIw6HUSbA",
+    "title": "The 35g Protein Rule for Hunger",
+    "topic": "Targeting 35 Grams Of Protein",
+    "series": "Smart Food Choices",
+    "hook": "Still feeling hungry right after eating protein?",
+    "script_word_count": 59,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-09T12:13:07.380020+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
