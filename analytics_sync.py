@@ -106,55 +106,40 @@ def build_series_insights(uploads):
 
 
 def build_first_week_metrics(api, uploads, report_end):
-    """Compare Shorts over their first seven calendar days after publication."""
-    published = {}
+    """Fetch each upload's first-week daily metrics with supported video filters.
+
+    The YouTube Analytics API rejects the combined video,day report for some
+    channel configurations. Query day rows for one video at a time instead;
+    unsupported/unauthorized rows are skipped without blocking the main sync.
+    """
+    result = {}
     for item in uploads:
         if not isinstance(item, dict) or not item.get("video_id") or not item.get("uploaded_at"):
             continue
+        video_id = str(item["video_id"]).strip()
         try:
-            published[str(item["video_id"])] = date.fromisoformat(str(item["uploaded_at"])[:10])
+            upload_day = date.fromisoformat(str(item["uploaded_at"])[:10])
         except ValueError:
             continue
-    if not published:
-        return {}
-
-    start = max(min(published.values()), report_end - timedelta(days=89))
-    query = {
-        "ids": "channel==MINE",
-        "startDate": start.isoformat(),
-        "endDate": report_end.isoformat(),
-        "dimensions": "video,day",
-        "metrics": "views,engagedViews,averageViewDuration,averageViewPercentage",
-        "maxResults": 200,
-    }
-    headers = None
-    rows = []
-    while True:
-        page = api.reports().query(**query).execute()
-        headers = page.get("columnHeaders", headers)
-        rows.extend(page.get("rows", []))
-        token = page.get("nextPageToken")
-        if not token:
-            break
-        query["pageToken"] = token
-
-    grouped = defaultdict(list)
-    names = [column["name"] for column in (headers or [])]
-    for row in rows:
-        values = dict(zip(names, row))
-        video_id = str(values.get("video", ""))
-        if video_id not in published:
+        period_end = min(upload_day + timedelta(days=6), report_end)
+        if period_end < upload_day:
             continue
+        query = {
+            "ids": "channel==MINE",
+            "startDate": upload_day.isoformat(),
+            "endDate": period_end.isoformat(),
+            "dimensions": "day",
+            "filters": f"video=={video_id}",
+            "metrics": "views,engagedViews,averageViewDuration,averageViewPercentage",
+            "maxResults": 100,
+        }
         try:
-            day = date.fromisoformat(str(values.get("day", "")))
-        except ValueError:
+            page = api.reports().query(**query).execute()
+        except HttpError as exc:
+            print(f"WARNING: first-week analytics unavailable for {video_id}: {exc}")
             continue
-        age = (day - published[video_id]).days
-        if 0 <= age < 7:
-            grouped[video_id].append(values)
-
-    result = {}
-    for video_id, daily_rows in grouped.items():
+        headers = [column["name"] for column in page.get("columnHeaders", [])]
+        daily_rows = [dict(zip(headers, row)) for row in page.get("rows", [])]
         total_views = sum(int(row.get("views", 0) or 0) for row in daily_rows)
         total_engaged = sum(int(row.get("engagedViews", 0) or 0) for row in daily_rows)
         if total_views:
@@ -168,17 +153,15 @@ def build_first_week_metrics(api, uploads, report_end):
             ) / total_views
         else:
             avg_pct = avg_duration = 0
-        upload_day = published[video_id]
-        complete = report_end >= upload_day + timedelta(days=6)
         result[video_id] = {
             "views_first_7_days": total_views,
             "engaged_views_first_7_days": total_engaged,
             "average_view_percentage_first_7_days": round(avg_pct, 2),
             "average_view_duration_seconds_first_7_days": round(avg_duration, 2),
             "days_since_upload_in_report": min(max((report_end - upload_day).days + 1, 0), 7),
-            "first_7_days_complete": complete,
+            "first_7_days_complete": report_end >= upload_day + timedelta(days=6),
             "period_start": upload_day.isoformat(),
-            "period_end": min(upload_day + timedelta(days=6), report_end).isoformat(),
+            "period_end": period_end.isoformat(),
         }
     return result
 
