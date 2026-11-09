@@ -112,14 +112,15 @@ def exercise_scene():
         for n,p in [("Shoulder",sh),("Elbow",el),("Wrist",wr)]:
             uv(side+" "+n,p,(.055,.055,.055),blue,24)
     # Animate one complete controlled push-up cycle: torso/chest move, limbs stay planted.
+    animated=[torso,chest,abs1,pelvis,shorts,hd,neck,thigh,quad,ham]
+    rest={o.name:o.location.copy() for o in animated}
     for frame in range(1,FRAMES+1):
         phase=2*math.pi*(frame-1)/FRAMES
         down=.5-.5*math.cos(phase)
         dz=-.22*down
-        for o in [torso,chest,abs1,pelvis,shorts,hd,neck,thigh,quad,ham]:
-            o.location.z += dz
-        # keyframe delta is applied through location so all hero geometry remains genuinely 3D.
-        for o in [torso,chest,abs1,pelvis,shorts,hd,neck,thigh,quad,ham]:
+        for o in animated:
+            base=rest[o.name]
+            o.location=(base.x,base.y,base.z+dz)
             o.keyframe_insert(data_path="location",frame=frame)
     text_obj("TARGET MUSCLES  /  CONTROLLED REP",(.0,-.65,2.15),.12,white)
     setup_camera((.0,0,1.0),4.9 if A.orientation=="portrait" else 4.2)
@@ -157,12 +158,11 @@ def food_scene():
         uv("Protein portion "+str(i),(-.28+i*.15,-.13,.40),(.14,.12,.075),gold)
     for i in range(5):
         uv("Grain serving "+str(i),(.20+i*.075,.20,.34),(.055,.05,.045),gold,24)
-    for f in range(1,FRAMES+1):
-        p=(f-1)/(FRAMES-1)
-        for i,o in enumerate([x for x in bpy.data.objects if x.name.startswith(("Roasted vegetable","Protein portion","Grain serving"))]):
-            if f==1: o.scale*=.01
-            o.scale=(.19,.16,.10) if o.name.startswith("Roasted") else ((.14,.12,.075) if o.name.startswith("Protein") else (.055,.05,.045))
-            o.keyframe_insert(data_path="scale",frame=f)
+    food_objects=[x for x in bpy.data.objects if x.name.startswith(("Roasted vegetable","Protein portion","Grain serving"))]
+    for o in food_objects:
+        full=o.scale.copy()
+        o.scale=(.001,.001,.001); o.keyframe_insert(data_path="scale",frame=1)
+        o.scale=full; o.keyframe_insert(data_path="scale",frame=FRAMES)
     text_obj("WHOLE FOOD  /  NUTRIENT DENSITY",(.0,-.7,1.25),.10,white)
     setup_camera((0,0,.45),3.5 if A.orientation=="portrait" else 3.0)
 
