@@ -13,9 +13,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1080, 1920
 FPS = 30
-BG = (10, 17, 31)
-WHITE = (242, 247, 255)
-MUTED = (155, 174, 198)
+BG = (239, 244, 248)
+WHITE = (28, 43, 58)
+MUTED = (91, 111, 130)
 CYAN = (42, 210, 230)
 ORANGE = (255, 166, 72)
 GREEN = (99, 230, 160)
@@ -50,9 +50,9 @@ def centered(draw, text, y, f, fill=WHITE, max_width=900, spacing=12):
 def base_scene(title, subtitle, index):
     im=Image.new("RGB",(W,H),BG); d=ImageDraw.Draw(im)
     # subtle grid + top accent
-    for x in range(0,W,90): d.line((x,0,x,H),fill=(17,29,46),width=1)
-    for y in range(0,H,90): d.line((0,y,W,y),fill=(17,29,46),width=1)
-    d.rounded_rectangle((56,72,W-56,174),radius=28,fill=(18,31,50),outline=(38,58,82),width=2)
+    for x in range(0,W,90): d.line((x,0,x,H),fill=(224,232,239),width=1)
+    for y in range(0,H,90): d.line((0,y,W,y),fill=(224,232,239),width=1)
+    d.rounded_rectangle((56,72,W-56,174),radius=28,fill=(250,252,254),outline=(205,217,227),width=2)
     d.text((W/2,122),f"FITFUEL  •  SCIENCE {index:02d}",font=font(30,True),fill=CYAN,anchor="mm")
     centered(d,title.upper(),250,font(56,True),WHITE,940,14)
     centered(d,subtitle,390,font(30),MUTED,900,10)
@@ -467,7 +467,7 @@ def draw_diagram(scene, index, frame, frames):
         draw_process(d,p,t,title,subtitle)
     # Animated stroke/reveal marker tracks the spoken scene.
     x=70+int((W-140)*p)
-    d.rounded_rectangle((70,H-170,W-70,H-75),radius=24,fill=(18,31,50),outline=(38,58,82),width=2)
+    d.rounded_rectangle((70,H-170,W-70,H-75),radius=24,fill=(250,252,254),outline=(205,217,227),width=2)
     d.text((W/2,H-122),"FITFUEL  •  SCIENCE EXPLAINER",font=font(24,True),fill=MUTED,anchor="mm")
     d.rounded_rectangle((70,H-48,x,H-34),radius=7,fill=CYAN)
     return im
