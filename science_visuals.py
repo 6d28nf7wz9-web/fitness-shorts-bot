@@ -218,7 +218,7 @@ def draw_exercise(d, p, t, exercise="SQUAT"):
         d.line((hip,(760,1260)),fill=(205,65,75),width=42)
         d.line(((760,1260),(790,1450)),fill=(235,220,195),width=36)
         d.line((shoulder,(640,1190)),fill=(235,220,195),width=26)
-        d.line((640,1190,(640,1380)),fill=(235,220,195),width=24)
+        d.line(((640,1190),(640,1380)),fill=(235,220,195),width=24)
         bar_y=1380-int(65*pulse)
         d.line((250,bar_y,900,bar_y),fill=WHITE,width=16)
         for x in (280,870): d.rounded_rectangle((x-28,bar_y-75,x+28,bar_y+75),radius=10,fill=ORANGE)
