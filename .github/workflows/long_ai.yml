@@ -24,7 +24,6 @@ jobs:
     timeout-minutes: 120
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
       YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
@@ -73,8 +72,8 @@ jobs:
           export LONG_REC=output/long/ai_voice.mp3
           python long_transcribe.py
 
-      - name: Fetch footage
-        run: python long_clips.py
+      - name: Render scientific motion graphics
+        run: python long_science_visuals.py
 
       - name: Assemble video
         run: |
