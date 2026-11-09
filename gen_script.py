@@ -817,7 +817,7 @@ def generate_script():
     print(f"Video angle: {content_type}")
     print("Using channel performance memory:", MEMORY_FILE)
 
-    from research_sources import research_for_topic\n    research = research_for_topic(content_type)\n\n    from research_sources import research_for_topic\n    research = research_for_topic(content_type)\n\n    prompt = build_prompt(
+    from research_sources import research_for_topic\n    research = research_for_topic(content_type)\n\n    prompt = build_prompt(
         content_type,
         all_used(),
         trends,
