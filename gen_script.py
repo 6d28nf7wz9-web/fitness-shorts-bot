@@ -452,7 +452,7 @@ def build_prompt(content_type, used, trends, memory, research):
             f"{lines}\n"
         )
 
-    return f'''
+    research_block = "\\n".join(\n        "- PMID " + str(p['pmid']) + " | " + p.get('title','') + " | " + p.get('journal','') + " (" + p.get('year','') + ") | DOI: " + (p.get('doi') or 'none') + " | Abstract: " + p.get('abstract','')\n        for p in research\n    ) or "No PubMed records retrieved. Use conservative established guidance only and return sources=[]; never fabricate citations."\n\n    return f'''
 You are the short-form video scriptwriter for FitFuel,
 a practical fitness channel about building muscle and losing fat.
 
@@ -482,7 +482,7 @@ Return ONLY valid JSON with exactly these keys:
   "topic": "unique 3-6 word label",
   "title": "clear, curiosity-driven title, maximum 60 characters",
   "description": "one or two concise sentences",
-  "hashtags": ["4 to 6 relevant hashtags without #"],
+  "hashtags": ["4 to 6 relevant hashtags without #"],\n  "sources": ["PubMed PMID from supplied list"],
   "scenes": [
     {{"narration": "spoken words for this scene", "keyword": "filmable search 1 | filmable search 2 | filmable search 3"}}
   ]
@@ -674,7 +674,7 @@ def validate(data):
                 f"{scene.get('keyword')}"
             )
 
-    known_pmids = {p.get("pmid") for p in load_json("output/research_sources.json", []) if isinstance(p, dict)}\n    cited = [str(p).strip() for p in data.get("sources", [])]\n    if any(p not in known_pmids for p in cited):\n        return "sources contains PMID not retrieved from PubMed"\n    if len(cited) > 5:\n        return "maximum 5 references"\n\n    total_words = sum(word_counts)
+    known_pmids = {p.get("pmid") for p in load_json("output/research_sources.json", []) if isinstance(p, dict)}\n    cited = [str(p).strip() for p in data.get("sources", [])]\n    if any(p not in known_pmids for p in cited):\n        return "sources contains PMID not retrieved from PubMed"\n    if len(cited) > 5:\n        return "maximum 5 references"\n\n    known_pmids = {p.get("pmid") for p in load_json("output/research_sources.json", []) if isinstance(p, dict)}\n    cited = [str(p).strip() for p in data.get("sources", [])]\n    if any(p not in known_pmids for p in cited):\n        return "sources contains PMID not retrieved from PubMed"\n    if len(cited) > 5:\n        return "maximum 5 references"\n\n    total_words = sum(word_counts)
 
     if not 45 <= total_words <= 65:
         return (
