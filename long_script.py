@@ -277,8 +277,6 @@ def generate(used, trends):
     )
 
 def reading_text(video_id, data):
-
-def reading_text(video_id, data):
     words = sum(len(s["narration"].split()) for s in data["sections"])
     minutes = round(words / 150, 1)
     repo = os.getenv("GITHUB_REPOSITORY", "YOUR-USERNAME/fitness-shorts-bot")
