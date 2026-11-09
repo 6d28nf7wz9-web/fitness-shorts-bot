@@ -28,7 +28,7 @@ def arrow(d,a,b,c=CYAN,w=8):
                (b[0]-z*math.cos(ang+.55),b[1]-z*math.sin(ang+.55))],fill=c)
 
 def classify_section(s):
-    text=(str(s.get("heading",""))+" "+" ".join(map(str,s.get("keywords",[])))).lower()
+    text=(str(s.get("heading",""))+" "+str(s.get("narration",""))+" "+" ".join(map(str,s.get("keywords",[])))).lower()
     rules=[
       ("digestion_fiber",r"fiber|fibre|gut|digest|intestin|microbiome|colon"),
       ("exercise_biomechanics",r"squat|deadlift|bench|press|lunge|curl|row|push.?up|pull.?up|exercise|form"),
