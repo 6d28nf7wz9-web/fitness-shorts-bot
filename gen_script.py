@@ -318,6 +318,21 @@ def performance_context(memory):
         "Treat these as channel-level baselines, not targets guaranteed for every Short."
     )
 
+    series_insights = memory.get("series_insights", [])
+    reliable_series = [
+        item for item in series_insights
+        if isinstance(item, dict) and int(item.get("videos", 0) or 0) >= 2
+    ]
+    if reliable_series:
+        lines.append("Recurring-series performance (minimum 2 measured videos; descriptive, not causal):")
+        for item in reliable_series[:4]:
+            lines.append(
+                f"- {item.get('series')}: {item.get('videos')} videos; "
+                f"{item.get('avg_view_percentage')}% average viewed; "
+                f"{item.get('avg_engaged_views_per_video')} average engaged views; "
+                f"{item.get('subscribers_gained')} subscribers gained."
+            )
+
     topic_insights = memory.get("topic_insights", [])
     reliable_topics = [
         item for item in topic_insights
