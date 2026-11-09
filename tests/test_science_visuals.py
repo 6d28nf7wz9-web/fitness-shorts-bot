@@ -1,6 +1,6 @@
 """Smoke tests for scientific scene classification and output helpers."""
 import unittest
-from science_visuals import classify, wrap
+from science_visuals import classify, classify_scene, wrap
 
 class ScienceVisualTests(unittest.TestCase):
     def test_protein(self):
@@ -11,5 +11,11 @@ class ScienceVisualTests(unittest.TestCase):
         self.assertEqual(classify("Water and hydration improve performance"), "hydration")
     def test_fallback(self):
         self.assertEqual(classify("A useful habit"), "generic")
+    def test_dietary_fiber_gets_digestive_system(self):
+        self.assertEqual(classify_scene({"narration":"Dietary fiber travels to the colon"}), "digestion_fiber")
+    def test_exercise_gets_biomechanics(self):
+        self.assertEqual(classify_scene({"narration":"During a squat your knees and hips bend"}), "exercise_biomechanics")
+    def test_model_visual_type_is_respected(self):
+        self.assertEqual(classify_scene({"narration":"A useful point","visual_type":"muscle_anatomy"}), "muscle_anatomy")
 
 if __name__ == "__main__": unittest.main()
