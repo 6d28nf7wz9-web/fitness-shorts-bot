@@ -452,7 +452,12 @@ def build_prompt(content_type, used, trends, memory, research):
             f"{lines}\n"
         )
 
-    research_block = "\n".join(\n        "- PMID " + str(p['pmid']) + " | " + p.get('title','') + " | " + p.get('journal','') + " (" + p.get('year','') + ") | DOI: " + (p.get('doi') or 'none') + " | Abstract: " + p.get('abstract','')\n        for p in research\n    ) or "No PubMed records retrieved. Use conservative established guidance only and return sources=[]; never fabricate citations."\n\n    return f'''
+    research_block = "\\n".join(
+        f"- PMID {p['pmid']} | {p.get('title', '')} | {p.get('journal', '')} ({p.get('year', '')}) | DOI: {p.get('doi') or 'none'} | Abstract: {p.get('abstract', '')}"
+        for p in research
+    ) or "No PubMed records retrieved. Use conservative established guidance only and return sources=[]; never fabricate citations."
+
+    return f'''
 You are the short-form video scriptwriter for FitFuel,
 a practical fitness channel about building muscle and losing fat.
 
