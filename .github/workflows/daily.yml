@@ -80,6 +80,14 @@ jobs:
       - name: Validate script and footage
         run: python quality_check.py
 
+      - name: Test scientific visual mapping
+        run: python -m unittest discover -s tests -v
+
+      - name: Render scientific explainer visuals
+        env:
+          SCIENCE_VISUALS: 1
+        run: python science_visuals.py
+
       - name: Assemble video
         run: |
           python assemble.py

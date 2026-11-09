@@ -112,6 +112,16 @@ def main():
 
     n = len(audio)
     secs = [a["seconds"] for a in audio]
+
+    science_enabled = os.getenv("SCIENCE_VISUALS", "1").lower() not in ("0", "false", "no", "off")
+    science_clips = [f"output/science/scene_{i}.mp4" for i in range(1, n + 1)]
+    use_science = science_enabled and all(os.path.isfile(p) and os.path.getsize(p) > 10000 for p in science_clips)
+    if use_science:
+        print("Visual source: original scientific motion graphics")
+        video_clips = science_clips
+    else:
+        print("Visual source: Pixabay footage (science visuals unavailable or disabled)")
+        video_clips = [f"output/clips/scene_{i}.mp4" for i in range(1, n + 1)]
     total = round(sum(secs), 2)
 
     music_files = [
@@ -128,7 +138,7 @@ def main():
 
     cmd = ["ffmpeg", "-y", "-loglevel", "error"]
     for i in range(1, n + 1):
-        cmd += ["-i", f"output/clips/scene_{i}.mp4"]
+        cmd += ["-i", video_clips[i - 1]]
     for a in audio:
         cmd += ["-i", a["file"]]
     cmd += ["-stream_loop", "-1", "-i", music]
