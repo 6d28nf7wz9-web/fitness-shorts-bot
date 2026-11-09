@@ -43,7 +43,22 @@ def fetch_pubmed(topic, limit=5):
         return []
 
 def research_for_topic(topic):
-    papers=fetch_pubmed(topic,5)
+    text=str(topic).lower()
+    if "muscle" in text or "strength" in text:
+        query="resistance training muscle hypertrophy systematic review"
+    elif "fat-loss" in text or "fat loss" in text:
+        query="energy restriction weight loss adults systematic review"
+    elif "hunger" in text or "nutrition" in text:
+        query="dietary protein satiety appetite systematic review"
+    elif "technique" in text or "exercise" in text:
+        query="resistance exercise training technique systematic review"
+    elif "recovery" in text or "training-performance" in text:
+        query="sleep recovery exercise performance systematic review"
+    elif "food" in text or "meal" in text:
+        query="dietary protein nutrition healthy diet systematic review"
+    else:
+        query="exercise nutrition physical activity systematic review"
+    papers=fetch_pubmed(query,5)
     os.makedirs("output",exist_ok=True)
     with open("output/research_sources.json","w",encoding="utf-8") as f:json.dump(papers,f,ensure_ascii=False,indent=2)
     print(f"[research] Retrieved {len(papers)} PubMed records for: {topic}")
