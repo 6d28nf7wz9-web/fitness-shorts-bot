@@ -198,7 +198,7 @@ def main():
             continue
         description = (
             f"{sec['heading']}. Part of: {queue['title']}{link}\n\n{tag_line}\n\n"
-            f"{DISCLAIMER}\n\nVideo clips and music: Pixabay."
+            f"{DISCLAIMER}\n\nAnimated scientific visuals: FitFuel."
         )
         try:
             vid = upload_video(out, sec["heading"], description, tags, "26", PRIVACY)
