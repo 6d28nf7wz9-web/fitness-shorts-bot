@@ -55,9 +55,9 @@ def draw_scene(s,kind,section_no,frame,offset,total,beat_index=0):
     t=offset+frame/FPS; p=min(1,(offset+frame/FPS)/max(total,.001))
     im=Image.new("RGB",(W,H),NAVY); d=ImageDraw.Draw(im)
     # Premium deep-blue gradient, subtle technical grid and animated ambient accents.
-    for y in range(H):
+    for y in range(0,H,8):
         q=y/max(H-1,1); c=tuple(int(a+(b-a)*q) for a,b in zip((10,18,31),(19,34,52)))
-        d.line((0,y,W,y),fill=c)
+        d.rectangle((0,y,W,min(y+7,H)),fill=c)
     for x in range(0,W,64): d.line((x,0,x,H),fill=GRID,width=1)
     for y in range(0,H,64): d.line((0,y,W,y),fill=GRID,width=1)
     for i in range(18):
@@ -180,7 +180,15 @@ def draw_scene(s,kind,section_no,frame,offset,total,beat_index=0):
         label(d,"HOW THE SYSTEM WORKS",(640,625),23,PURPLE)
     d.rounded_rectangle((58,690,W-58,700),radius=5,fill=(210,220,228))
     d.rounded_rectangle((58,690,58+int((W-116)*p),700),radius=5,fill=CYAN)
-    return im
+    # Subtle eased camera drift/zoom gives every five-second beat a new, polished framing.
+    zoom=1.035+0.012*(0.5+0.5*math.sin(t*0.72))
+    nw,nh=int(W*zoom),int(H*zoom)
+    scaled=im.resize((nw,nh),Image.Resampling.LANCZOS)
+    max_x,max_y=nw-W,nh-H
+    phase=beat_index*1.35
+    left=int(max_x*(0.5+0.30*math.sin(t*0.32+phase)))
+    top=int(max_y*(0.5+0.24*math.cos(t*0.28+phase)))
+    return scaled.crop((left,top,left+W,top+H))
 
 def render_chunk(section,section_no,kind,offset,seconds,total,outfile,beat_index=0):
     temp=Path(str(outfile)+".frames"); temp.mkdir(parents=True,exist_ok=True)
