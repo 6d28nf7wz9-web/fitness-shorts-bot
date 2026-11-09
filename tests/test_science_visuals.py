@@ -1,6 +1,8 @@
 """Smoke tests for scientific scene classification and output helpers."""
 import unittest
-from science_visuals import classify, classify_scene, wrap, visual_beat_durations
+import tempfile
+from pathlib import Path
+from science_visuals import classify, classify_scene, wrap, visual_beat_durations, render_scene
 
 class ScienceVisualTests(unittest.TestCase):
     def test_protein(self):
@@ -26,5 +28,12 @@ class ScienceVisualTests(unittest.TestCase):
         self.assertAlmostEqual(sum(beats), 13.2, places=5)
     def test_short_scene_keeps_its_natural_duration(self):
         self.assertEqual(visual_beat_durations(2.5), [2.5])
+    def test_renderer_builds_a_multi_beat_mp4(self):
+        scene = {"narration": "Muscle protein synthesis uses amino acids.", "visual_type": "protein_synthesis"}
+        with tempfile.TemporaryDirectory() as tmp:
+            output = str(Path(tmp) / "short.mp4")
+            info = render_scene(scene, 1, 8.0, output)
+            self.assertTrue(Path(output).is_file())
+            self.assertEqual(info["visual_beats"], [4.0, 4.0])
 
 if __name__ == "__main__": unittest.main()
