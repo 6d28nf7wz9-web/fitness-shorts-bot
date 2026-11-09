@@ -534,8 +534,7 @@ def render_scene(scene,index,seconds,outfile):
         concat_file=os.path.join(temp,"concat.txt")
         with open(concat_file,"w",encoding="utf-8") as f:
             for path in beat_files:
-                f.write("file '"+os.path.abspath(path).replace("'","'\\''")+"'
-")
+                f.write("file '"+os.path.abspath(path).replace("'","'\\''")+"\\n")
         subprocess.run(["ffmpeg","-y","-loglevel","error","-f","concat","-safe","0",
                         "-i",concat_file,"-c","copy","-an",outfile],check=True)
     finally:
