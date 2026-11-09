@@ -620,6 +620,7 @@ def repair_keywords(data):
 
 def validate(data):
     required = (
+        "sources",
         "topic",
         "title",
         "description",
