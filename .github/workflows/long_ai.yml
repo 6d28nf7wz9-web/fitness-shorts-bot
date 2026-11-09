@@ -81,7 +81,10 @@ jobs:
           export LONG_REC=output/long/ai_voice.mp3
           python long_transcribe.py
 
-      - name: Assemble video/
+      - name: Render legacy Long visuals
+        run: python long_science_visuals.py
+
+      - name: Assemble video
         run: |
           python long_assemble.py
           python avatar.py long
