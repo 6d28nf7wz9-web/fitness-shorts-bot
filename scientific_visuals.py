@@ -59,10 +59,9 @@ def base(title, subtitle, t):
     for y in range(0, H, 45):
         d.line((0, y, W, y), fill=(224, 232, 239), width=1)
     d.rounded_rectangle((28, 34, W-28, 104), radius=18, fill=PANEL, outline=(202, 215, 226), width=2)
-    d.text((48, 53), "FITFUEL  /  SCIENCE", font=font(17, True), fill=CYAN)
-    d.text((W-48, 56), f"{int(t*10)%100:02d}", font=font(16), fill=MUTED, anchor="ra")
-    d.text((W//2, 165), title[:34].upper(), font=font(27, True), fill=WHITE, anchor="mm")
-    d.text((W//2, 208), subtitle[:52], font=font(16), fill=MUTED, anchor="mm")
+    # Keep the legacy renderer consistent: the header is the topic of this slide.
+    d.text((W//2, 69), title[:34].upper(), font=font(21, True), fill=WHITE, anchor="mm")
+    d.text((W//2, 165), subtitle[:52], font=font(16), fill=MUTED, anchor="mm")
     # bottom timeline accent
     d.rounded_rectangle((45, H-62, W-45, H-48), radius=7, fill=(218, 228, 236))
     d.rounded_rectangle((45, H-62, 45+int((W-90)*((t%4)/4)), H-48), radius=7, fill=CYAN)
