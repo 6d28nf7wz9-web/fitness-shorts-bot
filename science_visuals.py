@@ -84,60 +84,198 @@ def protein(draw, cx, cy, radius=34, color=CYAN):
     draw.line(pts+[pts[0]],fill=color,width=7,joint="curve")
     for x,y in pts: draw.ellipse((x-12,y-12,x+12,y+12),fill=ORANGE,outline=WHITE,width=2)
 
-def draw_diagram(kind, title, subtitle, idx, frame=0):
-    im,d=base_scene(title,subtitle,idx)
-    phase=frame/FPS
-    if kind=="muscle":
-        muscle(d,W/2,1030,1.25)
-        d.rounded_rectangle((120,1390,960,1570),radius=35,fill=(20,37,57),outline=ORANGE,width=4)
-        centered(d,"RESISTANCE  →  RECOVERY  →  ADAPTATION",1440,font(30,True),ORANGE,780,12)
-        arrow(d,(W/2,1250),(W/2,1370),CYAN)
-    elif kind=="protein":
-        muscle(d,340,1020,0.75,ORANGE)
-        for i in range(5):
-            x=650+(i%2)*100; y=760+i*105
-            protein(d,x,y,28,CYAN)
-            arrow(d,(x-60,y),(520,y+int(phase*20)%30),GREEN,5)
-        d.rounded_rectangle((130,1450,950,1640),radius=30,fill=(20,37,57),outline=GREEN,width=4)
-        centered(d,"AMINO ACIDS  →  PROTEIN BUILDING",1500,font(32,True),GREEN,780,10)
-    elif kind=="energy":
-        # calorie balance scale
-        d.line((W/2,800,W/2,1370),fill=WHITE,width=16); d.line((260,920,820,920),fill=CYAN,width=12)
-        d.line((360,920,280,1190),fill=ORANGE,width=6); d.line((720,920,800,1190),fill=GREEN,width=6)
-        d.arc((170,1120,390,1280),0,180,fill=ORANGE,width=8); d.arc((690,1120,910,1280),0,180,fill=GREEN,width=8)
-        centered(d,"ENERGY IN",1290,font(36,True),ORANGE,350)
-        centered(d,"ENERGY OUT",1290,font(36,True),GREEN,350)
-        centered(d,"BODY WEIGHT TREND",1480,font(34,True),WHITE,850)
-    elif kind=="hydration":
-        # water droplet and muscle
-        d.ellipse((250,760,830,1340),fill=(16,45,66),outline=CYAN,width=8)
-        d.polygon([(540,680),(350,1020),(420,1210),(540,1280),(660,1210),(730,1020)],fill=(24,130,180),outline=CYAN)
+def draw_fiber_system(d, p, t):
+    # Food -> stomach -> small intestine -> colon; fiber particles travel through.
+    d.rounded_rectangle((90,650,360,1080),radius=42,fill=(20,37,57),outline=ORANGE,width=5)
+    centered(d,"FIBER-RICH FOOD",790,font(30,True),ORANGE,240)
+    # stylized whole foods
+    d.ellipse((150,845,220,915),fill=(220,75,75),outline=WHITE,width=3)
+    d.ellipse((235,840,300,905),fill=(85,180,95),outline=WHITE,width=3)
+    d.rounded_rectangle((175,940,285,980),radius=16,fill=(194,145,83),outline=WHITE,width=2)
+    arrow(d,(380,860),(475,860),CYAN,9)
+    # simplified digestive tract
+    d.ellipse((485,650,675,830),fill=(105,55,68),outline=(255,160,170),width=7)
+    centered(d,"STOMACH",740,font(23,True),WHITE,180)
+    arrow(d,(675,860),(735,860),CYAN,8)
+    # small intestine loops
+    for i in range(4):
+        y=900+i*55
+        d.arc((735,y-45,960,y+50),0,330,fill=(245,165,145),width=13)
+    centered(d,"SMALL INTESTINE",1175,font(23,True),WHITE,280)
+    # colon outline with animated peristaltic pulse
+    d.line([(820,1180),(790,1240),(790,1420),(835,1480),(990,1480),(1020,1430),(1020,1240),(980,1180)],
+           fill=(255,185,150),width=32,joint="curve")
+    d.line([(820,1180),(790,1240),(790,1420),(835,1480),(990,1480),(1020,1430),(1020,1240),(980,1180)],
+           fill=(120,65,80),width=16,joint="curve")
+    centered(d,"COLON",1540,font(25,True),WHITE,220)
+    # fiber particles move along the tract
+    path=[(430,860),(535,740),(655,860),(790,930),(880,1100),(790,1260),(790,1390),(900,1480),(1020,1360)]
+    count=max(1,int(1+p*8))
+    for i in range(count):
+        q=(p*1.4+i/9)%1
+        k=min(len(path)-2,int(q*(len(path)-1)))
+        u=q*(len(path)-1)-k
+        x=path[k][0]*(1-u)+path[k+1][0]*u
+        y=path[k][1]*(1-u)+path[k+1][1]*u
+        rr=10+(i%3)*3
+        d.ellipse((x-rr,y-rr,x+rr,y+rr),fill=[GREEN,CYAN,ORANGE][i%3],outline=WHITE,width=2)
+    if p>0.55:
+        for i in range(7):
+            x=845+(i%3)*54; y=1300+(i//3)*48
+            rr=10+int(4*math.sin(t*4+i))
+            d.ellipse((x-rr,y-rr,x+rr,y+rr),fill=PURPLE,outline=WHITE,width=2)
+        centered(d,"GUT MICROBES",1665,font(25,True),PURPLE,400)
+    centered(d,"FIBER REACHES THE COLON",1780,font(30,True),GREEN,850)
+
+
+def draw_muscle_anatomy(d, p, t):
+    # Stylized anatomical muscle with fascicle bundle and a magnified fiber.
+    d.ellipse((145,570,660,1280),fill=(55,31,43),outline=(245,145,155),width=8)
+    d.polygon([(245,670),(525,670),(625,1140),(430,1270),(190,1110)],fill=(125,50,65),outline=(255,165,165))
+    for i in range(8):
+        x=250+i*42
+        offset=int(12*math.sin(t*3+i*.4))
+        d.line((x,720+offset,x+90,1130+offset),fill=(235,105,125),width=18)
+        d.line((x+5,735+offset,x+90,1110+offset),fill=(255,190,185),width=3)
+    # zoom callout to muscle fiber
+    d.ellipse((640,760,1020,1140),fill=(22,39,58),outline=CYAN,width=8)
+    for i in range(5):
+        y=825+i*58
+        d.rounded_rectangle((700,y,950,y+26),radius=13,fill=(160,55,75),outline=(255,170,175),width=3)
+        for j in range(5):
+            x=720+j*48+int(6*math.sin(t*4+i+j))
+            d.line((x,y+5,x+15,y+20),fill=(255,220,210),width=3)
+    arrow(d,(580,890),(680,890),CYAN,8)
+    centered(d,"MUSCLE FIBERS",850,font(26,True),WHITE,340)
+    # contraction / adaptation pulses
+    if p>.25:
         for i in range(4):
-            y=920+i*75; d.arc((410,y,670,y+50),0,180,fill=(180,245,255),width=5)
-        centered(d,"FLUIDS SUPPORT PERFORMANCE",1430,font(34,True),CYAN,850)
-    elif kind=="sleep":
-        d.ellipse((350,760,730,1140),fill=ORANGE)
-        d.ellipse((470,700,790,1020),fill=BG)
-        for x,y in [(260,750),(800,840),(350,1240),(760,1260),(550,650)]:
-            d.polygon([(x,y-24),(x-8,y-6),(x-26,y),(x-8,y+6),(x,y+24),(x+8,y+6),(x+26,y),(x+8,y-6)],fill=CYAN)
-        centered(d,"SLEEP  •  RECOVERY  •  CONSISTENCY",1430,font(34,True),PURPLE,900)
-    elif kind=="training":
-        # progressive overload staircase
-        vals=[390,520,650,780,910]
-        for i,v in enumerate(vals):
-            x=170+i*155
-            d.rounded_rectangle((x,1320-v/2,x+100,1320),radius=18,fill=(40,80,115),outline=CYAN,width=4)
-            d.text((x+50,1320-v/2-55),str(i+1),font=font(28,True),fill=WHITE,anchor="mm")
-        arrow(d,(150,1360),(950,700),ORANGE,10)
-        centered(d,"PROGRESSIVE OVERLOAD",1450,font(38,True),CYAN,850)
-    else:
-        # generic concept card
-        d.rounded_rectangle((140,760,940,1430),radius=50,fill=(20,37,57),outline=CYAN,width=5)
-        centered(d,"ONE CLEAR IDEA",930,font(48,True),CYAN,700)
-        centered(d,subtitle,1110,font(32),WHITE,700)
-    d.rounded_rectangle((70,H-170,W-70,H-75),radius=24,fill=(18,31,50),outline=(38,58,82),width=2)
-    d.text((W/2,H-122),"EVIDENCE-BASED FITNESS  •  EDUCATIONAL VISUAL",font=font(24,True),fill=MUTED,anchor="mm")
-    return im
+            yy=1320+i*42
+            d.rounded_rectangle((220,yy,820,yy+20),radius=10,fill=(55,95,125))
+            d.rounded_rectangle((220,yy,220+int(600*min(1,(p-.25)*1.5)),yy+20),radius=10,fill=ORANGE if i%2 else GREEN)
+    centered(d,"ANATOMICAL SCHEMATIC",1580,font(25,True),MUTED,700)
+
+
+def draw_exercise(d, p, t, exercise="SQUAT"):
+    # Animated biomechanical stick-figure with joints and highlighted working muscles.
+    bend=(0.5+0.5*math.sin(t*2.4))
+    hip_y=850+int(85*bend)
+    shoulder=(520,hip_y-250)
+    hip=(520,hip_y)
+    knee=(390+int(40*bend),hip_y+190)
+    ankle=(350,1450)
+    # floor and guide
+    d.line((180,1480,900,1480),fill=MUTED,width=7)
+    # torso and limbs
+    d.line((shoulder,hip),fill=(235,220,195),width=42)
+    d.line((shoulder,(430,hip_y-310)),fill=(235,220,195),width=30)
+    d.line((430,hip_y-310),(365,hip_y-270),fill=(235,220,195),width=26)
+    d.line((hip,knee),fill=ORANGE,width=38)
+    d.line((knee,ankle),fill=(235,220,195),width=34)
+    d.line((hip,(650,hip_y+160)),fill=ORANGE,width=38)
+    d.line((650,hip_y+160),(720,1450),fill=(235,220,195),width=34)
+    for x,y in [shoulder,hip,knee,ankle,(650,hip_y+160)]:
+        d.ellipse((x-24,y-24,x+24,y+24),fill=CYAN,outline=WHITE,width=4)
+    # muscle highlights at quads/glutes
+    d.ellipse((350,hip_y+65,445,hip_y+230),fill=(220,70,75),outline=(255,170,150),width=4)
+    d.ellipse((570,hip_y+65,665,hip_y+230),fill=(220,70,75),outline=(255,170,150),width=4)
+    centered(d,exercise.upper()[:28],590,font(34,True),ORANGE,700)
+    centered(d,"JOINTS + TARGET MUSCLES",1580,font(28,True),WHITE,800)
+    # motion arrows
+    if p>.2:
+        arrow(d,(760,900),(760,760),GREEN,8)
+        arrow(d,(280,1120),(280,1260),GREEN,8)
+
+
+def draw_protein_synthesis(d, p, t):
+    # Dietary protein -> amino acids -> muscle cell -> assembling protein strands.
+    d.rounded_rectangle((95,670,365,1080),radius=34,fill=(20,42,59),outline=CYAN,width=5)
+    centered(d,"PROTEIN",740,font(31,True),CYAN,220)
+    for i in range(5):
+        x=155+(i%2)*105; y=850+(i//2)*62
+        protein(d,x,y,24,[CYAN,ORANGE,GREEN][i%3])
+    arrow(d,(390,880),(500,880),ORANGE,9)
+    d.ellipse((500,650,1020,1220),fill=(18,48,65),outline=CYAN,width=8)
+    centered(d,"MUSCLE CELL",720,font(31,True),WHITE,400)
+    # particles move into cell and link into a growing chain
+    for i in range(10):
+        q=(p*1.1+i/10)%1
+        x=430+q*430; y=850+math.sin(q*math.pi*4+i)*65
+        d.ellipse((x-14,y-14,x+14,y+14),fill=[ORANGE,GREEN,CYAN][i%3],outline=WHITE,width=2)
+    if p>.35:
+        pts=[]
+        for i in range(9):
+            pts.append((610+i*38,1040+math.sin(i*.9+t*2)*30))
+        d.line(pts,fill=GREEN,width=12,joint="curve")
+        for x,y in pts:
+            d.ellipse((x-15,y-15,x+15,y+15),fill=GREEN,outline=WHITE,width=2)
+    centered(d,"AMINO ACIDS → NEW PROTEIN",1430,font(31,True),GREEN,850)
+
+
+def draw_energy(d, p, t):
+    # Fat-cell energy release -> bloodstream transport -> mitochondria/ATP.
+    for i in range(3):
+        x=180+i*150; y=880+int(12*math.sin(t*2+i))
+        d.ellipse((x-72,y-72,x+72,y+72),fill=(220,155,70),outline=ORANGE,width=7)
+        d.ellipse((x-32,y-32,x+32,y+32),fill=(245,205,130))
+    centered(d,"STORED ENERGY",700,font(30,True),ORANGE,700)
+    arrow(d,(660,900),(800,900),CYAN,10)
+    # mitochondrion with animated cristae
+    d.ellipse((785,730,1030,1080),fill=(70,50,35),outline=GREEN,width=8)
+    for i in range(4):
+        y=800+i*62
+        d.arc((830,y-20,980,y+35),0,180,fill=(255,190,90),width=8)
+    for i in range(int(2+p*8)):
+        x=820+(i*31+int(t*65))%180; y=1140+(i%3)*45
+        d.ellipse((x-11,y-11,x+11,y+11),fill=CYAN)
+    centered(d,"ATP / CELLULAR ENERGY",1380,font(30,True),GREEN,800)
+
+
+def draw_hydration(d, p, t):
+    # Water moves into a muscle cell; cell fluid level responds.
+    d.ellipse((260,680,830,1250),fill=(15,50,72),outline=CYAN,width=9)
+    centered(d,"MUSCLE CELL",760,font(31,True),WHITE,450)
+    for i in range(int(3+p*10)):
+        x=340+(i*71+int(t*45))%400
+        y=900+(i*43)%240
+        d.ellipse((x-12,y-12,x+12,y+12),fill=(80,210,255),outline=WHITE,width=2)
+    arrow(d,(130,960),(250,960),CYAN,10)
+    d.polygon([(180,790),(135,865),(150,920),(180,940),(210,920),(225,865)],fill=(35,135,200),outline=CYAN)
+    centered(d,"FLUID BALANCE",1420,font(34,True),CYAN,750)
+
+
+def draw_recovery(d, p, t):
+    # Recovery timeline and tissue repair metaphor.
+    d.ellipse((390,700,690,1000),fill=(250,180,90),outline=ORANGE,width=6)
+    d.ellipse((510,650,780,920),fill=BG)
+    for i in range(8):
+        x=160+i*105; y=1190+int(18*math.sin(t*2+i))
+        r=12+int(4*math.sin(t*3+i))
+        d.ellipse((x-r,y-r,x+r,y+r),fill=PURPLE)
+    centered(d,"SLEEP + RECOVERY",1080,font(35,True),PURPLE,850)
+    d.line((150,1400,930,1400),fill=CYAN,width=8)
+    d.ellipse((150,1380,190,1420),fill=GREEN)
+    d.ellipse((150+int(780*p),1380,190+int(780*p),1420),fill=ORANGE)
+    centered(d,"REPAIR AND ADAPTATION",1510,font(30,True),WHITE,850)
+
+
+def draw_process(d, p, t, title, subtitle):
+    # Sequential reveal of a 3-step causal mechanism, with a travelling signal.
+    labels=["TRIGGER","PROCESS","RESULT"]
+    xs=[220,540,860]
+    colors=[ORANGE,CYAN,GREEN]
+    for i,(x,label,color) in enumerate(zip(xs,labels,colors)):
+        if p < i*.25: continue
+        d.rounded_rectangle((x-115,850,x+115,1110),radius=35,fill=(20,40,60),outline=color,width=6)
+        centered(d,label,960,font(29,True),color,200)
+        if i:
+            arrow(d,(xs[i-1]+120,980),(x-125,980),WHITE,7)
+    for i in range(5):
+        q=(p*1.6+i/5)%1
+        x=220+q*640; y=780+int(18*math.sin(t*3+i))
+        d.ellipse((x-12,y-12,x+12,y+12),fill=CYAN,outline=WHITE,width=2)
+    centered(d,subtitle[:70],1300,font(32,True),WHITE,850)
+
 
 def classify(text):
     t=str(text).lower()
@@ -153,23 +291,106 @@ def classify(text):
         if re.search(pat,t): return kind
     return "generic"
 
+
+def classify_scene(scene):
+    text=" ".join(str(scene.get(k,"")) for k in
+                  ("narration","visual_title","visual_subtitle","visual_instruction","keyword")).lower()
+    requested=str(scene.get("visual_type","")).strip().lower()
+    aliases={
+        "fiber":"digestion_fiber","digestion":"digestion_fiber","gut":"digestion_fiber",
+        "muscle":"muscle_anatomy","anatomy":"muscle_anatomy",
+        "exercise":"exercise_biomechanics","biomechanics":"exercise_biomechanics",
+        "protein":"protein_synthesis","nutrition":"food_nutrition",
+        "fat_loss":"energy_metabolism","energy":"energy_metabolism",
+        "sleep":"recovery_sleep","recovery":"recovery_sleep",
+    }
+    requested=aliases.get(requested,requested)
+    allowed={"digestion_fiber","muscle_anatomy","exercise_biomechanics",
+             "protein_synthesis","energy_metabolism","hydration","recovery_sleep",
+             "food_nutrition","process"}
+    if requested in allowed: return requested
+    if re.search(r"dietary fiber|fibre|fiber|gut|intestin|digest|microbiome|prebiotic|whole grain|oat|legume",text):
+        return "digestion_fiber"
+    if re.search(r"squat|deadlift|bench press|lunge|curl|row exercise|push.?up|pull.?up|exercise form|range of motion|joint angle",text):
+        return "exercise_biomechanics"
+    if re.search(r"protein|amino acid|synthesis|muscle protein|build muscle",text):
+        return "protein_synthesis"
+    if re.search(r"muscle|hypertrophy|resistance|strength|lifting|training|biceps|quadriceps|glute|hamstring|chest",text):
+        return "muscle_anatomy"
+    if re.search(r"calorie|energy balance|fat loss|weight loss|deficit|surplus|fat oxidation|lipolysis",text):
+        return "energy_metabolism"
+    if re.search(r"water|hydration|fluid|dehydrat",text):
+        return "hydration"
+    if re.search(r"sleep|recovery|rest day|fatigue",text):
+        return "recovery_sleep"
+    if re.search(r"food|meal|eat|nutrition|carb|carbohydrate|vegetable|fruit|protein source",text):
+        return "food_nutrition"
+    return "process"
+
+
 def scene_text(scene):
     narration=str(scene.get("narration","")).strip()
     title=str(scene.get("visual_title") or scene.get("heading") or narration[:55]).strip()
     subtitle=str(scene.get("visual_subtitle") or narration).strip()
-    return title[:90],subtitle[:180],narration
+    instruction=str(scene.get("visual_instruction") or "").strip()
+    return title[:90],subtitle[:180],narration,instruction
+
+
+def draw_diagram(scene, index, frame, frames):
+    title,subtitle,narration,instruction=scene_text(scene)
+    kind=classify_scene(scene)
+    p=min(1.0,max(0.0,frame/max(1,frames-1)))
+    t=frame/FPS
+    im,d=base_scene(title,subtitle,index)
+    # Every frame is redrawn: objects are progressively revealed and animated,
+    # instead of applying a slow zoom to one static illustration.
+    if kind=="digestion_fiber":
+        draw_fiber_system(d,p,t)
+    elif kind=="muscle_anatomy":
+        draw_muscle_anatomy(d,p,t)
+    elif kind=="exercise_biomechanics":
+        exercise="SQUAT" if re.search(r"squat",narration.lower()) else "EXERCISE MECHANICS"
+        draw_exercise(d,p,t,exercise)
+    elif kind=="protein_synthesis":
+        draw_protein_synthesis(d,p,t)
+    elif kind=="energy_metabolism":
+        draw_energy(d,p,t)
+    elif kind=="hydration":
+        draw_hydration(d,p,t)
+    elif kind=="recovery_sleep":
+        draw_recovery(d,p,t)
+    elif kind=="food_nutrition":
+        draw_fiber_system(d,p,t)
+    else:
+        draw_process(d,p,t,title,subtitle)
+    # Animated stroke/reveal marker tracks the spoken scene.
+    x=70+int((W-140)*p)
+    d.rounded_rectangle((70,H-170,W-70,H-75),radius=24,fill=(18,31,50),outline=(38,58,82),width=2)
+    d.text((W/2,H-122),"FITFUEL  •  SCIENCE EXPLAINER",font=font(24,True),fill=MUTED,anchor="mm")
+    d.rounded_rectangle((70,H-48,x,H-34),radius=7,fill=CYAN)
+    return im
+
 
 def render_scene(scene,index,seconds,outfile):
-    title,subtitle,narration=scene_text(scene); kind=classify(narration)
     os.makedirs(os.path.dirname(outfile),exist_ok=True)
-    # Render 1 still per scene and gently animate a scale/opacity pulse using zoompan.
-    still=outfile+".png"
-    draw_diagram(kind,title,subtitle,index,0).save(still)
-    frames=max(1,int(seconds*FPS))
-    vf=f"zoompan=z='1+0.018*sin(2*PI*on/{frames})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={FPS},format=yuv420p"
-    cmd=["ffmpeg","-y","-loglevel","error","-loop","1","-i",still,"-vf",vf,"-t",str(seconds),"-r",str(FPS),"-c:v","libx264","-preset","veryfast","-crf","22","-pix_fmt","yuv420p","-an",outfile]
-    subprocess.run(cmd,check=True); os.remove(still)
-    return {"scene":index,"type":kind,"title":title,"file":outfile,"seconds":round(seconds,2)}
+    frames=max(2,int(seconds*FPS))
+    temp=outfile+".frames"
+    os.makedirs(temp,exist_ok=True)
+    try:
+        for frame in range(frames):
+            draw_diagram(scene,index,frame,frames).save(f"{temp}/f{frame:05d}.png")
+        cmd=["ffmpeg","-y","-loglevel","error","-framerate",str(FPS),"-i",f"{temp}/f%05d.png",
+             "-t",f"{seconds:.3f}","-c:v","libx264","-preset","veryfast","-crf","21",
+             "-pix_fmt","yuv420p","-an",outfile]
+        subprocess.run(cmd,check=True)
+    finally:
+        for name in os.listdir(temp):
+            os.remove(os.path.join(temp,name))
+        os.rmdir(temp)
+    return {"scene":index,"type":classify_scene(scene),"title":scene_text(scene)[0],
+            "file":outfile,"seconds":round(seconds,2),"animation":"drawn-and-moving"}
+
+
 
 def main():
     if os.getenv("SCIENCE_VISUALS","1").lower() in ("0","false","no","off"):
