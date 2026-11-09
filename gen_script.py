@@ -452,7 +452,7 @@ def build_prompt(content_type, used, trends, memory, research):
             f"{lines}\n"
         )
 
-    research_block = "\\n".join(
+    research_block = chr(10).join(
         f"- PMID {p['pmid']} | {p.get('title', '')} | {p.get('journal', '')} ({p.get('year', '')}) | DOI: {p.get('doi') or 'none'} | Abstract: {p.get('abstract', '')}"
         for p in research
     ) or "No PubMed records retrieved. Use conservative established guidance only and return sources=[]; never fabricate citations."
