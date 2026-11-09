@@ -508,7 +508,7 @@ def visual_beat_durations(seconds, target=BEAT_SECONDS):
 def render_scene(scene,index,seconds,outfile):
     os.makedirs(os.path.dirname(outfile),exist_ok=True)
     # Production path: use shared Blender CGI, never the legacy Pillow 2D scene.
-    if os.getenv("VISUAL_ENGINE", "blender3d").lower() == "blender3d":
+    if os.getenv("VISUAL_ENGINE", "legacy-test-only").lower() == "blender3d":
         title, subtitle, narration, instruction = scene_text(scene)
         kind = classify_scene(scene)
         exercise = " ".join([title, narration, instruction])[:110]
