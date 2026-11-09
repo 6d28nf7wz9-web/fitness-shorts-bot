@@ -476,6 +476,10 @@ Optimize for viewer satisfaction and clarity, not clickbait.
 Recently used topics (avoid repeating or closely copying):
 {recent}
 
+SCIENTIFIC SOURCES FROM PUBMED (verified records):
+{research_block}
+Use only these papers as evidence. Claims must not exceed their abstracts. Never invent statistics, PMIDs, DOIs, authors, or journals. Include 1-4 supplied PMIDs supporting the main claims in sources; if none, use [].
+
 Return ONLY valid JSON with exactly these keys:
 
 {{
@@ -817,7 +821,10 @@ def generate_script():
     print(f"Video angle: {content_type}")
     print("Using channel performance memory:", MEMORY_FILE)
 
-    from research_sources import research_for_topic\n    research = research_for_topic(content_type)\n\n    prompt = build_prompt(
+    from research_sources import research_for_topic
+    research = research_for_topic(content_type)
+
+    prompt = build_prompt(
         content_type,
         all_used(),
         trends,
