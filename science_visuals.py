@@ -180,34 +180,79 @@ def draw_muscle_anatomy(d, p, t):
 
 
 def draw_exercise(d, p, t, exercise="SQUAT"):
-    # Animated biomechanical stick-figure with joints and highlighted working muscles.
-    bend=(0.5+0.5*math.sin(t*2.4))
-    hip_y=850+int(85*bend)
-    shoulder=(520,hip_y-250)
-    hip=(520,hip_y)
-    knee=(390+int(40*bend),hip_y+190)
-    ankle=(350,1450)
-    # floor and guide
-    d.line((180,1480,900,1480),fill=MUTED,width=7)
-    # torso and limbs
-    d.line((shoulder,hip),fill=(235,220,195),width=42)
-    d.line((shoulder,(430,hip_y-310)),fill=(235,220,195),width=30)
-    d.line((430,hip_y-310),(365,hip_y-270),fill=(235,220,195),width=26)
-    d.line((hip,knee),fill=ORANGE,width=38)
-    d.line((knee,ankle),fill=(235,220,195),width=34)
-    d.line((hip,(650,hip_y+160)),fill=ORANGE,width=38)
-    d.line((650,hip_y+160),(720,1450),fill=(235,220,195),width=34)
-    for x,y in [shoulder,hip,knee,ankle,(650,hip_y+160)]:
-        d.ellipse((x-24,y-24,x+24,y+24),fill=CYAN,outline=WHITE,width=4)
-    # muscle highlights at quads/glutes
-    d.ellipse((350,hip_y+65,445,hip_y+230),fill=(220,70,75),outline=(255,170,150),width=4)
-    d.ellipse((570,hip_y+65,665,hip_y+230),fill=(220,70,75),outline=(255,170,150),width=4)
-    centered(d,exercise.upper()[:28],590,font(34,True),ORANGE,700)
-    centered(d,"JOINTS + TARGET MUSCLES",1580,font(28,True),WHITE,800)
-    # motion arrows
-    if p>.2:
-        arrow(d,(760,900),(760,760),GREEN,8)
-        arrow(d,(280,1120),(280,1260),GREEN,8)
+    # Exercise-specific biomechanics: body position and highlighted prime movers.
+    key=str(exercise).lower()
+    pulse=0.5+0.5*math.sin(t*2.4)
+    d.line((130,1510,950,1510),fill=MUTED,width=7)
+    def joint(x,y):
+        d.ellipse((x-22,y-22,x+22,y+22),fill=CYAN,outline=WHITE,width=4)
+    if "bench" in key or "chest press" in key:
+        # Supine press: torso horizontal, bar moves vertically over the chest.
+        d.rounded_rectangle((230,1130,820,1220),radius=35,fill=(235,220,195),outline=WHITE,width=3)
+        d.ellipse((760,1050,850,1140),fill=(235,220,195),outline=WHITE,width=3)
+        d.ellipse((420,1110,650,1245),fill=(205,65,75),outline=ORANGE,width=5)
+        elbow_y=930+int(45*pulse)
+        d.line((540,1140,540,elbow_y),fill=(235,220,195),width=34)
+        d.line((540,elbow_y,540,760+int(45*pulse)),fill=(235,220,195),width=30)
+        d.line((540,760+int(45*pulse),540,700+int(45*pulse)),fill=CYAN,width=14)
+        d.line((320,700+int(45*pulse),760,700+int(45*pulse)),fill=WHITE,width=18)
+        for x in (300,760): d.rounded_rectangle((x-25,640+int(45*pulse),x+25,760+int(45*pulse)),radius=10,fill=ORANGE)
+        centered(d,"CHEST + TRICEPS",1390,font(30,True),ORANGE,700)
+    elif "curl" in key:
+        # Standing elbow flexion with biceps highlighted.
+        d.line((520,730,520,1160),fill=(235,220,195),width=48)
+        d.ellipse((465,610,575,720),fill=(235,220,195),outline=WHITE,width=3)
+        d.line((520,820,390,1050),fill=(235,220,195),width=34)
+        elbow=(390,1050); wrist=(470,850-int(90*pulse))
+        d.line((elbow,wrist),fill=(235,220,195),width=30)
+        d.ellipse((420,850,500,1040),fill=(205,65,75),outline=ORANGE,width=4)
+        d.line((wrist,(470,790-int(90*pulse))),fill=CYAN,width=14)
+        d.rounded_rectangle((410,730-int(90*pulse),530,790-int(90*pulse)),radius=12,fill=WHITE)
+        centered(d,"BICEPS • ELBOW FLEXION",1390,font(30,True),ORANGE,800)
+    elif "deadlift" in key or "hinge" in key:
+        # Hip hinge: bar travels close to the legs; posterior chain highlighted.
+        hip=(570,1030); shoulder=(700,800); knee=(420,1280); ankle=(380,1450)
+        d.line((shoulder,hip),fill=(235,220,195),width=48)
+        d.line((hip,knee),fill=(205,65,75),width=42)
+        d.line((knee,ankle),fill=(235,220,195),width=36)
+        d.line((hip,(760,1260)),fill=(205,65,75),width=42)
+        d.line(((760,1260),(790,1450)),fill=(235,220,195),width=36)
+        d.line((shoulder,(640,1190)),fill=(235,220,195),width=26)
+        d.line((640,1190,(640,1380)),fill=(235,220,195),width=24)
+        bar_y=1380-int(65*pulse)
+        d.line((250,bar_y,900,bar_y),fill=WHITE,width=16)
+        for x in (280,870): d.rounded_rectangle((x-28,bar_y-75,x+28,bar_y+75),radius=10,fill=ORANGE)
+        centered(d,"GLUTES • HAMSTRINGS • BACK",700,font(28,True),ORANGE,900)
+    elif "push" in key:
+        # Push-up plank: elbows flex and extend; chest/triceps highlighted.
+        shoulder=(330,1050); hip=(650,1120); ankle=(900,1190)
+        d.line((shoulder,hip),fill=(235,220,195),width=42)
+        d.line((hip,ankle),fill=(235,220,195),width=32)
+        d.ellipse((250,980,350,1080),fill=(235,220,195),outline=WHITE,width=3)
+        elbow=(450,1320-int(50*pulse)); wrist=(360,1460)
+        d.line((shoulder,elbow),fill=(205,65,75),width=34)
+        d.line((elbow,wrist),fill=(235,220,195),width=28)
+        joint(*elbow); joint(*wrist)
+        centered(d,"CHEST • SHOULDERS • TRICEPS",700,font(28,True),ORANGE,900)
+    else:
+        # Squat: hip/knee flexion with quadriceps and glutes highlighted.
+        hip_y=850+int(85*pulse)
+        shoulder=(520,hip_y-250); hip=(520,hip_y)
+        knee=(390+int(40*pulse),hip_y+190); ankle=(350,1450)
+        d.line((shoulder,hip),fill=(235,220,195),width=42)
+        d.line((shoulder,(430,hip_y-310)),fill=(235,220,195),width=30)
+        d.line(((430,hip_y-310),(365,hip_y-270)),fill=(235,220,195),width=26)
+        d.line((hip,knee),fill=(205,65,75),width=38)
+        d.line((knee,ankle),fill=(235,220,195),width=34)
+        d.line((hip,(650,hip_y+160)),fill=(205,65,75),width=38)
+        d.line(((650,hip_y+160),(720,1450)),fill=(235,220,195),width=34)
+        for x,y in [shoulder,hip,knee,ankle,(650,hip_y+160)]: joint(x,y)
+        centered(d,"QUADRICEPS • GLUTES",700,font(30,True),ORANGE,800)
+    centered(d,str(exercise).upper()[:30],590,font(34,True),WHITE,850)
+    if p>.25:
+        arrow(d,(930,930),(930,790),GREEN,8)
+        arrow(d,(160,1120),(160,1260),GREEN,8)
+
 
 
 def draw_protein_synthesis(d, p, t):
@@ -373,7 +418,7 @@ def draw_diagram(scene, index, frame, frames):
     elif kind=="muscle_anatomy":
         draw_muscle_anatomy(d,p,t)
     elif kind=="exercise_biomechanics":
-        exercise=(title.upper()[:28] if title else ("SQUAT" if re.search(r"squat",narration.lower()) else "EXERCISE MECHANICS"))
+        exercise=" ".join([title,narration,instruction])[:110]
         draw_exercise(d,p,t,exercise)
     elif kind=="protein_synthesis":
         draw_protein_synthesis(d,p,t)
