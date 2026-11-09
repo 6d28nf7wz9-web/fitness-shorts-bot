@@ -9,6 +9,7 @@ class LongScienceVisualTests(unittest.TestCase):
         self.assertEqual(classify_section({"heading":"Hydration and water balance"}),"hydration")
         self.assertEqual(classify_section({"heading":"Why sleep improves recovery"}),"recovery_sleep")
         self.assertEqual(classify_section({"heading":"A useful general principle"}),"process")
+        self.assertEqual(classify_section({"heading":"A useful principle","narration":"Dietary fiber supports the gut microbiome"}),"digestion_fiber")
     def test_sections_split_into_contiguous_short_beats(self):
         windows=chunk_windows(0,16,7)
         self.assertEqual(windows,[(0.0,7.0),(7.0,14.0),(14.0,16.0)])
