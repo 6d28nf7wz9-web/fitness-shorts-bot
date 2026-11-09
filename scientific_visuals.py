@@ -184,8 +184,10 @@ def classify(text):
     return "generic", "THE SCIENCE", "A simple mechanism, made visual"
 
 
-def render_scene(index, narration, seconds):
-    kind,title,sub=classify(narration)
+def render_scene(index, narration, seconds, visual_title="", visual_subtitle=""):
+    kind,default_title,default_sub=classify(narration)
+    title=str(visual_title or default_title).strip()[:34]
+    sub=str(visual_subtitle or default_sub).strip()[:52]
     draw_fn={"muscle":muscle,"protein":protein,"energy":energy,"hydration":hydration,
              "progression":progression,"generic":generic}[kind]
     frames=max(2,int(seconds*FPS))
@@ -194,6 +196,13 @@ def render_scene(index, narration, seconds):
             t=f/FPS
             im,d=base(title,sub,t)
             draw_fn(d,t)
+            # Animated editorial accent and scene-specific takeaway.
+            pulse=0.5+0.5*math.sin(t*3.2)
+            x=40+int(18*pulse)
+            d.rounded_rectangle((x,245,500,258),radius=6,fill=(25,48,70))
+            d.rounded_rectangle((x,245,x+int(460*(0.35+0.65*pulse)),258),radius=6,fill=ORANGE if index%2 else CYAN)
+            d.rounded_rectangle((38,875,502,920),radius=14,fill=(16,31,53),outline=(34,65,91),width=2)
+            d.text((270,897),f"TAKEAWAY / {sub[:38].upper()}",font=font(13,True),fill=GREEN if index%2 else CYAN,anchor="mm")
             # scale up for the existing 1080x1920 assembly pipeline
             im.resize((1080,1920),Image.Resampling.LANCZOS).save(f"{tmp}/f{f:05d}.png")
         out=OUT/f"scene_{index}.mp4"
@@ -221,7 +230,7 @@ def main():
         if dest.exists():
             dest.unlink()
         try:
-            render_scene(i,str(scene.get("narration","")),float(a.get("seconds",0)))
+            render_scene(i,str(scene.get("narration","")),float(a.get("seconds",0)),\n                          str(scene.get("visual_title","")),str(scene.get("visual_subtitle","")))
         except Exception as exc:
             print(f"WARN science scene {i} failed; Pixabay fallback will be used: {exc}")
             if dest.exists(): dest.unlink()

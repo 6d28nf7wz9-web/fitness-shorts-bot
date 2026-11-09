@@ -520,7 +520,7 @@ End with a short phrase that naturally echoes the opening idea.
 
 STRICT SCRIPT RULES:
 
-- Create 4 or 5 scenes only.
+- Create 5 to 7 scenes. Every scene is exactly ONE spoken sentence and its own visual slide.\n- Each sentence must trigger a distinct slide/visual state; never leave one static diagram for multiple sentences.\n- Add visual_title (2-5 words) and visual_subtitle (3-6 words) to every scene; short, readable, punchy, not a duplicate of narration.
 - Total narration: 45-65 spoken words,
   designed for roughly 18-27 seconds at a natural speaking pace.
 - Hook scene: 4-9 words.
