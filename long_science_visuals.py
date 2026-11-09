@@ -5,12 +5,13 @@ from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1280, 720
 FPS = max(8, min(15, int(os.getenv("LONG_SCIENCE_FPS", "12"))))
-MAX_CHUNK = max(4.0, float(os.getenv("LONG_SCIENCE_CHUNK_SECONDS", "7")))
+MAX_CHUNK = min(6.0, max(4.0, float(os.getenv("LONG_SCIENCE_CHUNK_SECONDS", "5"))))
 OUT = Path("output/long")
 SCIENCE = OUT / "science"
-BG=(239,244,248); INK=(28,43,58); MUTED=(91,111,130)
-CYAN=(0,112,145); ORANGE=(190,99,35); GREEN=(38,125,82)
+BG=(10,18,31); INK=(24,39,55); MUTED=(102,123,144)
+CYAN=(0,145,180); ORANGE=(220,119,48); GREEN=(38,145,99)
 PURPLE=(112,82,165); PALE=(250,252,254)
+NAVY=(10,18,31); PANEL=(20,34,52); GRID=(29,46,66); WHITE=(244,248,252)
 REG="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 BOLD="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
@@ -50,12 +51,23 @@ def chunk_windows(start,end,maximum=MAX_CHUNK):
         nxt=min(end,cur+maximum); out.append((round(cur,3),round(nxt,3))); cur=nxt
     return out
 
-def draw_scene(s,kind,section_no,frame,offset,total):
+def draw_scene(s,kind,section_no,frame,offset,total,beat_index=0):
     t=offset+frame/FPS; p=min(1,(offset+frame/FPS)/max(total,.001))
-    im=Image.new("RGB",(W,H),BG); d=ImageDraw.Draw(im)
-    for x in range(0,W,80): d.line((x,0,x,H),fill=(229,235,241),width=1)
-    for y in range(0,H,80): d.line((0,y,W,y),fill=(229,235,241),width=1)
-    d.rounded_rectangle((42,28,W-42,150),radius=24,fill=PALE,outline=(205,217,227),width=2)
+    im=Image.new("RGB",(W,H),NAVY); d=ImageDraw.Draw(im)
+    # Premium deep-blue gradient, subtle technical grid and animated ambient accents.
+    for y in range(H):
+        q=y/max(H-1,1); c=tuple(int(a+(b-a)*q) for a,b in zip((10,18,31),(19,34,52)))
+        d.line((0,y,W,y),fill=c)
+    for x in range(0,W,64): d.line((x,0,x,H),fill=GRID,width=1)
+    for y in range(0,H,64): d.line((0,y,W,y),fill=GRID,width=1)
+    for i in range(18):
+        x=(i*97+int(t*13))%W; y=(i*53+int(t*7))%H
+        r=2+(i%3); d.ellipse((x-r,y-r,x+r,y+r),fill=(30,62,83))
+    d.rounded_rectangle((42,28,W-42,150),radius=24,fill=PALE,outline=(75,101,126),width=2)
+    d.rounded_rectangle((58,43,66,133),radius=4,fill=CYAN)
+    label(d,"FITFUEL  /  SCIENCE LAB",(145,51),14,CYAN)
+    d.rounded_rectangle((W-230,42,W-65,76),radius=15,fill=(225,239,246))
+    label(d,f"VISUAL BEAT {beat_index+1:02d}",(W-147,59),13,CYAN)
     title=str(s.get("heading","FITFUEL SCIENCE")).upper()[:75]
     f=font(34,True)
     while d.textbbox((0,0),title,font=f)[2]>1120 and f.size>20: f=font(f.size-1,True)
@@ -170,12 +182,12 @@ def draw_scene(s,kind,section_no,frame,offset,total):
     d.rounded_rectangle((58,690,58+int((W-116)*p),700),radius=5,fill=CYAN)
     return im
 
-def render_chunk(section,section_no,kind,offset,seconds,total,outfile):
+def render_chunk(section,section_no,kind,offset,seconds,total,outfile,beat_index=0):
     temp=Path(str(outfile)+".frames"); temp.mkdir(parents=True,exist_ok=True)
     frames=max(2,int(math.ceil(seconds*FPS)))
     try:
         for frame in range(frames):
-            draw_scene(section,kind,section_no,frame,offset,total).save(temp/f"f{frame:05d}.jpg",quality=90)
+            draw_scene(section,kind,section_no,frame,offset,total,beat_index=beat_index).save(temp/f"f{frame:05d}.jpg",quality=92)
         cmd=["ffmpeg","-y","-loglevel","error","-framerate",str(FPS),"-i",str(temp/"f%05d.jpg"),
              "-vf","fps=30,scale=1920:1080:flags=lanczos,setsar=1","-t",f"{seconds:.3f}",
              "-c:v","libx264","-preset","veryfast","-crf","21","-pix_fmt","yuv420p","-an",str(outfile)]
@@ -193,9 +205,9 @@ def main():
         if end<=start: raise SystemExit(f"Invalid timing in section {si}")
         kind=classify_section(sec); windows=chunk_windows(0,end-start)
         print(f"[long science] section {si}/{len(sections)}: {sec.get('heading')} -> {kind}; {len(windows)} beats")
-        for offset,stop in windows:
+        for beat_index,(offset,stop) in enumerate(windows):
             number+=1; dest=SCIENCE/f"scene_{number:04d}.mp4"
-            render_chunk(sec,si,kind,offset,stop-offset,end-start,dest)
+            render_chunk(sec,si,kind,offset,stop-offset,end-start,dest,beat_index=beat_index)
             chunks.append({"file":str(dest),"start":round(start+offset,2),"end":round(start+stop,2),
                            "section":si,"query":sec.get("heading",""),"visual_type":kind,
                            "animation":"2d-motion-graphics"})
