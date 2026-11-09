@@ -18,14 +18,15 @@ def args():
 
 A=args()
 FAST_PREVIEW=os.getenv("FITFUEL_PREVIEW_FAST","0")=="1"
-W,H=((360,640) if A.orientation=="portrait" else (640,360)) if FAST_PREVIEW else ((720,1280) if A.orientation=="portrait" else (1280,720))
-FPS=12 if FAST_PREVIEW else 24
-SAMPLES=8 if FAST_PREVIEW else 24
-FRAMES=max(12,int(A.duration*FPS))
+W,H=((240,426) if A.orientation=="portrait" else (426,240)) if FAST_PREVIEW else ((480,854) if A.orientation=="portrait" else (854,480))
+FPS=8 if FAST_PREVIEW else 12
+SAMPLES=2 if FAST_PREVIEW else 8
+FRAMES=max(8,int(math.ceil(A.duration*FPS)))
 bpy.ops.object.select_all(action="SELECT"); bpy.ops.object.delete(use_global=False)
 scene=bpy.context.scene
 scene.render.engine="BLENDER_EEVEE"
-scene.eevee.use_gtao=True; scene.eevee.gtao_distance=3; scene.eevee.gtao_factor=1.35
+scene.eevee.use_gtao=not FAST_PREVIEW
+scene.eevee.gtao_distance=2; scene.eevee.gtao_factor=1.15
 scene.render.resolution_x=W; scene.render.resolution_y=H; scene.render.resolution_percentage=100
 scene.eevee.taa_render_samples=SAMPLES
 scene.render.fps=FPS; scene.frame_start=1; scene.frame_end=FRAMES
