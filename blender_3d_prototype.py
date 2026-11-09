@@ -10,13 +10,17 @@ bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=Fal
 for datablocks in (bpy.data.meshes, bpy.data.curves, bpy.data.materials, bpy.data.cameras, bpy.data.lights):
     pass
 scene=bpy.context.scene
-scene.render.engine='BLENDER_EEVEE_NEXT'
+# Ubuntu apt provides Blender 4.0.x; its Eevee engine identifier is BLENDER_EEVEE.
+scene.render.engine='BLENDER_EEVEE'
 scene.render.resolution_x=int(os.getenv('ANIM_W','720')); scene.render.resolution_y=int(os.getenv('ANIM_H','1280'))
 scene.render.resolution_percentage=100
 scene.render.fps=24; scene.frame_start=1; scene.frame_end=96
 scene.render.image_settings.file_format='PNG'
 scene.world.color=(0.018,0.025,0.04)
-scene.view_settings.view_transform='AgX'
+try:
+    scene.view_settings.view_transform='AgX'
+except Exception:
+    scene.view_settings.view_transform='Standard'
 
 def mat(name,color,metal=0,rough=.35,emission=0):
     m=bpy.data.materials.new(name); m.diffuse_color=(*color,1); m.use_nodes=True
