@@ -501,7 +501,7 @@ def visual_beat_durations(seconds, target=BEAT_SECONDS):
     """Split each script scene into balanced 4-6s visual beats where possible."""
     seconds=float(seconds)
     if seconds<=0: raise ValueError("scene duration must be positive")
-    count=max(1,int(math.ceil(seconds/target)))
+    count=max(1,int(math.ceil(seconds/6.0)),int(round(seconds/target)))
     return [seconds/count]*count
 
 
