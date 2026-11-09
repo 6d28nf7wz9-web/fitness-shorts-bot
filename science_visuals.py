@@ -53,9 +53,9 @@ def base_scene(title, subtitle, index):
     for x in range(0,W,90): d.line((x,0,x,H),fill=(224,232,239),width=1)
     for y in range(0,H,90): d.line((0,y,W,y),fill=(224,232,239),width=1)
     d.rounded_rectangle((56,72,W-56,174),radius=28,fill=(250,252,254),outline=(205,217,227),width=2)
-    d.text((W/2,122),f"FITFUEL  •  SCIENCE {index:02d}",font=font(30,True),fill=CYAN,anchor="mm")
-    centered(d,title.upper(),250,font(56,True),WHITE,940,14)
-    centered(d,subtitle,390,font(30),MUTED,900,10)
+    # The top header names the actual subject of this scene, not a generic brand label.
+    centered(d,title.upper(),88,font(31,True),WHITE,920,3)
+    centered(d,subtitle,235,font(30),MUTED,900,10)
     return im,d
 
 def muscle(draw, cx, cy, scale=1.0, color=ORANGE):
