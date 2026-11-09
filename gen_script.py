@@ -494,6 +494,7 @@ understand one useful idea instantly,
 and stay until the payoff.
 
 TODAY'S SERIES: {series}
+Approved series names: {', '.join(SERIES)}. Use the assigned series exactly.
 TODAY'S ANGLE: {content_type}
 
 CHANNEL PERFORMANCE LEARNING:
