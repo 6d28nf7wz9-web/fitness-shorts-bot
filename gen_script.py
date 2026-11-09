@@ -830,6 +830,7 @@ def generate_script():
         all_used(),
         trends,
         memory,
+        research,
     )
 
     model_candidates = get_model_candidates()
