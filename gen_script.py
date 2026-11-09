@@ -106,6 +106,13 @@ def get_model_candidates():
 
 MEMORY_FILE = "performance_memory.json"
 
+SERIES = [
+    "Fitness Myth Check",
+    "One Mistake, One Fix",
+    "Fitness Science Explained",
+    "Smart Food Choices",
+]
+
 BANNED = [
     "steroid",
     "sarm",
@@ -284,6 +291,11 @@ def choose_content_type(used, memory):
     return selected
 
 
+def choose_series(used):
+    """Rotate recognizable recurring formats."""
+    return SERIES[len(used) % len(SERIES)]
+
+
 def performance_context(memory):
     baseline = memory.get("baseline", {})
     signals = memory.get("topic_signals", [])
@@ -430,7 +442,8 @@ def performance_context(memory):
         return baseline_text + chr(10) + "Performance evidence (soft guidance only):" + chr(10) + chr(10).join(lines)
     return baseline_text
 
-def build_prompt(content_type, used, trends, memory, research):
+def build_prompt(content_type, used, trends, memory, research, series=None):
+    series = series or SERIES[len(used) % len(SERIES)]
     recent = (
         ", ".join(str(topic) for topic in used[-80:])
         if used
@@ -465,6 +478,7 @@ Your job is to make viewers STOP scrolling,
 understand one useful idea instantly,
 and stay until the payoff.
 
+TODAY'S SERIES: {series}
 TODAY'S ANGLE: {content_type}
 
 CHANNEL PERFORMANCE LEARNING:
@@ -488,6 +502,7 @@ Use only these papers as evidence. Claims must not exceed their abstracts. Never
 Return ONLY valid JSON with exactly these keys:
 
 {{
+  "series": "one exact FitFuel series name from the approved list",
   "topic": "unique 3-6 word label",
   "title": "clear, curiosity-driven title, maximum 60 characters",
   "description": "one or two concise sentences",
@@ -520,7 +535,7 @@ End with a short phrase that naturally echoes the opening idea.
 
 STRICT SCRIPT RULES:
 
-- Create 5 to 7 scenes. Every scene is exactly ONE spoken sentence and its own visual slide.\n- Each sentence must trigger a distinct slide/visual state; never leave one static diagram for multiple sentences.\n- Add visual_title (2-5 words), visual_subtitle (3-6 words), visual_type, and visual_instruction to every scene.
+- Create 4 to 5 scenes. Every scene is exactly ONE spoken sentence and its own visual slide.\n- Each sentence must trigger a distinct slide/visual state; never leave one static diagram for multiple sentences.\n- Add visual_title (2-5 words), visual_subtitle (3-6 words), visual_type, and visual_instruction to every scene.
 - visual_type must be one of: digestion_fiber, muscle_anatomy, exercise_biomechanics, protein_synthesis, energy_metabolism, hydration, recovery_sleep, food_nutrition, process.
 - visual_instruction must describe the actual subject anatomy/process, what moves, where it moves, and the key visual labels; do not describe a generic title card.
 - Match the illustration to the exact spoken sentence. If explaining dietary fiber, show food fiber travelling through the digestive tract and its relevant effect; if explaining an exercise, show the body position, joints, and muscles involved; if explaining a muscle, show that muscle anatomically; if explaining metabolism, show the actual energy pathway.
@@ -536,8 +551,9 @@ STRICT SCRIPT RULES:
   or empty motivational lines.
 - Use numbers only when reliable and useful.
 - Never invent studies or statistics.
-- No long intro, greeting, recap, like-and-subscribe,
-  or spoken disclaimer.
+- No long intro, greeting, recap, generic like-and-subscribe,
+  or spoken disclaimer. The final scene must include a natural topic-specific
+  comment question and a brief invitation to follow FitFuel for the next episode.
 - Title must accurately match the video
   and include the main topic naturally.
 - Description: concise, relevant, no keyword stuffing.
@@ -628,6 +644,7 @@ def repair_keywords(data):
 
 def validate(data):
     required = (
+        "series",
         "sources",
         "topic",
         "title",
@@ -639,6 +656,9 @@ def validate(data):
     for key in required:
         if key not in data:
             return f"missing key: {key}"
+
+    if data.get("series") not in SERIES:
+        return "series must be one of the four approved FitFuel series"
 
     if (
         not isinstance(data["scenes"], list)
@@ -697,6 +717,10 @@ def validate(data):
         return "maximum 5 references"
 
     total_words = sum(word_counts)
+
+    final_line = str(data["scenes"][-1].get("narration", "")).lower()
+    if "?" not in final_line or not any(word in final_line for word in ("follow", "next episode", "next part")):
+        return "final scene needs a comment question and a short follow invitation"
 
     if not 45 <= total_words <= 65:
         return (
@@ -827,6 +851,8 @@ def generate_script():
         memory
     )
 
+    series = choose_series(used)
+    print(f"Video series: {series}")
     print(f"Video angle: {content_type}")
     print("Using channel performance memory:", MEMORY_FILE)
 
@@ -839,6 +865,7 @@ def generate_script():
         trends,
         memory,
         research,
+        series,
     )
 
     model_candidates = get_model_candidates()
@@ -960,6 +987,7 @@ def finalize(data):
     data["references"] = cited_papers
     ref_text = references_block(cited_papers)
     data["description"] = (
+        f"Series: {data.get('series', 'FitFuel')}\n"
         f"{data['description'].strip()}\n\n"
         f"{' '.join(tags)}\n\n"
         f"{DISCLAIMER}\n\n"
