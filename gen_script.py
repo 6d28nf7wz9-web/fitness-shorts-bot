@@ -430,7 +430,7 @@ def performance_context(memory):
         return baseline_text + chr(10) + "Performance evidence (soft guidance only):" + chr(10) + chr(10).join(lines)
     return baseline_text
 
-def build_prompt(content_type, used, trends, memory):
+def build_prompt(content_type, used, trends, memory, research):
     recent = (
         ", ".join(str(topic) for topic in used[-80:])
         if used
@@ -674,7 +674,7 @@ def validate(data):
                 f"{scene.get('keyword')}"
             )
 
-    total_words = sum(word_counts)
+    known_pmids = {p.get("pmid") for p in load_json("output/research_sources.json", []) if isinstance(p, dict)}\n    cited = [str(p).strip() for p in data.get("sources", [])]\n    if any(p not in known_pmids for p in cited):\n        return "sources contains PMID not retrieved from PubMed"\n    if len(cited) > 5:\n        return "maximum 5 references"\n\n    total_words = sum(word_counts)
 
     if not 45 <= total_words <= 65:
         return (
