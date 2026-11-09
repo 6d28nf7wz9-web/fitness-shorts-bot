@@ -30,7 +30,7 @@ jobs:
       UPLOAD_PRIVACY: public
       SKIP_UPLOAD: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
       SHORTS_PER_LONG: "1"
-      VISUAL_ENGINE: blender3d
+      VISUAL_ENGINE: legacy
     steps:
       - uses: actions/checkout@v4
 
