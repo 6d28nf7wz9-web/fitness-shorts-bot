@@ -75,6 +75,36 @@ def build_topic_insights(uploads):
 
 
 
+
+def build_series_insights(uploads):
+    """Summarize recurring content formats using measured video analytics."""
+    grouped = defaultdict(list)
+    for item in uploads:
+        if not isinstance(item, dict) or not item.get("series"):
+            continue
+        stats = item.get("analytics")
+        if isinstance(stats, dict):
+            grouped[str(item["series"]).strip()].append(stats)
+
+    insights = []
+    for series, rows in grouped.items():
+        count = len(rows)
+        insights.append({
+            "series": series,
+            "videos": count,
+            "avg_views_per_video": round(sum(int(row.get("views", 0) or 0) for row in rows) / count),
+            "avg_engaged_views_per_video": round(sum(int(row.get("engaged_views", 0) or 0) for row in rows) / count),
+            "avg_view_percentage": round(sum(float(row.get("average_view_percentage", 0) or 0) for row in rows) / count, 2),
+            "subscribers_gained": sum(int(row.get("subscribers_gained", 0) or 0) for row in rows),
+            "sample_note": "Descriptive only; directional until at least 3 videos.",
+        })
+    return sorted(insights, key=lambda row: (
+        row["avg_view_percentage"],
+        row["avg_engaged_views_per_video"],
+        row["subscribers_gained"],
+    ), reverse=True)
+
+
 def build_first_week_metrics(api, uploads, report_end):
     """Compare Shorts over their first seven calendar days after publication."""
     published = {}
@@ -272,6 +302,7 @@ def main():
     }
     memory["video_performance"] = enriched
     memory["topic_insights"] = build_topic_insights(enriched)
+    memory["series_insights"] = build_series_insights(enriched)
     memory["first_week_topic_insights"] = build_first_week_topic_insights(enriched)
     memory["first_week_analytics"] = {
         "source": "YouTube Analytics API daily video report",
