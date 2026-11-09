@@ -11,13 +11,15 @@ class LongScienceVisualTests(unittest.TestCase):
         self.assertEqual(classify_section({"heading":"A useful general principle"}),"process")
         self.assertEqual(classify_section({"heading":"A useful principle","narration":"Dietary fiber supports the gut microbiome"}),"digestion_fiber")
     def test_sections_split_into_contiguous_short_beats(self):
-        windows=chunk_windows(0,16,7)
-        self.assertEqual(windows,[(0.0,7.0),(7.0,14.0),(14.0,16.0)])
-        self.assertTrue(all(b-a<=7 for a,b in windows))
+        windows=chunk_windows(0,16,5)
+        self.assertEqual(windows,[(0.0,5.0),(5.0,10.0),(10.0,15.0),(15.0,16.0)])
+        self.assertTrue(all(b-a<=6 for a,b in windows))
         self.assertEqual(windows[0][0],0); self.assertEqual(windows[-1][1],16)
     def test_landscape_motion_graphic_frame_renders(self):
         image = draw_scene({"heading": "Muscle protein synthesis", "keywords": ["protein", "muscle"]}, "protein_synthesis", 1, 2, 0.5, 8)
         self.assertEqual(image.size, (1280, 720))
+        second_beat = draw_scene({"heading": "Muscle protein synthesis"}, "protein_synthesis", 1, 2, 0.5, 8, beat_index=1)
+        self.assertNotEqual(image.tobytes(), second_beat.tobytes())
 
     def test_ffmpeg_renders_a_short_animated_scene(self):
         with tempfile.TemporaryDirectory() as folder:
