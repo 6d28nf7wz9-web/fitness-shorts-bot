@@ -18,5 +18,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install visual test dependency
+        run: pip install Pillow
       - name: Compile all Python files
         run: python -m compileall -q .
+      - name: Test scientific visual selection
+        run: python -m unittest tests.test_science_visuals -v
