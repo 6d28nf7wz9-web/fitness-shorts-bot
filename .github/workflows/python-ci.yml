@@ -29,6 +29,8 @@ jobs:
         run: python check_setup.py
       - name: Test scientific visual selection
         run: python -m unittest discover -s tests -p "test_science_visuals.py" -v
+      - name: Test AI Long scientific visual selection
+        run: python -m unittest discover -s tests -p "test_long_science_visuals.py" -v
       - name: Render scientific animation preview
         run: python preview_science_visuals.py
       - name: Upload preview video
