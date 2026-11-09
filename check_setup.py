@@ -221,12 +221,16 @@ def upload_plan(schedules, per_long):
     per_day = defaultdict(Counter)
     runs = []
     for fname, crons in schedules.items():
+        # Analytics and maintenance workflows do not upload videos, so they
+        # must not consume the YouTube video-upload quota in this estimate.
+        if fname not in ("daily.yml", "long_ai.yml"):
+            continue
         for c in crons:
             for t in cron_times(c, now, 7):
                 day = (t.astimezone(pac) if pac else t).date()
                 if fname == "daily.yml":
                     per_day[day]["short"] += 1
-                else:
+                elif fname == "long_ai.yml":
                     per_day[day]["long"] += 1
                     per_day[day]["cut"] += per_long
                 runs.append((t, fname))
