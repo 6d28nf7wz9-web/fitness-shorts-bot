@@ -81,10 +81,7 @@ jobs:
           export LONG_REC=output/long/ai_voice.mp3
           python long_transcribe.py
 
-      - name: Render scientific motion graphics
-        run: python long_science_visuals.py
-
-      - name: Assemble video
+      - name: Assemble video/
         run: |
           python long_assemble.py
           python avatar.py long
