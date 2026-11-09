@@ -16,10 +16,10 @@ from PIL import Image, ImageDraw, ImageFont
 W, H = 540, 960
 FPS = 15
 OUT = Path("output/science")
-BG = (8, 16, 32)
-PANEL = (16, 31, 53)
-WHITE = (240, 247, 255)
-MUTED = (151, 177, 202)
+BG = (241, 246, 250)
+PANEL = (250, 252, 254)
+WHITE = (28, 43, 58)
+MUTED = (91, 111, 130)
 CYAN = (48, 215, 230)
 ORANGE = (255, 166, 75)
 GREEN = (105, 230, 164)
@@ -55,16 +55,16 @@ def base(title, subtitle, t):
     d = ImageDraw.Draw(im)
     # restrained grid + moving scan line
     for x in range(0, W, 45):
-        d.line((x, 0, x, H), fill=(13, 25, 43), width=1)
+        d.line((x, 0, x, H), fill=(224, 232, 239), width=1)
     for y in range(0, H, 45):
-        d.line((0, y, W, y), fill=(13, 25, 43), width=1)
-    d.rounded_rectangle((28, 34, W-28, 104), radius=18, fill=PANEL, outline=(34, 65, 91), width=2)
+        d.line((0, y, W, y), fill=(224, 232, 239), width=1)
+    d.rounded_rectangle((28, 34, W-28, 104), radius=18, fill=PANEL, outline=(202, 215, 226), width=2)
     d.text((48, 53), "FITFUEL  /  SCIENCE", font=font(17, True), fill=CYAN)
     d.text((W-48, 56), f"{int(t*10)%100:02d}", font=font(16), fill=MUTED, anchor="ra")
     d.text((W//2, 165), title[:34].upper(), font=font(27, True), fill=WHITE, anchor="mm")
     d.text((W//2, 208), subtitle[:52], font=font(16), fill=MUTED, anchor="mm")
     # bottom timeline accent
-    d.rounded_rectangle((45, H-62, W-45, H-48), radius=7, fill=(28, 48, 70))
+    d.rounded_rectangle((45, H-62, W-45, H-48), radius=7, fill=(218, 228, 236))
     d.rounded_rectangle((45, H-62, 45+int((W-90)*((t%4)/4)), H-48), radius=7, fill=CYAN)
     return im, d
 
@@ -199,9 +199,9 @@ def render_scene(index, narration, seconds, visual_title="", visual_subtitle="")
             # Animated editorial accent and scene-specific takeaway.
             pulse=0.5+0.5*math.sin(t*3.2)
             x=40+int(18*pulse)
-            d.rounded_rectangle((x,245,500,258),radius=6,fill=(25,48,70))
+            d.rounded_rectangle((x,245,500,258),radius=6,fill=(218,228,236))
             d.rounded_rectangle((x,245,x+int(460*(0.35+0.65*pulse)),258),radius=6,fill=ORANGE if index%2 else CYAN)
-            d.rounded_rectangle((38,875,502,920),radius=14,fill=(16,31,53),outline=(34,65,91),width=2)
+            d.rounded_rectangle((38,875,502,920),radius=14,fill=(250,252,254),outline=(202,215,226),width=2)
             d.text((270,897),f"TAKEAWAY / {sub[:38].upper()}",font=font(13,True),fill=GREEN if index%2 else CYAN,anchor="mm")
             # scale up for the existing 1080x1920 assembly pipeline
             im.resize((1080,1920),Image.Resampling.LANCZOS).save(f"{tmp}/f{f:05d}.png")
