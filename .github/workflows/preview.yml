@@ -1,0 +1,118 @@
+name: Render Video Previews (No YouTube Upload)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fitness-video-previews
+  cancel-in-progress: false
+
+jobs:
+  short-preview:
+    name: Build final Shorts preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+      SKIP_UPLOAD: "1"
+      SCIENCE_VISUALS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install FFmpeg and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Generate Short script
+        run: python gen_script.py
+      - name: Generate voiceover
+        run: python voice.py
+      - name: Fetch and match footage
+        run: python clips_fast.py
+      - name: Validate script and footage
+        run: python quality_check.py
+      - name: Render scientific animations
+        run: python science_visuals.py
+      - name: Assemble final Short
+        run: |
+          python assemble.py
+          python avatar.py short
+      - name: Verify final preview (no upload)
+        run: |
+          test -s output/final.mp4
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/final.mp4
+          python upload.py
+      - name: Save Shorts preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-shorts-preview
+          path: |
+            output/final.mp4
+            output/script.json
+            output/clips_info.json
+            output/science_info.json
+          if-no-files-found: error
+          retention-days: 7
+
+  long-preview:
+    name: Build final AI Long preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      SKIP_UPLOAD: "1"
+      SHORTS_PER_LONG: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install FFmpeg and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Generate AI Long script
+        run: python long_script.py
+      - name: Generate AI voiceover
+        run: |
+          export LONG_ID=$(cat output/long_id.txt)
+          python long_voice.py
+      - name: Transcribe and time the narration
+        run: |
+          export LONG_ID=$(cat output/long_id.txt)
+          export LONG_REC=output/long/ai_voice.mp3
+          python long_transcribe.py
+      - name: Render animated scientific scenes
+        run: python long_science_visuals.py
+      - name: Assemble final AI Long video
+        run: |
+          python long_assemble.py
+          python avatar.py long
+      - name: Verify final preview (no upload)
+        run: |
+          test -s output/long/final_long.mp4
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/long/final_long.mp4
+          python long_upload.py
+      - name: Save AI Long preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-ai-long-preview
+          path: |
+            output/long/final_long.mp4
+            output/long/timeline.json
+            output/long/chunks.json
+            output/long/science_info.json
+          if-no-files-found: error
+          retention-days: 7
