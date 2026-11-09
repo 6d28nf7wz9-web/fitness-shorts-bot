@@ -86,7 +86,7 @@ jobs:
       - name: Render scientific explainer visuals
         env:
           SCIENCE_VISUALS: 1
-          VISUAL_ENGINE: blender3d
+      VISUAL_ENGINE: legacy
         run: python science_visuals.py
 
       - name: Assemble video
