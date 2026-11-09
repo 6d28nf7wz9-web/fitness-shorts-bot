@@ -1,6 +1,6 @@
 """Smoke tests for scientific scene classification and output helpers."""
 import unittest
-from science_visuals import classify, classify_scene, wrap
+from science_visuals import classify, classify_scene, wrap, visual_beat_durations
 
 class ScienceVisualTests(unittest.TestCase):
     def test_protein(self):
@@ -19,5 +19,12 @@ class ScienceVisualTests(unittest.TestCase):
         self.assertEqual(classify_scene({"narration":"Muscle fibers adapt after resistance training"}), "muscle_anatomy")
     def test_model_visual_type_is_respected(self):
         self.assertEqual(classify_scene({"narration":"A useful point","visual_type":"muscle_anatomy"}), "muscle_anatomy")
+    def test_visual_beats_stay_at_or_below_six_seconds(self):
+        beats = visual_beat_durations(13.2)
+        self.assertEqual(len(beats), 3)
+        self.assertTrue(all(4.0 <= beat <= 6.0 for beat in beats))
+        self.assertAlmostEqual(sum(beats), 13.2, places=5)
+    def test_short_scene_keeps_its_natural_duration(self):
+        self.assertEqual(visual_beat_durations(2.5), [2.5])
 
 if __name__ == "__main__": unittest.main()
