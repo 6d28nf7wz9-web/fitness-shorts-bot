@@ -15,6 +15,8 @@ class ScienceVisualTests(unittest.TestCase):
         self.assertEqual(classify_scene({"narration":"Dietary fiber travels to the colon"}), "digestion_fiber")
     def test_exercise_gets_biomechanics(self):
         self.assertEqual(classify_scene({"narration":"During a squat your knees and hips bend"}), "exercise_biomechanics")
+    def test_muscle_fibers_are_not_digestive_fiber(self):
+        self.assertEqual(classify_scene({"narration":"Muscle fibers adapt after resistance training"}), "muscle_anatomy")
     def test_model_visual_type_is_respected(self):
         self.assertEqual(classify_scene({"narration":"A useful point","visual_type":"muscle_anatomy"}), "muscle_anatomy")
 
