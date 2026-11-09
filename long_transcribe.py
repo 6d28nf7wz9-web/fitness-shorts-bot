@@ -148,6 +148,7 @@ def main():
         sections.append({
             "heading": sec["heading"],
             "keywords": sec["keywords"],
+            "narration": sec.get("narration", ""),
             "start": round(s - t0, 2),
             "end": round(e - t0, 2),
         })
