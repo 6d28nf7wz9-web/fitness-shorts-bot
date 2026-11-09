@@ -230,7 +230,8 @@ def main():
         if dest.exists():
             dest.unlink()
         try:
-            render_scene(i,str(scene.get("narration","")),float(a.get("seconds",0)),\n                          str(scene.get("visual_title","")),str(scene.get("visual_subtitle","")))
+            render_scene(i,str(scene.get("narration","")),float(a.get("seconds",0)),
+                          str(scene.get("visual_title","")),str(scene.get("visual_subtitle","")))
         except Exception as exc:
             print(f"WARN science scene {i} failed; Pixabay fallback will be used: {exc}")
             if dest.exists(): dest.unlink()
