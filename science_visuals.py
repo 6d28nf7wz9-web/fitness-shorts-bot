@@ -16,10 +16,10 @@ FPS = 30
 BG = (239, 244, 248)
 WHITE = (28, 43, 58)
 MUTED = (91, 111, 130)
-CYAN = (42, 210, 230)
-ORANGE = (255, 166, 72)
-GREEN = (99, 230, 160)
-PURPLE = (163, 132, 255)
+CYAN = (0, 112, 145)
+ORANGE = (190, 99, 35)
+GREEN = (38, 125, 82)
+PURPLE = (112, 82, 165)
 OUT = "output/science"
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 BOLD_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -86,7 +86,7 @@ def protein(draw, cx, cy, radius=34, color=CYAN):
 
 def draw_fiber_system(d, p, t):
     # Food -> stomach -> small intestine -> colon; fiber particles travel through.
-    d.rounded_rectangle((90,650,360,1080),radius=42,fill=(20,37,57),outline=ORANGE,width=5)
+    d.rounded_rectangle((90,650,360,1080),radius=42,fill=(250,252,254),outline=ORANGE,width=5)
     centered(d,"FIBER-RICH FOOD",790,font(30,True),ORANGE,240)
     # stylized whole foods
     d.ellipse((150,845,220,915),fill=(220,75,75),outline=WHITE,width=3)
@@ -144,7 +144,7 @@ def draw_food_nutrition(d, p, t):
         centered(d,"PROTEIN",890,font(24,True),WHITE,250)
     # small animated nutrient particles move from plate toward a body-cell icon
     arrow(d,(900,1050),(990,1050),GREEN,8)
-    d.ellipse((930,680,1060,810),fill=(18,48,65),outline=CYAN,width=6)
+    d.ellipse((930,680,1060,810),fill=(250,252,254),outline=CYAN,width=6)
     for i in range(int(2+p*7)):
         x=960+(i*29+int(t*55))%70; y=720+(i*43)%55
         d.ellipse((x-7,y-7,x+7,y+7),fill=[ORANGE,GREEN,CYAN][i%3])
@@ -161,7 +161,7 @@ def draw_muscle_anatomy(d, p, t):
         d.line((x,720+offset,x+90,1130+offset),fill=(235,105,125),width=18)
         d.line((x+5,735+offset,x+90,1110+offset),fill=(255,190,185),width=3)
     # zoom callout to muscle fiber
-    d.ellipse((640,760,1020,1140),fill=(22,39,58),outline=CYAN,width=8)
+    d.ellipse((640,760,1020,1140),fill=(250,252,254),outline=CYAN,width=8)
     for i in range(5):
         y=825+i*58
         d.rounded_rectangle((700,y,950,y+26),radius=13,fill=(160,55,75),outline=(255,170,175),width=3)
@@ -290,7 +290,7 @@ def draw_exercise(d, p, t, exercise="SQUAT"):
 
 def draw_protein_synthesis(d, p, t):
     # Dietary protein -> amino acids -> muscle cell -> assembling protein strands.
-    d.rounded_rectangle((95,670,365,1080),radius=34,fill=(20,42,59),outline=CYAN,width=5)
+    d.rounded_rectangle((95,670,365,1080),radius=34,fill=(250,252,254),outline=CYAN,width=5)
     centered(d,"PROTEIN",740,font(31,True),CYAN,220)
     for i in range(5):
         x=155+(i%2)*105; y=850+(i//2)*62
@@ -334,7 +334,7 @@ def draw_energy(d, p, t):
 
 def draw_hydration(d, p, t):
     # Water moves into a muscle cell; cell fluid level responds.
-    d.ellipse((260,680,830,1250),fill=(15,50,72),outline=CYAN,width=9)
+    d.ellipse((260,680,830,1250),fill=(250,252,254),outline=CYAN,width=9)
     centered(d,"MUSCLE CELL",760,font(31,True),WHITE,450)
     for i in range(int(3+p*10)):
         x=340+(i*71+int(t*45))%400
