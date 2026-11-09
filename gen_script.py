@@ -493,7 +493,7 @@ Return ONLY valid JSON with exactly these keys:
   "description": "one or two concise sentences",
   "hashtags": ["4 to 6 relevant hashtags without #"],\n  "sources": ["PubMed PMID from supplied list"],
   "scenes": [
-    {{"narration": "spoken words for this scene", "keyword": "filmable search 1 | filmable search 2 | filmable search 3"}}
+    {{"narration": "one complete spoken sentence", "visual_title": "short slide headline", "visual_subtitle": "3-6 word takeaway", "keyword": "filmable search 1 | filmable search 2 | filmable search 3"}}
   ]
 }}
 
