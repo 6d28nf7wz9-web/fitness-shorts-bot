@@ -20,9 +20,9 @@ BG = (241, 246, 250)
 PANEL = (250, 252, 254)
 WHITE = (28, 43, 58)
 MUTED = (91, 111, 130)
-CYAN = (48, 215, 230)
-ORANGE = (255, 166, 75)
-GREEN = (105, 230, 164)
+CYAN = (0, 112, 145)
+ORANGE = (190, 99, 35)
+GREEN = (38, 125, 82)
 
 
 def font(size, bold=False):
