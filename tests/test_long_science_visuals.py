@@ -1,5 +1,7 @@
+import tempfile
 import unittest
-from long_science_visuals import classify_section, chunk_windows, draw_scene
+from pathlib import Path
+from long_science_visuals import classify_section, chunk_windows, draw_scene, render_chunk
 
 class LongScienceVisualTests(unittest.TestCase):
     def test_topic_specific_scene_selection(self):
@@ -15,6 +17,13 @@ class LongScienceVisualTests(unittest.TestCase):
     def test_landscape_motion_graphic_frame_renders(self):
         image = draw_scene({"heading": "Muscle protein synthesis", "keywords": ["protein", "muscle"]}, "protein_synthesis", 1, 2, 0.5, 8)
         self.assertEqual(image.size, (1280, 720))
+
+    def test_ffmpeg_renders_a_short_animated_scene(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / "scene.mp4"
+            render_chunk({"heading": "Hydration", "keywords": ["water"]}, 1, "hydration", 0, 1.0, 1.0, output)
+            self.assertTrue(output.exists())
+            self.assertGreater(output.stat().st_size, 1000)
 
     def test_invalid_timing_is_rejected(self):
         with self.assertRaises(ValueError): chunk_windows(5,5,7)
