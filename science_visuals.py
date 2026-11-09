@@ -331,21 +331,22 @@ def classify_scene(scene):
     allowed={"digestion_fiber","muscle_anatomy","exercise_biomechanics",
              "protein_synthesis","energy_metabolism","hydration","recovery_sleep",
              "food_nutrition","process"}
-    if requested in allowed: return requested
+    # Specific biological/exercise cues override a broad model label.
     if re.search(r"dietary fiber|fibre|fiber|gut|intestin|digest|microbiome|prebiotic|whole grain|oat|legume",text):
         return "digestion_fiber"
     if re.search(r"squat|deadlift|bench press|lunge|curl|row exercise|push.?up|pull.?up|exercise form|range of motion|joint angle",text):
         return "exercise_biomechanics"
-    if re.search(r"protein|amino acid|synthesis|muscle protein|build muscle",text):
+    if re.search(r"protein synthesis|amino acid|muscle protein synthesis|mps",text):
         return "protein_synthesis"
-    if re.search(r"muscle|hypertrophy|resistance|strength|lifting|training|biceps|quadriceps|glute|hamstring|chest",text):
-        return "muscle_anatomy"
     if re.search(r"calorie|energy balance|fat loss|weight loss|deficit|surplus|fat oxidation|lipolysis",text):
         return "energy_metabolism"
     if re.search(r"water|hydration|fluid|dehydrat",text):
         return "hydration"
     if re.search(r"sleep|recovery|rest day|fatigue",text):
         return "recovery_sleep"
+    if requested in allowed: return requested
+    if re.search(r"muscle|hypertrophy|resistance|strength|lifting|training|biceps|quadriceps|glute|hamstring|chest",text):
+        return "muscle_anatomy"
     if re.search(r"food|meal|eat|nutrition|carb|carbohydrate|vegetable|fruit|protein source",text):
         return "food_nutrition"
     return "process"
