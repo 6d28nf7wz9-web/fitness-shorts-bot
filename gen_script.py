@@ -674,7 +674,16 @@ def validate(data):
                 f"{scene.get('keyword')}"
             )
 
-    known_pmids = {p.get("pmid") for p in load_json("output/research_sources.json", []) if isinstance(p, dict)}\n    cited = [str(p).strip() for p in data.get("sources", [])]\n    if any(p not in known_pmids for p in cited):\n        return "sources contains PMID not retrieved from PubMed"\n    if len(cited) > 5:\n        return "maximum 5 references"\n\n    known_pmids = {p.get("pmid") for p in load_json("output/research_sources.json", []) if isinstance(p, dict)}\n    cited = [str(p).strip() for p in data.get("sources", [])]\n    if any(p not in known_pmids for p in cited):\n        return "sources contains PMID not retrieved from PubMed"\n    if len(cited) > 5:\n        return "maximum 5 references"\n\n    total_words = sum(word_counts)
+    if not isinstance(data.get("sources"), list):
+        return "sources must be a list of PubMed PMIDs"
+    known_pmids = {str(p.get("pmid")) for p in load_json("output/research_sources.json", []) if isinstance(p, dict)}
+    cited = [str(p).strip() for p in data.get("sources", [])]
+    if any(p not in known_pmids for p in cited):
+        return "sources contains PMID not retrieved from PubMed"
+    if len(cited) > 5:
+        return "maximum 5 references"
+
+    total_words = sum(word_counts)
 
     if not 45 <= total_words <= 65:
         return (
@@ -920,28 +929,27 @@ def generate_script():
 
 def finalize(data):
     tags = []
-
     for hashtag in data["hashtags"]:
-        tag = (
-            "#"
-            + str(hashtag).strip().lstrip("#").replace(" ", "")
-        )
-
+        tag = "#" + str(hashtag).strip().lstrip("#").replace(" ", "")
         if tag not in tags:
             tags.append(tag)
-
     if "#Shorts" not in tags:
         tags.append("#Shorts")
 
+    from research_sources import references_block
+    all_papers = load_json("output/research_sources.json", [])
+    cited_pmids = {str(x) for x in data.get("sources", [])}
+    cited_papers = [p for p in all_papers if str(p.get("pmid")) in cited_pmids]
+    data["references"] = cited_papers
+    ref_text = references_block(cited_papers)
     data["description"] = (
         f"{data['description'].strip()}\n\n"
         f"{' '.join(tags)}\n\n"
         f"{DISCLAIMER}\n\n"
-        "Video clips and music: Pixabay."
+        f"{ref_text}\n\n"
+        "Educational illustrations; not medical advice."
     )
-
     data["title"] = data["title"].strip()[:60]
-
     return data
 
 
