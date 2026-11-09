@@ -74,6 +74,7 @@ jobs:
       SKIP_UPLOAD: "1"
       SHORTS_PER_LONG: "1"
       VISUAL_ENGINE: "blender3d"
+      FITFUEL_PREVIEW_FAST: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
