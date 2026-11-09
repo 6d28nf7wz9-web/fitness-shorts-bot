@@ -133,7 +133,7 @@ def render(tl, chunks, si, n, music):
     fade_start = max(dur - 1.2, 0)
     fc = ";".join([
         "[0:v]split[a][b]",
-        f"[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},boxblur=30:5,eq=brightness=-0.15[bg]",
+        f"[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},boxblur=30:5,eq=brightness=0.08:saturation=0.92[bg]",
         "[b]crop='min(iw,ih)':'min(iw,ih)',scale=1080:1080[fg]",
         f"[bg][fg]overlay=(W-w)/2:(H-h)/2-80,tpad=stop_mode=clone:stop_duration=2,ass={ass_path}[v]",
         f"[1:a]aresample=44100,aformat=channel_layouts=stereo,"
