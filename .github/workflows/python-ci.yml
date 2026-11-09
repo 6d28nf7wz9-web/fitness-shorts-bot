@@ -22,7 +22,7 @@ jobs:
         run: |
           pip install Pillow
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg blender libegl1 libgl1 libxrender1 libxi6 libxxf86vm1 libxfixes3 libxkbcommon0
       - name: Compile all Python files
         run: python -m compileall -q .
       - name: Validate schedules and YouTube upload quota
@@ -35,7 +35,10 @@ jobs:
         run: |
           pip install google-api-python-client google-auth
           python -m unittest discover -s tests -p "test_growth_analytics.py" -v
-      - name: Render scientific animation preview
+      - name: Render scientific animation preview (Blender 3D smoke test)
+        env:
+          VISUAL_ENGINE: blender3d
+          FITFUEL_PREVIEW_FAST: "1"
         run: python preview_science_visuals.py
       - name: Upload preview video
         uses: actions/upload-artifact@v4
