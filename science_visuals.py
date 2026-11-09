@@ -13,13 +13,17 @@ from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1080, 1920
 FPS = 30
-BG = (239, 244, 248)
-WHITE = (28, 43, 58)
-MUTED = (91, 111, 130)
-CYAN = (0, 112, 145)
-ORANGE = (190, 99, 35)
-GREEN = (38, 125, 82)
-PURPLE = (112, 82, 165)
+# Premium FitFuel palette: deep navy, crisp white and restrained neon accents.
+BG = (10, 18, 31)
+WHITE = (242, 247, 252)
+MUTED = (153, 174, 194)
+CYAN = (56, 205, 232)
+ORANGE = (255, 174, 92)
+GREEN = (83, 218, 157)
+PURPLE = (177, 151, 255)
+PANEL = (19, 34, 52)
+GRID = (27, 48, 68)
+BEAT_SECONDS = min(6.0, max(4.0, float(os.getenv("SHORTS_VISUAL_BEAT_SECONDS", "5.0"))))
 OUT = "output/science"
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 BOLD_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -49,13 +53,24 @@ def centered(draw, text, y, f, fill=WHITE, max_width=900, spacing=12):
 
 def base_scene(title, subtitle, index):
     im=Image.new("RGB",(W,H),BG); d=ImageDraw.Draw(im)
-    # subtle grid + top accent
-    for x in range(0,W,90): d.line((x,0,x,H),fill=(224,232,239),width=1)
-    for y in range(0,H,90): d.line((0,y,W,y),fill=(224,232,239),width=1)
-    d.rounded_rectangle((56,72,W-56,174),radius=28,fill=(250,252,254),outline=(205,217,227),width=2)
-    # The top header names the actual subject of this scene, not a generic brand label.
-    centered(d,title.upper(),88,font(31,True),WHITE,920,3)
-    centered(d,subtitle,235,font(30),MUTED,900,10)
+    # Subtle vertical gradient and fine technical grid establish a consistent premium look.
+    for y in range(0,H,8):
+        q=y/max(H-1,1)
+        color=tuple(int(a+(b-a)*q) for a,b in zip((9,17,30),(19,35,53)))
+        d.rectangle((0,y,W,min(H,y+7)),fill=color)
+    for x in range(0,W,72): d.line((x,0,x,H),fill=GRID,width=1)
+    for y in range(0,H,72): d.line((0,y,W,y),fill=GRID,width=1)
+    # restrained ambient particles
+    for i in range(22):
+        x=(i*137+index*31)%W; y=(i*83+index*47)%H
+        r=2+(i%3)
+        d.ellipse((x-r,y-r,x+r,y+r),fill=(30,66,88))
+    d.rounded_rectangle((48,58,W-48,184),radius=30,fill=PANEL,outline=(49,83,111),width=2)
+    d.rounded_rectangle((66,80,76,160),radius=5,fill=CYAN)
+    d.text((100,78),"FITFUEL  /  SCIENCE LAB",font=font(19,True),fill=CYAN)
+    # The header names the actual subject, not a generic brand label.
+    centered(d,title.upper(),111,font(31,True),WHITE,900,3)
+    centered(d,subtitle,245,font(27),MUTED,900,9)
     return im,d
 
 def muscle(draw, cx, cy, scale=1.0, color=ORANGE):
@@ -438,14 +453,14 @@ def scene_text(scene):
     return title[:90],subtitle[:180],narration,instruction
 
 
-def draw_diagram(scene, index, frame, frames):
+def draw_diagram(scene, index, frame, frames, beat_index=0, beat_count=1):
     title,subtitle,narration,instruction=scene_text(scene)
     kind=classify_scene(scene)
     p=min(1.0,max(0.0,frame/max(1,frames-1)))
-    t=frame/FPS
+    # Continue animation time across visual beats so motion does not restart.
+    t=beat_index*BEAT_SECONDS+frame/FPS
     im,d=base_scene(title,subtitle,index)
-    # Every frame is redrawn: objects are progressively revealed and animated,
-    # instead of applying a slow zoom to one static illustration.
+    # Every frame is redrawn with topic-specific moving scientific elements.
     if kind=="digestion_fiber":
         draw_fiber_system(d,p,t)
     elif kind=="muscle_anatomy":
@@ -465,33 +480,73 @@ def draw_diagram(scene, index, frame, frames):
         draw_food_nutrition(d,p,t)
     else:
         draw_process(d,p,t,title,subtitle)
-    # Animated stroke/reveal marker tracks the spoken scene.
+    # Premium lower-third and beat progress indicator.
+    d.rounded_rectangle((58,H-172,W-58,H-72),radius=24,fill=PANEL,outline=(49,83,111),width=2)
+    d.text((W/2,H-139),"FITFUEL  •  SCIENCE EXPLAINER",font=font(22,True),fill=MUTED,anchor="mm")
+    d.text((W/2,H-101),f"VISUAL {beat_index+1:02d} / {beat_count:02d}",font=font(17,True),fill=CYAN,anchor="mm")
     x=70+int((W-140)*p)
-    d.rounded_rectangle((70,H-170,W-70,H-75),radius=24,fill=(250,252,254),outline=(205,217,227),width=2)
-    d.text((W/2,H-122),"FITFUEL  •  SCIENCE EXPLAINER",font=font(24,True),fill=MUTED,anchor="mm")
     d.rounded_rectangle((70,H-48,x,H-34),radius=7,fill=CYAN)
-    return im
+    # Gentle cinematic camera drift; framing changes at each beat, not just the title.
+    zoom=1.025+0.008*(0.5+0.5*math.sin(t*0.7))
+    nw,nh=int(W*zoom),int(H*zoom)
+    scaled=im.resize((nw,nh),Image.Resampling.LANCZOS)
+    max_x,max_y=nw-W,nh-H
+    phase=beat_index*1.7
+    left=int(max_x*(0.5+0.32*math.sin(t*0.25+phase)))
+    top=int(max_y*(0.5+0.28*math.cos(t*0.22+phase)))
+    return scaled.crop((left,top,left+W,top+H))
+
+
+def visual_beat_durations(seconds, target=BEAT_SECONDS):
+    """Split each script scene into balanced 4-6s visual beats where possible."""
+    seconds=float(seconds)
+    if seconds<=0: raise ValueError("scene duration must be positive")
+    count=max(1,int(math.ceil(seconds/target)))
+    return [seconds/count]*count
 
 
 def render_scene(scene,index,seconds,outfile):
     os.makedirs(os.path.dirname(outfile),exist_ok=True)
-    frames=max(2,int(seconds*FPS))
-    temp=outfile+".frames"
+    durations=visual_beat_durations(seconds)
+    temp=outfile+".beats"
     os.makedirs(temp,exist_ok=True)
+    beat_files=[]
     try:
-        for frame in range(frames):
-            draw_diagram(scene,index,frame,frames).save(f"{temp}/f{frame:05d}.png")
-        cmd=["ffmpeg","-y","-loglevel","error","-framerate",str(FPS),"-i",f"{temp}/f%05d.png",
-             "-t",f"{seconds:.3f}","-c:v","libx264","-preset","veryfast","-crf","21",
-             "-pix_fmt","yuv420p","-an",outfile]
-        subprocess.run(cmd,check=True)
+        for beat_index,beat_seconds in enumerate(durations):
+            beat_dir=os.path.join(temp,f"beat_{beat_index+1:02d}")
+            os.makedirs(beat_dir,exist_ok=True)
+            frames=max(2,int(round(beat_seconds*FPS)))
+            for frame in range(frames):
+                draw_diagram(scene,index,frame,frames,beat_index,len(durations)).save(
+                    os.path.join(beat_dir,f"f{frame:05d}.jpg"),quality=93
+                )
+            beat_file=os.path.join(temp,f"beat_{beat_index+1:02d}.mp4")
+            fade=min(0.10,beat_seconds/5)
+            vf=f"fade=t=in:st=0:d={fade:.3f},fade=t=out:st={max(0,beat_seconds-fade):.3f}:d={fade:.3f}"
+            cmd=["ffmpeg","-y","-loglevel","error","-framerate",str(FPS),
+                 "-i",os.path.join(beat_dir,"f%05d.jpg"),"-t",f"{beat_seconds:.3f}",
+                 "-vf",vf,"-c:v","libx264","-preset","veryfast","-crf","20",
+                 "-pix_fmt","yuv420p","-an",beat_file]
+            subprocess.run(cmd,check=True)
+            beat_files.append(beat_file)
+            for name in os.listdir(beat_dir): os.remove(os.path.join(beat_dir,name))
+            os.rmdir(beat_dir)
+        concat_file=os.path.join(temp,"concat.txt")
+        with open(concat_file,"w",encoding="utf-8") as f:
+            for path in beat_files:
+                f.write("file '"+os.path.abspath(path).replace("'","'\\''")+"'
+")
+        subprocess.run(["ffmpeg","-y","-loglevel","error","-f","concat","-safe","0",
+                        "-i",concat_file,"-c","copy","-an",outfile],check=True)
     finally:
-        for name in os.listdir(temp):
-            os.remove(os.path.join(temp,name))
-        os.rmdir(temp)
+        for root,dirs,files in os.walk(temp,topdown=False):
+            for name in files: os.remove(os.path.join(root,name))
+            for name in dirs: os.rmdir(os.path.join(root,name))
+        if os.path.isdir(temp): os.rmdir(temp)
     return {"scene":index,"type":classify_scene(scene),"title":scene_text(scene)[0],
-            "file":outfile,"seconds":round(seconds,2),"animation":"drawn-and-moving"}
-
+            "file":outfile,"seconds":round(seconds,2),
+            "visual_beats":[round(x,2) for x in durations],
+            "animation":"premium-dark-motion-graphics-camera-drift"}
 
 
 def main():
