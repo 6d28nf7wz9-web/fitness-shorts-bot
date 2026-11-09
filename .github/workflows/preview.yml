@@ -20,6 +20,7 @@ jobs:
       PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
       SKIP_UPLOAD: "1"
       SCIENCE_VISUALS: "1"
+      VISUAL_ENGINE: "blender3d"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,7 +30,7 @@ jobs:
       - name: Install FFmpeg and fonts
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          sudo apt-get install -y ffmpeg fonts-dejavu-core blender libegl1 libgl1 libxrender1 libxi6 libxxf86vm1 libxfixes3 libxkbcommon0
       - name: Install Python dependencies
         run: pip install -r requirements.txt
       - name: Generate Short script
@@ -71,6 +72,7 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       SKIP_UPLOAD: "1"
       SHORTS_PER_LONG: "1"
+      VISUAL_ENGINE: "blender3d"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
