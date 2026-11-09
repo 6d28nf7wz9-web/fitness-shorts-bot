@@ -192,7 +192,7 @@ def draw_scene(s,kind,section_no,frame,offset,total,beat_index=0):
 
 def render_chunk(section,section_no,kind,offset,seconds,total,outfile,beat_index=0):
     # Shared true-3D Blender renderer used by Shorts and Long.
-    if os.getenv("VISUAL_ENGINE", "blender3d").lower() == "blender3d":
+    if os.getenv("VISUAL_ENGINE", "legacy-test-only").lower() == "blender3d":
         title = str(section.get("heading", "FITFUEL SCIENCE"))
         narration = str(section.get("narration", ""))
         cmd = ["blender", "-b", "-P", "blender_3d_scenes.py", "--",
