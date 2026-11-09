@@ -91,6 +91,13 @@ def main():
     with open("output/script.json", encoding="utf-8") as f:
         script = json.load(f)
 
+    # Preview mode must never initialize YouTube credentials or upload anything.
+    if os.getenv("SKIP_UPLOAD", "").strip().lower() in {"1", "true", "yes"}:
+        if not os.path.isfile(FINAL) or os.path.getsize(FINAL) < 10000:
+            raise SystemExit(f"Preview video is missing or invalid: {FINAL}")
+        print(f"SKIP_UPLOAD is enabled: validated {FINAL}; no YouTube client created.")
+        return
+
     youtube = build("youtube", "v3", credentials=get_credentials())
 
     tags = [
