@@ -493,7 +493,7 @@ Return ONLY valid JSON with exactly these keys:
   "description": "one or two concise sentences",
   "hashtags": ["4 to 6 relevant hashtags without #"],\n  "sources": ["PubMed PMID from supplied list"],
   "scenes": [
-    {{"narration": "one complete spoken sentence", "visual_title": "short slide headline", "visual_subtitle": "3-6 word takeaway", "keyword": "filmable search 1 | filmable search 2 | filmable search 3"}}
+    {{"narration": "one complete spoken sentence", "visual_title": "short slide headline", "visual_subtitle": "3-6 word takeaway", "visual_type": "one supported science visual type", "visual_instruction": "specific anatomical or physiological scene with objects, movement, and labels", "keyword": "filmable search 1 | filmable search 2 | filmable search 3"}}
   ]
 }}
 
@@ -520,7 +520,10 @@ End with a short phrase that naturally echoes the opening idea.
 
 STRICT SCRIPT RULES:
 
-- Create 5 to 7 scenes. Every scene is exactly ONE spoken sentence and its own visual slide.\n- Each sentence must trigger a distinct slide/visual state; never leave one static diagram for multiple sentences.\n- Add visual_title (2-5 words) and visual_subtitle (3-6 words) to every scene; short, readable, punchy, not a duplicate of narration.
+- Create 5 to 7 scenes. Every scene is exactly ONE spoken sentence and its own visual slide.\n- Each sentence must trigger a distinct slide/visual state; never leave one static diagram for multiple sentences.\n- Add visual_title (2-5 words), visual_subtitle (3-6 words), visual_type, and visual_instruction to every scene.
+- visual_type must be one of: digestion_fiber, muscle_anatomy, exercise_biomechanics, protein_synthesis, energy_metabolism, hydration, recovery_sleep, food_nutrition, process.
+- visual_instruction must describe the actual subject anatomy/process, what moves, where it moves, and the key visual labels; do not describe a generic title card.
+- Match the illustration to the exact spoken sentence. If explaining dietary fiber, show food fiber travelling through the digestive tract and its relevant effect; if explaining an exercise, show the body position, joints, and muscles involved; if explaining a muscle, show that muscle anatomically; if explaining metabolism, show the actual energy pathway.
 - Total narration: 45-65 spoken words,
   designed for roughly 18-27 seconds at a natural speaking pace.
 - Hook scene: 4-9 words.
