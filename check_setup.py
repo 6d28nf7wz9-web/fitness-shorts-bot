@@ -29,7 +29,7 @@ EXPECTED = {
     "daily.yml": ["gen_script.py", "voice.py", "clips_fast.py", "quality_check.py", "assemble.py", "upload.py"],
     "analytics.yml": ["analytics_sync.py", "monetization_report.py"],
     "long_ai.yml": [
-        "long_script.py", "long_voice.py", "long_transcribe.py", "long_clips.py",
+        "long_script.py", "long_voice.py", "long_transcribe.py", "long_science_visuals.py",
         "long_assemble.py", "avatar.py", "long_upload.py", "long_shorts.py",
     ],
 }
