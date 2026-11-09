@@ -332,7 +332,7 @@ def classify_scene(scene):
              "protein_synthesis","energy_metabolism","hydration","recovery_sleep",
              "food_nutrition","process"}
     # Specific biological/exercise cues override a broad model label.
-    if re.search(r"dietary fiber|dietary fibre|fiber-rich|fibre-rich|gut|intestin|digest|microbiome|prebiotic|whole grain|oat|legume",text):
+    if re.search(r"dietary fiber|dietary fibre|fiber-rich|fibre-rich|gut|intestin|digest|microbiome|prebiotic|whole grain",text):
         return "digestion_fiber"
     if re.search(r"squat|deadlift|bench press|lunge|curl|row exercise|push.?up|pull.?up|exercise form|range of motion|joint angle",text):
         return "exercise_biomechanics"
@@ -345,7 +345,7 @@ def classify_scene(scene):
     if re.search(r"sleep|recovery|rest day|fatigue",text):
         return "recovery_sleep"
     if requested in allowed: return requested
-    if re.search(r"muscle|muscle fiber|muscle fibre|hypertrophy|resistance|strength|lifting|training|biceps|quadriceps|glute|hamstring|chest",text):
+    if re.search(r"muscle|muscle fiber|muscle fibre|hypertrophy|resistance|strength|lifting|biceps|quadriceps|glute|hamstring|chest",text):
         return "muscle_anatomy"
     if re.search(r"food|meal|eat|nutrition|carb|carbohydrate|vegetable|fruit|protein source",text):
         return "food_nutrition"
@@ -428,7 +428,7 @@ def main():
         seconds=float(a.get("seconds",0))
         if seconds<=0: raise SystemExit(f"Science visuals: invalid duration for scene {i}")
         dest=f"{OUT}/scene_{i}.mp4"
-        print(f"[science] scene {i}/{len(scenes)} -> {classify(scene.get('narration',''))}")
+        print(f"[science] scene {i}/{len(scenes)} -> {classify_scene(scene)}")
         rendered.append(render_scene(scene,i,seconds,dest))
     with open("output/science_info.json","w",encoding="utf-8") as f: json.dump(rendered,f,indent=2)
     print(f"Scientific visuals ready: {len(rendered)} scenes -> {OUT}/")
