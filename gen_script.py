@@ -532,8 +532,10 @@ RETENTION STRUCTURE - follow this order:
 
 1) HOOK (first 1-2 seconds):
 4-9 spoken words.
-Start with a specific problem, surprising contrast,
-direct challenge, or useful result.
+Choose ONE hook mechanism and rotate it across uploads: a specific problem,
+a surprising contrast, a direct challenge, or a concrete result.
+Do not reuse the same opening structure in consecutive Shorts.
+Use the strongest measured hooks as inspiration for specificity, never copy wording.
 No greeting, channel name, setup, or generic openings.
 
 2) PAYOFF PROMISE:
