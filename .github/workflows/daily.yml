@@ -83,11 +83,8 @@ jobs:
       - name: Test scientific visual mapping
         run: python -m unittest discover -s tests -v
 
-      - name: Render scientific explainer visuals
-        env:
-          SCIENCE_VISUALS: 1
-      VISUAL_ENGINE: legacy
-        run: python science_visuals.py
+      - name: Keep Pixabay footage
+        run: echo "Using original Pixabay clips; scientific animation disabled"
 
       - name: Assemble video
         run: |
