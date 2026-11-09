@@ -11,11 +11,11 @@ MUSIC_VOLUME = 0.12
 FONT = "DejaVu Sans"
 
 # Caption fitting. Lower MAX_TEXT_WIDTH if text still touches the edges.
-MAX_TEXT_WIDTH = 840   # pixels; keeps text clear of the side buttons
-BASE_SIZE = 92         # biggest font size, used for short captions
-MIN_SIZE = 50          # never go smaller than this
+MAX_TEXT_WIDTH = 920   # pixels; keeps text clear of the side buttons
+BASE_SIZE = 76         # biggest font size, used for short captions
+MIN_SIZE = 48          # never go smaller than this
 CHAR_WIDTH = 0.80      # average capital letter width as a fraction of font size
-MAX_CHARS = 16         # max characters grouped into one caption
+MAX_CHARS = 28         # max characters grouped into one caption
 
 HEADER = f"""[Script Info]
 ScriptType: v4.00+
@@ -25,7 +25,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,{FONT},{BASE_SIZE},&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,8,2,2,120,120,700,1
+Style: Cap,{FONT},{BASE_SIZE},&H00FFFFFF,&H000000FF,&H00101828,&H90101828,-1,0,0,0,100,100,0,0,3,2,1,2,90,90,300,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -51,7 +51,7 @@ def chunk_words(text):
     for w in words:
         if not current:
             current = w
-        elif len(current) + 1 + len(w) <= MAX_CHARS and len(current.split()) < 2:
+        elif len(current) + 1 + len(w) <= MAX_CHARS and len(current.split()) < 5:
             current += " " + w
         else:
             chunks.append(current)
