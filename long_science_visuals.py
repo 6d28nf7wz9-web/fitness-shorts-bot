@@ -216,9 +216,6 @@ def render_chunk(section,section_no,kind,offset,seconds,total,outfile,beat_index
     finally: shutil.rmtree(temp,ignore_errors=True)
 
 def main():
-    if os.getenv("LONG_SCIENCE_VISUALS", "0").lower() in ("0", "false", "no", "off"):
-        print("Long scientific animation disabled; no generated animation will be rendered.")
-        return
     path=OUT/"timeline.json"
     if not path.exists(): raise SystemExit("Missing output/long/timeline.json")
     timeline=json.loads(path.read_text(encoding="utf-8")); sections=timeline.get("sections") or []
