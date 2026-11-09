@@ -33,6 +33,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Scheduled runs can be queued while an earlier run updates main.
+      # Refresh before generating IDs or queue files so this run starts from
+      # the latest committed topic history and cannot recreate a stale ID.
+      - name: Refresh main before generating
+        run: |
+          git fetch --no-tags origin main
+          git reset --hard origin/main
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
