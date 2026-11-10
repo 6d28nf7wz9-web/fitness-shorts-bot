@@ -531,9 +531,20 @@ def render_scene(scene,index,seconds,outfile):
         if not streams:
             raise SystemExit("3D CGI output has no video stream: " + outfile)
         stream = streams[0]
-        if (int(stream.get("width", 0)) < 720 or int(stream.get("height", 0)) < 1280
-                or stream.get("r_frame_rate") != "30/1"):
-            raise SystemExit("3D CGI quality gate failed: " + json.dumps(stream))
+        if os.getenv("FITFUEL_PREVIEW_FAST", "0") == "1":
+            # CI smoke previews deliberately use 240x426 at 8 fps to keep the
+            # test inexpensive; production renders remain strictly Full HD.
+            valid_preview = (int(stream.get("width", 0)) >= 240
+                             and int(stream.get("height", 0)) >= 426
+                             and stream.get("r_frame_rate") == "8/1")
+            if not valid_preview:
+                raise SystemExit("3D CGI preview quality gate failed: " + json.dumps(stream))
+        else:
+            valid_production = (int(stream.get("width", 0)) >= 1080
+                                and int(stream.get("height", 0)) >= 1920
+                                and stream.get("r_frame_rate") == "30/1")
+            if not valid_production:
+                raise SystemExit("3D CGI production quality gate failed: " + json.dumps(stream))
         return {"scene":index,"type":kind,"title":title,"file":outfile,
                 "seconds":round(seconds,2),"width":stream["width"],"height":stream["height"],
                 "fps":stream["r_frame_rate"],"animation":"blender-3d-cgi-reference-style"}
