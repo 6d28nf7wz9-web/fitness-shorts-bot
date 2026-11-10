@@ -24,20 +24,18 @@ jobs:
     timeout-minutes: 180
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
       YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
       UPLOAD_PRIVACY: public
       SKIP_UPLOAD: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
       SHORTS_PER_LONG: "1"
-      VISUAL_ENGINE: blender3d
-      CGI_RELEASE_APPROVED: 'false'
     steps:
       - uses: actions/checkout@v4
 
-      # Scheduled runs can be queued while an earlier run updates main.
-      # Refresh before generating IDs or queue files so this run starts from
-      # the latest committed topic history and cannot recreate a stale ID.
+      # Refresh before generating IDs or queue files so scheduled runs use
+      # the latest committed topic history and do not recreate stale IDs.
       - name: Refresh main before generating
         run: |
           git fetch --no-tags origin main
@@ -51,7 +49,7 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core blender libegl1 libgl1 libxrender1 libxi6 libxxf86vm1 libxfixes3 libxkbcommon0
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
 
       - name: Install Python packages
         run: pip install -r requirements.txt
@@ -82,33 +80,16 @@ jobs:
           export LONG_REC=output/long/ai_voice.mp3
           python long_transcribe.py
 
-      - name: Render legacy Long visuals
-        run: python long_science_visuals.py
+      - name: Fetch relevant Pixabay footage
+        run: python long_clips.py
 
       - name: Assemble video
         run: |
           python long_assemble.py
           python avatar.py long
 
-      - name: Preserve Long CGI renders for visual quality review
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: fitfuel-long-cgi-review-${{ github.run_number }}
-          path: |
-            output/long/science/
-            output/long/science_info.json
-            output/long/final_long.mp4
-          retention-days: 7
-          if-no-files-found: warn
-
       - name: Upload long video
-        if: env.CGI_RELEASE_APPROVED == 'true'
         run: python long_upload.py
-
-      - name: Hold Long publication until CGI is approved
-        if: env.CGI_RELEASE_APPROVED != 'true'
-        run: echo 'Long CGI render completed; publication held pending visual quality approval.'
 
       - name: Create Shorts from long video
         run: python long_shorts.py
