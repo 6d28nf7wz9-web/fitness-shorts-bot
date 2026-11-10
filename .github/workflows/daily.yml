@@ -27,6 +27,7 @@ jobs:
       UPLOAD_PRIVACY: public
       SCIENCE_VISUALS: '1'
       VISUAL_ENGINE: blender3d
+      CGI_RELEASE_APPROVED: 'false'
     steps:
       - uses: actions/checkout@v4
       
@@ -94,7 +95,12 @@ jobs:
           python avatar.py short
 
       - name: Upload to YouTube
+        if: env.CGI_RELEASE_APPROVED == 'true'
         run: python upload.py
+
+      - name: Hold publication until reference-quality CGI is approved
+        if: env.CGI_RELEASE_APPROVED != 'true'
+        run: echo '3D CGI render completed; publication held pending visual quality approval.'
 
       - name: Save learning data
         run: |
