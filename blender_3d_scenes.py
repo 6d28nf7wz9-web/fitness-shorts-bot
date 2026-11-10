@@ -18,9 +18,9 @@ def args():
 
 A=args()
 FAST_PREVIEW=os.getenv("FITFUEL_PREVIEW_FAST","0")=="1"
-W,H=((240,426) if A.orientation=="portrait" else (426,240)) if FAST_PREVIEW else ((480,854) if A.orientation=="portrait" else (854,480))
-FPS=8 if FAST_PREVIEW else 12
-SAMPLES=2 if FAST_PREVIEW else 8
+W,H=((240,426) if A.orientation=="portrait" else (426,240)) if FAST_PREVIEW else ((720,1280) if A.orientation=="portrait" else (1280,720))
+FPS=8 if FAST_PREVIEW else 30
+SAMPLES=2 if FAST_PREVIEW else 32
 FRAMES=max(8,int(math.ceil(A.duration*FPS)))
 bpy.ops.object.select_all(action="SELECT"); bpy.ops.object.delete(use_global=False)
 scene=bpy.context.scene
@@ -29,11 +29,19 @@ scene.eevee.use_gtao=not FAST_PREVIEW
 scene.eevee.gtao_distance=2; scene.eevee.gtao_factor=1.15
 scene.render.resolution_x=W; scene.render.resolution_y=H; scene.render.resolution_percentage=100
 scene.eevee.taa_render_samples=SAMPLES
+scene.render.image_settings.color_mode="RGB"
+scene.render.image_settings.color_depth="8"
+scene.render.ffmpeg.audio_codec="AAC"
+scene.render.ffmpeg.video_bitrate=12000
+scene.render.ffmpeg.gopsize=30
 scene.render.fps=FPS; scene.frame_start=1; scene.frame_end=FRAMES
 scene.render.image_settings.file_format="FFMPEG"; scene.render.ffmpeg.format="MPEG4"; scene.render.ffmpeg.codec="H264"; scene.render.ffmpeg.constant_rate_factor="MEDIUM"
 scene.render.filepath=os.path.abspath(A.output); scene.render.use_file_extension=True
 scene.render.image_settings.color_mode="RGB"
 scene.world.color=(0.012,0.018,0.03)
+scene.view_settings.look="AgX - Medium High Contrast"
+scene.render.use_motion_blur=True
+scene.render.motion_blur_shutter=0.35
 try: scene.view_settings.view_transform="AgX"
 except: pass
 
