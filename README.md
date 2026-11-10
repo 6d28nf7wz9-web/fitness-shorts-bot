@@ -14,5 +14,5 @@ Typography layout rules:
 - ASS captions stay bottom-anchored and are width/font fitted;
 - HyperFrames lint runs before render and missing/invalid output stops upload.
 
-Local run: `python hyperframes_render.py` (Node 22+, FFmpeg, HyperFrames).
+Production render: portrait 1080×1920 at 30 fps. CI and the daily workflow use Node 22 and HyperFrames CLI 0.9.31.\n\nLocal run: install Node 22, FFmpeg, and `hyperframes@0.9.31` globally, then run `python hyperframes_render.py`.
 Set `HYPERFRAMES_RENDER=0` only for an explicit legacy FFmpeg fallback.
