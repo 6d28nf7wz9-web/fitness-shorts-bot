@@ -1,0 +1,64 @@
+name: HyperFrames production integration test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'hyperframes_render.py'
+      - 'assemble.py'
+      - '.github/workflows/hyperframes-integration.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'hyperframes_render.py'
+      - 'assemble.py'
+      - '.github/workflows/hyperframes-integration.yml'
+      - 'tests/test_hyperframes_render.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render-fixture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install FFmpeg and HyperFrames
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          npm install --global hyperframes
+          hyperframes doctor
+      - name: Create safe synthetic fixture (no YouTube upload)
+        run: |
+          mkdir -p output/clips output/audio
+          python - <<'PY'
+          import json, subprocess
+          scenes = []
+          audio = []
+          for i in range(1, 5):
+              subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i",f"color=c=0x123456:s=1080x1920:r=30:d=2","-an","-c:v","libx264","-pix_fmt","yuv420p",f"output/clips/scene_{i}.mp4"],check=True)
+              voice=f"output/audio/voice_{i}.wav"
+              subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i","sine=frequency=440:duration=2","-c:a","pcm_s16le",voice],check=True)
+              scenes.append({"narration":f"Test narration for scene {i} stays readable.","visual_title":f"TEST SCENE {i}","visual_subtitle":"SAFE TEXT LAYOUT"})
+              audio.append({"scene":i,"seconds":2.0,"file":voice})
+          json.dump({"title":"HyperFrames fixture","scenes":scenes},open("output/script.json","w"))
+          json.dump(audio,open("output/audio_info.json","w"))
+          PY
+      - name: Render HyperFrames composition
+        run: python hyperframes_render.py
+      - name: Assemble final fixture with captions and audio
+        run: python assemble.py
+      - name: Verify output dimensions and duration
+        run: |
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 output/final.mp4
+          ffprobe -v error -show_entries format=duration -of csv=p=0 output/final.mp4
+          test -s output/final.mp4
