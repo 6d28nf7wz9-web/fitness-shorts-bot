@@ -35,7 +35,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg fonts-dejavu-core
-          npm install --global hyperframes
+          npm install --global hyperframes@0.9.31
           hyperframes doctor
       - name: Create safe synthetic fixture (no YouTube upload)
         run: |

@@ -33,12 +33,27 @@ def wrap_words(text, limit):
 
 
 def fit_text(text, max_lines, max_chars, base, minimum):
+    """Fit overlay copy to a hard line limit so it cannot collide with captions."""
+    hard_lines = min(4, max(1, max_lines + 1))
     lines = wrap_words(text, max_chars)
-    if len(lines) > max_lines:
-        # Keep complete wording while reducing font and allowing a third line.
-        max_lines = min(4, len(lines))
-    ratio = min(1.0, max_lines / max(len(lines), 1))
-    size = max(minimum, min(base, int(base * ratio)))
+    size = base
+
+    if len(lines) > hard_lines:
+        size = max(minimum, int(base * hard_lines / len(lines)))
+        effective_chars = max(max_chars, int(max_chars * base / size))
+        lines = wrap_words(text, effective_chars)
+    else:
+        effective_chars = max_chars
+
+    if len(lines) > hard_lines:
+        # Visual labels are summaries; keep narration intact but bound on-screen
+        # copy to its safe box rather than allowing text to spill into captions.
+        lines = lines[:hard_lines]
+        last = lines[-1].rstrip()
+        if len(last) >= effective_chars:
+            last = last[:effective_chars - 1].rstrip()
+        lines[-1] = last.rstrip(" .") + "…"
+
     return lines, size
 
 
@@ -62,9 +77,9 @@ def main():
 .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,10,18,.82) 0%,rgba(5,13,23,.20) 34%,rgba(5,13,23,.30) 58%,rgba(4,10,18,.88) 100%)}
 .grid{position:absolute;inset:0;opacity:.12;background-image:linear-gradient(#6ea4c8 1px,transparent 1px),linear-gradient(90deg,#6ea4c8 1px,transparent 1px);background-size:72px 72px}
 .brand{position:absolute;left:84px;right:84px;top:120px;text-align:center;font-size:25px;letter-spacing:7px;color:#72e6c2;font-weight:800}
-.titlebox{position:absolute;left:90px;right:90px;top:420px;height:300px;display:flex;align-items:center;justify-content:center;text-align:center}
+.titlebox{position:absolute;left:90px;right:90px;top:420px;height:300px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center}
 .title{font-weight:900;letter-spacing:-2px;line-height:1.06;color:#fff;text-shadow:0 5px 28px #000;max-width:900px;overflow-wrap:anywhere}
-.subbox{position:absolute;left:130px;right:130px;top:790px;min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center}
+.subbox{position:absolute;left:130px;right:130px;top:790px;height:150px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center}
 .sub{font-weight:700;line-height:1.22;color:#72e6c2;text-shadow:0 3px 18px #000;max-width:820px;overflow-wrap:anywhere}
 
 """
@@ -101,11 +116,11 @@ video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
     # anchored in assemble.py, visual text is confined to the middle safe zone.
     print(f"HyperFrames composition: {len(scenes)} scenes, {total:.2f}s; safe title/subtitle zones")
     subprocess.run(
-        ["npx", "--yes", "hyperframes", "lint", "."],
+        ["hyperframes", "lint", "."],
         cwd=str(ROOT), check=True
     )
     subprocess.run(
-        ["npx", "--yes", "hyperframes", "render", "--output", "base.mp4", "--fps", str(FPS), "--quality", "standard"],
+        ["hyperframes", "render", "--output", "base.mp4", "--fps", str(FPS), "--quality", "standard"],
         cwd=str(ROOT), check=True
     )
     output = ROOT / "base.mp4"
