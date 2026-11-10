@@ -33,12 +33,27 @@ def wrap_words(text, limit):
 
 
 def fit_text(text, max_lines, max_chars, base, minimum):
+    """Fit overlay copy to a hard line limit so it cannot collide with captions."""
+    hard_lines = min(4, max(1, max_lines + 1))
     lines = wrap_words(text, max_chars)
-    if len(lines) > max_lines:
-        # Keep complete wording while reducing font and allowing a third line.
-        max_lines = min(4, len(lines))
-    ratio = min(1.0, max_lines / max(len(lines), 1))
-    size = max(minimum, min(base, int(base * ratio)))
+    size = base
+
+    if len(lines) > hard_lines:
+        size = max(minimum, int(base * hard_lines / len(lines)))
+        effective_chars = max(max_chars, int(max_chars * base / size))
+        lines = wrap_words(text, effective_chars)
+    else:
+        effective_chars = max_chars
+
+    if len(lines) > hard_lines:
+        # Visual labels are summaries; keep narration intact but bound on-screen
+        # copy to its safe box rather than allowing text to spill into captions.
+        lines = lines[:hard_lines]
+        last = lines[-1].rstrip()
+        if len(last) >= effective_chars:
+            last = last[:effective_chars - 1].rstrip()
+        lines[-1] = last.rstrip(" .") + "…"
+
     return lines, size
 
 
@@ -101,11 +116,11 @@ video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
     # anchored in assemble.py, visual text is confined to the middle safe zone.
     print(f"HyperFrames composition: {len(scenes)} scenes, {total:.2f}s; safe title/subtitle zones")
     subprocess.run(
-        ["npx", "--yes", "hyperframes", "lint", "."],
+        ["hyperframes", "lint", "."],
         cwd=str(ROOT), check=True
     )
     subprocess.run(
-        ["npx", "--yes", "hyperframes", "render", "--output", "base.mp4", "--fps", str(FPS), "--quality", "standard"],
+        ["hyperframes", "render", "--output", "base.mp4", "--fps", str(FPS), "--quality", "standard"],
         cwd=str(ROOT), check=True
     )
     output = ROOT / "base.mp4"
