@@ -8,6 +8,7 @@ import json
 import os
 import re
 import subprocess
+import shutil
 from pathlib import Path
 
 ROOT = Path("output/hyperframes")
@@ -50,6 +51,8 @@ def main():
         raise SystemExit("HyperFrames: scene/audio count mismatch")
 
     ROOT.mkdir(parents=True, exist_ok=True)
+    assets = ROOT / "assets"
+    assets.mkdir(exist_ok=True)
     total = sum(float(x["seconds"]) for x in audio)
     css = """
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111d;color:#f5f8ff;font-family:Arial,'DejaVu Sans',sans-serif}
@@ -62,7 +65,7 @@ def main():
 .title{font-weight:900;letter-spacing:-2px;line-height:1.06;color:#fff;text-shadow:0 5px 28px #000;max-width:900px;overflow-wrap:anywhere}
 .subbox{position:absolute;left:130px;right:130px;top:790px;min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center}
 .sub{font-weight:700;line-height:1.22;color:#72e6c2;text-shadow:0 3px 18px #000;max-width:820px;overflow-wrap:anywhere}
-.scene-tag{position:absolute;left:90px;right:90px;bottom:250px;text-align:center;color:#c2d4e3;font-size:22px;letter-spacing:4px}
+
 """
     blocks = []
     cursor = 0.0
@@ -76,14 +79,15 @@ def main():
         sub_html = "<br>".join(html.escape(x) for x in sub_lines)
         start = f"{cursor:.3f}"
         enddur = f"{dur:.3f}"
-        blocks.append(f'<video id="bg{i}" data-start="{start}" data-duration="{enddur}" data-track-index="0" data-volume="0" src="../clips/scene_{i}.mp4"></video>')
+        source = Path(f"output/clips/scene_{i}.mp4")
+        shutil.copy2(source, assets / f"scene_{i}.mp4")
+        blocks.append(f'<video id="bg{i}" data-start="{start}" data-duration="{enddur}" data-track-index="0" data-volume="0" src="assets/scene_{i}.mp4"></video>')
         blocks.append(f"""
 <div id="overlay{i}" class="clip" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
  <div class="subbox"><div class="sub" style="font-size:{sub_size}px">{sub_html}</div></div>
- <div class="scene-tag">TRAINING • NUTRITION • HEALTH</div>
 </div>""")
         cursor += dur
     html_doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FitFuel HyperFrames render</title><style>{css}
