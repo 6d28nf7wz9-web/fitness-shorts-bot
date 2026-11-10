@@ -37,7 +37,8 @@ def fit_text(text, max_lines, max_chars, base, minimum):
     if len(lines) > max_lines:
         # Keep complete wording while reducing font and allowing a third line.
         max_lines = min(4, len(lines))
-    size = max(minimum, min(base, int(base * max_lines / max(len(lines), max_lines)))))
+    ratio = min(1.0, max_lines / max(len(lines), 1))
+    size = max(minimum, min(base, int(base * ratio)))
     return lines, size
 
 
