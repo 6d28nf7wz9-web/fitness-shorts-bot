@@ -30,7 +30,8 @@ jobs:
       UPLOAD_PRIVACY: public
       SKIP_UPLOAD: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
       SHORTS_PER_LONG: "1"
-      VISUAL_ENGINE: legacy
+      VISUAL_ENGINE: blender3d
+      CGI_RELEASE_APPROVED: 'false'
     steps:
       - uses: actions/checkout@v4
 
@@ -89,8 +90,25 @@ jobs:
           python long_assemble.py
           python avatar.py long
 
+      - name: Preserve Long CGI renders for visual quality review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-long-cgi-review-${{ github.run_number }}
+          path: |
+            output/long/science/
+            output/long/science_info.json
+            output/long/final_long.mp4
+          retention-days: 7
+          if-no-files-found: warn
+
       - name: Upload long video
+        if: env.CGI_RELEASE_APPROVED == 'true'
         run: python long_upload.py
+
+      - name: Hold Long publication until CGI is approved
+        if: env.CGI_RELEASE_APPROVED != 'true'
+        run: echo 'Long CGI render completed; publication held pending visual quality approval.'
 
       - name: Create Shorts from long video
         run: python long_shorts.py
