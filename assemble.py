@@ -9,13 +9,11 @@ ASS_FILE = "output/captions.ass"
 FINAL = "output/final.mp4"
 MUSIC_VOLUME = 0.12
 FONT = "DejaVu Sans"
-
-# Caption fitting. Lower MAX_TEXT_WIDTH if text still touches the edges.
-MAX_TEXT_WIDTH = 920   # pixels; keeps text clear of the side buttons
-BASE_SIZE = 76         # biggest font size, used for short captions
-MIN_SIZE = 48          # never go smaller than this
-CHAR_WIDTH = 0.80      # average capital letter width as a fraction of font size
-MAX_CHARS = 28         # max characters grouped into one caption
+MAX_TEXT_WIDTH = 920
+BASE_SIZE = 76
+MIN_SIZE = 48
+CHAR_WIDTH = 0.80
+MAX_CHARS = 28
 
 HEADER = f"""[Script Info]
 ScriptType: v4.00+
@@ -45,8 +43,8 @@ def clean(text):
 
 
 def chunk_words(text):
-    """Group words into captions of at most 2 words and MAX_CHARS characters."""
-    words = text.replace("\n", " ").split()
+    """Group words into readable captions with bounded width."""
+    words = text.replace("\\n", " ").split()
     chunks, current = [], ""
     for w in words:
         if not current:
@@ -82,13 +80,11 @@ def build_captions(script, audio):
             d = duration * w / total_w
             color = yellow if k % 3 == 2 else ""
             fs = "{\\fs%d}" % fit_size(c)
-            lines.append(
-                f"Dialogue: 0,{ass_time(t)},{ass_time(t + d)},Cap,,0,0,0,,{pop}{color}{fs}{c}"
-            )
+            lines.append(f"Dialogue: 0,{ass_time(t)},{ass_time(t + d)},Cap,,0,0,0,,{pop}{color}{fs}{c}")
             t += d
             k += 1
         scene_start += duration
-    return "\n".join(lines) + "\n"
+    return "\\n".join(lines) + "\\n"
 
 
 def main():
@@ -96,7 +92,6 @@ def main():
         script = json.load(f)
     with open("output/audio_info.json", encoding="utf-8") as f:
         audio = json.load(f)
-
     scenes = script.get("scenes", [])
     if not scenes or len(scenes) != len(audio):
         raise SystemExit(f"Preflight failed: {len(scenes)} script scenes but {len(audio)} audio files")
@@ -111,76 +106,62 @@ def main():
     print(f"Preflight passed: {len(scenes)} scenes, all clips and audio files verified.")
 
     n = len(audio)
-    secs = [a["seconds"] for a in audio]
-
-    science_enabled = os.getenv("SCIENCE_VISUALS", "1").lower() not in ("0", "false", "no", "off")
-    science_clips = [f"output/science/scene_{i}.mp4" for i in range(1, n + 1)]
-    use_science = science_enabled and all(os.path.isfile(p) and os.path.getsize(p) > 10000 for p in science_clips)
-    if use_science:
-        print("Visual source: original scientific motion graphics")
-        video_clips = science_clips
+    secs = [float(a["seconds"]) for a in audio]
+    total = round(sum(secs), 3)
+    if os.getenv("HYPERFRAMES_RENDER", "1").lower() not in ("0", "false", "no", "off"):
+        print("Visual engine: HyperFrames (Gemini scene titles + matching footage)")
+        subprocess.run(["python", "hyperframes_render.py"], check=True)
+        visual = "output/hyperframes/base.mp4"
+        if not os.path.isfile(visual) or os.path.getsize(visual) < 100000:
+            raise SystemExit("HyperFrames output missing or invalid")
     else:
-        print("Visual source: Pixabay footage (science visuals unavailable or disabled)")
-        video_clips = [f"output/clips/scene_{i}.mp4" for i in range(1, n + 1)]
-    total = round(sum(secs), 2)
+        print("Visual engine: legacy FFmpeg concat (HYPERFRAMES_RENDER=0)")
+        science_enabled = os.getenv("SCIENCE_VISUALS", "1").lower() not in ("0", "false", "no", "off")
+        science_clips = [f"output/science/scene_{i}.mp4" for i in range(1, n + 1)]
+        use_science = science_enabled and all(os.path.isfile(p) and os.path.getsize(p) > 10000 for p in science_clips)
+        video_clips = science_clips if use_science else [f"output/clips/scene_{i}.mp4" for i in range(1, n + 1)]
+        visual = None
 
-    music_files = [
-        f"music/{name}" for name in os.listdir("music")
-        if name.lower().endswith((".mp3", ".wav", ".m4a"))
-    ]
+    music_files = [f"music/{name}" for name in os.listdir("music") if name.lower().endswith((".mp3", ".wav", ".m4a"))]
     if not music_files:
         raise SystemExit("No music files found in the music/ folder")
     music = random.choice(music_files)
     print("Music:", music)
-
+    os.makedirs(os.path.dirname(ASS_FILE), exist_ok=True)
     with open(ASS_FILE, "w", encoding="utf-8") as f:
         f.write(build_captions(script, audio))
 
     cmd = ["ffmpeg", "-y", "-loglevel", "error"]
-    for i in range(1, n + 1):
-        cmd += ["-i", video_clips[i - 1]]
-    for a in audio:
-        cmd += ["-i", a["file"]]
+    if visual:
+        cmd += ["-i", visual]
+    else:
+        for clip in video_clips:
+            cmd += ["-i", clip]
+    for item in audio:
+        cmd += ["-i", item["file"]]
     cmd += ["-stream_loop", "-1", "-i", music]
 
     parts = []
-    parts.append("".join(f"[{i}:v]" for i in range(n)) + f"concat=n={n}:v=1:a=0[vc]")
-    parts.append(f"[vc]ass={ASS_FILE}[v]")
-
+    if visual:
+        parts.append(f"[0:v]ass={ASS_FILE}[v]")
+        voice_offset = 1
+        music_index = 1 + n
+    else:
+        parts.append("".join(f"[{i}:v]" for i in range(n)) + f"concat=n={n}:v=1:a=0[vc]")
+        parts.append(f"[vc]ass={ASS_FILE}[v]")
+        voice_offset = n
+        music_index = 2 * n
     for i in range(n):
-        parts.append(
-            f"[{n + i}:a]aresample=44100,aformat=channel_layouts=stereo,"
-            f"apad=whole_dur={secs[i]},atrim=0:{secs[i]},asetpts=PTS-STARTPTS[a{i}]"
-        )
+        parts.append(f"[{voice_offset+i}:a]aresample=44100,aformat=channel_layouts=stereo,apad=whole_dur={secs[i]},atrim=0:{secs[i]},asetpts=PTS-STARTPTS[a{i}]")
     parts.append("".join(f"[a{i}]" for i in range(n)) + f"concat=n={n}:v=0:a=1[voice]")
-
     fade_start = max(total - 1.2, 0)
-    parts.append(
-        f"[{2 * n}:a]atrim=0:{total},asetpts=PTS-STARTPTS,aresample=44100,"
-        f"aformat=channel_layouts=stereo,volume={MUSIC_VOLUME},"
-        f"afade=t=in:d=0.5,afade=t=out:st={fade_start}:d=1.2[mus]"
-    )
-    parts.append(
-        "[voice][mus]amix=inputs=2:duration=first:dropout_transition=0,"
-        "volume=2,alimiter=limit=0.95[aout]"
-    )
-
-    cmd += [
-        "-filter_complex", ";".join(parts),
-        "-map", "[v]", "-map", "[aout]",
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
-        "-pix_fmt", "yuv420p", "-r", "30",
-        "-c:a", "aac", "-b:a", "192k",
-        "-movflags", "+faststart",
-        "-t", str(total),
-        FINAL,
-    ]
-
-    print("Rendering video (1-2 minutes)...")
+    parts.append(f"[{music_index}:a]atrim=0:{total},asetpts=PTS-STARTPTS,aresample=44100,aformat=channel_layouts=stereo,volume={MUSIC_VOLUME},afade=t=in:d=0.5,afade=t=out:st={fade_start}:d=1.2[mus]")
+    parts.append("[voice][mus]amix=inputs=2:duration=first:dropout_transition=0,volume=2,alimiter=limit=0.95[aout]")
+    cmd += ["-filter_complex", ";".join(parts), "-map", "[v]", "-map", "[aout]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", str(total), FINAL]
+    print("Final mux: HyperFrames visuals + scene-timed voice + safe word captions + music")
     subprocess.run(cmd, check=True)
-
     size_mb = os.path.getsize(FINAL) / 1e6
-    print(f"\nDone: {FINAL}  ({total}s, {size_mb:.1f} MB)")
+    print(f"Done: {FINAL} ({total:.2f}s, {size_mb:.1f} MB)")
     if total > 58:
         print("Warning: longer than 58 seconds. Shorts must be under 60.")
 
