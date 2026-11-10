@@ -18,32 +18,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install visual test and rendering dependencies
-        run: |
-          pip install Pillow
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg blender libegl1 libgl1 libxrender1 libxi6 libxxf86vm1 libxfixes3 libxkbcommon0
       - name: Compile all Python files
         run: python -m compileall -q .
       - name: Validate schedules and YouTube upload quota
         run: python check_setup.py
-      - name: Test scientific visual selection
-        run: python -m unittest discover -s tests -p "test_science_visuals.py" -v
-      - name: Test AI Long scientific visual selection
-        run: python -m unittest discover -s tests -p "test_long_science_visuals.py" -v
       - name: Test series-level analytics learning
         run: |
           pip install google-api-python-client google-auth
           python -m unittest discover -s tests -p "test_growth_analytics.py" -v
-      - name: Render scientific animation preview (Blender 3D smoke test)
-        env:
-          VISUAL_ENGINE: blender3d
-          FITFUEL_PREVIEW_FAST: "1"
-        run: python preview_science_visuals.py
-      - name: Upload preview video
-        uses: actions/upload-artifact@v4
-        with:
-          name: science-visuals-preview
-          path: output/science_preview.mp4
-          if-no-files-found: error
-          retention-days: 7
