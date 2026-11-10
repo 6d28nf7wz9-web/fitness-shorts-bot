@@ -520,8 +520,23 @@ def render_scene(scene,index,seconds,outfile):
         subprocess.run(cmd, check=True)
         if not os.path.isfile(outfile) or os.path.getsize(outfile) < 10000:
             raise SystemExit("Blender 3D renderer produced no valid Short scene: " + outfile)
+        # Strict output gate: no silent downgrade to stock footage or low-res render.
+        probe = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "stream=width,height,r_frame_rate",
+             "-of", "json", outfile],
+            check=True, capture_output=True, text=True
+        )
+        streams = json.loads(probe.stdout).get("streams", [])
+        if not streams:
+            raise SystemExit("3D CGI output has no video stream: " + outfile)
+        stream = streams[0]
+        if (int(stream.get("width", 0)) < 720 or int(stream.get("height", 0)) < 1280
+                or stream.get("r_frame_rate") != "30/1"):
+            raise SystemExit("3D CGI quality gate failed: " + json.dumps(stream))
         return {"scene":index,"type":kind,"title":title,"file":outfile,
-                "seconds":round(seconds,2),"animation":"blender-3d-cgi-reference-style"}
+                "seconds":round(seconds,2),"width":stream["width"],"height":stream["height"],
+                "fps":stream["r_frame_rate"],"animation":"blender-3d-cgi-reference-style"}
     durations=visual_beat_durations(seconds)
     temp=outfile+".beats"
     os.makedirs(temp,exist_ok=True)
