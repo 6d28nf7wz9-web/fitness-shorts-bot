@@ -1,6 +1,12 @@
 name: HyperFrames production integration test
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'hyperframes_render.py'
+      - 'assemble.py'
+      - '.github/workflows/hyperframes-integration.yml'
   pull_request:
     branches: [main]
     paths:
