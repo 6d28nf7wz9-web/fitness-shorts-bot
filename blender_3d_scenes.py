@@ -125,6 +125,24 @@ def exercise_scene():
             uv(side+" finger "+str(j),(-.10+j*.035,y-.08+j*.05,.075),(.11,.025,.025),skin,24)
         for n,p in [("Shoulder",sh),("Elbow",el),("Wrist",wr)]:
             uv(side+" "+n,p,(.055,.055,.055),blue,24)
+    # Reference-style biomechanics overlays: green neutral alignment, red deviation,
+    # and a cyan shoulder-to-wrist guide. These are luminous 3D curves, not flat stickers.
+    def guide(name, points, mat, width=.012):
+        cu=bpy.data.curves.new(name,"CURVE"); cu.dimensions="3D"; cu.bevel_depth=width; cu.bevel_resolution=4
+        sp=cu.splines.new("POLY"); sp.points.add(len(points)-1)
+        for bp,co in zip(sp.points,points): bp.co=(*co,1)
+        ob=bpy.data.objects.new(name,cu); bpy.context.collection.objects.link(ob); ob.data.materials.append(mat)
+        return ob
+    # Neutral plank reference through shoulder, hip and ankle; red curved spine cue.
+    guide("GREEN neutral alignment", [(-.96,-.48,1.52),(-.05,-.48,1.30),(1.66,-.48,.34)], green, .014)
+    guide("RED lumbar deviation cue", [(-.96,-.50,1.52),(-.55,-.50,1.28),(-.05,-.50,1.42),(.48,-.50,1.12),(1.66,-.50,.34)], muscle, .010)
+    guide("CYAN vertical wrist shoulder guide", [(-.94,-.58,1.52),(-.38,-.58,.12)], blue, .009)
+    # Small elbow-angle rays and a subtle angle arc around the near elbow.
+    guide("Elbow angle upper ray", [(-.94,-.60,1.52),(-.64,-.60,.78)], blue, .008)
+    guide("Elbow angle lower ray", [(-.64,-.60,.78),(-.38,-.60,.12)], blue, .008)
+    for j in range(7):
+        a=math.radians(205+j*22)
+        uv("Elbow angle marker",(-.64+.12*math.cos(a),-.62,.78+.12*math.sin(a)),(.012,.012,.012),blue,12)
     # Animate one complete controlled push-up cycle: torso/chest move, limbs stay planted.
     animated=[torso,chest,abs1,pelvis,shorts,hd,neck,thigh,quad,ham]
     rest={o.name:o.location.copy() for o in animated}
