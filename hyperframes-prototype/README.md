@@ -27,3 +27,6 @@ Open the preview URL printed by HyperFrames. Render output stays inside this fol
 
 ## Next phase (only after this prototype passes)
 Test a separate composition that layers captions/graphics over a copied sample clip. Keep all integration work on this branch until reviewed.
+
+
+Composition structure corrected: one full-frame timed scene contains all visual layers; the root and scene now declare explicit start/duration.
