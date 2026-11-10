@@ -203,6 +203,20 @@ def render_chunk(section,section_no,kind,offset,seconds,total,outfile,beat_index
         subprocess.run(cmd, check=True)
         if not Path(outfile).is_file() or Path(outfile).stat().st_size < 10000:
             raise SystemExit("Blender 3D renderer produced no valid Long scene: " + str(outfile))
+        probe = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "stream=width,height,r_frame_rate",
+             "-of", "json", str(outfile)],
+            check=True, capture_output=True, text=True
+        )
+        streams = json.loads(probe.stdout).get("streams", [])
+        if not streams:
+            raise SystemExit("Long CGI output has no video stream: " + str(outfile))
+        stream = streams[0]
+        if (int(stream.get("width", 0)) < 1920
+                or int(stream.get("height", 0)) < 1080
+                or stream.get("r_frame_rate") != "30/1"):
+            raise SystemExit("Long CGI production quality gate failed: " + json.dumps(stream))
         return
     temp=Path(str(outfile)+".frames"); temp.mkdir(parents=True,exist_ok=True)
     frames=max(2,int(math.ceil(seconds*FPS)))
