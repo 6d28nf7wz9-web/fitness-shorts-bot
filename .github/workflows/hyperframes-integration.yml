@@ -45,7 +45,7 @@ jobs:
           scenes = []
           audio = []
           for i in range(1, 5):
-              subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i",f"color=c=0x123456:s=1080x1920:r=30:d=2","-an","-c:v","libx264","-pix_fmt","yuv420p",f"output/clips/scene_{i}.mp4"],check=True)
+              subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i",f"testsrc2=s=1080x1920:r=30:d=2","-an","-c:v","libx264","-pix_fmt","yuv420p",f"output/clips/scene_{i}.mp4"],check=True)
               voice=f"output/audio/voice_{i}.wav"
               subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i","sine=frequency=440:duration=2","-c:a","pcm_s16le",voice],check=True)
               scenes.append({"narration":f"Test narration for scene {i} stays readable.","visual_title":f"TEST SCENE {i}","visual_subtitle":"SAFE TEXT LAYOUT"})
