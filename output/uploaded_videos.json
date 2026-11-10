@@ -130,5 +130,17 @@
     "uploaded_at": "2026-11-10T12:32:05.007553+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "G0YuiKS1nk8",
+    "title": "How Much Protein Do You Really Need for Muscle?",
+    "topic": "Optimal Daily Protein Ceiling",
+    "series": "Smart Food Choices",
+    "hook": "Eating extra protein won't build more muscle.",
+    "script_word_count": 60,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-10T18:34:02.998109+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
