@@ -94,6 +94,18 @@ jobs:
           python assemble.py
           python avatar.py short
 
+      - name: Preserve CGI renders for visual quality review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-cgi-review-${{ github.run_number }}
+          path: |
+            output/science/
+            output/science_info.json
+            output/final.mp4
+          retention-days: 7
+          if-no-files-found: warn
+
       - name: Upload to YouTube
         if: env.CGI_RELEASE_APPROVED == 'true'
         run: python upload.py
