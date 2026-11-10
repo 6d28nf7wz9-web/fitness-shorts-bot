@@ -25,6 +25,8 @@ jobs:
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
       UPLOAD_PRIVACY: public
+      SCIENCE_VISUALS: '1'
+      VISUAL_ENGINE: blender3d
     steps:
       - uses: actions/checkout@v4
       
@@ -83,8 +85,8 @@ jobs:
       - name: Test scientific visual mapping
         run: python -m unittest discover -s tests -v
 
-      - name: Keep Pixabay footage
-        run: echo "Using original Pixabay clips; scientific animation disabled"
+      - name: Render topic-specific 3D CGI scenes
+        run: python science_visuals.py
 
       - name: Assemble video
         run: |
