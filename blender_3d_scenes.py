@@ -18,7 +18,7 @@ def args():
 
 A=args()
 FAST_PREVIEW=os.getenv("FITFUEL_PREVIEW_FAST","0")=="1"
-W,H=((240,426) if A.orientation=="portrait" else (426,240)) if FAST_PREVIEW else ((720,1280) if A.orientation=="portrait" else (1280,720))
+W,H=((240,426) if A.orientation=="portrait" else (426,240)) if FAST_PREVIEW else ((1080,1920) if A.orientation=="portrait" else (1920,1080))
 FPS=8 if FAST_PREVIEW else 30
 SAMPLES=2 if FAST_PREVIEW else 32
 FRAMES=max(8,int(math.ceil(A.duration*FPS)))
@@ -216,12 +216,114 @@ def cell_scene():
     text_obj("CELLULAR PROCESS  /  ENERGY",(.0,-.65,1.9),.10,white)
     setup_camera((0,0,1),3.7 if A.orientation=="portrait" else 3.1)
 
+
+def muscle_scene():
+    # Layered muscle-fiber cutaway: fascicles, striations and activation pulses.
+    base=uv("Muscle belly",(0,0,1.0),(0.82,.34,.42),organ)
+    for i in range(9):
+        x=-.62+i*.155
+        fiber=uv("Longitudinal muscle fascicle "+str(i),(x,-.30,1.0),(.075,.055,.31),muscle if i%3 else green,32)
+        fiber.rotation_euler[1]=-.22
+        for j in range(5):
+            z=.76+j*.12
+            uv("Fiber striation",(x,-.365,z),(.052,.012,.009),gold,16)
+    # Animated activation wave travels through the bundle.
+    for i in range(12):
+        p=uv("Activation signal "+str(i),(-.72+i*.13,-.40,.62),(.025,.018,.025),blue,16)
+        for fr in range(1,FRAMES+1):
+            q=(fr-1)/max(1,FRAMES-1)
+            p.location.x=-.72+((i*.13+q*1.5)%1.44)
+            p.keyframe_insert(data_path="location",frame=fr)
+    text_obj("MUSCLE ANATOMY  /  ACTIVATION",(.0,-.58,1.75),.105,white)
+    setup_camera((0,0,1),3.7 if A.orientation=="portrait" else 3.2)
+
+def protein_scene():
+    # Amino-acid chain assembly beside a muscle cell.
+    uv("Muscle cell",(0,0,1),(.72,.34,.56),blue)
+    uv("Cell nucleus",(-.12,-.34,1),(.25,.07,.22),organ)
+    chain=[]
+    for i in range(11):
+        a=i*.56
+        p=(.78*math.cos(a),-.38,1+.42*math.sin(a))
+        chain.append(p); uv("Amino acid "+str(i),p,(.075,.065,.075),[gold,green,muscle][i%3],24)
+    for a,b in zip(chain,chain[1:]):
+        capsule("Peptide bond",a,b,.025,white,.025)
+    text_obj("AMINO ACIDS  /  PROTEIN SYNTHESIS",(.0,-.58,1.85),.09,white)
+    setup_camera((0,0,1),3.8 if A.orientation=="portrait" else 3.2)
+
+def energy_scene():
+    # Mitochondrion and animated ATP energy particles.
+    uv("Mitochondrion outer membrane",(0,0,1),(.88,.38,.43),gold)
+    uv("Mitochondrion inner matrix",(0,-.30,1),(.72,.10,.30),organ)
+    for i in range(7):
+        x=-.55+i*.18
+        capsule("Cristae membrane",(x,-.405,.82),(x+.10,-.405,1.18),.025,white,.025)
+    for i in range(16):
+        a=i*math.tau/16
+        p=uv("ATP particle "+str(i),(1.12*math.cos(a),-.05,1+0.72*math.sin(a)),(.045,.045,.045),green,16)
+        for fr in range(1,FRAMES+1):
+            q=(fr-1)/FRAMES*math.tau
+            p.location=(1.12*math.cos(a+q),-.05,1+.72*math.sin(a+q))
+            p.keyframe_insert(data_path="location",frame=fr)
+    text_obj("CELLULAR ENERGY  /  ATP",(.0,-.58,1.78),.11,white)
+    setup_camera((0,0,1),3.9 if A.orientation=="portrait" else 3.2)
+
+def hydration_scene():
+    # Water molecules crossing a muscle-cell membrane.
+    uv("Muscle cell membrane",(0,0,1),(.78,.32,.55),blue)
+    uv("Cell interior",(0,-.29,1),(.63,.08,.40),skin)
+    for i in range(15):
+        x=-1.2+(i%5)*.12; z=.55+(i//5)*.42
+        p=uv("Water molecule "+str(i),(x,-.1,z),(.045,.045,.045),blue,20)
+        for fr in range(1,FRAMES+1):
+            q=(fr-1)/max(1,FRAMES-1)
+            p.location=(x+q*.8,-.12,z+.04*math.sin(q*math.tau+i))
+            p.keyframe_insert(data_path="location",frame=fr)
+    text_obj("HYDRATION  /  FLUID BALANCE",(.0,-.58,1.82),.105,white)
+    setup_camera((0,0,1),3.9 if A.orientation=="portrait" else 3.2)
+
+def recovery_scene():
+    # Sleep/recovery concept: moonlit rest scene and repairing muscle fibers.
+    uv("Repairing muscle tissue",(0,0,.9),(.85,.30,.35),organ)
+    for i in range(8):
+        x=-.62+i*.17
+        capsule("Repair fiber",(x,-.32,.72),(x+.08,-.32,1.08),.035,green,.035)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,radius=.34,location=(-.65,.05,1.65))
+    moon=bpy.context.object; moon.name="Sleep moon"; moon.data.materials.append(gold)
+    uv("Moon shadow",(-.49,-.27,1.72),(.30,.08,.32),floor)
+    for i in range(12):
+        a=i*math.tau/12
+        uv("Recovery signal",(1.0*math.cos(a),-.1,1+.7*math.sin(a)),(.025,.025,.025),blue,16)
+    text_obj("SLEEP  /  RECOVERY  /  ADAPTATION",(.0,-.58,2.0),.085,white)
+    setup_camera((0,0,1),4.0 if A.orientation=="portrait" else 3.3)
+
+def process_scene():
+    # A 3-stage scientific pathway connected by a moving signal.
+    nodes=[(-.85,1.0),(0,1.0),(.85,1.0)]
+    for i,(x,z) in enumerate(nodes):
+        uv(["Trigger node","Process node","Outcome node"][i],(x,0,z),(.25,.22,.25),[gold,blue,green][i])
+        text_obj(["TRIGGER","PROCESS","RESULT"][i],(x,-.36,z-.48),.10,white)
+    for i in range(2):
+        capsule("Causal pathway", (nodes[i][0]+.27,-.05,1),(nodes[i+1][0]-.27,-.05,1),.035,white,.035)
+    signal=uv("Moving causal signal",(-.58,-.28,1),(.07,.07,.07),muscle)
+    for fr in range(1,FRAMES+1):
+        q=(fr-1)/max(1,FRAMES-1)
+        signal.location=(-.58+q*1.16,-.28,1+.08*math.sin(q*math.tau))
+        signal.keyframe_insert(data_path="location",frame=fr)
+    text_obj("HOW THE BODY WORKS",(.0,-.58,1.85),.12,white)
+    setup_camera((0,0,1),4.0 if A.orientation=="portrait" else 3.2)
+
 def main():
     kind=A.kind.lower()
-    if kind=="exercise_biomechanics" or kind=="muscle_anatomy": exercise_scene()
+    if kind=="exercise_biomechanics": exercise_scene()
+    elif kind=="muscle_anatomy": muscle_scene()
     elif kind in ("digestion_fiber","digestive_system"): digestion_scene()
-    elif kind in ("food_nutrition","protein_synthesis"): food_scene()
-    else: cell_scene()
+    elif kind=="food_nutrition": food_scene()
+    elif kind=="protein_synthesis": protein_scene()
+    elif kind=="energy_metabolism": energy_scene()
+    elif kind=="hydration": hydration_scene()
+    elif kind=="recovery_sleep": recovery_scene()
+    else: process_scene()
     scene.frame_set(1)
     scene.render.filepath=os.path.abspath(A.output)
     os.makedirs(os.path.dirname(os.path.abspath(A.output)),exist_ok=True)
