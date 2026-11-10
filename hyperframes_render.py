@@ -17,7 +17,7 @@ SAFE_SUB_WIDTH = 820
 
 
 def wrap_words(text, limit):
-    words = re.sub(r"\\s+", " ", str(text or "")).strip().split()
+    words = re.sub(r"\s+", " ", str(text or "")).strip().split()
     lines, current = [], ""
     for word in words:
         candidate = (current + " " + word).strip()
