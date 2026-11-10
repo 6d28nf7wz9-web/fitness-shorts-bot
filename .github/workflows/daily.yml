@@ -25,25 +25,9 @@ jobs:
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
       UPLOAD_PRIVACY: public
-      SCIENCE_VISUALS: '1'
-      VISUAL_ENGINE: blender3d
-      CGI_RELEASE_APPROVED: 'false'
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Debug checked-out version
-        run: |
-          echo "========== GITHUB RUN INFO =========="
-          echo "Branch: $GITHUB_REF"
-          echo "Commit: $GITHUB_SHA"
-          git log -1 --oneline
 
-          echo "========== CLIPS_FAST.PY =========="
-          grep -n "scenes =" clips_fast.py || true
-          grep -n "enumerate(scenes" clips_fast.py || true
-
-          echo "========== FILE CONTENT =========="
-          nl -ba clips_fast.py | sed -n '1,125p'
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -52,7 +36,7 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core blender libegl1 libgl1 libxrender1 libxi6 libxxf86vm1 libxfixes3 libxkbcommon0
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
 
       - name: Install Python packages
         run: pip install -r requirements.txt
@@ -63,58 +47,22 @@ jobs:
       - name: Voiceover
         run: python voice.py
 
-      - name: Fetch clips
-        run: |
-          echo "========== DEBUG INFO =========="
-          echo "Branch: $GITHUB_REF"
-          echo "Commit: $GITHUB_SHA"
-          echo "Working directory:"
-          pwd
-          echo "========== ACTUAL FILE =========="
-          ls -l clips_fast.py
-          sha256sum clips_fast.py
-          echo "========== SCENES DEFINITION =========="
-          grep -n "scenes =" clips_fast.py || true
-          echo "========== LOOP LOCATION =========="
-          grep -n "enumerate(scenes" clips_fast.py || true
-          echo "========== RUN SCRIPT =========="
-          python clips_fast.py
+      - name: Fetch relevant Pixabay clips
+        run: python clips_fast.py
 
       - name: Validate script and footage
         run: python quality_check.py
-
-      - name: Test scientific visual mapping
-        run: python -m unittest discover -s tests -v
-
-      - name: Render topic-specific 3D CGI scenes
-        run: python science_visuals.py
 
       - name: Assemble video
         run: |
           python assemble.py
           python avatar.py short
 
-      - name: Preserve CGI renders for visual quality review
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: fitfuel-cgi-review-${{ github.run_number }}
-          path: |
-            output/science/
-            output/science_info.json
-            output/final.mp4
-          retention-days: 7
-          if-no-files-found: warn
-
       - name: Upload to YouTube
-        if: env.CGI_RELEASE_APPROVED == 'true'
         run: python upload.py
 
-      - name: Hold publication until reference-quality CGI is approved
-        if: env.CGI_RELEASE_APPROVED != 'true'
-        run: echo '3D CGI render completed; publication held pending visual quality approval.'
-
       - name: Save learning data
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
