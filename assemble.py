@@ -44,7 +44,7 @@ def clean(text):
 
 def chunk_words(text):
     """Group words into readable captions with bounded width."""
-    words = text.replace("\\n", " ").split()
+    words = text.replace("\n", " ").split()
     chunks, current = [], ""
     for w in words:
         if not current:
@@ -84,7 +84,7 @@ def build_captions(script, audio):
             t += d
             k += 1
         scene_start += duration
-    return "\\n".join(lines) + "\\n"
+    return "\n".join(lines) + "\n"
 
 
 def main():
