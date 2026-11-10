@@ -82,7 +82,7 @@ def main():
         enddur = f"{dur:.3f}"
         source = Path(f"output/clips/scene_{i}.mp4")
         shutil.copy2(source, assets / f"scene_{i}.mp4")
-        blocks.append(f'<video id="bg{i}" data-start="{start}" data-duration="{enddur}" data-track-index="0" data-volume="0" src="assets/scene_{i}.mp4"></video>')
+        blocks.append(f'<video id="bg{i}" data-start="{start}" data-duration="{enddur}" data-track-index="0" data-volume="0" muted src="assets/scene_{i}.mp4"></video>')
         blocks.append(f"""
 <div id="overlay{i}" class="clip" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
@@ -93,7 +93,7 @@ def main():
         cursor += dur
     html_doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FitFuel HyperFrames render</title><style>{css}
 video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
-</style></head><body><div id="root" data-composition-id="fitfuel-short" data-start="0" data-duration="{total:.3f}" data-width="{W}" data-height="{H}" data-fps="{FPS}">
+</style></head><body><div id="root" data-composition-id="fitfuel-short" data-start="0" data-duration="{total:.3f}" data-width="{W}" data-height="{H}" data-fps="{FPS}" data-no-timeline>
 {''.join(blocks)}
 </div></body></html>"""
     (ROOT / "index.html").write_text(html_doc, encoding="utf-8")
