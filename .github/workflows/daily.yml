@@ -6,6 +6,12 @@ on:
     - cron: "17 11 * * *"
     - cron: "17 17 * * *"
   workflow_dispatch:
+    inputs:
+      preview_only:
+        description: "Build and save a preview artifact without uploading to YouTube"
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -28,6 +34,7 @@ jobs:
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
       UPLOAD_PRIVACY: public
+      SKIP_UPLOAD: ${{ inputs.preview_only && '1' || '' }}
       HYPERFRAMES_RENDER: "1"
     steps:
       - uses: actions/checkout@v4
@@ -71,8 +78,17 @@ jobs:
           python assemble.py
           python avatar.py short
 
-      - name: Upload to YouTube
+      - name: Upload to YouTube (skipped in preview-only mode)
         run: python upload.py
+
+      - name: Save preview video artifact
+        if: ${{ inputs.preview_only }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-short-preview
+          path: output/final.mp4
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Save learning data
         if: always()
