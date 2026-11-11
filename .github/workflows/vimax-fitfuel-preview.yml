@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   render-preview:
+    if: ${{ vars.VIMAX_PAID_RENDER == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
@@ -46,15 +47,37 @@ jobs:
           git clone --depth 1 https://github.com/HKUDS/ViMax.git ViMax
           cd ViMax
           uv sync --no-dev --no-install-project
-          # ViMax's Google Veo adapter defaults to landscape. Request portrait for this preview.
+          # Keep this evaluation portrait and use the lower-cost current Google media models.
           python - <<'PY'
           from pathlib import Path
-          p = Path("tools/video_generator_veo_google_api.py")
-          source = p.read_text(encoding="utf-8")
-          old = 'aspect_ratio: str = "16:9"'
-          if old not in source:
-              raise SystemExit("Could not safely apply the portrait aspect-ratio patch; upstream adapter changed.")
-          p.write_text(source.replace(old, 'aspect_ratio: str = "9:16"', 1), encoding="utf-8")
+
+          image_path = Path("tools/image_generator_nanobanana_google_api.py")
+          image_source = image_path.read_text(encoding="utf-8")
+          image_replacements = {
+              'self.model = "gemini-2.5-flash-image"': 'self.model = "gemini-3.1-flash-image"',
+              'aspect_ratio: Optional[str] = "16:9"': 'aspect_ratio: Optional[str] = "9:16"',
+              'if e.status_code == 429': 'if e.code == 429',
+          }
+          for old, new in image_replacements.items():
+              if old not in image_source:
+                  raise SystemExit(f"Could not safely patch image adapter: missing {old}")
+              image_source = image_source.replace(old, new, 1)
+          image_path.write_text(image_source, encoding="utf-8")
+
+          video_path = Path("tools/video_generator_veo_google_api.py")
+          video_source = video_path.read_text(encoding="utf-8")
+          video_replacements = {
+              't2v_model: str = "veo-3.1-generate-preview"': 't2v_model: str = "veo-3.1-fast-generate-preview"',
+              'ff2v_model: str = "veo-3.1-generate-preview"': 'ff2v_model: str = "veo-3.1-fast-generate-preview"',
+              'flf2v_model: str = "veo-3.1-generate-preview"': 'flf2v_model: str = "veo-3.1-fast-generate-preview"',
+              'resolution: str = "1080p"': 'resolution: str = "720p"',
+              'aspect_ratio: str = "16:9"': 'aspect_ratio: str = "9:16"',
+          }
+          for old, new in video_replacements.items():
+              if old not in video_source:
+                  raise SystemExit(f"Could not safely patch video adapter: missing {old}")
+              video_source = video_source.replace(old, new, 1)
+          video_path.write_text(video_source, encoding="utf-8")
           PY
 
       - name: Prepare FitFuel script and run ViMax
