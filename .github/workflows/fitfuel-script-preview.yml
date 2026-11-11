@@ -1,0 +1,94 @@
+name: FitFuel script-to-video 3D preview (no YouTube upload)
+
+on:
+  push:
+    branches:
+      - experiment/vimax-standalone-evaluation
+    paths:
+      - "experiments/vimax/fitfuel_blender_script.json"
+      - "blender_preview.py"
+      - "blender_3d_scenes.py"
+      - "assemble.py"
+      - "voice.py"
+      - ".github/workflows/fitfuel-script-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fitfuel-script-preview
+  cancel-in-progress: true
+
+jobs:
+  render-fitfuel-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Blender, FFmpeg and rendering libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg fonts-dejavu-core libegl1 libegl-mesa0 libgl1-mesa-dri
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install voice and image dependencies
+        run: python -m pip install --upgrade pip edge-tts pillow
+
+      - name: Prepare the real FitFuel script and generate narration
+        run: |
+          mkdir -p output/clips output/audio
+          cp experiments/vimax/fitfuel_blender_script.json output/script.json
+          python voice.py
+
+      - name: Match each Blender scene duration to its narration
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          script_path = Path("output/script.json")
+          script = json.loads(script_path.read_text(encoding="utf-8"))
+          audio = json.loads(Path("output/audio_info.json").read_text(encoding="utf-8"))
+          if len(script["scenes"]) != len(audio):
+              raise SystemExit("Scene/audio count mismatch")
+          for scene, item in zip(script["scenes"], audio):
+              scene["duration"] = round(float(item["seconds"]) + 0.25, 2)
+          script_path.write_text(json.dumps(script, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print("Matched scene durations:", [s["duration"] for s in script["scenes"]])
+          PY
+
+      - name: Render narration-matched Blender 3D scenes
+        env:
+          FITFUEL_PREVIEW_FAST: "1"
+        run: |
+          python blender_preview.py --script output/script.json --duration 6
+          cp output/3d_preview/scene_*.mp4 output/clips/
+
+      - name: Assemble voice, captions, music and 3D scenes
+        env:
+          HYPERFRAMES_RENDER: "0"
+          SCIENCE_VISUALS: "0"
+          TTS_VOICE: "en-US-AndrewNeural"
+        run: |
+          python assemble.py
+          test -s output/final.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate -of default=noprint_wrappers=1 output/final.mp4
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 output/final.mp4
+
+      - name: Upload final preview and review materials
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FitFuel-Protein-3D-Final-Preview
+          path: |
+            output/final.mp4
+            output/3d_preview/preview.mp4
+            output/captions.ass
+            output/script.json
+            output/audio_info.json
+          if-no-files-found: warn
+          retention-days: 7
