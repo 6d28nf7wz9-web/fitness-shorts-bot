@@ -37,6 +37,7 @@ The second command is an explicit local opt-in. The scheduled `.github/workflows
 
 The Shorts clip selector now aggregates:
 - **Pixabay** (existing API key)
+- **Coverr** (official video API; set GitHub Actions secret `COVERR_API_KEY`; free Demo tier is limited to 50 requests/hour)
 - **Pexels** (official video search API; set GitHub Actions secret `PEXELS_API_KEY`)
 - **NASA Image & Video Library** (public API; enabled by `NASA_VIDEO_SEARCH=1`; expect mostly science/space footage, not gym B-roll)
 - **Mixkit + Videvo** (no stable public search API is used; import videos downloaded under the applicable free license into `stock_library/` and add a JSON sidecar).
@@ -58,3 +59,12 @@ Mixkit/Videvo local sidecar example (`stock_library/fitness_01.json`):
 The MP4 must be in the same folder. Commit this folder to the repository so GitHub Actions can access it. Use only assets whose individual license permits the intended YouTube/commercial use; preserve required attribution. Mixkit has both Free and Restricted licenses; Videvo license/attribution varies by clip. The selector checks local Mixkit/Videvo tags and downloads/copies matching assets into the normal clip pipeline.
 
 Pexels API usage requires attribution/linking to Pexels and photographers where possible. Add the key in GitHub: **Settings → Secrets and variables → Actions → New repository secret → `PEXELS_API_KEY`**. If absent, the provider is skipped without breaking Pixabay. NASA search is optional and can be disabled with `NASA_VIDEO_SEARCH=0`.
+
+
+Coverr API setup:
+- Add repository secret `COVERR_API_KEY` under **Settings → Secrets and variables → Actions → New repository secret**.
+- The selector searches `GET https://api.coverr.co/videos` with the official `x-api-key` header and downloads the signed MP4 URL returned by Coverr.
+- Search results are cached for 24 hours to reduce API usage. The free Demo tier allows 50 API requests/hour.
+- After a Coverr clip is actually downloaded, the pipeline calls Coverr's `PATCH /videos/:id/stats/downloads` tracking endpoint.
+- Free Demo API usage requires crediting Coverr and the creator when listed. The upload description adds those credits and links. Coverr's current license allows commercial use, but does not allow redistributing raw stock files, bulk library downloads, or using API content to train AI.
+- Sponsored partner assets and watermarked premium previews are excluded by the adapter.
