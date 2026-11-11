@@ -1,0 +1,91 @@
+name: ViMax FitFuel Preview
+
+on:
+  push:
+    branches:
+      - experiment/vimax-standalone-evaluation
+    paths:
+      - "experiments/vimax/**"
+      - ".github/workflows/vimax-fitfuel-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vimax-fitfuel-preview
+  cancel-in-progress: false
+
+jobs:
+  render-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Check required API credentials
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          test -n "$OPENROUTER_API_KEY" || { echo "::error::Missing repository secret OPENROUTER_API_KEY"; exit 1; }
+          test -n "$GOOGLE_API_KEY" || { echo "::error::Missing repository secret GOOGLE_API_KEY"; exit 1; }
+
+      - name: Check out FitFuel experiment
+        uses: actions/checkout@v4
+
+      - name: Install system video tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Clone and install ViMax in an isolated directory
+        run: |
+          git clone --depth 1 https://github.com/HKUDS/ViMax.git ViMax
+          cd ViMax
+          uv sync --no-dev --no-install-project
+          # ViMax's Google Veo adapter defaults to landscape. Request portrait for this preview.
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("tools/video_generator_veo_google_api.py")
+          source = p.read_text(encoding="utf-8")
+          old = 'aspect_ratio: str = "16:9"'
+          if old not in source:
+              raise SystemExit("Could not safely apply the portrait aspect-ratio patch; upstream adapter changed.")
+          p.write_text(source.replace(old, 'aspect_ratio: str = "9:16"', 1), encoding="utf-8")
+          PY
+
+      - name: Prepare FitFuel script and run ViMax
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          cp experiments/vimax/test_script.txt ViMax/fitfuel_test_script.txt
+          cp experiments/vimax/run_vimax.py ViMax/run_fitfuel_vimax.py
+          cd ViMax
+          uv run --no-sync python run_fitfuel_vimax.py
+
+      - name: Validate rendered video
+        if: success()
+        run: |
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of default=noprint_wrappers=1 ViMax/artifacts/FitFuel_ViMax_preview.mp4
+
+      - name: Upload preview and storyboard artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FitFuel-ViMax-preview
+          path: |
+            ViMax/artifacts/FitFuel_ViMax_preview.mp4
+            ViMax/.working_dir/fitfuel_eval/storyboard.json
+            ViMax/.working_dir/fitfuel_eval/shots/*/first_frame.png
+          if-no-files-found: warn
+          retention-days: 7
