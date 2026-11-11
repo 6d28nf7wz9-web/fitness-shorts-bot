@@ -168,6 +168,10 @@ def main():
             try:
                 download(url, raw_file)
 
+                if str(clip_id or "").startswith("coverr:"):
+                    from stock_sources import track_coverr_download
+                    track_coverr_download(str(clip_id).split(":", 1)[1])
+
                 process(
                     raw_file,
                     part_file,
