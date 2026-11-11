@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import shutil
 import subprocess
 import time
 
@@ -213,6 +214,12 @@ def download(url, path):
         try:
             if os.path.exists(path):
                 os.remove(path)
+
+            if os.path.isfile(url):
+                shutil.copyfile(url, path)
+                if os.path.getsize(path) > 10000:
+                    return
+                raise RuntimeError("Local stock file is empty or too small")
 
             with requests.get(
                 url,
