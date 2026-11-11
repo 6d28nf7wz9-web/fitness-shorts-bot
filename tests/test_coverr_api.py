@@ -1,55 +1,33 @@
-"""Live smoke test for the optional Coverr API integration.
+"""Live smoke test for the Coverr API adapter.
 
 Skipped automatically when COVERR_API_KEY is not configured.
 """
 import os
 import unittest
 
-import requests
-
 
 class CoverrApiSmokeTest(unittest.TestCase):
-    def test_search_returns_downloadable_mp4(self):
-        api_key = os.getenv("COVERR_API_KEY", "").strip()
-        if not api_key:
+    def test_adapter_returns_downloadable_mp4(self):
+        if not os.getenv("COVERR_API_KEY", "").strip():
             self.skipTest("COVERR_API_KEY is not configured")
 
-        response = requests.get(
-            "https://api.coverr.co/videos",
-            headers={"x-api-key": api_key},
-            params={
-                "query": "fitness",
-                "page_size": 5,
-                "sort": "popular",
-                "urls": "true",
-            },
-            timeout=25,
-        )
-        self.assertEqual(
-            response.status_code,
-            200,
-            "Coverr API did not accept the configured key",
-        )
+        from stock_sources import _coverr
 
-        payload = response.json()
-        hits = payload.get("hits", [])
-        self.assertTrue(hits, "Coverr returned no results for 'fitness'")
+        hits = _coverr("fitness")
+        self.assertTrue(hits, "Coverr adapter returned no fitness results")
 
         downloadable = [
             item for item in hits
-            if (item.get("urls") or {}).get("mp4_download")
+            if str(item.get("id", "")).startswith("coverr:")
+            and (item.get("videos", {}).get("large") or {}).get("url", "").startswith("https://")
         ]
         self.assertTrue(
             downloadable,
-            "Coverr returned results but no downloadable MP4 URLs",
+            "Coverr adapter did not normalize any downloadable MP4 results",
         )
-
         first = downloadable[0]
-        self.assertTrue(first.get("id"), "Coverr result is missing its video ID")
-        self.assertTrue(
-            (first.get("urls") or {}).get("mp4_download", "").startswith("https://"),
-            "Coverr MP4 download URL is not HTTPS",
-        )
+        self.assertTrue(first.get("tags"), "Coverr adapter returned no search metadata")
+        self.assertGreater(first.get("duration", 0), 0, "Coverr duration is missing")
 
 
 if __name__ == "__main__":
