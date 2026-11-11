@@ -26,3 +26,18 @@ To enable after explicit approval: add the repository Actions variable `VIMAX_PA
 The workflow is `.github/workflows/vimax-fitfuel-preview.yml`. It uploads `FitFuel-ViMax-preview` after a completed run. Open the Actions run and download the artifact. Artifact retention is 7 days.
 
 No automatic YouTube upload is enabled.
+
+## Deterministic Blender fallback preview
+
+The companion workflow `.github/workflows/fitfuel-script-preview.yml` renders the same FitFuel protein script without paid image-generation APIs:
+
+- Edge TTS narration using `en-US-AndrewNeural`
+- Blender scenes selected by explicit `visual_type` and timed to each narration segment
+- HyperFrames is not required for this isolated fallback; `assemble.py` performs the final FFmpeg mux with the repository captions and music
+- Output: 480x854 portrait source scenes, final H.264/AAC MP4 at 30 fps
+- The workflow uploads a 7-day artifact and never publishes to YouTube
+
+The first ViMax attempt reached storyboard generation but failed when Google returned HTTP 429 for `gemini-2.5-flash-preview-image` (free-tier quota limit is zero for that model). The ViMax workflow is therefore manual-only; it must not be treated as a successful render or silently retried against the same exhausted quota.
+
+The Blender output is a stylized procedural 3D preview, not photorealistic anatomical CGI. Review the actual artifact before any production adoption.
+
