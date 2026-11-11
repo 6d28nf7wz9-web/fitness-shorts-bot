@@ -67,6 +67,7 @@ def next_episode():
         available = list(SERIES)
     # Rotate to the next series after the most recently completed/used one.
     prior = last_series or ""
-    start = (list(SERIES).index(prior) + 1) % len(SERIES if prior in SERIES else list(SERIES))
+    prior_index = list(SERIES).index(prior) if prior in SERIES else -1
+    start = (prior_index + 1) % len(SERIES)
     name = available[start % len(available)]
     return name, completed[name] + 1, SERIES[name][completed[name] % len(SERIES[name])]
