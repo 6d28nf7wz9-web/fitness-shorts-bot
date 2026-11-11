@@ -80,6 +80,87 @@ def _pexels(query):
     return _cached("pexels:" + query.lower(), fetch)
 
 
+
+def _coverr(query):
+    """Search Coverr's official API. Demo keys are limited to 50 requests/hour."""
+    key = os.getenv("COVERR_API_KEY", "").strip()
+    if not key:
+        return []
+
+    def fetch():
+        response = SESSION.get(
+            "https://api.coverr.co/videos",
+            headers={"x-api-key": key},
+            params={
+                "query": query,
+                "page_size": 20,
+                "sort": "popular",
+                "urls": "true",
+                "filter": "is_ai_generated:false",
+            },
+            timeout=25,
+        )
+        response.raise_for_status()
+        out = []
+        for video in response.json().get("hits", []):
+            # Prefer the download URL; signed URLs are tied to this API key.
+            urls = video.get("urls") or {}
+            mp4 = urls.get("mp4_download") or urls.get("mp4")
+            if not mp4:
+                continue
+            # Never use sponsored partner footage or watermarked premium previews.
+            if video.get("is_sponsored") or video.get("is_premium_preview") or video.get("is_watermarked"):
+                continue
+            creator = video.get("creator") or video.get("contributor") or video.get("user") or {}
+            if isinstance(creator, str):
+                author = creator
+                creator_url = ""
+            else:
+                author = (creator.get("name") or creator.get("full_name")
+                          or video.get("creator_name") or video.get("author")
+                          or "Coverr creator")
+                creator_url = (creator.get("url") or creator.get("profile_url")
+                               or video.get("creator_url") or "")
+            title = video.get("title") or video.get("description") or "Coverr stock video"
+            tags_value = video.get("tags") or []
+            tags = " ".join(map(str, tags_value)) if isinstance(tags_value, list) else str(tags_value)
+            width = int(video.get("max_width") or video.get("width") or 0)
+            height = int(video.get("max_height") or video.get("height") or 0)
+            out.append({
+                "id": f"coverr:{video.get('id')}",
+                "tags": f"{title} {tags} {video.get('description', '')}",
+                "duration": int(float(video.get("duration") or 0)),
+                "user": author,
+                "pageURL": creator_url or video.get("url") or video.get("page_url") or "https://coverr.co/",
+                "videos": {"large": {
+                    "url": mp4,
+                    "width": width,
+                    "height": height,
+                    "size": 0,
+                }},
+            })
+        return out
+
+    return _cached("coverr:" + query.lower(), fetch)
+
+
+def track_coverr_download(video_id):
+    """Notify Coverr after a selected clip is actually downloaded, as required by API terms."""
+    key = os.getenv("COVERR_API_KEY", "").strip()
+    if not key or not video_id:
+        return
+    try:
+        response = SESSION.patch(
+            f"https://api.coverr.co/videos/{video_id}/stats/downloads",
+            headers={"x-api-key": key},
+            timeout=12,
+        )
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        # Tracking failures should not discard a successfully downloaded render asset.
+        print(f"  Coverr download tracking warning: {str(exc)[:140]}")
+
+
 def _nasa(query):
     # NASA is a niche source; only videos with downloadable MP4 assets are returned.
     def fetch():
@@ -145,6 +226,9 @@ def _local_mixkit_videvo(query):
 
 def search_stock_sources(query):
     results = []
+    if os.getenv("COVERR_API_KEY"):
+        print(f"  Coverr search: {query}")
+        results.extend(_coverr(query))
     if os.getenv("PEXELS_API_KEY"):
         print(f"  Pexels search: {query}")
         results.extend(_pexels(query))
