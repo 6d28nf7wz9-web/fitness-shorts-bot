@@ -60,7 +60,7 @@ jobs:
       - name: Voiceover
         run: python voice.py
 
-      - name: Fetch relevant free stock footage (Pixabay + Pexels + NASA + local Mixkit/Videvo)
+      - name: Fetch relevant free stock footage (Pixabay + Coverr + Pexels + NASA + local Mixkit/Videvo)
         run: python clips_fast.py
 
       - name: Validate script and footage
