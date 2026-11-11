@@ -6,11 +6,20 @@ import subprocess
 from clips import download, keyword_variants, pick_file, search
 from relevance import popularity, relevance
 
+
 OUT_DIR = "output/long"
 RAW_DIR = f"{OUT_DIR}/raw"
 CHUNK_DIR = f"{OUT_DIR}/chunks"
 W, H, FPS = 1920, 1080, 30
 TARGET_CHUNK = 7.0  # seconds per clip
+
+
+def track_stock_download(hit):
+    """Record completed Coverr downloads without making render success depend on tracking."""
+    asset_id = str(hit.get("id", ""))
+    if asset_id.startswith("coverr:"):
+        from stock_sources import track_coverr_download
+        track_coverr_download(asset_id.split(":", 1)[1])
 
 
 def choose(keyword, seconds, used_ids, context=""):
@@ -38,7 +47,7 @@ def choose(keyword, seconds, used_ids, context=""):
         if cands:
             cands.sort(key=lambda c: (c[0], popularity(c[1])), reverse=True)
             top = cands[:6]
-            weights = [4 if c[0][0] == 2 else 1 for c in top]     # clips matching the keyword are 4x more likely
+            weights = [4 if c[0][0] == 2 else 1 for c in top]
             _, hit, url, landscape = random.choices(top, weights=weights)[0]
             return query, hit, url, landscape
         print(f"    no on-topic results for '{query}', trying the next search")
@@ -133,6 +142,7 @@ def main():
 
             try:
                 download(url, raw)
+                track_stock_download(hit)
                 clip_len = hit.get("duration") or 0
                 start = random.uniform(0, max(0.0, clip_len - each - 0.3))
                 process(raw, out, each, landscape, start)
@@ -143,8 +153,9 @@ def main():
             used_ids.add(hit["id"])
             chunks.append({
                 "file": out, "start": round(t, 2), "end": round(t + each, 2),
-                "section": si, "query": query, "pixabay_id": hit.get("id"),
-                "page": hit.get("pageURL"), "author": hit.get("user"), "tags": hit.get("tags"),
+                "section": si, "query": query, "asset_id": hit.get("id"),
+                "pixabay_id": hit.get("id"), "page": hit.get("pageURL"),
+                "author": hit.get("user"), "tags": hit.get("tags"),
             })
             t += each
             kind = "wide" if landscape else "vertical (blur-fit)"
