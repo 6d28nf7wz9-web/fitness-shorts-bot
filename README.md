@@ -16,3 +16,18 @@ Typography layout rules:
 
 Production render: portrait 1080×1920 at 30 fps. CI and the daily workflow use Node 22 and HyperFrames CLI 0.9.31.\n\nLocal run: install Node 22, FFmpeg, and `hyperframes@0.9.31` globally, then run `python hyperframes_render.py`.
 Set `HYPERFRAMES_RENDER=0` only for an explicit legacy FFmpeg fallback.
+
+
+## Blender CGI preview (manual / not auto-published)
+
+The experimental Blender scene pipeline is available without changing the daily upload path:
+
+```bash
+# Render a safe built-in preview (no YouTube upload)
+FITFUEL_PREVIEW_FAST=1 python blender_preview.py --fixture --duration 2.5
+
+# Render scenes from a generated Gemini script, then assemble them with HyperFrames
+FITFUEL_3D_PREVIEW=1 FITFUEL_3D_SCENE_SECONDS=4.0 python assemble.py
+```
+
+The second command is an explicit local opt-in. The scheduled `.github/workflows/daily.yml` does not set `FITFUEL_3D_PREVIEW`; production continues using the established footage path until the CGI assets and visual review are approved. The manual **Blender 3D preview (safe, no upload)** workflow publishes a 7-day downloadable preview artifact only.
