@@ -73,6 +73,8 @@ def save_upload(video_id, script):
         "title": script.get("title", ""),
         "topic": script.get("topic", ""),
         "series": script.get("series", "Unclassified"),
+        "episode_number": script.get("episode_number"),
+        "episode_topic": script.get("episode_topic", ""),
         "hook": (script.get("scenes") or [{}])[0].get("narration", ""),
         "script_word_count": sum(len(str(scene.get("narration", "")).split()) for scene in script.get("scenes", [])),
         "scene_count": len(script.get("scenes", [])),
