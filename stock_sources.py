@@ -103,13 +103,16 @@ def _coverr(query):
         response.raise_for_status()
         out = []
         for video in response.json().get("hits", []):
+            if not video.get("id"):
+                continue
             # Prefer the download URL; signed URLs are tied to this API key.
             urls = video.get("urls") or {}
             mp4 = urls.get("mp4_download") or urls.get("mp4")
             if not mp4:
                 continue
             # Never use sponsored partner footage or watermarked premium previews.
-            if video.get("is_sponsored") or video.get("is_premium_preview") or video.get("is_watermarked"):
+            if (video.get("is_sponsored") or video.get("sponsored") or video.get("is_partner_content")
+                    or video.get("is_premium") or video.get("is_premium_preview") or video.get("is_watermarked")):
                 continue
             creator = video.get("creator") or video.get("contributor") or video.get("user") or {}
             if isinstance(creator, str):
@@ -117,8 +120,7 @@ def _coverr(query):
                 creator_url = ""
             else:
                 author = (creator.get("name") or creator.get("full_name")
-                          or video.get("creator_name") or video.get("author")
-                          or "Coverr creator")
+                          or video.get("creator_name") or video.get("author") or "")
                 creator_url = (creator.get("url") or creator.get("profile_url")
                                or video.get("creator_url") or "")
             title = video.get("title") or video.get("description") or "Coverr stock video"
