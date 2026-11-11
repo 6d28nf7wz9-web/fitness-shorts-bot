@@ -67,12 +67,15 @@ jobs:
       - name: Voiceover
         run: python voice.py
 
+      - name: Prepare free-only Text-to-Video prompts (no provider API calls)
+        run: python text_to_video.py
+
       - name: Fetch relevant free stock footage (Pixabay + Coverr + Pexels + NASA + local Mixkit/Videvo)
         env:
           KLING_API_KEY: ${{ secrets.KLING_API_KEY }}
           RUNWAY_API_KEY: ${{ secrets.RUNWAY_API_KEY }}
           WAN_API_KEY: ${{ secrets.WAN_API_KEY }}
-          # Hard-locked off until the owner explicitly approves a paid generation.
+          # Hard-locked off. No hosted video-generation API is called in free-only mode.
           I2V_ENABLED: "0"
           I2V_PROVIDER: ${{ vars.I2V_PROVIDER || 'kling' }}
           I2V_MAX_SCENES: ${{ vars.I2V_MAX_SCENES || '2' }}
@@ -89,12 +92,14 @@ jobs:
       - name: Upload to YouTube (skipped in preview-only mode)
         run: python upload.py
 
-      - name: Save preview video artifact
+      - name: Save preview video and Text-to-Video prompt plan
         if: ${{ inputs.preview_only }}
         uses: actions/upload-artifact@v4
         with:
           name: fitfuel-short-preview
-          path: output/final.mp4
+          path: |
+            output/final.mp4
+            output/t2v_prompt_plan.json
           retention-days: 7
           if-no-files-found: error
 
