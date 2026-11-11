@@ -96,7 +96,6 @@ def _coverr(query):
                 "page_size": 20,
                 "sort": "popular",
                 "urls": "true",
-                "filter": "is_ai_generated:false",
             },
             timeout=25,
         )
