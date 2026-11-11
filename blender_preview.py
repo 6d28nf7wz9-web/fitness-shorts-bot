@@ -79,7 +79,7 @@ def render_preview(script, blender="blender", duration=2.5):
         clips.append(target)
 
     concat = OUT / "concat.txt"
-    concat.write_text("".join(f"file '{p.resolve()}'\\n" for p in clips), encoding="utf-8")
+    concat.write_text("".join(f"file '{p.resolve()}'\n" for p in clips), encoding="utf-8")
     final = OUT / "preview.mp4"
     subprocess.run([
         "ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
