@@ -18,6 +18,7 @@ BLENDER_SCRIPT = Path(__file__).with_name("blender_3d_scenes.py")
 FAMILY_TO_BLENDER = {
     "exercise_biomechanics": "exercise_biomechanics",
     "muscle_anatomy": "muscle_anatomy",
+    "protein_synthesis": "protein_synthesis",
     "digestive_system": "digestion_fiber",
     "food_nutrition": "food_nutrition",
     "metabolism_hormones": "energy_metabolism",
@@ -49,6 +50,9 @@ def load_script(path, fixture=False):
 
 
 def scene_kind(scene):
+    requested = str(scene.get("visual_type", "")).strip().lower()
+    if requested in FAMILY_TO_BLENDER:
+        return FAMILY_TO_BLENDER[requested]
     family = resolve_scene_family(
         str(scene.get("visual_title", "")) + " " + str(scene.get("narration", ""))
     )
@@ -65,9 +69,12 @@ def render_preview(script, blender="blender", duration=2.5):
         target = OUT / f"scene_{i}.mp4"
         kind = scene_kind(scene)
         text = str(scene.get("visual_title") or scene.get("narration") or script.get("title", "FITFUEL"))
+        scene_duration = float(scene.get("duration", duration))
+        if scene_duration <= 0 or scene_duration > 60:
+            raise ValueError(f"Invalid duration for scene {i}: {scene_duration}")
         cmd = [
             executable, "-b", "-P", str(BLENDER_SCRIPT), "--",
-            "--kind", kind, "--duration", str(duration), "--output", str(target),
+            "--kind", kind, "--duration", str(scene_duration), "--output", str(target),
             "--orientation", "portrait", "--text", text[:52],
         ]
         if kind == "exercise_biomechanics":
