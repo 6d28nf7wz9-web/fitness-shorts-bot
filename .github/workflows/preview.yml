@@ -1,0 +1,103 @@
+name: Safe FitFuel Preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/preview.yml"
+      - "gen_script.py"
+      - "voice.py"
+      - "clips_fast.py"
+      - "assemble.py"
+      - "avatar.py"
+      - "hyperframes_render.py"
+      - "quality_check.py"
+      - "clips.py"
+      - "stock_sources.py"
+      - "relevance.py"
+      - "requirements.txt"
+      - "music/**"
+      - "avatar/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fitfuel-safe-preview
+  cancel-in-progress: false
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      NASA_VIDEO_SEARCH: "1"
+      HYPERFRAMES_RENDER: "1"
+      FITFUEL_3D_PREVIEW: "0"
+      SKIP_UPLOAD: "1"
+      UPLOAD_PRIVACY: private
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install HyperFrames
+        run: |
+          npm install --global hyperframes@0.9.31
+          hyperframes doctor
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install FFmpeg and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Generate FitFuel script
+        run: python gen_script.py
+
+      - name: Generate voiceover
+        run: python voice.py
+
+      - name: Fetch relevant footage
+        run: python clips_fast.py
+
+      - name: Validate script and footage
+        run: python quality_check.py
+
+      - name: Render video, captions, and presenter
+        run: |
+          python assemble.py
+          python avatar.py short
+
+      - name: Validate preview without YouTube upload
+        run: |
+          python upload.py
+          test -s output/final.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 output/final.mp4
+          ffprobe -v error -show_entries format=duration -of csv=p=0 output/final.mp4
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-final-preview-${{ github.run_number }}
+          path: |
+            output/final.mp4
+            output/script.json
+            output/clips_info.json
+            output/captions.ass
+          retention-days: 7
+          if-no-files-found: error
