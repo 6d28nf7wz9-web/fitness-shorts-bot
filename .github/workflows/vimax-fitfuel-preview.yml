@@ -78,3 +78,4 @@ jobs:
             ViMax/.working_dir/fitfuel_eval/shots/*/first_frame.png
           if-no-files-found: warn
           retention-days: 7
+          include-hidden-files: true
