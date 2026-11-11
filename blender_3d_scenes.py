@@ -219,7 +219,7 @@ def food_scene():
         x=.05+(i%3)*.065; y=.52+(i//3)*.045
         uv("Rice grain "+str(i),(x,y,.34),(.035,.022,.018),rice,16)
 
-    text_obj("PROTEIN FOODS  /  CHICKEN  /  TOFU  /  EGGS",(.0,-.68,1.28),.075,white)
+    text_obj("CHICKEN  /  TOFU  /  EGGS",(.15,-.68,1.28),.085,white)
     setup_camera((0,0,.48),3.5 if A.orientation=="portrait" else 3.0)
 
 
