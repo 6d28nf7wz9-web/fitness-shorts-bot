@@ -1,0 +1,27 @@
+{
+  "title": "Protein: Repair and Preserve Muscle",
+  "topic": "Protein and muscle repair",
+  "scenes": [
+    {
+      "narration": "Protein gives your body the amino acids it needs to repair muscle fibers after hard training.",
+      "visual_title": "PROTEIN BUILDS MUSCLE",
+      "visual_subtitle": "Amino acids support repair",
+      "visual_type": "protein_synthesis",
+      "visual_instruction": "Show amino-acid building blocks assembling beside a muscle cell and layered muscle fibers; keep the anatomy central and cinematic."
+    },
+    {
+      "narration": "Choose a clear protein portion at meals, such as grilled chicken, tofu, or eggs, while managing your calories.",
+      "visual_title": "CHOOSE A PROTEIN PORTION",
+      "visual_subtitle": "Chicken, tofu, or eggs",
+      "visual_type": "food_nutrition",
+      "visual_instruction": "Show a balanced three-dimensional meal plate with a distinct protein serving, vegetables, and grains; make the protein portion visually obvious."
+    },
+    {
+      "narration": "Consistent protein intake supports muscle maintenance as you lose fat, alongside resistance training and recovery.",
+      "visual_title": "PRESERVE MUSCLE",
+      "visual_subtitle": "Training plus recovery",
+      "visual_type": "sleep_recovery",
+      "visual_instruction": "Show muscle tissue and repairing fibers with a calm recovery cue; emphasize muscle maintenance, not unrelated gym footage."
+    }
+  ]
+}
