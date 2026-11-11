@@ -16,6 +16,12 @@ class ImageToVideoSafetyTests(unittest.TestCase):
                     i2v.generate_video("missing.png", "test prompt", "out.mp4")
                 post.assert_not_called()
 
+    def test_production_workflow_hard_locks_generation_off(self):
+        with open(".github/workflows/daily.yml", encoding="utf-8") as f:
+            workflow = f.read()
+        self.assertIn('I2V_ENABLED: "0"', workflow)
+        self.assertNotIn("vars.I2V_ENABLED", workflow)
+
     def test_scene_limit_is_hard_capped_at_two(self):
         with patch.dict(os.environ, {"I2V_MAX_SCENES": "99"}):
             self.assertEqual(i2v.max_scenes(), 2)
