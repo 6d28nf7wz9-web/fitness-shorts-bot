@@ -32,7 +32,7 @@ FIXTURE = {
         {"narration": "A controlled squat activates the quadriceps and glutes.", "visual_title": "SQUAT BIOMECHANICS"},
         {"narration": "Muscle fibers contract and adapt to progressive overload.", "visual_title": "MUSCLE FIBERS"},
         {"narration": "Fiber travels through the stomach and intestines.", "visual_title": "DIGESTIVE SYSTEM"},
-        {"narration": "Protein supplies amino acids for muscle repair.", "visual_title": "PROTEIN SYNTHESIS"},
+        {"narration": "Amino acids link into a chain during protein synthesis.", "visual_title": "PROTEIN SYNTHESIS"},
     ],
 }
 
