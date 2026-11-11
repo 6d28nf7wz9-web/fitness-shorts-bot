@@ -28,6 +28,8 @@ jobs:
         run: python -m unittest discover -s tests -p "test_hyperframes_render.py" -v
       - name: Test Blender preview routing (no Blender render required)
         run: python -m unittest discover -s tests -p "test_blender_preview.py" -v
+      - name: Test image-to-video adapters (mocked; no provider calls)
+        run: python -m unittest discover -s tests -p "test_image_to_video.py" -v
       - name: Test series-level analytics learning
         run: |
           pip install google-api-python-client google-auth
