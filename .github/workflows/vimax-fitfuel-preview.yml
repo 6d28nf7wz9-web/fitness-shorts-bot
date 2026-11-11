@@ -1,12 +1,6 @@
 name: ViMax FitFuel Preview
 
 on:
-  push:
-    branches:
-      - experiment/vimax-standalone-evaluation
-    paths:
-      - "experiments/vimax/**"
-      - ".github/workflows/vimax-fitfuel-preview.yml"
   workflow_dispatch:
 
 permissions:
