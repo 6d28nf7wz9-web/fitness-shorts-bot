@@ -106,16 +106,11 @@ def get_model_candidates():
 
 MEMORY_FILE = "performance_memory.json"
 
-SERIES = [
-    "Fitness Myth Check",
-    "One Mistake, One Fix",
-    "Fitness Science Explained",
-    "Smart Food Choices",
-]
+from series_engine import next_episode, SERIES as SERIES_PLAN
+
+SERIES = list(SERIES_PLAN)
 
 BANNED = [
-    "steroid",
-    "sarm",
     "fat burner",
     "fat-burner",
     "detox",
@@ -292,8 +287,8 @@ def choose_content_type(used, memory):
 
 
 def choose_series(used):
-    """Rotate recognizable recurring formats."""
-    return SERIES[len(used) % len(SERIES)]
+    """Select the next planned episode based only on successful uploads."""
+    return next_episode()
 
 
 def performance_context(memory):
@@ -580,12 +575,10 @@ STRICT SCRIPT RULES:
   and include the main topic naturally.
 - Description: concise, relevant, no keyword stuffing.
 - Hashtags: 4-6 relevant tags.
-- Only established, evidence-based fitness advice:
-  progressive overload, calorie balance, adequate protein,
-  exercise technique, sleep, recovery, and consistency.
-- Never promote steroids, SARMs, fat burners, detoxes,
-  miracle products, extreme diets, medical treatment,
-  or spot reduction.
+- Cover evidence-based fitness advice and controversial topics (including anabolic steroids, TRT, hormones, and PEDs) in a balanced, educational, non-promotional way.
+- Explain risks and uncertainty clearly; never provide steroid/SARM cycles, doses, sourcing, stacking, or instructions to evade medical supervision.
+- Distinguish prescribed TRT for diagnosed conditions from nonmedical anabolic-steroid use; do not equate them.
+- Never promote fat burners, detoxes, miracle products, extreme diets, or spot reduction.
 - Never promise a result or timeframe.
 
 VISUAL SEARCH RULES:
@@ -881,14 +874,10 @@ def generate_script():
     trends = load_trends()
     memory = load_performance_memory()
 
-    content_type = choose_content_type(
-        used,
-        memory
-    )
-
-    series = choose_series(used)
-    print(f"Video series: {series}")
-    print(f"Video angle: {content_type}")
+    series, episode_number, episode_topic = choose_series(used)
+    content_type = episode_topic
+    print(f"Video series: {series} | Episode {episode_number}")
+    print(f"Episode topic: {episode_topic}")
     print("Using channel performance memory:", MEMORY_FILE)
 
     from research_sources import research_for_topic
@@ -970,6 +959,8 @@ def generate_script():
                     f"{total_words} words"
                 )
 
+                data["episode_number"] = episode_number
+                data["episode_topic"] = episode_topic
                 return data
 
             except Exception as exc:
