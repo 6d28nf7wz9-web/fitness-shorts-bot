@@ -2,7 +2,8 @@
 
 ## Safety defaults
 
-- Image-to-video is **disabled by default**. The production workflow passes provider secrets only to the footage step, but no paid API request is made unless `I2V_ENABLED=1`.
+- Image-to-video is **hard-locked off in the production workflow** with `I2V_ENABLED="0"`. Repository variables cannot turn it on.
+- No paid provider request is made unless the owner explicitly approves a change to the workflow's hard-coded master switch.
 - The integration makes one request to exactly one selected provider. It does not retry a paid generation or cascade to another paid provider.
 - At most two scenes per Short can be generated (`I2V_MAX_SCENES` is hard-capped at 2).
 - Each provider is configured for a five-second generation. The existing FFmpeg scene processor then fits/loops that source to the narration duration.
@@ -22,9 +23,9 @@ JPEG is also accepted (`.jpg` / `.jpeg`). Use portrait images where possible, at
 
 The daily workflow exposes these environment variables only to the `clips_fast.py` step:
 
-| Variable | Default | Purpose |
+| Variable | Current value | Purpose |
 |---|---:|---|
-| `I2V_ENABLED` | `0` | Master switch; leave off until the owner explicitly approves a paid generation |
+| `I2V_ENABLED` | `0` (hard-coded) | Master switch; cannot be changed through repository variables |
 | `I2V_PROVIDER` | `kling` | One of `kling`, `runway`, `wan` |
 | `I2V_MAX_SCENES` | `2` | Number of eligible early scenes, hard-capped at 2 |
 
@@ -34,7 +35,7 @@ Provider credentials are read from repository Actions secrets:
 - `RUNWAY_API_KEY`
 - `WAN_API_KEY` — this must be a **Replicate API token** for the official `wan-video/wan-2.2-i2v-a14b` model; Wan 2.2 itself does not issue a universal API key.
 
-Do not set `I2V_ENABLED=1` until the still-image inputs, provider account balance, model selection, and expected cost have been reviewed and the owner has explicitly approved generation. The feature remains off unless that variable is deliberately changed.
+Do not change the hard-coded `I2V_ENABLED` value until the still-image inputs, provider account balance, model selection, and expected cost have been reviewed and the owner has explicitly approved generation. Adding or changing repository variables alone cannot activate I2V.
 
 ## Provider implementation
 
