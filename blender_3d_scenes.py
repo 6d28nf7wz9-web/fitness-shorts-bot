@@ -18,9 +18,9 @@ def args():
 
 A=args()
 FAST_PREVIEW=os.getenv("FITFUEL_PREVIEW_FAST","0")=="1"
-W,H=((240,426) if A.orientation=="portrait" else (426,240)) if FAST_PREVIEW else ((1080,1920) if A.orientation=="portrait" else (1920,1080))
-FPS=8 if FAST_PREVIEW else 30
-SAMPLES=2 if FAST_PREVIEW else 32
+W,H=((480,854) if A.orientation=="portrait" else (854,480)) if FAST_PREVIEW else ((1080,1920) if A.orientation=="portrait" else (1920,1080))
+FPS=12 if FAST_PREVIEW else 30
+SAMPLES=4 if FAST_PREVIEW else 32
 FRAMES=max(8,int(math.ceil(A.duration*FPS)))
 bpy.ops.object.select_all(action="SELECT"); bpy.ops.object.delete(use_global=False)
 scene=bpy.context.scene
@@ -180,23 +180,48 @@ def digestion_scene():
     setup_camera((0,0,1.05),3.8 if A.orientation=="portrait" else 3.4)
 
 def food_scene():
-    # Three-dimensional plated meal with distinct produce, protein and carbohydrate forms.
+    # A clear 3D protein-food plate: grilled chicken, tofu cubes, eggs and vegetables.
     bpy.ops.mesh.primitive_cylinder_add(vertices=96,radius=.86,depth=.10,location=(0,0,.18))
     plate=bpy.context.object; plate.name="Ceramic plate"; plate.data.materials.append(white)
-    for i in range(7):
-        a=i*math.tau/7
-        uv("Roasted vegetable "+str(i),(math.cos(a)*.48,math.sin(a)*.48,.36),(.19,.16,.10),foodgreen if i%2 else foodred)
+
+    chicken_mat=material("Grilled chicken breast",(.58,.25,.075),.02,.30)
+    tofu_mat=material("Fresh tofu",(.88,.78,.57),0,.42)
+    egg_white=material("Egg white",(.96,.94,.84),0,.24)
+    yolk=material("Egg yolk",(.98,.57,.045),0,.28)
+    broccoli=material("Broccoli green",(.055,.28,.055),0,.48)
+    rice=material("Cooked rice",(.91,.88,.77),0,.55)
+
+    # Grilled chicken breast, shaped as a plump fillet with visible sear marks.
+    breast=uv("Grilled chicken breast",(-.34,-.02,.39),(.39,.22,.105),chicken_mat)
+    breast.rotation_euler[2]=-.18
     for i in range(4):
-        uv("Protein portion "+str(i),(-.28+i*.15,-.13,.40),(.14,.12,.075),gold)
+        x=-.55+i*.13
+        capsule("Chicken sear mark",(x,-.19,.475),(x+.07,-.16,.48),.009,dark,.009)
+
+    # Distinct tofu cubes on the right side of the plate.
+    for i,(x,y) in enumerate([(.30,-.02),(.49,.12),(.28,.22),(.48,-.13)]):
+        bpy.ops.mesh.primitive_cube_add(size=1,location=(x,y,.39))
+        cube=bpy.context.object; cube.name="Tofu cube "+str(i+1); cube.scale=(.15,.14,.13)
+        cube.data.materials.append(tofu_mat)
+        bevel=cube.modifiers.new("Soft tofu edges","BEVEL"); bevel.width=.035; bevel.segments=4
+        cube.modifiers.new("Tofu weighted normals","WEIGHTED_NORMAL")
+
+    # Two clearly recognizable boiled egg halves with yellow yolks.
+    for i,x in enumerate([-.12,.10]):
+        uv("Boiled egg white "+str(i+1),(x,-.43,.36),(.17,.13,.075),egg_white)
+        uv("Boiled egg yolk "+str(i+1),(x,-.45,.425),(.075,.075,.025),yolk)
+
+    # Green vegetables and a small grain portion complete the balanced plate.
     for i in range(5):
-        uv("Grain serving "+str(i),(.20+i*.075,.20,.34),(.055,.05,.045),gold,24)
-    food_objects=[x for x in bpy.data.objects if x.name.startswith(("Roasted vegetable","Protein portion","Grain serving"))]
-    for o in food_objects:
-        full=o.scale.copy()
-        o.scale=(.001,.001,.001); o.keyframe_insert(data_path="scale",frame=1)
-        o.scale=full; o.keyframe_insert(data_path="scale",frame=FRAMES)
-    text_obj("WHOLE FOOD  /  NUTRIENT DENSITY",(.0,-.7,1.25),.10,white)
-    setup_camera((0,0,.45),3.5 if A.orientation=="portrait" else 3.0)
+        a=i*math.tau/5
+        uv("Broccoli floret "+str(i),(.02+.58*math.cos(a),.30+.30*math.sin(a),.36),(.09,.085,.075),broccoli,24)
+    for i in range(9):
+        x=.05+(i%3)*.065; y=.52+(i//3)*.045
+        uv("Rice grain "+str(i),(x,y,.34),(.035,.022,.018),rice,16)
+
+    text_obj("PROTEIN FOODS  /  CHICKEN  /  TOFU  /  EGGS",(.0,-.68,1.28),.075,white)
+    setup_camera((0,0,.48),3.5 if A.orientation=="portrait" else 3.0)
+
 
 def cell_scene():
     # Macro cell / mitochondrion scene for metabolism, hormones and recovery topics.
