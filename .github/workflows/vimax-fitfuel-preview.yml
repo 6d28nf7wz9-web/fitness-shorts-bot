@@ -23,11 +23,10 @@ jobs:
     steps:
       - name: Check required API credentials
         env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          test -n "$OPENROUTER_API_KEY" || { echo "::error::Missing repository secret OPENROUTER_API_KEY"; exit 1; }
-          test -n "$GOOGLE_API_KEY" || { echo "::error::Missing repository secret GOOGLE_API_KEY"; exit 1; }
+          test -n "$GEMINI_API_KEY" || { echo "::error::Missing repository secret GEMINI_API_KEY"; exit 1; }
 
       - name: Check out FitFuel experiment
         uses: actions/checkout@v4
@@ -65,7 +64,7 @@ jobs:
 
       - name: Prepare FitFuel script and run ViMax
         env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
           cp experiments/vimax/test_script.txt ViMax/fitfuel_test_script.txt
