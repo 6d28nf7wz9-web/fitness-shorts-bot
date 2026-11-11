@@ -91,6 +91,42 @@ def main():
     with open("output/script.json", encoding="utf-8") as f:
         script = json.load(f)
 
+    # Credit the footage providers/contributors actually used in this render.
+    try:
+        with open("output/clips_info.json", encoding="utf-8") as f:
+            clip_data = json.load(f)
+        providers, creators = set(), set()
+        for scene in clip_data if isinstance(clip_data, list) else []:
+            for clip in scene.get("clips", []):
+                asset_id = str(clip.get("pixabay_id", ""))
+                page = str(clip.get("page", ""))
+                author = str(clip.get("author", "")).strip()
+                if asset_id.startswith("pexels:"):
+                    providers.add("Pexels")
+                    if author and page:
+                        creators.add(f"{author} ({page})")
+                elif asset_id.startswith("coverr:"):
+                    providers.add("Coverr")
+                    if author and page:
+                        creators.add(f"{author} on Coverr ({page})")
+                elif asset_id.startswith("nasa:"):
+                    providers.add("NASA")
+                elif asset_id.startswith("mixkit:"):
+                    providers.add("Mixkit")
+                    if author: creators.add(author)
+                elif asset_id.startswith("videvo:"):
+                    providers.add("Videvo")
+                    if author: creators.add(author)
+        if providers:
+            attribution = "Stock footage sources: " + ", ".join(sorted(providers)) + "."
+            if "Coverr" in providers:
+                attribution += "\nCoverr stock footage: https://coverr.co/"
+            if creators:
+                attribution += "\nContributors/assets: " + "; ".join(sorted(creators)[:8])
+            script["description"] = script.get("description", "").rstrip() + "\n\n" + attribution
+    except (OSError, ValueError, TypeError):
+        pass
+
     # Preview mode must never initialize YouTube credentials or upload anything.
     if os.getenv("SKIP_UPLOAD", "").strip().lower() in {"1", "true", "yes"}:
         if not os.path.isfile(FINAL) or os.path.getsize(FINAL) < 10000:

@@ -30,3 +30,7 @@ jobs:
         run: |
           pip install google-api-python-client google-auth
           python -m unittest discover -s tests -p "test_growth_analytics.py" -v
+      - name: Smoke-test Coverr API and MP4 URLs
+        env:
+          COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+        run: python -m unittest discover -s tests -p "test_coverr_api.py" -v

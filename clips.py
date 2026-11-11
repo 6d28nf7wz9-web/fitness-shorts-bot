@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import shutil
 import subprocess
 import time
 
@@ -31,56 +32,47 @@ def save_cache(cache):
         json.dump(cache, f)
 
 
-def search(query):
+def search_pixabay(query):
     key = os.getenv("PIXABAY_API_KEY")
 
     if not key:
-        raise RuntimeError("PIXABAY_API_KEY is not set")
+        print("  Pixabay skipped: PIXABAY_API_KEY is not set")
+        return []
 
     cache = load_cache()
-    entry = cache.get(query)
+    entry = cache.get("pixabay:" + query)
 
     if entry and time.time() - entry.get("time", 0) < 86400:
         return entry.get("hits", [])
 
     params = {
-        "key": key,
-        "q": query,
-        "per_page": 50,
-        "video_type": "film",
-        "safesearch": "true",
-        "min_width": 720,
+        "key": key, "q": query, "per_page": 50,
+        "video_type": "film", "safesearch": "true", "min_width": 720,
     }
-
     for attempt in range(1, 4):
         try:
             r = requests.get(API_URL, params=params, timeout=30)
-
             if r.status_code == 429:
                 print("Pixabay rate limit, waiting 10s...")
-                time.sleep(10)
-                continue
-
+                time.sleep(10); continue
             r.raise_for_status()
-
             hits = r.json().get("hits", [])
-
-            # Do not cache empty results; they may be transient.
             if hits:
-                cache[query] = {
-                    "time": time.time(),
-                    "hits": hits
-                }
+                cache["pixabay:" + query] = {"time": time.time(), "hits": hits}
                 save_cache(cache)
-
             return hits
-
         except requests.RequestException as e:
-            print(f"[attempt {attempt}] search failed: {str(e)[:150]}")
+            print(f"[Pixabay attempt {attempt}] search failed: {str(e)[:150]}")
             time.sleep(3)
-
     return []
 
+
+def search(query):
+    """Aggregate normalized free footage from Pixabay, Pexels, NASA and local Mixkit/Videvo imports."""
+    from stock_sources import search_stock_sources
+    hits = search_pixabay(query)
+    hits.extend(search_stock_sources(query))
+    return hits
 
 def pick_file(hit):
     videos = hit.get("videos", {})
@@ -128,7 +120,7 @@ def choose_clip(keyword, seconds, used_ids, context=""):
     reusable = {}
 
     for query in variants:
-        print(f"  Pixabay search: {query}")
+        print(f"  Stock search: {query}")
         hits = search(query)
 
         for hit in hits:
@@ -222,6 +214,12 @@ def download(url, path):
         try:
             if os.path.exists(path):
                 os.remove(path)
+
+            if os.path.isfile(url):
+                shutil.copyfile(url, path)
+                if os.path.getsize(path) > 10000:
+                    return
+                raise RuntimeError("Local stock file is empty or too small")
 
             with requests.get(
                 url,
