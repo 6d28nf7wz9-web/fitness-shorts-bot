@@ -2,7 +2,7 @@
 
 Pexels requires a user-provided API key. NASA's public media API is keyless.
 Mixkit/Videvo do not provide a stable public search API; their licensed downloads
-can be imported into output/stock_library with a .json sidecar (documented below).
+can be imported into stock_library/ with a .json sidecar (documented below).
 """
 import json
 import os
@@ -85,12 +85,12 @@ def _nasa(query):
     def fetch():
         response = SESSION.get(
             "https://images-api.nasa.gov/search",
-            params={"q": query, "media_type": "video", "page_size": 25},
+            params={"q": query, "media_type": "video", "page_size": 8},
             timeout=25,
         )
         response.raise_for_status()
         out = []
-        for item in response.json().get("collection", {}).get("items", []):
+        for item in response.json().get("collection", {}).get("items", [])[:5]:
             data = (item.get("data") or [{}])[0]
             nasa_id = data.get("nasa_id")
             if not nasa_id:
