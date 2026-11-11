@@ -25,6 +25,9 @@ jobs:
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      NASA_VIDEO_SEARCH: "1"
       YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
@@ -80,7 +83,7 @@ jobs:
           export LONG_REC=output/long/ai_voice.mp3
           python long_transcribe.py
 
-      - name: Fetch relevant Pixabay footage
+      - name: Fetch relevant free stock footage (Pixabay + Coverr + Pexels + NASA + local Mixkit/Videvo)
         run: python long_clips.py
 
       - name: Assemble video
