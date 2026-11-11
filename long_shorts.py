@@ -21,6 +21,7 @@ MAX_TEXT_WIDTH = 840
 BASE_SIZE = 92
 MIN_SIZE = 50
 CHAR_WIDTH = 0.80
+HEAD_MARGIN_V = 480  # Keep the long-derived Short heading below the presenter safe zone.
 MAX_CHARS = 16
 
 HEADER = f"""[Script Info]
@@ -32,7 +33,7 @@ WrapStyle: 0
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Cap,{FONT},{BASE_SIZE},&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,8,2,2,120,120,700,1
-Style: Head,{FONT},62,&H00FFFFFF,&H000000FF,&H99000000,&H00000000,-1,0,0,0,100,100,0,0,3,18,0,8,100,100,230,1
+Style: Head,{FONT},62,&H00FFFFFF,&H000000FF,&H99000000,&H00000000,-1,0,0,0,100,100,0,0,3,18,0,8,100,100,{HEAD_MARGIN_V},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text

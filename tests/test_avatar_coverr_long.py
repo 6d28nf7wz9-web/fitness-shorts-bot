@@ -27,6 +27,21 @@ class PresenterLayoutTests(unittest.TestCase):
 
 
 class LongCoverrIntegrationTests(unittest.TestCase):
+
+    def test_long_short_heading_starts_below_presenter_safe_zone(self):
+        tree = ast.parse(pathlib.Path("long_shorts.py").read_text(encoding="utf-8"))
+        heading_margin = next(
+            ast.literal_eval(node.value)
+            for node in tree.body
+            if isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name) and target.id == "HEAD_MARGIN_V" for target in node.targets)
+        )
+        layout = read_avatar_layouts()["short"]
+        top = 1920 - layout["h"] - layout["bottom"]
+        bob = 6
+        safe_gap = 40
+        self.assertGreaterEqual(heading_margin, top + layout["h"] + bob + safe_gap)
+
     def test_coverr_download_is_tracked_by_asset_id(self):
         with patch("stock_sources.track_coverr_download") as track:
             track_stock_download({"id": "coverr:abc123"})
