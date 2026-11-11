@@ -105,6 +105,10 @@ def main():
                     providers.add("Pexels")
                     if author and page:
                         creators.add(f"{author} ({page})")
+                elif asset_id.startswith("coverr:"):
+                    providers.add("Coverr")
+                    if author and page:
+                        creators.add(f"{author} on Coverr ({page})")
                 elif asset_id.startswith("nasa:"):
                     providers.add("NASA")
                 elif asset_id.startswith("mixkit:"):
@@ -115,6 +119,8 @@ def main():
                     if author: creators.add(author)
         if providers:
             attribution = "Stock footage sources: " + ", ".join(sorted(providers)) + "."
+            if "Coverr" in providers:
+                attribution += "\\nCoverr stock footage: https://coverr.co/"
             if creators:
                 attribution += "\\nContributors/assets: " + "; ".join(sorted(creators)[:8])
             script["description"] = script.get("description", "").rstrip() + "\\n\\n" + attribution
