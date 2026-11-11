@@ -557,8 +557,9 @@ STRICT SCRIPT RULES:
 - visual_type must be one of: digestion_fiber, muscle_anatomy, exercise_biomechanics, protein_synthesis, energy_metabolism, hydration, recovery_sleep, food_nutrition, process.
 - visual_instruction must describe the actual subject anatomy/process, what moves, where it moves, and the key visual labels; do not describe a generic title card.
 - Match the illustration to the exact spoken sentence. If explaining dietary fiber, show food fiber travelling through the digestive tract and its relevant effect; if explaining an exercise, show the body position, joints, and muscles involved; if explaining a muscle, show that muscle anatomically; if explaining metabolism, show the actual energy pathway.
-- Total narration: 45-65 spoken words,
+- Total narration: aim for 52-58 spoken words (hard limit 45-65),
   designed for roughly 18-27 seconds at a natural speaking pace.
+- Count spoken words before returning JSON; stay comfortably inside the limit.
 - Hook scene: 4-9 words.
 - Each later scene: usually 8-17 words.
 - One video = one idea. Do not cram multiple tips into one Short.
@@ -570,8 +571,11 @@ STRICT SCRIPT RULES:
 - Use numbers only when reliable and useful.
 - Never invent studies or statistics.
 - No long intro, greeting, recap, generic like-and-subscribe,
-  or spoken disclaimer. The final scene must include a natural topic-specific
-  comment question and a brief invitation to follow FitFuel for the next episode.
+  or spoken disclaimer. The final scene MUST include a natural topic-specific
+  question mark and the exact word "follow" with a brief FitFuel invitation.
+- Before returning, verify: 4-5 scenes, 52-58 total narration words,
+  first scene 4-9 words, final scene has "?" and "follow", and sources
+  are selected only from the supplied PMID list.
 - Title must accurately match the video
   and include the main topic naturally.
 - Description: concise, relevant, no keyword stuffing.
@@ -787,6 +791,19 @@ def validate(data):
     return None
 
 
+def _is_quota_exhausted(exc):
+    """Detect hard account/project quota exhaustion (not a brief RPM throttle)."""
+    message = str(exc).lower()
+    markers = (
+        "exceeded your current quota",
+        "quota exceeded",
+        "billing details",
+        "generate_requests_per_model",
+        "free_tier_requests",
+    )
+    return any(marker in message for marker in markers)
+
+
 def _is_temporary_gemini_error(exc):
     """Return True for rate limits and temporary Gemini service failures."""
     message = str(exc).lower()
@@ -893,8 +910,9 @@ def generate_script():
         " -> ".join(model_candidates)
     )
 
-    max_attempts = 4
+    max_attempts = 3
     last_problem = "Unknown error"
+    quota_failures = []
 
     for attempt in range(1, max_attempts + 1):
         print(
@@ -957,11 +975,24 @@ def generate_script():
             except Exception as exc:
                 last_problem = str(exc)
                 api_failures += 1
+                if _is_quota_exhausted(exc):
+                    quota_failures.append(model)
 
                 print(
                     f"{model} failed; moving to next model: "
                     f"{last_problem[:220]}"
                 )
+
+        # Hard account quota exhaustion is not fixed by repeating the same prompt.
+        if quota_failures:
+            raise RuntimeError(
+                "Gemini account/project quota is exhausted for this run. "
+                "The configured fallback models returned quota errors: "
+                f"{', '.join(quota_failures)}. Check Google AI Studio billing "
+                "and per-model request/token quotas, or use an API key/project "
+                "with available quota. "
+                f"Last error: {last_problem[:300]}"
+            )
 
         if api_failures == len(model_candidates):
             raise RuntimeError(
