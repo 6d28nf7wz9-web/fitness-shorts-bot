@@ -18,10 +18,10 @@
     },
     {
       "narration": "Consistent protein intake supports muscle maintenance as you lose fat, alongside resistance training and recovery.",
-      "visual_title": "PRESERVE MUSCLE",
-      "visual_subtitle": "Training plus recovery",
-      "visual_type": "sleep_recovery",
-      "visual_instruction": "Show muscle tissue and repairing fibers with a calm recovery cue; emphasize muscle maintenance, not unrelated gym footage."
+      "visual_title": "MUSCLE FIBERS",
+      "visual_subtitle": "Repair and maintenance",
+      "visual_type": "muscle_anatomy",
+      "visual_instruction": "Show a layered 3D muscle-fiber bundle with clear striations and a travelling activation signal, illustrating muscle maintenance during fat loss."
     }
   ]
 }
