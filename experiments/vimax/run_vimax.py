@@ -18,7 +18,7 @@ WORK_DIR = ROOT / ".working_dir" / "fitfuel_eval"
 def prepare_config():
     config = yaml.safe_load((ROOT / "configs" / "script2video.yaml").read_text(encoding="utf-8"))
     config["chat_model"]["init_args"].update({
-        "model": "gemini-2.5-flash",
+        "model": "gemini-3.8-flash",
         "model_provider": "openai",
         "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
         "api_key": os.environ["GEMINI_API_KEY"],
