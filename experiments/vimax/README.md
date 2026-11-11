@@ -10,7 +10,7 @@ This remains an isolated evaluation on `experiment/vimax-standalone-evaluation`;
 - Uploads the MP4, storyboard and first frames as a GitHub Actions artifact for 7 days.
 
 ## Credentials
-The workflow reuses the repository's existing `GEMINI_API_KEY` Actions secret for Gemini chat planning, Google image generation and Veo video generation. No API key is stored in the repository or printed in logs.
+The workflow reuses the repository's existing `GEMINI_API_KEY` Actions secret for Gemini chat planning, Google image generation and Veo video generation. Chat planning uses Gemini 3.5 Flash-Lite to reduce request cost and avoid the exhausted Gemini 3.8 Flash free-tier quota. No API key is stored in the repository or printed in logs.
 
 The render uses external paid / credit-limited APIs. The workflow checks that the secret exists before installing or generating anything.
 
