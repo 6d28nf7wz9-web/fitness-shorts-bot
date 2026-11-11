@@ -65,13 +65,14 @@ def _pexels(query):
             chosen = next((f for f in files if f.get("link") and f.get("file_type", "").startswith("video/")), None)
             if not chosen:
                 continue
-            tags = query
+            page_url = video.get("url", "https://www.pexels.com")
+            tags = re.sub(r"[-_/]", " ", page_url.rsplit("/", 2)[-2])
             out.append({
                 "id": f"pexels:{video.get('id')}",
                 "tags": tags,
                 "duration": int(video.get("duration", 0)),
                 "user": (video.get("user") or {}).get("name", "Pexels contributor"),
-                "pageURL": video.get("url", "https://www.pexels.com"),
+                "pageURL": page_url,
                 "videos": {"large": {"url": chosen["link"], "width": chosen.get("width", 0),
                                     "height": chosen.get("height", 0), "size": 0}},
             })
