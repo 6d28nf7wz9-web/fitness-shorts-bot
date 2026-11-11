@@ -72,7 +72,8 @@ jobs:
           KLING_API_KEY: ${{ secrets.KLING_API_KEY }}
           RUNWAY_API_KEY: ${{ secrets.RUNWAY_API_KEY }}
           WAN_API_KEY: ${{ secrets.WAN_API_KEY }}
-          I2V_ENABLED: ${{ vars.I2V_ENABLED || '0' }}
+          # Hard-locked off until the owner explicitly approves a paid generation.
+          I2V_ENABLED: "0"
           I2V_PROVIDER: ${{ vars.I2V_PROVIDER || 'kling' }}
           I2V_MAX_SCENES: ${{ vars.I2V_MAX_SCENES || '2' }}
         run: python clips_fast.py
