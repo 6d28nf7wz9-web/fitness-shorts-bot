@@ -65,7 +65,7 @@ jobs:
       - name: Prepare FitFuel script and run ViMax
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           cp experiments/vimax/test_script.txt ViMax/fitfuel_test_script.txt
           cp experiments/vimax/run_vimax.py ViMax/run_fitfuel_vimax.py
