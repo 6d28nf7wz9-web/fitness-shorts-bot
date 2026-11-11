@@ -33,4 +33,6 @@ jobs:
       - name: Smoke-test Coverr API and MP4 URLs
         env:
           COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
-        run: python -m unittest discover -s tests -p "test_coverr_api.py" -v
+        run: |
+          python -m pip install requests
+          python -m unittest discover -s tests -p "test_coverr_api.py" -v
