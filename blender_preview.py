@@ -51,6 +51,7 @@ def load_script(path, fixture=False):
 def scene_kind(scene):
     family = resolve_scene_family(
         str(scene.get("visual_title", "")) + " " + str(scene.get("narration", ""))
+    )
     return FAMILY_TO_BLENDER.get(family, "process")
 
 
