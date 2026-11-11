@@ -16,9 +16,10 @@ AVATAR_DIR = os.getenv("AVATAR_DIR", "avatar")
 CACHE_DIR = "output/avatar_cache"
 BOB = 6  # pixels of gentle up and down movement
 
-# h = height of the presenter on the video, bottom = gap from the bottom edge
+# h = presenter height; x and bottom keep it outside the Shorts title/caption safe zones.
+# The Shorts presenter sits in the upper-left corner, below the brand line and above titles.
 LAYOUTS = {
-    "short": {"h": 370, "x": "W-w-32", "bottom": 1130},
+    "short": {"h": 220, "x": "32", "bottom": 1520},
     "long": {"h": 280, "x": "W-w-40", "bottom": 24},
 }
 

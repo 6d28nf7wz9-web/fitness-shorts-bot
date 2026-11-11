@@ -94,6 +94,46 @@ def build_chapters(tl):
     return "\n".join(f"{mmss(t)} {h}" for t, h in chapters)
 
 
+def stock_attribution(chunks):
+    """Build video-description credits from the stock assets actually used."""
+    providers, creators = set(), set()
+    for chunk in chunks if isinstance(chunks, list) else []:
+        asset_id = str(chunk.get("asset_id") or chunk.get("pixabay_id") or "")
+        page = str(chunk.get("page") or "").strip()
+        author = str(chunk.get("author") or "").strip()
+        if asset_id.startswith("coverr:"):
+            providers.add("Coverr")
+            if author and page:
+                creators.add(f"{author} ({page})")
+        elif asset_id.startswith("pexels:"):
+            providers.add("Pexels")
+            if author and page:
+                creators.add(f"{author} ({page})")
+        elif asset_id.startswith("nasa:"):
+            providers.add("NASA")
+        elif asset_id.startswith("mixkit:"):
+            providers.add("Mixkit")
+            if author:
+                creators.add(author)
+        elif asset_id.startswith("videvo:"):
+            providers.add("Videvo")
+            if author:
+                creators.add(author)
+        elif asset_id.startswith("pixabay:") or asset_id.isdigit():
+            providers.add("Pixabay")
+            if author and page:
+                creators.add(f"{author} ({page})")
+
+    if not providers:
+        return ""
+    lines = ["Stock footage sources: " + ", ".join(sorted(providers)) + "."]
+    if "Coverr" in providers:
+        lines.append("Coverr stock footage: https://coverr.co/")
+    if creators:
+        lines.append("Contributors/assets: " + "; ".join(sorted(creators)[:10]))
+    return "\n".join(lines)
+
+
 def main():
     with open(f"{OUT_DIR}/timeline.json", encoding="utf-8") as f:
         tl = json.load(f)
@@ -153,13 +193,17 @@ def main():
     subprocess.run(cmd, check=True)
 
     chapters = build_chapters(tl)
-    parts = queue["description"].split("\n\n")
+    parts = queue.get("description", "").split("\n\n")
     if chapters:
         parts.insert(1, "Chapters:\n" + chapters)
+    description = "\n\n".join(part for part in parts if part.strip())
+    attribution = stock_attribution(chunks)
+    if attribution:
+        description = (description.rstrip() + "\n\n" + attribution).strip()
     meta = {
         "id": tl["id"],
         "title": queue["title"],
-        "description": "\n\n".join(parts),
+        "description": description,
         "tags": [str(h).lstrip("#") for h in queue.get("hashtags", [])][:10],
     }
     with open(f"{OUT_DIR}/meta.json", "w", encoding="utf-8") as f:
@@ -168,7 +212,6 @@ def main():
     size = os.path.getsize(FINAL) / 1e6
     print(f"\nDone: {FINAL}  ({mmss(dur)}, {size:.0f} MB)")
     print("Chapters:\n" + (chapters or "(none, too few long sections)"))
-
 
 
 if __name__ == "__main__":
