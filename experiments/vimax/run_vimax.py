@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 
 import yaml
+from moviepy import VideoFileClip
 from pipelines.script2video_pipeline import Script2VideoPipeline
 
 
@@ -58,6 +59,9 @@ Compose the main subject centrally with safe margins for a vertical 9:16 social 
     shutil.copy2(output, destination)
     print(f"FITFUEL_PREVIEW={destination}")
     print(f"FITFUEL_PREVIEW_BYTES={destination.stat().st_size}")
+    with VideoFileClip(str(destination)) as clip:
+        print(f"FITFUEL_PREVIEW_SIZE={clip.size[0]}x{clip.size[1]}")
+        print(f"FITFUEL_PREVIEW_DURATION={clip.duration:.2f}s")
 
 
 if __name__ == "__main__":
