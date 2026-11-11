@@ -21,6 +21,8 @@ jobs:
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      NASA_VIDEO_SEARCH: "1"
       YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
@@ -57,7 +59,7 @@ jobs:
       - name: Voiceover
         run: python voice.py
 
-      - name: Fetch relevant Pixabay clips
+      - name: Fetch relevant free stock footage (Pixabay + Pexels + NASA + local Mixkit/Videvo)
         run: python clips_fast.py
 
       - name: Validate script and footage
