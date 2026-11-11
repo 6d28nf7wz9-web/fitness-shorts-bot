@@ -1,14 +1,25 @@
+import ast
+import pathlib
 import unittest
 from unittest.mock import patch
 
-from avatar import LAYOUTS
 from long_assemble import stock_attribution
 from long_clips import track_stock_download
 
 
+def read_avatar_layouts():
+    tree = ast.parse(pathlib.Path("avatar.py").read_text(encoding="utf-8"))
+    assignment = next(
+        node for node in tree.body
+        if isinstance(node, ast.Assign)
+        and any(isinstance(target, ast.Name) and target.id == "LAYOUTS" for target in node.targets)
+    )
+    return ast.literal_eval(assignment.value)
+
+
 class PresenterLayoutTests(unittest.TestCase):
     def test_short_presenter_is_in_upper_left_safe_zone(self):
-        layout = LAYOUTS["short"]
+        layout = read_avatar_layouts()["short"]
         top = 1920 - layout["h"] - layout["bottom"]
         self.assertEqual(layout["x"], "32")
         self.assertGreaterEqual(top, 0)
