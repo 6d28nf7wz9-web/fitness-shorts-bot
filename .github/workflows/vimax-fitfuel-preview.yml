@@ -31,13 +31,10 @@ jobs:
       - name: Check out FitFuel experiment
         uses: actions/checkout@v4
 
-      - name: Install system video tools
+      - name: Verify system video tools
         run: |
-          if ! command -v ffmpeg >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg
-          fi
           ffmpeg -version
+          ffprobe -version
 
       - name: Set up Python
         uses: actions/setup-python@v5
