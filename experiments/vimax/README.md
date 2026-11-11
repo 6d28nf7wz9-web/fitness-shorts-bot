@@ -9,12 +9,10 @@ This remains an isolated evaluation on `experiment/vimax-standalone-evaluation`;
 - Patches only the temporary ViMax checkout's Google Veo adapter to request `9:16` portrait video. The patch is not applied to the production repository or upstream.
 - Uploads the MP4, storyboard and first frames as a GitHub Actions artifact for 7 days.
 
-## Required GitHub Actions secrets
-Add these under repository Settings -> Secrets and variables -> Actions:
-- `OPENROUTER_API_KEY`: chat/storyboard planning.
-- `GOOGLE_API_KEY`: Google image generation and Veo video generation.
+## Credentials
+The workflow reuses the repository's existing `GEMINI_API_KEY` Actions secret for Gemini chat planning, Google image generation and Veo video generation. No API key is stored in the repository or printed in logs.
 
-Never put keys in tracked files or chat. The render uses external paid / credit-limited APIs. The workflow checks that both secrets exist before installing or generating anything.
+The render uses external paid / credit-limited APIs. The workflow checks that the secret exists before installing or generating anything.
 
 ## Run / retrieve
 The workflow is `.github/workflows/vimax-fitfuel-preview.yml`. A push to this experiment branch triggers it; it can also be run manually after the workflow is available on the repository's default branch. When complete, open the Actions run and download the `FitFuel-ViMax-preview` artifact. Artifact retention is 7 days.
