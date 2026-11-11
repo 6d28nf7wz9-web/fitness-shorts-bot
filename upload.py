@@ -120,10 +120,10 @@ def main():
         if providers:
             attribution = "Stock footage sources: " + ", ".join(sorted(providers)) + "."
             if "Coverr" in providers:
-                attribution += "\\nCoverr stock footage: https://coverr.co/"
+                attribution += "\nCoverr stock footage: https://coverr.co/"
             if creators:
-                attribution += "\\nContributors/assets: " + "; ".join(sorted(creators)[:8])
-            script["description"] = script.get("description", "").rstrip() + "\\n\\n" + attribution
+                attribution += "\nContributors/assets: " + "; ".join(sorted(creators)[:8])
+            script["description"] = script.get("description", "").rstrip() + "\n\n" + attribution
     except (OSError, ValueError, TypeError):
         pass
 
