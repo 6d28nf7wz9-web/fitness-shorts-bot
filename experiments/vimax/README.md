@@ -1,52 +1,23 @@
-# ViMax standalone evaluation (experimental)
+# ViMax FitFuel preview runner
 
-This experiment is intentionally isolated from the production Shorts/Long workflows.
+This remains an isolated evaluation on `experiment/vimax-standalone-evaluation`; production workflows and `main` are untouched.
 
-## Current status
+## What the preview does
+- Uses the real FitFuel protein / muscle-growth excerpt in `test_script.txt`.
+- Requests at most 3 shots and a consistent cinematic 3D anatomical fitness-explainer identity.
+- Uses one image candidate to limit generation calls.
+- Patches only the temporary ViMax checkout's Google Veo adapter to request `9:16` portrait video. The patch is not applied to the production repository or upstream.
+- Uploads the MP4, storyboard and first frames as a GitHub Actions artifact for 7 days.
 
-- The branch is based on the existing `main` pipeline.
-- ViMax is evaluated as a separate upstream project: https://github.com/HKUDS/ViMax
-- No ViMax code has been vendored into this repository and no production workflow is changed.
-- Static review only so far. A rendered video has **not** been produced in this environment.
+## Required GitHub Actions secrets
+Add these under repository Settings -> Secrets and variables -> Actions:
+- `OPENROUTER_API_KEY`: chat/storyboard planning.
+- `GOOGLE_API_KEY`: Google image generation and Veo video generation.
 
-## Why this is the first candidate
+Never put keys in tracked files or chat. The render uses external paid / credit-limited APIs. The workflow checks that both secrets exist before installing or generating anything.
 
-ViMax provides a Script2Video pipeline: explicit script -> character/storyboard planning -> shot decomposition -> keyframes -> generated video clips -> final video. Its upstream README documents Script2Video and a browser UI. The upstream project is MIT licensed.
+## Run / retrieve
+The workflow is `.github/workflows/vimax-fitfuel-preview.yml`. A push to this experiment branch triggers it; it can also be run manually after the workflow is available on the repository's default branch. When complete, open the Actions run and download the `FitFuel-ViMax-preview` artifact. Artifact retention is 7 days.
 
-## Requirements / cost gate
-
-Upstream currently requires Python 3.12+ and recommends `uv sync`. The documented Script2Video example uses:
-- OpenRouter chat model (Gemini model routed through OpenRouter)
-- Google Nano Banana image generation
-- Google Veo video generation
-
-These are external model services. The ViMax source code is open source, but model generation is not automatically free or unlimited. API keys, provider availability, billing/credits, and rate limits must be in place. The sample config has image/video limits of 2 requests/minute and 50/day.
-
-## FitFuel test case
-
-Use `test_script.txt` as a small, real excerpt from the existing L001 long-video script. The first evaluation should be deliberately small (3-4 shots maximum) to limit cost and turnaround time.
-
-Requested visual direction:
-- consistent cinematic 3D anatomical fitness explainer
-- realistic human anatomy / muscle groups where relevant
-- scene visuals must directly illustrate the narration
-- avoid generic unrelated gym montage
-- portrait 9:16 if supported by the selected generator; verify output dimensions rather than assuming
-- no generated text inside footage; titles/captions remain the responsibility of our existing renderer
-
-## Acceptance checklist
-
-Do not integrate or replace Pixabay/HyperFrames unless the generated sample passes all of these:
-1. Every shot matches the specific narration beat.
-2. Visual identity stays consistent across shots.
-3. Anatomy is credible and readable, not distorted.
-4. Output is usable in portrait format and has adequate resolution.
-5. No unwanted text, logos, or watermarks in generated footage.
-6. We can estimate cost per 30 seconds and per 3-minute video.
-7. The generated clips can be handed to our current renderer without changing production behavior.
-
-## Next execution step
-
-Run ViMax from its own checkout (not inside the production pipeline), configure the OpenRouter and Google provider keys in the local environment / GitHub Actions secrets, then run Script2Video with `test_script.txt`. Save the final MP4 and intermediate storyboard/keyframes as an artifact for visual review.
-
-Do not place API keys in tracked files. Do not enable automatic uploads. Do not merge this branch into `main` until the output is approved.
+## Known evaluation limitation
+The pipeline generates visual shots from still keyframes and Veo clips; this first test is about style, anatomy, continuity, and script-to-scene matching. Review the actual MP4 dimensions and output before considering any production integration. No automatic YouTube upload is enabled.
