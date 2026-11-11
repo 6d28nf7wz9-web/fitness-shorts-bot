@@ -116,7 +116,7 @@ def _nasa(query):
 
 def _local_mixkit_videvo(query):
     """Use locally downloaded licensed clips; never scrape restricted websites."""
-    folder = Path("output/stock_library")
+    folder = Path("stock_library")
     if not folder.exists():
         return []
     words = set(re.findall(r"[a-z0-9]+", query.lower()))
