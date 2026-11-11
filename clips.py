@@ -120,7 +120,7 @@ def choose_clip(keyword, seconds, used_ids, context=""):
     reusable = {}
 
     for query in variants:
-        print(f"  Pixabay search: {query}")
+        print(f"  Stock search: {query}")
         hits = search(query)
 
         for hit in hits:
