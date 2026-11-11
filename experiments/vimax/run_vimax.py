@@ -16,7 +16,12 @@ WORK_DIR = ROOT / ".working_dir" / "fitfuel_eval"
 
 def prepare_config():
     config = yaml.safe_load((ROOT / "configs" / "script2video.yaml").read_text(encoding="utf-8"))
-    config["chat_model"]["init_args"].update({\n        "model": "gemini-2.5-flash",\n        "model_provider": "openai",\n        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",\n        "api_key": os.environ["GEMINI_API_KEY"],\n    })
+    config["chat_model"]["init_args"].update({
+        "model": "gemini-2.5-flash",
+        "model_provider": "openai",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key": os.environ["GEMINI_API_KEY"],
+    })
     config["image_generator"]["init_args"]["api_key"] = os.environ["GOOGLE_API_KEY"]
     config["video_generator"]["init_args"]["api_key"] = os.environ["GOOGLE_API_KEY"]
     config["image_selection"]["num_candidates"] = 1
