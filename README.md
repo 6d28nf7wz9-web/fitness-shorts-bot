@@ -39,9 +39,9 @@ The Shorts clip selector now aggregates:
 - **Pixabay** (existing API key)
 - **Pexels** (official video search API; set GitHub Actions secret `PEXELS_API_KEY`)
 - **NASA Image & Video Library** (public API; enabled by `NASA_VIDEO_SEARCH=1`; expect mostly science/space footage, not gym B-roll)
-- **Mixkit + Videvo** (no stable public search API is used; import videos downloaded under the applicable free license into `output/stock_library/` and add a JSON sidecar).
+- **Mixkit + Videvo** (no stable public search API is used; import videos downloaded under the applicable free license into `stock_library/` and add a JSON sidecar).
 
-Mixkit/Videvo local sidecar example (`output/stock_library/fitness_01.json`):
+Mixkit/Videvo local sidecar example (`stock_library/fitness_01.json`):
 ```json
 {
   "source": "mixkit",
@@ -55,6 +55,6 @@ Mixkit/Videvo local sidecar example (`output/stock_library/fitness_01.json`):
   "url": "https://mixkit.co/"
 }
 ```
-The MP4 must be in the same folder. Use only assets whose individual license permits the intended YouTube/commercial use; preserve required attribution. Mixkit has both Free and Restricted licenses; Videvo license/attribution varies by clip. The selector checks local Mixkit/Videvo tags and downloads/copies matching assets into the normal clip pipeline.
+The MP4 must be in the same folder. Commit this folder to the repository so GitHub Actions can access it. Use only assets whose individual license permits the intended YouTube/commercial use; preserve required attribution. Mixkit has both Free and Restricted licenses; Videvo license/attribution varies by clip. The selector checks local Mixkit/Videvo tags and downloads/copies matching assets into the normal clip pipeline.
 
 Pexels API usage requires attribution/linking to Pexels and photographers where possible. Add the key in GitHub: **Settings → Secrets and variables → Actions → New repository secret → `PEXELS_API_KEY`**. If absent, the provider is skipped without breaking Pixabay. NASA search is optional and can be disabled with `NASA_VIDEO_SEARCH=0`.
