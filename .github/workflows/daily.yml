@@ -64,7 +64,7 @@ jobs:
 
       - name: Write script
         timeout-minutes: 8
-        run: python -u gen_script.py
+        run: python gen_script.py
 
       - name: Voiceover
         run: python voice.py
