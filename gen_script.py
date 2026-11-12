@@ -841,7 +841,7 @@ def _is_temporary_gemini_error(exc):
 
 
 def _generate_with_retry(client, model, prompt, retries=0):
-    """Try a model briefly; let the caller move to a fallback quickly."""
+    """Retry transient provider overload once, then let the caller fall back."""
 
     for retry in range(retries + 1):
         try:
@@ -955,7 +955,7 @@ def generate_script():
                     client,
                     model,
                     prompt,
-                    retries=0
+                    retries=1
                 )
                 print(
                     f"{model} responded in {time.monotonic() - request_started:.1f}s",
