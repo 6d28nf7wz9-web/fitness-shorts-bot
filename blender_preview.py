@@ -6,6 +6,7 @@ Set FITFUEL_PREVIEW_FAST=1 for low-resolution CI previews.
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -14,6 +15,7 @@ from visual_scene_registry import resolve_scene_family
 
 OUT = Path("output/3d_preview")
 BLENDER_SCRIPT = Path(__file__).with_name("blender_3d_scenes.py")
+BICEPS_CURL_SCRIPT = Path(__file__).with_name("blender_bicep_curl.py")
 
 FAMILY_TO_BLENDER = {
     "exercise_biomechanics": "exercise_biomechanics",
@@ -29,10 +31,10 @@ FAMILY_TO_BLENDER = {
 FIXTURE = {
     "title": "FitFuel 3D Preview",
     "scenes": [
-        {"narration": "A controlled squat activates the quadriceps and glutes.", "visual_title": "SQUAT BIOMECHANICS"},
+        {"narration": "A controlled dumbbell biceps curl keeps the elbow fixed as the forearm flexes.", "visual_title": "BICEPS CURL"},
         {"narration": "Muscle fibers contract and adapt to progressive overload.", "visual_title": "MUSCLE FIBERS"},
         {"narration": "Fiber travels through the stomach and intestines.", "visual_title": "DIGESTIVE SYSTEM"},
-        {"narration": "Amino acids link into a chain during protein synthesis.", "visual_title": "PROTEIN SYNTHESIS"},
+        {"narration": "A balanced meal combines protein, carbohydrates and vegetables.", "visual_title": "FOOD NUTRITION"},
     ],
 }
 
@@ -65,13 +67,22 @@ def render_preview(script, blender="blender", duration=2.5):
         target = OUT / f"scene_{i}.mp4"
         kind = scene_kind(scene)
         text = str(scene.get("visual_title") or scene.get("narration") or script.get("title", "FITFUEL"))
-        cmd = [
-            executable, "-b", "-P", str(BLENDER_SCRIPT), "--",
-            "--kind", kind, "--duration", str(duration), "--output", str(target),
-            "--orientation", "portrait", "--text", text[:52],
-        ]
-        if kind == "exercise_biomechanics":
-            cmd += ["--exercise", text[:30]]
+        is_biceps_curl = bool(re.search(r"\b(?:biceps?|arm)\s+curl\b", text, re.IGNORECASE))
+        renderer = BICEPS_CURL_SCRIPT if is_biceps_curl else BLENDER_SCRIPT
+        if is_biceps_curl:
+            cmd = [
+                executable, "-b", "-P", str(renderer), "--",
+                "--duration", str(duration), "--output", str(target),
+                "--exercise", text[:30],
+            ]
+        else:
+            cmd = [
+                executable, "-b", "-P", str(renderer), "--",
+                "--kind", kind, "--duration", str(duration), "--output", str(target),
+                "--orientation", "portrait", "--text", text[:52],
+            ]
+            if kind == "exercise_biomechanics":
+                cmd += ["--exercise", text[:30]]
         print(f"[3D preview] scene {i}/{len(script['scenes'])}: {kind} — {text[:70]}", flush=True)
         subprocess.run(cmd, check=True)
         if not target.exists() or target.stat().st_size < 10_000:
