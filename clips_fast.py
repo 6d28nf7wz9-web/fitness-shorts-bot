@@ -182,7 +182,7 @@ def main():
                 wan_file = try_animate_stock(raw_file, scene, each, part_file)
                 if wan_file:
                     try:
-                        process(wan_file, part_file, each, True)
+                        process(wan_file, part_file, each, portrait)
                     finally:
                         if os.path.exists(wan_file):
                             os.remove(wan_file)
