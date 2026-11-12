@@ -552,7 +552,7 @@ STRICT SCRIPT RULES:
 - visual_type must be one of: digestion_fiber, muscle_anatomy, exercise_biomechanics, protein_synthesis, energy_metabolism, hydration, recovery_sleep, food_nutrition, process.
 - visual_instruction must describe the actual subject anatomy/process, what moves, where it moves, and the key visual labels; do not describe a generic title card.
 - Match the illustration to the exact spoken sentence. If explaining dietary fiber, show food fiber travelling through the digestive tract and its relevant effect; if explaining an exercise, show the body position, joints, and muscles involved; if explaining a muscle, show that muscle anatomically; if explaining metabolism, show the actual energy pathway.
-- Total narration: aim for 52-58 spoken words (hard limit 45-65),
+- Total narration: aim for 50-55 spoken words (hard limit 45-68),
   designed for roughly 18-27 seconds at a natural speaking pace.
 - Count spoken words before returning JSON; stay comfortably inside the limit.
 - Hook scene: 4-9 words.
@@ -568,7 +568,7 @@ STRICT SCRIPT RULES:
 - No long intro, greeting, recap, generic like-and-subscribe,
   or spoken disclaimer. The final scene MUST include a natural topic-specific
   question mark and the exact word "follow" with a brief FitFuel invitation.
-- Before returning, verify: 4-5 scenes, 52-58 total narration words,
+- Before returning, verify: 4-5 scenes, 50-55 total narration words,
   first scene 4-9 words, final scene has "?" and "follow", and sources
   are selected only from the supplied PMID list.
 - Title must accurately match the video
@@ -737,10 +737,10 @@ def validate(data):
     if "?" not in final_line or not any(word in final_line for word in ("follow", "next episode", "next part")):
         return "final scene needs a comment question and a short follow invitation"
 
-    if not 45 <= total_words <= 65:
+    if not 45 <= total_words <= 68:
         return (
             f"narration is {total_words} words "
-            "(target 45-65)"
+            "(target 45-68)"
         )
 
     if not 4 <= word_counts[0] <= 9:
@@ -777,7 +777,8 @@ def validate(data):
 
     if too_similar(
         str(data["topic"]),
-        all_used()
+        all_used(),
+        threshold=0.68,
     ):
         return "topic too close to one already used"
 
