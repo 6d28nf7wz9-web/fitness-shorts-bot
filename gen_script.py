@@ -106,6 +106,19 @@ def get_model_candidates():
 
 MEMORY_FILE = "performance_memory.json"
 
+# Bound generation latency so a transient API stall cannot consume an entire runner.
+def _positive_int_env(name, default):
+    try:
+        value = int(os.getenv(name, str(default)))
+        return value if value > 0 else default
+    except (TypeError, ValueError):
+        return default
+
+
+GEMINI_REQUEST_TIMEOUT_MS = _positive_int_env("GEMINI_REQUEST_TIMEOUT_MS", 45000)
+GEMINI_MAX_MODELS = _positive_int_env("GEMINI_MAX_MODELS", 3)
+GEMINI_MAX_GENERATION_ATTEMPTS = _positive_int_env("GEMINI_MAX_GENERATION_ATTEMPTS", 2)
+
 from series_engine import next_episode, SERIES as SERIES_PLAN
 
 SERIES = list(SERIES_PLAN)
@@ -827,7 +840,7 @@ def _is_temporary_gemini_error(exc):
     )
 
 
-def _generate_with_retry(client, model, prompt, retries=1):
+def _generate_with_retry(client, model, prompt, retries=0):
     """Try a model briefly; let the caller move to a fallback quickly."""
 
     for retry in range(retries + 1):
@@ -863,13 +876,24 @@ def _generate_with_retry(client, model, prompt, retries=1):
             time.sleep(delay)
 
 
+def create_gemini_client(api_key):
+    """Create a client with one bounded HTTP attempt per model request."""
+    return genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(
+            timeout=GEMINI_REQUEST_TIMEOUT_MS,
+            retry_options=types.HttpRetryOptions(attempts=1),
+        ),
+    )
+
+
 def generate_script():
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY is not set")
 
-    client = genai.Client(api_key=api_key)
+    client = create_gemini_client(api_key)
 
     used = load_used()
     trends = load_trends()
@@ -882,7 +906,13 @@ def generate_script():
     print("Using channel performance memory:", MEMORY_FILE)
 
     from research_sources import research_for_topic
+    print("Starting PubMed research...", flush=True)
+    research_started = time.monotonic()
     research = research_for_topic(content_type)
+    print(
+        f"PubMed research finished in {time.monotonic() - research_started:.1f}s",
+        flush=True,
+    )
 
     prompt = build_prompt(
         content_type,
@@ -893,14 +923,16 @@ def generate_script():
         series,
     )
 
-    model_candidates = get_model_candidates()
+    model_candidates = get_model_candidates()[:GEMINI_MAX_MODELS]
+    if not model_candidates:
+        raise RuntimeError("No Gemini models are configured")
 
     print(
         "Gemini model fallback order:",
         " -> ".join(model_candidates)
     )
 
-    max_attempts = 3
+    max_attempts = GEMINI_MAX_GENERATION_ATTEMPTS
     last_problem = "Unknown error"
     quota_failures = []
 
@@ -913,11 +945,21 @@ def generate_script():
 
         for model in model_candidates:
             try:
+                request_started = time.monotonic()
+                print(
+                    f"Requesting Gemini model {model} "
+                    f"(timeout {GEMINI_REQUEST_TIMEOUT_MS / 1000:.0f}s)...",
+                    flush=True,
+                )
                 response = _generate_with_retry(
                     client,
                     model,
                     prompt,
-                    retries=1
+                    retries=0
+                )
+                print(
+                    f"{model} responded in {time.monotonic() - request_started:.1f}s",
+                    flush=True,
                 )
 
                 if not response.text:
@@ -970,9 +1012,11 @@ def generate_script():
                 if _is_quota_exhausted(exc):
                     quota_failures.append(model)
 
+                elapsed = time.monotonic() - request_started
                 print(
-                    f"{model} failed; moving to next model: "
-                    f"{last_problem[:220]}"
+                    f"{model} failed after {elapsed:.1f}s; moving to next model: "
+                    f"{last_problem[:220]}",
+                    flush=True,
                 )
 
         # Hard account quota exhaustion is not fixed by repeating the same prompt.
