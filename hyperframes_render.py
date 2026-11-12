@@ -15,15 +15,6 @@ ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
 SAFE_TITLE_WIDTH = 880
 SAFE_SUB_WIDTH = 820
-USE_3D_PREVIEW = os.getenv("FITFUEL_3D_PREVIEW", "0").lower() in ("1", "true", "yes", "on")
-
-
-def scene_clip_path(index):
-    """Use locally rendered Blender scenes only when explicitly opted in."""
-    folder = Path("output/3d_preview") if USE_3D_PREVIEW else Path("output/clips")
-    return folder / f"scene_{index}.mp4"
-
-
 def wrap_words(text, limit):
     words = re.sub(r"\s+", " ", str(text or "")).strip().split()
     lines, current = [], ""
@@ -102,7 +93,7 @@ def main():
         sub_html = "<br>".join(html.escape(x) for x in sub_lines)
         start = f"{cursor:.3f}"
         enddur = f"{dur:.3f}"
-        source = scene_clip_path(i)
+        source = Path("output/clips") / f"scene_{i}.mp4"
         if not source.exists() or source.stat().st_size < 10_000:
             raise SystemExit(f"Missing visual scene {i}: {source}")
         shutil.copy2(source, assets / f"scene_{i}.mp4")
