@@ -109,13 +109,7 @@ def main():
     secs = [float(a["seconds"]) for a in audio]
     total = round(sum(secs), 3)
     if os.getenv("HYPERFRAMES_RENDER", "1").lower() not in ("0", "false", "no", "off"):
-        use_3d = os.getenv("FITFUEL_3D_PREVIEW", "0").lower() in ("1", "true", "yes", "on")
-        if use_3d:
-            print("Visual engine: Blender 3D scene preview -> HyperFrames (preview-only opt-in)")
-            subprocess.run(["python", "blender_preview.py", "--script", "output/script.json",
-                            "--duration", os.getenv("FITFUEL_3D_SCENE_SECONDS", "4.0")], check=True)
-        else:
-            print("Visual engine: HyperFrames (Gemini scene titles + matching footage)")
+        print("Visual engine: HyperFrames (scene-matched Coverr/Pixabay stock footage + safe typography)")
         subprocess.run(["python", "hyperframes_render.py"], check=True)
         visual = "output/hyperframes/base.mp4"
         if not os.path.isfile(visual) or os.path.getsize(visual) < 100000:
