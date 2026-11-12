@@ -6,7 +6,7 @@ on:
       duration:
         description: "Duration per scene in seconds"
         required: true
-        default: "3"
+        default: "5"
         type: string
       fast_preview:
         description: "Use low-resolution quick preview"
@@ -40,7 +40,7 @@ jobs:
         env:
           FITFUEL_PREVIEW_FAST: ${{ inputs.fast_preview && '1' || '0' }}
         run: |
-          python blender_preview.py --fixture --duration "${{ inputs.duration }}"
+          python blender_preview.py --fixture --biceps-curl-only --duration "${{ inputs.duration }}"
           ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_name,width,height,nb_frames -of json output/3d_preview/preview.mp4
       - name: Upload preview artifact
         uses: actions/upload-artifact@v4
