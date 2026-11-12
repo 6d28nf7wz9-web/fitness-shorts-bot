@@ -81,6 +81,50 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
                 )
         self.assertEqual(selected["id"], 9001)
 
+    def test_two_distinct_training_category_tags_allow_relevant_category_fallback(self):
+        generic_gym_hit = {
+            "tags": "gym workout strength training fitness",
+            "pageURL": "https://example.invalid/video/gym-training",
+        }
+        score = relevance(
+            generic_gym_hit,
+            "athlete measuring health metrics|gym workout|weight training",
+            "Stopping steroids never guarantees your natural testosterone returns.",
+        )
+        self.assertEqual(score, 2)
+
+    def test_single_ambiguous_training_tag_is_not_enough_for_category_fallback(self):
+        ambiguous_hit = {
+            "tags": "jellyfish swimming underwater aquarium",
+            "pageURL": "https://example.invalid/video/jellyfish",
+        }
+        score = relevance(
+            ambiguous_hit,
+            "microscopic sperm cells in lab sample",
+            "Natural sperm and testosterone production.",
+        )
+        self.assertLess(score, 2)
+
+    def test_choose_clip_uses_strong_category_fallback_when_exact_topic_is_unavailable(self):
+        gym_hit = make_hit(
+            9102,
+            "gym workout strength training fitness",
+        )
+
+        def search_gym_fallback(query):
+            return [gym_hit] if query == "gym workout" else []
+
+        with patch("clips.search", side_effect=search_gym_fallback):
+            with patch.dict(os.environ, {"ALLOW_CATEGORY_ONLY_CLIPS": "0"}):
+                _, selected, _, _ = choose_clip(
+                    "athlete measuring health metrics|gym workout|weight training",
+                    2.5,
+                    set(),
+                    context="Stopping steroids never guarantees your natural testosterone returns.",
+                )
+
+        self.assertEqual(selected["id"], 9102)
+
     def test_quality_gate_blocks_a_scene_when_every_cut_is_weak(self):
         scenes = [
             {"narration": "Steroids can shut down natural hormone signals."},
