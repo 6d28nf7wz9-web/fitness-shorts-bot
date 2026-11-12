@@ -893,12 +893,24 @@ def create_gemini_client(api_key):
 
 
 def generate_script():
-    api_key = os.getenv("GEMINI_API_KEY")
+    """Generate a validated script with automatic Gemini -> Groq -> OpenRouter failover."""
+    from ai_providers import build_external_providers
 
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY is not set")
+    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+    gemini_client = create_gemini_client(gemini_key) if gemini_key else None
+    gemini_models = get_model_candidates()[:GEMINI_MAX_MODELS] if gemini_client else []
+    external_providers = build_external_providers()
 
-    client = create_gemini_client(api_key)
+    providers = []
+    if gemini_client:
+        providers.append(("Gemini", None))
+    providers.extend((provider.name, provider) for provider in external_providers)
+
+    if not providers:
+        raise RuntimeError(
+            "No AI provider is configured. Set GEMINI_API_KEY, GROQ_API_KEY, "
+            "or OPENROUTER_API_KEY in GitHub Actions Secrets."
+        )
 
     used = load_used()
     trends = load_trends()
@@ -906,9 +918,9 @@ def generate_script():
 
     series, episode_number, episode_topic = choose_series(used)
     content_type = episode_topic
-    print(f"Video series: {series} | Episode {episode_number}")
-    print(f"Episode topic: {episode_topic}")
-    print("Using channel performance memory:", MEMORY_FILE)
+    print(f"Video series: {series} | Episode {episode_number}", flush=True)
+    print(f"Episode topic: {episode_topic}", flush=True)
+    print("Using channel performance memory:", MEMORY_FILE, flush=True)
 
     from research_sources import research_for_topic
     print("Starting PubMed research...", flush=True)
@@ -928,138 +940,106 @@ def generate_script():
         series,
     )
 
-    model_candidates = get_model_candidates()[:GEMINI_MAX_MODELS]
-    if not model_candidates:
-        raise RuntimeError("No Gemini models are configured")
-
     print(
-        "Gemini model fallback order:",
-        " -> ".join(model_candidates)
+        "AI provider order:",
+        " -> ".join(name for name, _ in providers),
+        flush=True,
     )
 
-    max_attempts = GEMINI_MAX_GENERATION_ATTEMPTS
     last_problem = "Unknown error"
-    quota_failures = []
-    model_responded = False
+    max_attempts = GEMINI_MAX_GENERATION_ATTEMPTS
 
     for attempt in range(1, max_attempts + 1):
-        print(
-            f"\nGeneration attempt {attempt}/{max_attempts}"
-        )
+        print(f"\nGeneration attempt {attempt}/{max_attempts}", flush=True)
 
-        api_failures = 0
-
-        for model in model_candidates:
+        for provider_name, provider in providers:
+            request_started = time.monotonic()
             try:
-                request_started = time.monotonic()
+                if provider_name == "Gemini":
+                    response_text = None
+                    model_errors = []
+                    for model in gemini_models:
+                        try:
+                            print(
+                                f"Requesting Gemini model {model} "
+                                f"(timeout {GEMINI_REQUEST_TIMEOUT_MS / 1000:.0f}s)...",
+                                flush=True,
+                            )
+                            response = _generate_with_retry(
+                                gemini_client, model, prompt, retries=1
+                            )
+                            response_text = response.text
+                            if not response_text:
+                                raise RuntimeError("Empty Gemini response")
+                            selected_model = model
+                            break
+                        except Exception as exc:
+                            model_errors.append(f"{model}: {str(exc)[:180]}")
+                            print(
+                                f"Gemini model {model} failed; moving to next model: "
+                                f"{str(exc)[:180]}",
+                                flush=True,
+                            )
+                    if not response_text:
+                        raise RuntimeError("; ".join(model_errors) or "No Gemini model responded")
+                else:
+                    print(f"Requesting {provider_name} ({provider.model})...", flush=True)
+                    response = provider.generate(prompt)
+                    response_text = response.text
+                    selected_model = response.model
+
+                elapsed = time.monotonic() - request_started
                 print(
-                    f"Requesting Gemini model {model} "
-                    f"(timeout {GEMINI_REQUEST_TIMEOUT_MS / 1000:.0f}s)...",
+                    f"{provider_name}/{selected_model} responded in {elapsed:.1f}s",
                     flush=True,
                 )
-                response = _generate_with_retry(
-                    client,
-                    model,
-                    prompt,
-                    retries=1
-                )
-                print(
-                    f"{model} responded in {time.monotonic() - request_started:.1f}s",
-                    flush=True,
-                )
 
-                if not response.text:
-                    last_problem = "Empty Gemini response"
-                    print(f"{model}: {last_problem}")
-                    continue
-
-                model_responded = True
-                data = repair_keywords(
-                    parse_json(response.text)
-                )
-
+                data = repair_keywords(parse_json(response_text))
                 problem = validate(data)
-
                 if problem:
                     last_problem = problem
-
                     print(
-                        f"{model}: Invalid script: {problem}"
+                        f"{provider_name}: Invalid script: {problem}; trying next provider",
+                        flush=True,
                     )
-
                     prompt += (
-                        "\n\nThe previous output failed: "
-                        f"{problem}. Generate a completely NEW script "
-                        "and obey every constraint. Return JSON only."
+                        "\n\nThe previous output failed validation: "
+                        f"{problem}. Generate a completely NEW script, obey every "
+                        "constraint, and return JSON only."
                     )
-
                     continue
 
-                print(
-                    f"Successfully generated script using: {model}"
-                )
-
                 total_words = sum(
-                    len(scene["narration"].split())
-                    for scene in data["scenes"]
+                    len(scene["narration"].split()) for scene in data["scenes"]
                 )
-
-                print(
-                    f"Validated narration length: "
-                    f"{total_words} words"
-                )
-
                 data["episode_number"] = episode_number
                 data["episode_topic"] = episode_topic
+                data["ai_provider"] = provider_name
+                data["ai_model"] = selected_model
+                print(
+                    f"Successfully generated and validated script using "
+                    f"{provider_name}/{selected_model}; narration={total_words} words",
+                    flush=True,
+                )
                 return data
 
             except Exception as exc:
                 last_problem = str(exc)
-                api_failures += 1
-                if _is_quota_exhausted(exc):
-                    quota_failures.append(model)
-
-                elapsed = time.monotonic() - request_started
                 print(
-                    f"{model} failed after {elapsed:.1f}s; moving to next model: "
-                    f"{last_problem[:220]}",
+                    f"{provider_name} failed after "
+                    f"{time.monotonic() - request_started:.1f}s; "
+                    f"moving to next provider: {last_problem[:240]}",
                     flush=True,
                 )
 
-        # Hard account quota exhaustion is not fixed by repeating the same prompt.
-        if quota_failures and not model_responded:
-            raise RuntimeError(
-                "Gemini account/project quota is exhausted for this run. "
-                "The configured fallback models returned quota errors: "
-                f"{', '.join(quota_failures)}. Check Google AI Studio billing "
-                "and per-model request/token quotas, or use an API key/project "
-                "with available quota. "
-                f"Last error: {last_problem[:300]}"
-            )
-
-        if api_failures == len(model_candidates):
-            raise RuntimeError(
-                "All configured Gemini models failed. "
-                "Check model access/quota or set GEMINI_MODEL and "
-                "GEMINI_FALLBACK_MODELS to model IDs enabled for your API key. "
-                f"Last error: {last_problem}"
-            )
-
         if attempt < max_attempts:
-            delay = min(
-                5 * (2 ** (attempt - 1)),
-                30,
-            )
-
-            print(
-                f"Waiting {delay} seconds before retry..."
-            )
-
+            delay = min(5 * (2 ** (attempt - 1)), 10)
+            print(f"All providers exhausted this attempt; retrying once in {delay}s", flush=True)
             time.sleep(delay)
 
     raise RuntimeError(
-        f"Could not generate a valid script after "
-        f"{max_attempts} attempts. Last error: {last_problem}"
+        f"No provider produced a valid FitFuel script after {max_attempts} attempts. "
+        f"Last error: {last_problem[:500]}"
     )
 
 
