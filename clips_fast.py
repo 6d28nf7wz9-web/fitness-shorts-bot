@@ -237,12 +237,20 @@ def main():
                     from stock_sources import track_coverr_download
                     track_coverr_download(str(clip_id).split(":", 1)[1])
 
-                process(
-                    raw_file,
-                    part_file,
-                    each,
-                    portrait,
-                )
+                # Wan may enhance one selected stock segment, using a frame
+                # from that exact Coverr/Pixabay result as its visual reference.
+                # If disabled or unsuccessful, the original stock segment is used.
+                wan_file = try_animate_stock(raw_file, scene, each, part_file)
+                if wan_file:
+                    try:
+                        process(wan_file, part_file, each, True)
+                    finally:
+                        if os.path.exists(wan_file):
+                            os.remove(wan_file)
+                    clip_source = "stock+wan"
+                else:
+                    process(raw_file, part_file, each, portrait)
+                    clip_source = "stock"
 
                 if clip_id is not None:
                     used_ids.add(clip_id)
@@ -254,7 +262,7 @@ def main():
             part_files.append(part_file)
 
             scene_clips.append({
-                "source": "stock",
+                "source": clip_source,
                 "query": query,
                 "keyword": keyword,
                 "pixabay_id": clip_id,
