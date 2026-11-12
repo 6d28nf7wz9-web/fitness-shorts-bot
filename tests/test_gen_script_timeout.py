@@ -26,6 +26,22 @@ class GeminiTimeoutTests(unittest.TestCase):
 
         client.models.generate_content.assert_called_once()
 
+    def test_transient_503_gets_one_bounded_retry(self):
+        client = Mock()
+        client.models.generate_content.side_effect = [
+            RuntimeError("503 UNAVAILABLE: high demand"),
+            Mock(text='{"ok": true}'),
+        ]
+
+        with patch("gen_script.time.sleep") as sleep:
+            response = gen_script._generate_with_retry(
+                client, "test-model", "test prompt", retries=1
+            )
+
+        self.assertEqual(response.text, '{"ok": true}')
+        self.assertEqual(client.models.generate_content.call_count, 2)
+        sleep.assert_called_once_with(3)
+
     def test_invalid_environment_values_fall_back_to_safe_defaults(self):
         with patch.dict("os.environ", {"FITFUEL_TEST_LIMIT": "0"}):
             self.assertEqual(
