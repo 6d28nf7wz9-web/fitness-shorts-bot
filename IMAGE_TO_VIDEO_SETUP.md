@@ -1,46 +1,41 @@
-# FitFuel hybrid Image-to-Video (I2V)
+# FitFuel stock-first Wan assistance
 
-## Safety defaults
+## Production visual strategy
 
-- Image-to-video is **hard-locked off in the production workflow** with `I2V_ENABLED="0"`. Repository variables cannot turn it on.
-- No paid provider request is made unless the owner explicitly approves a change to the workflow's hard-coded master switch.
-- The integration makes one request to exactly one selected provider. It does not retry a paid generation or cascade to another paid provider.
-- At most two scenes per Short can be generated (`I2V_MAX_SCENES` is hard-capped at 2).
-- Each provider is configured for a five-second generation. The existing FFmpeg scene processor then fits/loops that source to the narration duration.
-- If the feature is disabled, a still image is missing, or a provider fails, the scene uses the existing stock-footage pipeline.
-- Tests mock all provider requests. CI never calls Kling, Runway, or Replicate.
+The Short is assembled from scene-matched real footage. Coverr and Pixabay are
+the primary sources; Pexels, NASA and imported licensed stock remain optional
+additional sources. The stock selector and relevance checks remain responsible
+for choosing footage that matches each scene.
 
-## Still-image inputs
+Wan is a supplementary tool, not the primary video renderer. When deliberately
+enabled, the pipeline:
+1. Selects and downloads a relevant Coverr/Pixabay stock clip.
+2. Extracts one representative frame from that exact clip.
+3. Sends that frame and the scene narration to Wan 2.2 image-to-video through
+   Replicate, requesting subtle photorealistic live-action motion.
+4. Uses the Wan result for that single segment only. If generation fails, it
+   keeps the original stock footage.
 
-The current pipeline does not yet generate AI still images automatically. Until a separate still-image stage is approved and implemented, place prepared 3D reference stills here:
+The workflow allows no more than one Wan-enhanced segment per Short. Captions,
+voice, music, HyperFrames typography and presenter/avatar compositing remain
+separate and unchanged.
 
-- `output/i2v_inputs/scene_1.png`
-- `output/i2v_inputs/scene_2.png`
+## Safety and cost defaults
 
-JPEG is also accepted (`.jpg` / `.jpeg`). Use portrait images where possible, at least 300 px on each side. The input file must be 5 MB or smaller. The still should already depict the exact anatomy/subject to preserve; the I2V prompt adds only subtle motion and camera movement.
+- Wan assistance is disabled in the scheduled workflow:
+  - I2V_ENABLED=0
+  - WAN_STOCK_ASSIST=0
+- Both switches must be intentionally enabled before any paid API request can
+  happen.
+- WAN_API_KEY must be a Replicate API token. The configured model is
+  wan-video/wan-2.2-i2v-a14b; this is not the local Wan 2.1 Colab checkpoint.
+- Only one stock segment is eligible per Short, and there is no paid-provider
+  retry or fallback chain.
+- If Wan is disabled, unconfigured, times out or fails, the selected Coverr/
+  Pixabay clip remains the final visual.
+- No scheduled job runs Blender or any 3D render step.
 
-## GitHub Actions configuration
-
-The daily workflow exposes these environment variables only to the `clips_fast.py` step:
-
-| Variable | Current value | Purpose |
-|---|---:|---|
-| `I2V_ENABLED` | `0` (hard-coded) | Master switch; cannot be changed through repository variables |
-| `I2V_PROVIDER` | `kling` | One of `kling`, `runway`, `wan` |
-| `I2V_MAX_SCENES` | `2` | Number of eligible early scenes, hard-capped at 2 |
-
-Provider credentials are read from repository Actions secrets:
-
-- `KLING_API_KEY`
-- `RUNWAY_API_KEY`
-- `WAN_API_KEY` — this must be a **Replicate API token** for the official `wan-video/wan-2.2-i2v-a14b` model; Wan 2.2 itself does not issue a universal API key.
-
-Do not change the hard-coded `I2V_ENABLED` value until the still-image inputs, provider account balance, model selection, and expected cost have been reviewed and the owner has explicitly approved generation. Adding or changing repository variables alone cannot activate I2V.
-
-## Provider implementation
-
-- Kling: official Kling 2.5 Turbo image-to-video endpoint; task polling by task ID.
-- Runway: official Runway Dev `/v1/image_to_video` endpoint using `gen4_turbo`, with the documented API version header.
-- Wan 2.2: Replicate's official `wan-video/wan-2.2-i2v-a14b` prediction endpoint.
-
-All output is downloaded to a temporary raw path and normalized to the existing 1080x1920 scene format by `clips.process`. Captions, voice, presenter placement, and HyperFrames composition remain unchanged.
+Do not enable paid Wan generation until the expected Replicate cost and one
+sampled result have been reviewed. The free Colab T4 Wan 2.1 route is kept out of
+the production workflow because its previous preview was too short and had
+unreliable exercise motion.
