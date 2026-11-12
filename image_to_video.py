@@ -264,10 +264,11 @@ def generate_video(image_path, prompt, destination, provider=None):
     token = _token(provider)
     image_uri = _image_data_uri(image_path)
     safe_prompt = (
-        "Create a premium cinematic 3D anatomical fitness explainer shot. "
-        "Preserve the exact subject and anatomy from the reference image. "
-        "Use subtle physically plausible motion and a slow controlled camera move. "
-        "Do not add text, labels, logos, extra limbs, or change the subject. "
+        "Create premium photorealistic live-action footage from the reference frame. "
+        "Preserve the exact people, objects, clothing, location and composition. "
+        "Use only subtle physically plausible movement and a gentle cinematic camera move. "
+        "Do not create CGI, 3D anatomy, overlays, text, labels, logos, extra limbs, "
+        "new people or objects, or change the subject. "
         + str(prompt or "Subtle cinematic movement")
     )
     generators = {
