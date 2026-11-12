@@ -56,7 +56,10 @@ scene.render.use_motion_blur = not FAST
 scene.render.motion_blur_shutter = 0.25
 scene.render.resolution_percentage = 100
 scene.render.image_settings.color_mode = "RGB"
-scene.view_settings.view_transform = "AgX"
+try:
+    scene.view_settings.view_transform = "AgX"
+except Exception:
+    scene.view_settings.view_transform = "Filmic"
 scene.world.color = (0.012, 0.018, 0.03)
 if hasattr(scene, "eevee") and not FAST:
     scene.eevee.taa_render_samples = 32
@@ -212,6 +215,7 @@ dumbbell_root.keyframe_insert(data_path="location", frame=1)
 # Forearm endpoint is calculated around a stationary elbow pivot.
 forearm_len = 0.59
 for frame in range(1, FRAMES + 1):
+    scene.frame_set(frame)
     phase = (frame - 1) / max(1, FRAMES - 1)
     angle_deg = 125.0 * (0.5 - 0.5 * math.cos(2 * math.pi * phase))
     angle = math.radians(angle_deg)
@@ -222,7 +226,7 @@ for frame in range(1, FRAMES + 1):
     )
     put_between(forearm, elbow, wrist)
     # The hand and dumbbell share one parent, so the grip cannot drift away.
-    dumbbell_root.location = (wrist[0], wrist[1] - 0.18, wrist[2] - 0.02)
+    dumbbell_root.location = (wrist[0], wrist[1] - 0.02, wrist[2] - 0.02)
     dumbbell_root.keyframe_insert(data_path="location", frame=frame)
 
 # Use linear timing between densely sampled points; motion is already eased analytically.
