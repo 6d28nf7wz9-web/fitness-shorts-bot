@@ -1,5 +1,5 @@
 import unittest
-from blender_preview import FAMILY_TO_BLENDER, FIXTURE, load_script, scene_kind
+from blender_preview import FAMILY_TO_BLENDER, FIXTURE, load_script, scene_kind, uses_controlled_curl_rig
 
 
 class BlenderPreviewTests(unittest.TestCase):
@@ -11,6 +11,14 @@ class BlenderPreviewTests(unittest.TestCase):
         self.assertEqual(scene_kind({"narration": "stomach digestion and gut fiber"}), "digestion_fiber")
         self.assertEqual(scene_kind({"narration": "sleep and recovery"}), "recovery_sleep")
         self.assertEqual(scene_kind({"narration": "protein synthesis in muscle"}), "muscle_anatomy")
+
+    def test_biceps_curl_uses_controlled_rig_not_generic_text_to_video(self):
+        self.assertTrue(uses_controlled_curl_rig({
+            "visual_title": "BICEPS CURL",
+            "narration": "Keep the elbow fixed and curl the dumbbell."
+        }))
+        self.assertTrue(uses_controlled_curl_rig({"narration": "Arm curl with a dumbbell"}))
+        self.assertFalse(uses_controlled_curl_rig({"narration": "A controlled push-up"}))
 
     def test_every_registry_family_has_a_blender_route(self):
         self.assertEqual(set(FAMILY_TO_BLENDER), {
