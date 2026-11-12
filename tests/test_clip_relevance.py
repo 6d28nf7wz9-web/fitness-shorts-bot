@@ -81,6 +81,30 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
                 )
         self.assertEqual(selected["id"], 9001)
 
+    def test_two_distinct_training_category_tags_allow_relevant_category_fallback(self):
+        generic_gym_hit = {
+            "tags": "gym workout strength training fitness",
+            "pageURL": "https://example.invalid/video/gym-training",
+        }
+        score = relevance(
+            generic_gym_hit,
+            "athlete measuring health metrics|gym workout|weight training",
+            "Stopping steroids never guarantees your natural testosterone returns.",
+        )
+        self.assertEqual(score, 2)
+
+    def test_single_ambiguous_training_tag_is_not_enough_for_category_fallback(self):
+        ambiguous_hit = {
+            "tags": "jellyfish swimming underwater aquarium",
+            "pageURL": "https://example.invalid/video/jellyfish",
+        }
+        score = relevance(
+            ambiguous_hit,
+            "microscopic sperm cells in lab sample",
+            "Natural sperm and testosterone production.",
+        )
+        self.assertLess(score, 2)
+
     def test_quality_gate_blocks_a_scene_when_every_cut_is_weak(self):
         scenes = [
             {"narration": "Steroids can shut down natural hormone signals."},
