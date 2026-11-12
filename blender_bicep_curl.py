@@ -166,7 +166,7 @@ palm = uv("Gripping palm", (0, 0, 0), (0.105, 0.085, 0.12), skin)
 # A visible closed grip: fingers curl around the horizontal handle, not around a plate.
 finger_objects = []
 for i in range(4):
-    finger_objects.append(uv("Grip finger " + str(i + 1), (0, 0, 0), (0.035, 0.045, 0.075), skin, 24))
+    finger_objects.append(uv("Grip finger " + str(i + 1), (0, 0, 0), (0.035, 0.04, 0.028), skin, 24))
 thumb = uv("Opposing thumb", (0, 0, 0), (0.04, 0.05, 0.09), skin, 24)
 
 # Dumbbell assembly: handle along the hand's grip axis, collars, and equal round plates.
@@ -204,8 +204,8 @@ for ob in [palm, wrist_joint, thumb] + finger_objects:
 wrist_joint.location = (0, 0, 0)
 palm.location = (-0.015, -0.02, -0.01)
 for i, finger in enumerate(finger_objects):
-    finger.location = (0.035 * (i - 1.5), -0.10, -0.015)
-thumb.location = (-0.02, -0.11, 0.055)
+    finger.location = (0.04, -0.10, -0.055 + i * 0.035)
+thumb.location = (-0.045, -0.10, 0.055)
 
 # Camera-facing side of the dumbbell and palm is y=-0.18.
 dumbbell_root.location = (-0.53, -0.18, 0.60)
@@ -225,6 +225,8 @@ for frame in range(1, FRAMES + 1):
         elbow[2] - forearm_len * math.cos(angle),
     )
     put_between(forearm, elbow, wrist)
+    biceps.scale.y = 0.065 * (1.0 + 0.16 * math.sin(angle))
+    biceps.keyframe_insert(data_path="scale", frame=frame)
     # The hand and dumbbell share one parent, so the grip cannot drift away.
     dumbbell_root.location = (wrist[0], wrist[1] - 0.02, wrist[2] - 0.02)
     dumbbell_root.keyframe_insert(data_path="location", frame=frame)
