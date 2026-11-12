@@ -59,10 +59,15 @@ def main():
                 score = relevance(hit, part.get("keyword", ""), narration)
                 if score < 2:
                     weak.append(str(part.get("pixabay_id")))
-            if weak:
+            if weak and len(weak) == len(parts):
+                errors.append(
+                    f"Scene {i}: all {len(parts)} footage cuts lack a specific scene match "
+                    f"(IDs {', '.join(weak[:4])}); blocking upload"
+                )
+            elif weak:
                 warnings.append(
-                    f"Scene {i}: {len(weak)}/{len(parts)} footage cuts only category-level "
-                    f"match (IDs {', '.join(weak[:4])})"
+                    f"Scene {i}: {len(weak)}/{len(parts)} footage cuts lack a specific scene match "
+                    f"(IDs {', '.join(weak[:4])})"
                 )
 
     print(f"Quality gate: {len(scenes)} scenes, {total} spoken words")

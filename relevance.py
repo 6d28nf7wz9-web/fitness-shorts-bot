@@ -52,7 +52,12 @@ FILLER = {
 GENERIC = {
     "gym", "workout", "fitness", "training", "exercise",
     "healthy", "health", "food", "meal", "nutrition", "diet",
-    "sport", "person", "people", "weight", "weights", "body"
+    "sport", "person", "people", "weight", "weights", "body",
+    # Demographic, posture, and motion descriptors are not proof that a
+    # clip depicts the actual subject (e.g. a bird tagged "male" or "sitting").
+    "athlete", "male", "female", "sitting", "standing",
+    "thoughtfully", "stressed", "preparing", "holding",
+    "locker", "room", "running", "swimming"
 }
 
 TRAINING_FALLBACKS = [
