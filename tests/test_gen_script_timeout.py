@@ -42,6 +42,25 @@ class GeminiTimeoutTests(unittest.TestCase):
         self.assertEqual(client.models.generate_content.call_count, 2)
         sleep.assert_called_once_with(3)
 
+    def test_hard_quota_error_is_not_retried(self):
+        client = Mock()
+        client.models.generate_content.side_effect = RuntimeError(
+            "429 RESOURCE_EXHAUSTED: You exceeded your current quota; check billing details"
+        )
+
+        with patch("gen_script.time.sleep") as sleep:
+            with self.assertRaisesRegex(RuntimeError, "exceeded your current quota"):
+                gen_script._generate_with_retry(
+                    client, "test-model", "test prompt", retries=1
+                )
+
+        client.models.generate_content.assert_called_once()
+        sleep.assert_not_called()
+
+    def test_negated_guarantee_language_is_not_banned(self):
+        self.assertNotIn("guaranteed", gen_script.BANNED)
+        self.assertIn("guaranteed recovery", gen_script.BANNED)
+
     def test_invalid_environment_values_fall_back_to_safe_defaults(self):
         with patch.dict("os.environ", {"FITFUEL_TEST_LIMIT": "0"}):
             self.assertEqual(
