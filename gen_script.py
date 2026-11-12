@@ -127,7 +127,11 @@ BANNED = [
     "fat burner",
     "fat-burner",
     "detox",
-    "guaranteed",
+    "guaranteed results",
+    "guaranteed cure",
+    "guaranteed recovery",
+    "guaranteed fat loss",
+    "guaranteed muscle growth",
     "spot reduc",
     "miracle",
     "overnight",
@@ -856,7 +860,8 @@ def _generate_with_retry(client, model, prompt, retries=0):
 
         except Exception as exc:
             if (
-                not _is_temporary_gemini_error(exc)
+                _is_quota_exhausted(exc)
+                or not _is_temporary_gemini_error(exc)
                 or retry >= retries
             ):
                 raise
@@ -935,6 +940,7 @@ def generate_script():
     max_attempts = GEMINI_MAX_GENERATION_ATTEMPTS
     last_problem = "Unknown error"
     quota_failures = []
+    model_responded = False
 
     for attempt in range(1, max_attempts + 1):
         print(
@@ -967,6 +973,7 @@ def generate_script():
                     print(f"{model}: {last_problem}")
                     continue
 
+                model_responded = True
                 data = repair_keywords(
                     parse_json(response.text)
                 )
@@ -1020,7 +1027,7 @@ def generate_script():
                 )
 
         # Hard account quota exhaustion is not fixed by repeating the same prompt.
-        if quota_failures:
+        if quota_failures and not model_responded:
             raise RuntimeError(
                 "Gemini account/project quota is exhausted for this run. "
                 "The configured fallback models returned quota errors: "
