@@ -77,7 +77,10 @@ def mat(name, color, metallic=0.0, roughness=0.35, emission=0.0):
     if emission:
         if "Emission Color" in bs.inputs:
             bs.inputs["Emission Color"].default_value = (*color, 1)
-        bs.inputs["Emission Strength"].default_value = emission
+        elif "Emission" in bs.inputs:
+            bs.inputs["Emission"].default_value = (*color, 1)
+        if "Emission Strength" in bs.inputs:
+            bs.inputs["Emission Strength"].default_value = emission
     return m
 
 skin = mat("FitFuel warm anatomical skin", (0.64, 0.39, 0.27), 0.05, 0.3)
