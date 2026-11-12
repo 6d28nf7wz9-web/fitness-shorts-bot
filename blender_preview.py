@@ -59,7 +59,7 @@ def scene_kind(scene):
 
 def uses_controlled_curl_rig(scene):
     text = str(scene.get("visual_title", "")) + " " + str(scene.get("narration", ""))
-    return bool(re.search(r"\\b(?:biceps?|arm)\\s+curl\\b", text, re.IGNORECASE))
+    return bool(re.search(r"\b(?:biceps?|arm)\s+curl\b", text, re.IGNORECASE))
 
 
 def render_preview(script, blender="blender", duration=2.5):
@@ -72,7 +72,7 @@ def render_preview(script, blender="blender", duration=2.5):
         target = OUT / f"scene_{i}.mp4"
         kind = scene_kind(scene)
         text = str(scene.get("visual_title") or scene.get("narration") or script.get("title", "FITFUEL"))
-        is_biceps_curl = bool(re.search(r"\b(?:biceps?|arm)\s+curl\b", text, re.IGNORECASE))
+        is_biceps_curl = uses_controlled_curl_rig(scene)
         renderer = BICEPS_CURL_SCRIPT if is_biceps_curl else BLENDER_SCRIPT
         if is_biceps_curl:
             cmd = [
