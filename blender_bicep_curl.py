@@ -29,10 +29,13 @@ FPS = 12 if FAST else 30
 FRAMES = max(24, round(args.duration * FPS))
 
 # Clean scene and render configuration.
-bpy.ops.object.select_all(action="SELECT)
+bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete(use_global=False)
 scene = bpy.context.scene
-scene.render.engine = "BLENDER_EEVEE_NEXT" if hasattr(bpy.types, "EEVEE_NEXT") else "BLENDER_EEVEE"
+try:
+    scene.render.engine = "BLENDER_EEVEE_NEXT"
+except Exception:
+    scene.render.engine = "BLENDER_EEVEE"
 scene.render.resolution_x = WIDTH
 scene.render.resolution_y = HEIGHT
 scene.render.resolution_percentage = 100
@@ -55,7 +58,6 @@ scene.render.resolution_percentage = 100
 scene.render.image_settings.color_mode = "RGB"
 scene.view_settings.view_transform = "AgX"
 scene.world.color = (0.012, 0.018, 0.03)
-scene.render.engine = "BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items else "BLENDER_EEVEE"
 if hasattr(scene, "eevee") and not FAST:
     scene.eevee.taa_render_samples = 32
 if hasattr(scene, "eevee") and FAST:
@@ -196,7 +198,11 @@ for side in (-1, 1):
 # Parent grip pieces to the same wrist root so the hand and weight travel together.
 for ob in [palm, wrist_joint, thumb] + finger_objects:
     ob.parent = dumbbell_root
-    ob.location = (0, 0, 0)
+wrist_joint.location = (0, 0, 0)
+palm.location = (-0.015, -0.02, -0.01)
+for i, finger in enumerate(finger_objects):
+    finger.location = (0.035 * (i - 1.5), -0.10, -0.015)
+thumb.location = (-0.02, -0.11, 0.055)
 
 # Camera-facing side of the dumbbell and palm is y=-0.18.
 dumbbell_root.location = (-0.53, -0.18, 0.60)
@@ -215,18 +221,9 @@ for frame in range(1, FRAMES + 1):
         elbow[2] - forearm_len * math.cos(angle),
     )
     put_between(forearm, elbow, wrist)
-    wrist_joint.location = wrist
-    wrist_joint.keyframe_insert(data_path="location", frame=frame)
-    # The hand stays aligned with the forearm; dumbbell axis remains horizontal.
-    palm.location = (wrist[0] - 0.015, wrist[1] - 0.015, wrist[2] - 0.01)
-    palm.keyframe_insert(data_path="location", frame=frame)
+    # The hand and dumbbell share one parent, so the grip cannot drift away.
     dumbbell_root.location = (wrist[0], wrist[1] - 0.18, wrist[2] - 0.02)
     dumbbell_root.keyframe_insert(data_path="location", frame=frame)
-    for i, finger in enumerate(finger_objects):
-        finger.location = (wrist[0] + 0.035 * (i - 1.5), wrist[1] - 0.10, wrist[2] - 0.015)
-        finger.keyframe_insert(data_path="location", frame=frame)
-    thumb.location = (wrist[0] - 0.02, wrist[1] - 0.11, wrist[2] + 0.055)
-    thumb.keyframe_insert(data_path="location", frame=frame)
 
 # Use linear timing between densely sampled points; motion is already eased analytically.
 for ob in bpy.data.objects:
