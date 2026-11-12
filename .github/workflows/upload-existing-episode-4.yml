@@ -1,0 +1,123 @@
+name: Upload existing FitFuel Episode 4 preview
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/upload-existing-episode-4.yml
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: fitness-video-pipelines
+  cancel-in-progress: false
+
+jobs:
+  upload-existing-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PYTHONUNBUFFERED: "1"
+      YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+      YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+      YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+      UPLOAD_PRIVACY: public
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download the exact successful preview artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: fitfuel-short-preview
+          path: downloaded-preview
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 43206844376
+          merge-multiple: true
+
+      - name: Prepare the existing video and Episode 4 metadata
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          test -s downloaded-preview/final.mp4
+          cp downloaded-preview/final.mp4 output/final.mp4
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          history_path = Path("output/uploaded_videos.json")
+          history = json.loads(history_path.read_text(encoding="utf-8")) if history_path.exists() else []
+          title = "Will Testosterone Recover After Steroid Use?"
+          topic = "Testosterone Recovery After Steroids"
+          if any(
+              item.get("title") == title or
+              (item.get("series") == "Steroid Reality Check" and item.get("episode_number") == 4)
+              for item in history if isinstance(item, dict)
+          ):
+              raise SystemExit("Episode 4 already exists in upload history; refusing a duplicate upload.")
+
+          script = {
+              "title": title,
+              "topic": topic,
+              "series": "Steroid Reality Check",
+              "episode_number": 4,
+              "episode_topic": "Can testosterone production recover after stopping steroids?",
+              "description": (
+                  "Can natural testosterone recover after anabolic steroid use? Recovery varies by "
+                  "individual, age, cycle duration, compounds used, and overall health. Blood tests "
+                  "and follow-up with a qualified healthcare professional are important. Do not "
+                  "self-prescribe post-cycle therapy (PCT).\n\n"
+                  "This video is for educational purposes only and is not medical advice. "
+                  "Speak with a qualified healthcare professional about your own situation.\n\n"
+                  "Steroid Reality Check — Episode 4. Follow FitFuel for evidence-informed fitness, "
+                  "training, nutrition, and health explainers."
+              ),
+              "hashtags": [
+                  "#TestosteroneRecovery",
+                  "#SteroidRealityCheck",
+                  "#HormoneHealth",
+                  "#FitnessScience",
+                  "#FitFuel"
+              ],
+              "scenes": [
+                  {"narration": "Will your testosterone bounce back after steroid cycles?"},
+                  {"narration": "Evidence indicates most men typically regain natural levels within months."},
+                  {"narration": "Age, cycle length, and proper PCT affect recovery speed."},
+                  {"narration": "Regular blood work and symptom tracking guide safe decisions."},
+                  {"narration": "Ready to monitor your hormones? Follow FitFuel for science."}
+              ]
+          }
+          Path("output/script.json").write_text(
+              json.dumps(script, ensure_ascii=False, indent=2),
+              encoding="utf-8"
+          )
+          PY
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Upload the existing Episode 4 video to YouTube
+        run: python upload.py
+
+      - name: Save the uploaded episode and sequence state to main
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add used_topics.json output/uploaded_videos.json
+          git diff --cached --quiet && {
+            echo "No upload history changes detected."
+            exit 1
+          }
+          git commit -m "Record published Steroid Reality Check episode 4"
+          git pull --rebase origin main
+          git push origin HEAD:main
