@@ -9,11 +9,6 @@ from clips import (
     download,
     process,
 )
-from image_to_video import (
-    generate_video,
-    scene_image_path,
-    scene_is_eligible,
-)
 
 PART_SECONDS = float(os.getenv("PART_SECONDS", "2.6"))
 MAX_PARTS = 4
@@ -75,49 +70,6 @@ def _concat_parts(part_files, output_file, scene_index):
             os.remove(list_file)
 
 
-def _try_i2v(scene_index, scene, seconds, output_file):
-    """Try one explicitly enabled AI scene; return metadata or None for stock fallback."""
-    if not scene_is_eligible(scene_index):
-        return None
-
-    image_path = scene_image_path(scene_index)
-    raw_file = os.path.join(RAW_DIR, f"i2v_scene_{scene_index}.mp4")
-    prompt = "Scene narration: " + str(scene.get("narration", ""))
-    prompt += ". Visual direction: " + str(scene.get("visual_title") or scene.get("keyword") or "")
-
-    try:
-        print(
-            f"  AI visual enabled: provider={os.getenv('I2V_PROVIDER', 'kling')} "
-            f"image={image_path}"
-        )
-        generate_video(image_path, prompt, raw_file)
-        process(raw_file, output_file, seconds, True)
-        return {
-            "scene": scene_index,
-            "source": "i2v",
-            "provider": os.getenv("I2V_PROVIDER", "kling"),
-            "input_image": str(image_path),
-            "file": output_file,
-            "seconds": seconds,
-            "narration": str(scene.get("narration", "")),
-            "clips": [{
-                "source": "i2v",
-                "keyword": str(scene.get("keyword", "")),
-                "tags": "AI-generated image-to-video scene",
-                "seconds": min(5, seconds),
-            }],
-            "pixabay_ids": [],
-        }
-    except Exception as exc:
-        # Never chain to another paid provider. The regular stock path is the
-        # only fallback, preventing accidental multi-provider credit spend.
-        print(f"  AI visual unavailable; falling back to stock: {str(exc)[:220]}")
-        return None
-    finally:
-        if os.path.exists(raw_file):
-            os.remove(raw_file)
-
-
 def main():
     with open("output/script.json", encoding="utf-8") as f:
         script = json.load(f)
@@ -177,19 +129,6 @@ def main():
             f"({seconds:.2f}s)"
         )
         print(f"  narration: {narration}")
-
-        # AI is strictly opt-in, limited to the first configured scenes, and
-        # requires a pre-generated still. Missing images never trigger billing.
-        ai_info = _try_i2v(
-            scene_index,
-            scene,
-            seconds,
-            output_file,
-        )
-        if ai_info:
-            info.append(ai_info)
-            print(f"  source: image-to-video ({ai_info['provider']})")
-            continue
 
         parts = max(
             MIN_PARTS,
