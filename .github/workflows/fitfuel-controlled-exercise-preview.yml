@@ -29,7 +29,7 @@ jobs:
       - name: Install pinned Blender 4.2.0 LTS and FFmpeg
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg xz-utils curl
+          sudo apt-get install -y ffmpeg xz-utils curl libegl1 libgl1 libgles2 libxrender1 libxi6 libxkbcommon0 libsm6
           BLENDER_VERSION="4.2.0"
           curl -fL "https://download.blender.org/release/Blender4.2/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o "$RUNNER_TEMP/blender.tar.xz"
           mkdir -p "$RUNNER_TEMP/blender"
