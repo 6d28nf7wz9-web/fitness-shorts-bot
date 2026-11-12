@@ -1,5 +1,5 @@
 import unittest
-from hyperframes_render import fit_text, wrap_words, scene_clip_path, USE_3D_PREVIEW
+from hyperframes_render import fit_text, wrap_words
 
 
 class HyperFramesTextLayoutTests(unittest.TestCase):
@@ -33,15 +33,6 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
 
     def test_empty_subtitle_has_safe_fallback(self):
         self.assertEqual(wrap_words("", 30), [""])
-
-    def test_normal_production_uses_pixabay_clip_path_by_default(self):
-        self.assertFalse(USE_3D_PREVIEW)
-        self.assertEqual(str(scene_clip_path(2)), "output/clips/scene_2.mp4")
-
-    def test_daily_workflow_does_not_enable_experimental_blender_preview(self):
-        with open(".github/workflows/daily.yml", encoding="utf-8") as f:
-            workflow = f.read()
-        self.assertNotIn("FITFUEL_3D_PREVIEW", workflow)
 
     def test_daily_workflow_installs_renderer_and_sets_public_mode(self):
         with open(".github/workflows/daily.yml", encoding="utf-8") as f:

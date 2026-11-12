@@ -191,33 +191,7 @@ def draw_scene(s,kind,section_no,frame,offset,total,beat_index=0):
     return scaled.crop((left,top,left+W,top+H))
 
 def render_chunk(section,section_no,kind,offset,seconds,total,outfile,beat_index=0):
-    # Shared true-3D Blender renderer used by Shorts and Long.
-    if os.getenv("VISUAL_ENGINE", "legacy-test-only").lower() == "blender3d":
-        title = str(section.get("heading", "FITFUEL SCIENCE"))
-        narration = str(section.get("narration", ""))
-        cmd = ["blender", "-b", "-P", "blender_3d_scenes.py", "--",
-               "--kind", kind, "--duration", str(float(seconds)),
-               "--output", str(outfile), "--orientation", "landscape",
-               "--text", title, "--exercise", narration[:110]]
-        print("[long science 3D] section", section_no, "beat", beat_index+1, "->", kind)
-        subprocess.run(cmd, check=True)
-        if not Path(outfile).is_file() or Path(outfile).stat().st_size < 10000:
-            raise SystemExit("Blender 3D renderer produced no valid Long scene: " + str(outfile))
-        probe = subprocess.run(
-            ["ffprobe", "-v", "error", "-select_streams", "v:0",
-             "-show_entries", "stream=width,height,r_frame_rate",
-             "-of", "json", str(outfile)],
-            check=True, capture_output=True, text=True
-        )
-        streams = json.loads(probe.stdout).get("streams", [])
-        if not streams:
-            raise SystemExit("Long CGI output has no video stream: " + str(outfile))
-        stream = streams[0]
-        if (int(stream.get("width", 0)) < 1920
-                or int(stream.get("height", 0)) < 1080
-                or stream.get("r_frame_rate") != "30/1"):
-            raise SystemExit("Long CGI production quality gate failed: " + json.dumps(stream))
-        return
+    # Use the established 2D motion-graphics renderer; no Blender/CGI path.
     temp=Path(str(outfile)+".frames"); temp.mkdir(parents=True,exist_ok=True)
     frames=max(2,int(math.ceil(seconds*FPS)))
     try:
@@ -245,7 +219,7 @@ def main():
             render_chunk(sec,si,kind,offset,stop-offset,end-start,dest,beat_index=beat_index)
             chunks.append({"file":str(dest),"start":round(start+offset,2),"end":round(start+stop,2),
                            "section":si,"query":sec.get("heading",""),"visual_type":kind,
-                           "animation":"blender-3d-cgi-reference-style"})
+                           "animation":"2d-science-motion-graphics"})
         info.append({"section":si,"heading":sec.get("heading",""),"visual_type":kind,
                      "chunks":len(windows),"duration":round(end-start,2)})
     (OUT/"chunks.json").write_text(json.dumps(chunks,indent=2),encoding="utf-8")

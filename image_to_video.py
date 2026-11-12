@@ -1,8 +1,8 @@
-"""Cost-guarded image-to-video adapters for FitFuel.
+"""Cost-guarded image-to-video adapter used only for optional Wan stock assistance.
 
-This module is deliberately inert unless I2V_ENABLED=1. It never tries a
-second paid provider after a failure: the caller should fall back to stock.
-Input stills are expected at output/i2v_inputs/scene_N.(png|jpg|jpeg).
+The production caller extracts a frame from a selected Coverr/Pixabay clip.
+No provider is contacted unless I2V_ENABLED=1; Wan stock enhancement also
+requires WAN_STOCK_ASSIST=1. The original stock clip is always the fallback.
 """
 import base64
 import mimetypes
@@ -264,10 +264,11 @@ def generate_video(image_path, prompt, destination, provider=None):
     token = _token(provider)
     image_uri = _image_data_uri(image_path)
     safe_prompt = (
-        "Create a premium cinematic 3D anatomical fitness explainer shot. "
-        "Preserve the exact subject and anatomy from the reference image. "
-        "Use subtle physically plausible motion and a slow controlled camera move. "
-        "Do not add text, labels, logos, extra limbs, or change the subject. "
+        "Create premium photorealistic live-action footage from the reference frame. "
+        "Preserve the exact people, objects, clothing, location and composition. "
+        "Use only subtle physically plausible movement and a gentle cinematic camera move. "
+        "Do not create CGI, 3D anatomy, overlays, text, labels, logos, extra limbs, "
+        "new people or objects, or change the subject. "
         + str(prompt or "Subtle cinematic movement")
     )
     generators = {
