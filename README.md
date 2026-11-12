@@ -18,20 +18,25 @@ Production render: portrait 1080×1920 at 30 fps. CI and the daily workflow use 
 Set `HYPERFRAMES_RENDER=0` only for an explicit legacy FFmpeg fallback.
 
 
-## Blender CGI preview (manual / not auto-published)
+## Stock-first visuals with optional Wan assistance
 
-The experimental Blender scene pipeline is available without changing the daily upload path:
+The production visual path uses relevant real footage from **Coverr and Pixabay**
+(and optional Pexels/NASA/local licensed assets). Blender/CGI rendering has been
+removed from the video assembly path.
 
-```bash
-# Render a safe built-in preview (no YouTube upload)
-FITFUEL_PREVIEW_FAST=1 python blender_preview.py --fixture --duration 2.5
-
-# Render scenes from a generated Gemini script, then assemble them with HyperFrames
-FITFUEL_3D_PREVIEW=1 FITFUEL_3D_SCENE_SECONDS=4.0 python assemble.py
-```
-
-The second command is an explicit local opt-in. The scheduled `.github/workflows/daily.yml` does not set `FITFUEL_3D_PREVIEW`; production continues using the established footage path until the CGI assets and visual review are approved. The manual **Blender 3D preview (safe, no upload)** workflow publishes a 7-day downloadable preview artifact only.
-
+Wan is an optional enhancement to one selected stock segment:
+- The pipeline first selects and downloads a relevant Coverr/Pixabay clip.
+- If explicitly enabled, it extracts a frame from that exact clip and sends the
+  frame plus scene narration to Wan 2.2 image-to-video through Replicate.
+- The prompt requires photorealistic live-action continuity, not CGI or 3D anatomy.
+- At most one stock segment per Short can be enhanced. If Wan fails, the original
+  stock clip is retained.
+- The feature is hard-locked off in the daily workflow (I2V_ENABLED=0 and
+  WAN_STOCK_ASSIST=0). Enabling it requires an intentional workflow change and
+  a configured Replicate WAN_API_KEY; generation is a paid API operation.
+- The earlier local Wan 2.1 Colab experiment is not part of scheduled production.
+  It remains unsuitable as an automatic renderer on the free T4 setup based on
+  the one-second/poor-motion preview.
 
 ## Multi-source free footage
 
