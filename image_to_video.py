@@ -1,8 +1,8 @@
-"""Cost-guarded image-to-video adapters for FitFuel.
+"""Cost-guarded image-to-video adapter used only for optional Wan stock assistance.
 
-This module is deliberately inert unless I2V_ENABLED=1. It never tries a
-second paid provider after a failure: the caller should fall back to stock.
-Input stills are expected at output/i2v_inputs/scene_N.(png|jpg|jpeg).
+The production caller extracts a frame from a selected Coverr/Pixabay clip.
+No provider is contacted unless I2V_ENABLED=1; Wan stock enhancement also
+requires WAN_STOCK_ASSIST=1. The original stock clip is always the fallback.
 """
 import base64
 import mimetypes
