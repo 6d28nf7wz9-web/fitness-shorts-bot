@@ -110,12 +110,18 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--script", default="output/script.json")
     p.add_argument("--fixture", action="store_true", help="Render a safe built-in test script")
+    p.add_argument("--biceps-curl-only", action="store_true", help="Render only the controlled biceps-curl test scene")
     p.add_argument("--duration", type=float, default=2.5)
     p.add_argument("--blender", default="blender")
     a = p.parse_args()
     if a.duration <= 0 or a.duration > 10:
         p.error("--duration must be >0 and <=10 seconds per scene")
     script = load_script(a.script, a.fixture)
+    if a.biceps_curl_only:
+        curl_scene = next((scene for scene in script["scenes"] if uses_controlled_curl_rig(scene)), None)
+        if curl_scene is None:
+            raise SystemExit("No biceps-curl scene found in the selected script/fixture")
+        script = {"title": script.get("title", "FitFuel Biceps Curl Test"), "scenes": [curl_scene]}
     render_preview(script, a.blender, a.duration)
 
 
