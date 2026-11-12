@@ -22,6 +22,11 @@ jobs:
         run: python -m compileall -q .
       - name: Validate schedules and YouTube upload quota
         run: python check_setup.py
+      - name: Test bounded Gemini script generation
+        run: |
+          python -m pip install google-genai
+          python -m unittest discover -s tests -p "test_gen_script_timeout.py" -v
+          python -m unittest discover -s tests -p "test_gen_script_quota.py" -v
       - name: Test recurring Shorts series and episode sequencing
         run: python -m unittest discover -s tests -p "test_series_engine.py" -v
       - name: Test HyperFrames typography layout
