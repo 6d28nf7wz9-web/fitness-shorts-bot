@@ -56,10 +56,15 @@ scene.render.use_motion_blur = not FAST
 scene.render.motion_blur_shutter = 0.25
 scene.render.resolution_percentage = 100
 scene.render.image_settings.color_mode = "RGB"
-try:
-    scene.view_settings.view_transform = "AgX"
-except Exception:
-    scene.view_settings.view_transform = "Filmic"
+# GitHub Actions currently renders with Blender 3.0.1, whose bundled
+# color-management configuration exposes only Standard. Keep this portable
+# across older and newer Blender builds instead of assuming AgX/Filmic exist.
+view_items = scene.view_settings.bl_rna.properties["view_transform"].enum_items
+available_views = {item.identifier for item in view_items}
+scene.view_settings.view_transform = next(
+    (name for name in ("AgX", "Filmic", "Standard") if name in available_views),
+    "Standard",
+)
 scene.world.color = (0.012, 0.018, 0.03)
 if hasattr(scene, "eevee") and not FAST:
     scene.eevee.taa_render_samples = 32
