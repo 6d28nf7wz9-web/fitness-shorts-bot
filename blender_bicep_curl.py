@@ -115,7 +115,8 @@ def segment(name, radius, material):
     bevel = ob.modifiers.new("Soft rounded edges", "BEVEL")
     bevel.width = radius * 0.35
     bevel.segments = 4
-    ob.modifiers.new("Weighted normals", "WEIGHTED_NORMAL")
+    # Bevelled cylinders render cleanly without Weighted Normal; omitting it
+    # avoids Blender 3.x Auto Smooth requirements and headless modifier errors.
     return ob
 
 def put_between(ob, a, b, radius_scale=1.0):
