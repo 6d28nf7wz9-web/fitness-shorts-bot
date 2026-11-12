@@ -27,6 +27,10 @@ jobs:
           python -m pip install google-genai
           python -m unittest discover -s tests -p "test_gen_script_timeout.py" -v
           python -m unittest discover -s tests -p "test_gen_script_quota.py" -v
+      - name: Test free multi-provider AI failover
+        run: |
+          python -m pip install requests google-genai
+          python -m unittest discover -s tests -p "test_ai_providers.py" -v
       - name: Test recurring Shorts series and episode sequencing
         run: python -m unittest discover -s tests -p "test_series_engine.py" -v
       - name: Test HyperFrames typography layout

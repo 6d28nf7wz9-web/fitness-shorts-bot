@@ -27,6 +27,10 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      GROQ_MODEL: llama-3.3-70b-versatile
+      OPENROUTER_MODEL: openrouter/free
       PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
       COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
       PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
