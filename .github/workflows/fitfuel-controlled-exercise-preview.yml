@@ -26,11 +26,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: feat/fitfuel-controlled-exercise-rig
-      - name: Install Blender and FFmpeg
+      - name: Install pinned Blender 4.2.0 LTS and FFmpeg
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender ffmpeg
-          blender --version
+          sudo apt-get install -y ffmpeg xz-utils curl
+          BLENDER_VERSION="4.2.0"
+          curl -fL "https://download.blender.org/release/Blender4.2/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o "$RUNNER_TEMP/blender.tar.xz"
+          mkdir -p "$RUNNER_TEMP/blender"
+          tar -xJf "$RUNNER_TEMP/blender.tar.xz" --strip-components=1 -C "$RUNNER_TEMP/blender"
+          echo "$RUNNER_TEMP/blender" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/blender/blender" --background --factory-startup --python-expr "import bpy; print('FITFUEL_BLENDER_VERSION', bpy.app.version_string)"
           ffmpeg -version | head -n 1
       - name: Check Python syntax
         run: |
