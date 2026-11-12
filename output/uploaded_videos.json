@@ -182,5 +182,19 @@
     "uploaded_at": "2026-11-11T18:23:18.180571+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "tJBzHcTT_Lc",
+    "title": "Why Steroids Crush Fertility and Testicles",
+    "topic": "Steroids and Fertility Shutdown",
+    "series": "Steroid Reality Check",
+    "episode_number": 3,
+    "episode_topic": "Why can steroid use affect fertility and testicular function?",
+    "hook": "Steroids quickly shut down your testes.",
+    "script_word_count": 55,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-12T06:32:14.102520+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
