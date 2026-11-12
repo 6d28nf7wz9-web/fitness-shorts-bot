@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     env:
+      PYTHONUNBUFFERED: "1"
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
       COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
@@ -62,7 +63,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Write script
-        run: python gen_script.py
+        timeout-minutes: 8
+        run: python -u gen_script.py
 
       - name: Voiceover
         run: python voice.py
