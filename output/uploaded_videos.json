@@ -210,5 +210,19 @@
     "uploaded_at": "2026-11-12T11:30:03.435468+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "m9RqM0cAIxQ",
+    "title": "Is TRT Just Like Bodybuilding Steroids?",
+    "topic": "TRT vs Bodybuilding Steroids",
+    "series": "Steroid Reality Check",
+    "episode_number": 5,
+    "episode_topic": "TRT and bodybuilding steroids are not the same thing",
+    "hook": "Confused about TRT vs steroids?",
+    "script_word_count": 50,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-12T12:12:52.846502+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
