@@ -876,19 +876,24 @@ def _generate_with_retry(client, model, prompt, retries=0):
             time.sleep(delay)
 
 
-def generate_script():
-    api_key = os.getenv("GEMINI_API_KEY")
-
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY is not set")
-
-    client = genai.Client(
+def create_gemini_client(api_key):
+    """Create a client with one bounded HTTP attempt per model request."""
+    return genai.Client(
         api_key=api_key,
         http_options=types.HttpOptions(
             timeout=GEMINI_REQUEST_TIMEOUT_MS,
             retry_options=types.HttpRetryOptions(attempts=1),
         ),
     )
+
+
+def generate_script():
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY is not set")
+
+    client = create_gemini_client(api_key)
 
     used = load_used()
     trends = load_trends()
