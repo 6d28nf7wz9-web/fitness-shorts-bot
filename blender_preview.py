@@ -57,6 +57,11 @@ def scene_kind(scene):
     return FAMILY_TO_BLENDER.get(family, "process")
 
 
+def uses_controlled_curl_rig(scene):
+    text = str(scene.get("visual_title", "")) + " " + str(scene.get("narration", ""))
+    return bool(re.search(r"\\b(?:biceps?|arm)\\s+curl\\b", text, re.IGNORECASE))
+
+
 def render_preview(script, blender="blender", duration=2.5):
     executable = shutil.which(blender)
     if not executable:
