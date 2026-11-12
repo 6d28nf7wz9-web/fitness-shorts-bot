@@ -74,8 +74,10 @@ jobs:
           WAN_API_KEY: ${{ secrets.WAN_API_KEY }}
           # Hard-locked off until the owner explicitly approves a paid generation.
           I2V_ENABLED: "0"
-          I2V_PROVIDER: ${{ vars.I2V_PROVIDER || 'kling' }}
-          I2V_MAX_SCENES: ${{ vars.I2V_MAX_SCENES || '2' }}
+          I2V_PROVIDER: wan
+          I2V_MAX_SCENES: "1"
+          # Still disabled until the owner explicitly approves paid Wan generations.
+          WAN_STOCK_ASSIST: "0"
         run: python clips_fast.py
 
       - name: Validate script and footage
