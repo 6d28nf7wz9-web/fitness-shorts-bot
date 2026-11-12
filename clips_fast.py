@@ -2,6 +2,8 @@ import json
 import os
 import subprocess
 
+from wan_stock_assist import try_animate_stock
+
 from clips import (
     CLIPS_DIR,
     RAW_DIR,
