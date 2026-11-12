@@ -30,6 +30,9 @@ jobs:
           sudo apt-get install -y blender ffmpeg
           blender --version
           ffmpeg -version | head -n 1
+      - name: Check Python syntax
+        run: |
+          python -m py_compile blender_preview.py blender_bicep_curl.py blender_3d_scenes.py
       - name: Run scene-routing tests
         run: |
           python -m unittest discover -s tests -p "test_blender_preview.py" -v
