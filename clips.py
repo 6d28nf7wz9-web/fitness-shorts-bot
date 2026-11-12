@@ -136,8 +136,10 @@ def choose_clip(keyword, seconds, used_ids, context=""):
             if not file_info:
                 continue
 
-            # Score against the actual search query, not narration words.
-            score = relevance(hit, query, context)
+            # Score against the scene's authored targets, not the fallback search
+            # variant. Otherwise a generic fallback such as "cooking healthy meal"
+            # can make unrelated footage look like an exact scene match.
+            score = relevance(hit, keyword, context)
 
             if score == 0:
                 continue
