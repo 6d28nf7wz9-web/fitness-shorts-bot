@@ -68,3 +68,18 @@ Coverr API setup:
 - After a Coverr clip is actually downloaded, the pipeline calls Coverr's `PATCH /videos/:id/stats/downloads` tracking endpoint.
 - Free Demo API usage requires crediting Coverr and the creator when listed. The upload description adds those credits and links. Coverr's current license allows commercial use, but does not allow redistributing raw stock files, bulk library downloads, or using API content to train AI.
 - Sponsored partner assets and watermarked premium previews are excluded by the adapter.
+
+
+## Controlled biceps-curl rig (isolated preview branch)
+
+The branch `feat/fitfuel-controlled-exercise-rig` adds a dedicated Blender test scene for a dumbbell biceps curl. The elbow pivot stays fixed, the forearm follows a deterministic curl arc, the hand and dumbbell share one parent, and the biceps highlight contracts during the rep.
+
+This is still a **preview-only prototype**; it does not alter the daily workflow or publish anything to YouTube.
+
+To render the focused five-second test:
+1. Open **Actions → Blender controlled exercise preview**.
+2. Select branch `feat/fitfuel-controlled-exercise-rig`.
+3. Choose `fast_preview=true` for a quick low-resolution check, or `false` for the higher-quality render.
+4. Run the workflow and download the `fitfuel-controlled-exercise-preview` artifact.
+
+The workflow runs syntax and scene-routing checks, renders only the biceps-curl scene, probes the MP4, and retains the preview artifact for 7 days. Review the actual hand grip, dumbbell orientation, elbow stability, and full curl cycle before considering any production integration.
