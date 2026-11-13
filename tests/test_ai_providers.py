@@ -13,6 +13,9 @@ from ai_providers import (
 
 
 class MultiProviderTests(unittest.TestCase):
+    def test_groq_default_uses_supported_replacement_model(self):
+        self.assertEqual(DEFAULT_GROQ_MODEL, "openai/gpt-oss-120b")
+
     def test_provider_order_and_free_defaults(self):
         providers = build_external_providers({
             "GROQ_API_KEY": "groq-test",

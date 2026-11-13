@@ -10,7 +10,7 @@ import time
 import requests
 
 
-DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"
 DEFAULT_OPENROUTER_MODEL = "openrouter/free"
 REQUEST_TIMEOUT_SECONDS = 45
 MAX_TRANSIENT_RETRIES = 1
