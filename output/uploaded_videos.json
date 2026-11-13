@@ -252,5 +252,19 @@
     "uploaded_at": "2026-11-13T06:16:58.585765+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "eY65XWM7Vxo",
+    "title": "Does Soreness Mean Your Workout Worked?",
+    "topic": "Muscle Soreness Versus Growth",
+    "series": "Gym Myth Court",
+    "episode_number": 2,
+    "episode_topic": "Is soreness proof that a workout worked?",
+    "hook": "Is severe muscle soreness actual proof of growth?",
+    "script_word_count": 50,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-13T12:07:08.727664+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
