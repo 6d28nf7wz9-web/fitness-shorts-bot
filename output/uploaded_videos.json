@@ -238,5 +238,19 @@
     "uploaded_at": "2026-11-12T18:07:05.119489+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "KAjT8d9-mwY",
+    "title": "Stop Training to Failure Every Set",
+    "topic": "RIR vs Failure Growth",
+    "series": "Gym Myth Court",
+    "episode_number": 1,
+    "episode_topic": "Does training to failure build more muscle every time?",
+    "hook": "Stop training to failure on every single set.",
+    "script_word_count": 50,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-13T06:16:58.585765+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
