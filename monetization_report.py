@@ -84,10 +84,12 @@ def main():
     start_365 = end - timedelta(days=364)
 
     try:
-        channel_response = youtube.channels().list(part="statistics", mine=True).execute()
+        channel_response = youtube.channels().list(part="snippet,statistics", mine=True).execute()
         channels = channel_response.get("items", [])
         if not channels:
             raise SystemExit("No YouTube channel was returned for the authorized account.")
+        channel_id = channels[0].get("id")
+        channel_title = channels[0].get("snippet", {}).get("title")
         stats = channels[0].get("statistics", {})
         subscriber_count = int(stats["subscriberCount"]) if stats.get("subscriberCount") else None
         total_channel_views = int(stats.get("viewCount", 0) or 0)
@@ -156,6 +158,8 @@ def main():
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "data_through": end.isoformat(),
         "channel": {
+            "channel_id": channel_id,
+            "channel_title": channel_title,
             "subscribers": subscriber_count,
             "total_channel_views_lifetime": total_channel_views,
         },
