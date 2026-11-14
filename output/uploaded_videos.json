@@ -280,5 +280,19 @@
     "uploaded_at": "2026-11-13T18:05:59.808203+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "5PNVItvN1I0",
+    "title": "Does Eating Late Cause Fat Gain?",
+    "topic": "Nighttime Eating Fat Gain",
+    "series": "Gym Myth Court",
+    "episode_number": 4,
+    "episode_topic": "Does eating late automatically cause fat gain?",
+    "hook": "Late night eating does not store fat.",
+    "script_word_count": 54,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-14T06:04:09.487547+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
