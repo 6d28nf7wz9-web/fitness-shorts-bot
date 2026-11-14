@@ -53,13 +53,13 @@
     "generic workout footage",
     "repeated muscle growth myths"
   ],
-  "learning_note": "Per-video metrics synced from YouTube Analytics. Compare videos at similar age; use retention and engaged views, not raw views alone.",
+  "learning_note": "Per-video metrics synced from YouTube Analytics. Compare videos at similar age; use retention and engaged views, not raw views alone. Topic averages are descriptive and should be treated cautiously until each topic has multiple videos.",
   "analytics": {
     "source": "YouTube Analytics API",
     "window_days": 28,
-    "period_start": "2026-10-10",
-    "period_end": "2026-11-06",
-    "last_sync": "2026-11-08T21:48:57.140750+00:00",
+    "period_start": "2026-10-16",
+    "period_end": "2026-11-12",
+    "last_sync": "2026-11-14T21:51:27.390242+00:00",
     "videos": {
       "XwcpIJM1eqU": {
         "views": 1176,
@@ -71,9 +71,9 @@
         "shares": 1,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140428+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576919+00:00"
       },
       "L_rjKtKYZxU": {
         "views": 979,
@@ -85,23 +85,23 @@
         "shares": 0,
         "subscribers_gained": 1,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140449+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576939+00:00"
       },
       "GRZDZzrxtdI": {
-        "views": 871,
-        "engaged_views": 446,
+        "views": 872,
+        "engaged_views": 447,
         "average_view_duration_seconds": 10.0,
-        "average_view_percentage": 37.98,
+        "average_view_percentage": 37.96,
         "likes": 11,
         "comments": 1,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140458+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576947+00:00"
       },
       "6uQfwiytYhM": {
         "views": 831,
@@ -113,23 +113,23 @@
         "shares": 0,
         "subscribers_gained": 1,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140466+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576953+00:00"
       },
       "hfpygls4hBM": {
-        "views": 748,
-        "engaged_views": 263,
+        "views": 756,
+        "engaged_views": 269,
         "average_view_duration_seconds": 13.0,
-        "average_view_percentage": 45.17,
-        "likes": 13,
+        "average_view_percentage": 46.54,
+        "likes": 14,
         "comments": 0,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140475+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576957+00:00"
       },
       "dm6TAQFe9Zo": {
         "views": 555,
@@ -141,9 +141,23 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140482+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576962+00:00"
+      },
+      "gHl9vWJiinI": {
+        "views": 448,
+        "engaged_views": 125,
+        "average_view_duration_seconds": 11.0,
+        "average_view_percentage": 65.24,
+        "likes": 5,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 2,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576967+00:00"
       },
       "Zwi9XIcm9sU": {
         "views": 408,
@@ -155,9 +169,9 @@
         "shares": 0,
         "subscribers_gained": 1,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140488+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576973+00:00"
       },
       "TiYIPGVm3P0": {
         "views": 325,
@@ -169,9 +183,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140494+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576978+00:00"
       },
       "ENY33ZJX7co": {
         "views": 271,
@@ -183,23 +197,79 @@
         "shares": 1,
         "subscribers_gained": 1,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140501+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576985+00:00"
       },
-      "yYUsiT2dY1I": {
-        "views": 211,
-        "engaged_views": 50,
+      "IhiwWfUHVNU": {
+        "views": 259,
+        "engaged_views": 60,
+        "average_view_duration_seconds": 14.0,
+        "average_view_percentage": 63.57,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576989+00:00"
+      },
+      "Aq4HSc0G_98": {
+        "views": 233,
+        "engaged_views": 46,
         "average_view_duration_seconds": 13.0,
-        "average_view_percentage": 38.65,
+        "average_view_percentage": 73.0,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576995+00:00"
+      },
+      "0_lxScfaqno": {
+        "views": 232,
+        "engaged_views": 76,
+        "average_view_duration_seconds": 13.0,
+        "average_view_percentage": 38.68,
         "likes": 4,
         "comments": 0,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140507+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577000+00:00"
+      },
+      "dBvgISRMbVM": {
+        "views": 216,
+        "engaged_views": 42,
+        "average_view_duration_seconds": 10.0,
+        "average_view_percentage": 49.47,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577005+00:00"
+      },
+      "yYUsiT2dY1I": {
+        "views": 211,
+        "engaged_views": 50,
+        "average_view_duration_seconds": 13.0,
+        "average_view_percentage": 38.81,
+        "likes": 4,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577009+00:00"
       },
       "kJ2RoNvV9XQ": {
         "views": 202,
@@ -211,9 +281,23 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140513+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577014+00:00"
+      },
+      "_OiEiTu6NMA": {
+        "views": 184,
+        "engaged_views": 34,
+        "average_view_duration_seconds": 12.0,
+        "average_view_percentage": 70.8,
+        "likes": 1,
+        "comments": 0,
+        "shares": 1,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577019+00:00"
       },
       "z_lr2iGE9MM": {
         "views": 136,
@@ -225,9 +309,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140520+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577023+00:00"
       },
       "KtGBNWQhZyo": {
         "views": 106,
@@ -239,9 +323,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140526+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577029+00:00"
       },
       "x0NlAy7ucBI": {
         "views": 100,
@@ -253,9 +337,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140534+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577034+00:00"
       },
       "XmfqqV5n5Sw": {
         "views": 98,
@@ -267,9 +351,51 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140540+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577038+00:00"
+      },
+      "G0YuiKS1nk8": {
+        "views": 89,
+        "engaged_views": 12,
+        "average_view_duration_seconds": 8.0,
+        "average_view_percentage": 38.1,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577043+00:00"
+      },
+      "lE-kWVPnOek": {
+        "views": 66,
+        "engaged_views": 17,
+        "average_view_duration_seconds": 13.0,
+        "average_view_percentage": 68.61,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577048+00:00"
+      },
+      "g405EgEt3Ng": {
+        "views": 64,
+        "engaged_views": 61,
+        "average_view_duration_seconds": 24.0,
+        "average_view_percentage": 15.1,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577053+00:00"
       },
       "msHZJNfsAXk": {
         "views": 63,
@@ -281,9 +407,93 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140546+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577059+00:00"
+      },
+      "lO3SsmLnaXY": {
+        "views": 62,
+        "engaged_views": 14,
+        "average_view_duration_seconds": 17.0,
+        "average_view_percentage": 81.46,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577064+00:00"
+      },
+      "m9RqM0cAIxQ": {
+        "views": 57,
+        "engaged_views": 9,
+        "average_view_duration_seconds": 24.0,
+        "average_view_percentage": 115.04,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577068+00:00"
+      },
+      "H-ml4IekN1Q": {
+        "views": 48,
+        "engaged_views": 6,
+        "average_view_duration_seconds": 11.0,
+        "average_view_percentage": 50.09,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577073+00:00"
+      },
+      "sZM3yIltbek": {
+        "views": 46,
+        "engaged_views": 13,
+        "average_view_duration_seconds": 18.0,
+        "average_view_percentage": 96.84,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577078+00:00"
+      },
+      "rC6rQSM3aaQ": {
+        "views": 45,
+        "engaged_views": 9,
+        "average_view_duration_seconds": 13.0,
+        "average_view_percentage": 68.58,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577083+00:00"
+      },
+      "b243aiNVjOY": {
+        "views": 45,
+        "engaged_views": 11,
+        "average_view_duration_seconds": 21.0,
+        "average_view_percentage": 118.71,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577088+00:00"
       },
       "1AySKo1F_Vc": {
         "views": 39,
@@ -295,23 +505,23 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140553+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577093+00:00"
       },
-      "g405EgEt3Ng": {
-        "views": 23,
-        "engaged_views": 21,
-        "average_view_duration_seconds": 32.0,
-        "average_view_percentage": 20.06,
-        "likes": 1,
+      "qgS1GiRvdk4": {
+        "views": 30,
+        "engaged_views": 6,
+        "average_view_duration_seconds": 15.0,
+        "average_view_percentage": 60.49,
+        "likes": 0,
         "comments": 0,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140559+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577097+00:00"
       },
       "0FbjN8r5QtA": {
         "views": 17,
@@ -323,9 +533,51 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140565+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577101+00:00"
+      },
+      "tJBzHcTT_Lc": {
+        "views": 16,
+        "engaged_views": 5,
+        "average_view_duration_seconds": 15.0,
+        "average_view_percentage": 68.1,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577106+00:00"
+      },
+      "L6FJhGypvIE": {
+        "views": 15,
+        "engaged_views": 7,
+        "average_view_duration_seconds": 36.0,
+        "average_view_percentage": 22.81,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577110+00:00"
+      },
+      "eKksvXiMhj4": {
+        "views": 14,
+        "engaged_views": 5,
+        "average_view_duration_seconds": 17.0,
+        "average_view_percentage": 69.02,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577114+00:00"
       },
       "bcc9zBLqaC0": {
         "views": 14,
@@ -337,9 +589,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140571+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577119+00:00"
       },
       "5B5GfFB5AQ0": {
         "views": 13,
@@ -351,26 +603,12 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140577+00:00"
-      },
-      "eKksvXiMhj4": {
-        "views": 13,
-        "engaged_views": 5,
-        "average_view_duration_seconds": 17.0,
-        "average_view_percentage": 69.02,
-        "likes": 0,
-        "comments": 0,
-        "shares": 0,
-        "subscribers_gained": 0,
-        "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140582+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577123+00:00"
       },
       "-iwoeQp5zK0": {
-        "views": 11,
+        "views": 12,
         "engaged_views": 4,
         "average_view_duration_seconds": 18.0,
         "average_view_percentage": 92.94,
@@ -379,23 +617,23 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140589+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577129+00:00"
       },
-      "IP1Y866TG6s": {
-        "views": 9,
+      "SY1kufsY-Dc": {
+        "views": 11,
         "engaged_views": 4,
-        "average_view_duration_seconds": 16.0,
-        "average_view_percentage": 8.76,
-        "likes": 0,
+        "average_view_duration_seconds": 13.0,
+        "average_view_percentage": 60.82,
+        "likes": 1,
         "comments": 0,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140597+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577134+00:00"
       },
       "FSvY_DE6kQs": {
         "views": 9,
@@ -407,23 +645,23 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140605+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577139+00:00"
       },
-      "L6FJhGypvIE": {
+      "IP1Y866TG6s": {
         "views": 9,
-        "engaged_views": 5,
-        "average_view_duration_seconds": 47.0,
-        "average_view_percentage": 30.34,
+        "engaged_views": 4,
+        "average_view_duration_seconds": 16.0,
+        "average_view_percentage": 8.76,
         "likes": 0,
         "comments": 0,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140611+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577144+00:00"
       },
       "9zU1hgEFkI8": {
         "views": 8,
@@ -435,23 +673,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140618+00:00"
-      },
-      "oJJf-uKo6CM": {
-        "views": 7,
-        "engaged_views": 4,
-        "average_view_duration_seconds": 21.0,
-        "average_view_percentage": 54.62,
-        "likes": 0,
-        "comments": 0,
-        "shares": 0,
-        "subscribers_gained": 0,
-        "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140625+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577149+00:00"
       },
       "hwYWnMAAY-g": {
         "views": 7,
@@ -463,23 +687,37 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140630+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577153+00:00"
       },
-      "1_JnlvWZxcQ": {
-        "views": 6,
-        "engaged_views": 1,
-        "average_view_duration_seconds": 15.0,
-        "average_view_percentage": 48.16,
+      "Db45ORL1kwU": {
+        "views": 7,
+        "engaged_views": 2,
+        "average_view_duration_seconds": 14.0,
+        "average_view_percentage": 57.74,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577158+00:00"
+      },
+      "oJJf-uKo6CM": {
+        "views": 7,
+        "engaged_views": 4,
+        "average_view_duration_seconds": 21.0,
+        "average_view_percentage": 54.62,
         "likes": 0,
         "comments": 0,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140638+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577162+00:00"
       },
       "yfJOsAcSwZ4": {
         "views": 6,
@@ -491,23 +729,37 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140644+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577166+00:00"
       },
-      "ZabjAZDYDEk": {
-        "views": 5,
-        "engaged_views": 2,
-        "average_view_duration_seconds": 7.0,
-        "average_view_percentage": 29.96,
+      "njRj31OnEIY": {
+        "views": 6,
+        "engaged_views": 3,
+        "average_view_duration_seconds": 87.0,
+        "average_view_percentage": 42.96,
         "likes": 0,
         "comments": 0,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140650+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577172+00:00"
+      },
+      "1_JnlvWZxcQ": {
+        "views": 6,
+        "engaged_views": 1,
+        "average_view_duration_seconds": 15.0,
+        "average_view_percentage": 48.16,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577178+00:00"
       },
       "rdMD4HzeSWo": {
         "views": 5,
@@ -519,9 +771,23 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140656+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577183+00:00"
+      },
+      "ZR2kr60LSnQ": {
+        "views": 5,
+        "engaged_views": 2,
+        "average_view_duration_seconds": 46.0,
+        "average_view_percentage": 25.96,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577187+00:00"
       },
       "xH4vypqh1AA": {
         "views": 5,
@@ -533,23 +799,51 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140662+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577191+00:00"
       },
-      "TrJFXOfxdyI": {
-        "views": 3,
-        "engaged_views": 1,
-        "average_view_duration_seconds": 40.0,
-        "average_view_percentage": 202.75,
+      "ZabjAZDYDEk": {
+        "views": 5,
+        "engaged_views": 2,
+        "average_view_duration_seconds": 7.0,
+        "average_view_percentage": 29.96,
         "likes": 0,
         "comments": 0,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140670+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577195+00:00"
+      },
+      "KAjT8d9-mwY": {
+        "views": 4,
+        "engaged_views": 2,
+        "average_view_duration_seconds": 7.0,
+        "average_view_percentage": 39.72,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577199+00:00"
+      },
+      "-FoJqqV2AFc": {
+        "views": 4,
+        "engaged_views": 1,
+        "average_view_duration_seconds": 43.0,
+        "average_view_percentage": 101.83,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577204+00:00"
       },
       "HNvUmBU3VlM": {
         "views": 3,
@@ -561,9 +855,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140676+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577208+00:00"
       },
       "ecI0B5q7SYk": {
         "views": 3,
@@ -575,9 +869,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140682+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577214+00:00"
       },
       "13pTIP0EyWA": {
         "views": 3,
@@ -589,23 +883,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140688+00:00"
-      },
-      "njRj31OnEIY": {
-        "views": 3,
-        "engaged_views": 3,
-        "average_view_duration_seconds": 87.0,
-        "average_view_percentage": 42.96,
-        "likes": 0,
-        "comments": 0,
-        "shares": 0,
-        "subscribers_gained": 0,
-        "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140694+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577218+00:00"
       },
       "brXo69DRZNE": {
         "views": 3,
@@ -617,9 +897,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140700+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577224+00:00"
       },
       "AetL-PDyDAE": {
         "views": 3,
@@ -631,9 +911,23 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140712+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577229+00:00"
+      },
+      "TrJFXOfxdyI": {
+        "views": 3,
+        "engaged_views": 1,
+        "average_view_duration_seconds": 40.0,
+        "average_view_percentage": 202.75,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577233+00:00"
       },
       "61Aad3V0TG0": {
         "views": 2,
@@ -645,9 +939,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140718+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577237+00:00"
       },
       "yypcTbOv258": {
         "views": 2,
@@ -659,11 +953,11 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140724+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577242+00:00"
       },
-      "-FoJqqV2AFc": {
+      "4gUGFp9UhF4": {
         "views": 1,
         "engaged_views": 0,
         "average_view_duration_seconds": 0.0,
@@ -673,9 +967,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140732+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577247+00:00"
       },
       "nr7lDrmLdoQ": {
         "views": 1,
@@ -687,9 +981,9 @@
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
-        "period_start": "2026-10-10",
-        "period_end": "2026-11-06",
-        "synced_at": "2026-11-08T21:48:57.140740+00:00"
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577251+00:00"
       }
     }
   },
@@ -700,7 +994,31 @@
       "topic": "Pre-Workout Sodium for Performance",
       "uploaded_at": "2026-11-07T17:49:55.626740+00:00",
       "privacy": "public",
-      "status": "uploaded"
+      "status": "uploaded",
+      "analytics": {
+        "views": 184,
+        "engaged_views": 34,
+        "average_view_duration_seconds": 12.0,
+        "average_view_percentage": 70.8,
+        "likes": 1,
+        "comments": 0,
+        "shares": 1,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577019+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 184,
+        "engaged_views_first_7_days": 34,
+        "average_view_percentage_first_7_days": 75.25,
+        "average_view_duration_seconds_first_7_days": 13.23,
+        "days_since_upload_in_report": 6,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-07",
+        "period_end": "2026-11-12"
+      }
     },
     {
       "video_id": "gHl9vWJiinI",
@@ -708,7 +1026,31 @@
       "topic": "Lean Ground Beef Swap",
       "uploaded_at": "2026-11-08T06:02:55.231293+00:00",
       "privacy": "public",
-      "status": "uploaded"
+      "status": "uploaded",
+      "analytics": {
+        "views": 448,
+        "engaged_views": 125,
+        "average_view_duration_seconds": 11.0,
+        "average_view_percentage": 65.24,
+        "likes": 5,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 2,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576967+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 448,
+        "engaged_views_first_7_days": 125,
+        "average_view_percentage_first_7_days": 65.42,
+        "average_view_duration_seconds_first_7_days": 10.95,
+        "days_since_upload_in_report": 5,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-08",
+        "period_end": "2026-11-12"
+      }
     },
     {
       "video_id": "H-ml4IekN1Q",
@@ -716,7 +1058,31 @@
       "topic": "Controlling the Eccentric Phase",
       "uploaded_at": "2026-11-08T07:52:32.566848+00:00",
       "privacy": "public",
-      "status": "uploaded"
+      "status": "uploaded",
+      "analytics": {
+        "views": 48,
+        "engaged_views": 6,
+        "average_view_duration_seconds": 11.0,
+        "average_view_percentage": 50.09,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577073+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 47,
+        "engaged_views_first_7_days": 5,
+        "average_view_percentage_first_7_days": 46.67,
+        "average_view_duration_seconds_first_7_days": 9.79,
+        "days_since_upload_in_report": 5,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-08",
+        "period_end": "2026-11-12"
+      }
     },
     {
       "video_id": "b243aiNVjOY",
@@ -724,7 +1090,31 @@
       "topic": "Late Night Eating Myth",
       "uploaded_at": "2026-11-08T11:50:45.675266+00:00",
       "privacy": "public",
-      "status": "uploaded"
+      "status": "uploaded",
+      "analytics": {
+        "views": 45,
+        "engaged_views": 11,
+        "average_view_duration_seconds": 21.0,
+        "average_view_percentage": 118.71,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577088+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 45,
+        "engaged_views_first_7_days": 11,
+        "average_view_percentage_first_7_days": 115.23,
+        "average_view_duration_seconds_first_7_days": 20.27,
+        "days_since_upload_in_report": 5,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-08",
+        "period_end": "2026-11-12"
+      }
     },
     {
       "video_id": "dBvgISRMbVM",
@@ -732,7 +1122,1093 @@
       "topic": "Eating Protein First for Satiety",
       "uploaded_at": "2026-11-08T17:51:46.678636+00:00",
       "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 216,
+        "engaged_views": 42,
+        "average_view_duration_seconds": 10.0,
+        "average_view_percentage": 49.47,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577005+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 216,
+        "engaged_views_first_7_days": 42,
+        "average_view_percentage_first_7_days": 49.57,
+        "average_view_duration_seconds_first_7_days": 9.93,
+        "days_since_upload_in_report": 5,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-08",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "Aq4HSc0G_98",
+      "title": "Stop Doing Romanian Deadlifts Like This",
+      "topic": "Mastering the Hip Hinge",
+      "hook": "Stop bending down on Romanian deadlifts.",
+      "script_word_count": 51,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-09T06:29:57.850436+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 233,
+        "engaged_views": 46,
+        "average_view_duration_seconds": 13.0,
+        "average_view_percentage": 73.0,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.576995+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 204,
+        "engaged_views_first_7_days": 37,
+        "average_view_percentage_first_7_days": 75.3,
+        "average_view_duration_seconds_first_7_days": 12.81,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "6XYMSYQ6wZc",
+      "title": "Why You Feel Weak Mid-Workout",
+      "topic": "Pre-Workout Hydration for Strength",
+      "hook": "Feeling weak halfway through your workout?",
+      "script_word_count": 51,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-09T08:06:14.239061+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "first_week_analytics": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "n_Px2uvbdMM",
+      "title": "The Best Carbohydrate Swap for Heart Health",
+      "topic": "Soluble Fiber Food Swaps",
+      "hook": "Not all breakfast carbs act the same.",
+      "script_word_count": 55,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-09T08:45:19.012075+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "first_week_analytics": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "5j5LHApqt7Y",
+      "title": "Can Light Weights Actually Build Muscle?",
+      "topic": "Lifting Light For Muscle Growth",
+      "hook": "You do not need heavy weights to grow.",
+      "script_word_count": 55,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-09T09:04:06.902509+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "first_week_analytics": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "NyJIw6HUSbA",
+      "title": "The 35g Protein Rule for Hunger",
+      "topic": "Targeting 35 Grams Of Protein",
+      "series": "Smart Food Choices",
+      "hook": "Still feeling hungry right after eating protein?",
+      "script_word_count": 59,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-09T12:13:07.380020+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "first_week_analytics": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "rcuh_45HSQ4",
+      "title": "Fix Your Reps: Stop Using Momentum",
+      "topic": "Peak Contraction Tension Fix",
+      "series": "Fitness Myth Check",
+      "hook": "Stop letting momentum lift the weight for you.",
+      "script_word_count": 62,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-09T18:13:00.333133+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "first_week_analytics": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "lE-kWVPnOek",
+      "title": "Stop Taking Pre-Workout Late at Night",
+      "topic": "Late Caffeine Pre-Workout Cutoff",
+      "series": "One Mistake, One Fix",
+      "hook": "Taking pre-workout late ruins your recovery sleep.",
+      "script_word_count": 50,
+      "scene_count": 4,
+      "uploaded_at": "2026-11-10T06:10:19.954772+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 66,
+        "engaged_views": 17,
+        "average_view_duration_seconds": 13.0,
+        "average_view_percentage": 68.61,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577048+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 35,
+        "engaged_views_first_7_days": 12,
+        "average_view_percentage_first_7_days": 62.21,
+        "average_view_duration_seconds_first_7_days": 12.0,
+        "days_since_upload_in_report": 3,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-10",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "rC6rQSM3aaQ",
+      "title": "Why You Need 35 Grams of Fiber Daily",
+      "topic": "Increasing Daily Fiber Intake",
+      "series": "Fitness Science Explained",
+      "hook": "Are you missing out on daily fiber?",
+      "script_word_count": 56,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-10T12:32:05.007553+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 45,
+        "engaged_views": 9,
+        "average_view_duration_seconds": 13.0,
+        "average_view_percentage": 68.58,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577083+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 45,
+        "engaged_views_first_7_days": 9,
+        "average_view_percentage_first_7_days": 71.28,
+        "average_view_duration_seconds_first_7_days": 13.93,
+        "days_since_upload_in_report": 3,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-10",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "G0YuiKS1nk8",
+      "title": "How Much Protein Do You Really Need for Muscle?",
+      "topic": "Optimal Daily Protein Ceiling",
+      "series": "Smart Food Choices",
+      "hook": "Eating extra protein won't build more muscle.",
+      "script_word_count": 60,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-10T18:34:02.998109+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 89,
+        "engaged_views": 12,
+        "average_view_duration_seconds": 8.0,
+        "average_view_percentage": 38.1,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577043+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 89,
+        "engaged_views_first_7_days": 12,
+        "average_view_percentage_first_7_days": 36.84,
+        "average_view_duration_seconds_first_7_days": 7.88,
+        "days_since_upload_in_report": 3,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-10",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "SY1kufsY-Dc",
+      "title": "Does Alternate Day Fasting Burn More Fat?",
+      "topic": "alternate day fasting fat loss",
+      "series": "Fitness Myth Check",
+      "hook": "Can alternate day fasting accelerate your fat loss?",
+      "script_word_count": 57,
+      "scene_count": 4,
+      "uploaded_at": "2026-11-11T06:19:26.852320+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 11,
+        "engaged_views": 4,
+        "average_view_duration_seconds": 13.0,
+        "average_view_percentage": 60.82,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577134+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 9,
+        "engaged_views_first_7_days": 2,
+        "average_view_percentage_first_7_days": 59.48,
+        "average_view_duration_seconds_first_7_days": 12.67,
+        "days_since_upload_in_report": 2,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-11",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "lO3SsmLnaXY",
+      "title": "Do Steroids Build Muscle Faster?",
+      "topic": "Steroid Speed Versus Health Cost",
+      "series": "Steroid Reality Check",
+      "episode_number": 1,
+      "episode_topic": "Do steroids build muscle faster—and at what cost?",
+      "hook": "Steroids build muscle faster, but at what cost?",
+      "script_word_count": 53,
+      "scene_count": 4,
+      "uploaded_at": "2026-11-11T12:09:15.476205+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 62,
+        "engaged_views": 14,
+        "average_view_duration_seconds": 17.0,
+        "average_view_percentage": 81.46,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577064+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 62,
+        "engaged_views_first_7_days": 14,
+        "average_view_percentage_first_7_days": 84.75,
+        "average_view_duration_seconds_first_7_days": 17.92,
+        "days_since_upload_in_report": 2,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-11",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "Db45ORL1kwU",
+      "title": "What Steroids Do to Natural Testosterone",
+      "topic": "Natural Testosterone On Steroids",
+      "series": "Steroid Reality Check",
+      "episode_number": 2,
+      "episode_topic": "What happens to natural testosterone during a steroid cycle?",
+      "hook": "Taking steroids completely shuts down natural testosterone.",
+      "script_word_count": 58,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-11T18:23:18.180571+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 7,
+        "engaged_views": 2,
+        "average_view_duration_seconds": 14.0,
+        "average_view_percentage": 57.74,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577158+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 7,
+        "engaged_views_first_7_days": 2,
+        "average_view_percentage_first_7_days": 41.24,
+        "average_view_duration_seconds_first_7_days": 10.0,
+        "days_since_upload_in_report": 2,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-11",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "tJBzHcTT_Lc",
+      "title": "Why Steroids Crush Fertility and Testicles",
+      "topic": "Steroids and Fertility Shutdown",
+      "series": "Steroid Reality Check",
+      "episode_number": 3,
+      "episode_topic": "Why can steroid use affect fertility and testicular function?",
+      "hook": "Steroids quickly shut down your testes.",
+      "script_word_count": 55,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-12T06:32:14.102520+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 16,
+        "engaged_views": 5,
+        "average_view_duration_seconds": 15.0,
+        "average_view_percentage": 68.1,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577106+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 11,
+        "engaged_views_first_7_days": 3,
+        "average_view_percentage_first_7_days": 67.88,
+        "average_view_duration_seconds_first_7_days": 15.0,
+        "days_since_upload_in_report": 1,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-12",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "sZM3yIltbek",
+      "title": "Will Testosterone Recover After Steroid Use?",
+      "topic": "Testosterone Recovery After Steroids",
+      "series": "Steroid Reality Check",
+      "episode_number": 4,
+      "episode_topic": "Can testosterone production recover after stopping steroids?",
+      "hook": "Will your testosterone bounce back after steroid cycles?",
+      "script_word_count": 45,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-12T11:30:03.435468+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 46,
+        "engaged_views": 13,
+        "average_view_duration_seconds": 18.0,
+        "average_view_percentage": 96.84,
+        "likes": 1,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577078+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 46,
+        "engaged_views_first_7_days": 13,
+        "average_view_percentage_first_7_days": 96.84,
+        "average_view_duration_seconds_first_7_days": 18.0,
+        "days_since_upload_in_report": 1,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-12",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "m9RqM0cAIxQ",
+      "title": "Is TRT Just Like Bodybuilding Steroids?",
+      "topic": "TRT vs Bodybuilding Steroids",
+      "series": "Steroid Reality Check",
+      "episode_number": 5,
+      "episode_topic": "TRT and bodybuilding steroids are not the same thing",
+      "hook": "Confused about TRT vs steroids?",
+      "script_word_count": 50,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-12T12:12:52.846502+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 57,
+        "engaged_views": 9,
+        "average_view_duration_seconds": 24.0,
+        "average_view_percentage": 115.04,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577068+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 57,
+        "engaged_views_first_7_days": 9,
+        "average_view_percentage_first_7_days": 115.04,
+        "average_view_duration_seconds_first_7_days": 24.0,
+        "days_since_upload_in_report": 1,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-12",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "qgS1GiRvdk4",
+      "title": "Why Steroid Muscle Gains Disappear",
+      "topic": "Retaining Muscle After Steroid Cycles",
+      "series": "Steroid Reality Check",
+      "episode_number": 6,
+      "episode_topic": "Why steroid-related muscle gains can be difficult to keep",
+      "hook": "Why do steroid gains disappear after stopping?",
+      "script_word_count": 56,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-12T18:07:05.119489+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 30,
+        "engaged_views": 6,
+        "average_view_duration_seconds": 15.0,
+        "average_view_percentage": 60.49,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577097+00:00"
+      },
+      "first_week_analytics": {
+        "views_first_7_days": 30,
+        "engaged_views_first_7_days": 6,
+        "average_view_percentage_first_7_days": 60.49,
+        "average_view_duration_seconds_first_7_days": 15.0,
+        "days_since_upload_in_report": 1,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-12",
+        "period_end": "2026-11-12"
+      }
+    },
+    {
+      "video_id": "KAjT8d9-mwY",
+      "title": "Stop Training to Failure Every Set",
+      "topic": "RIR vs Failure Growth",
+      "series": "Gym Myth Court",
+      "episode_number": 1,
+      "episode_topic": "Does training to failure build more muscle every time?",
+      "hook": "Stop training to failure on every single set.",
+      "script_word_count": 50,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-13T06:16:58.585765+00:00",
+      "privacy": "public",
+      "status": "uploaded",
+      "analytics": {
+        "views": 4,
+        "engaged_views": 2,
+        "average_view_duration_seconds": 7.0,
+        "average_view_percentage": 39.72,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-16",
+        "period_end": "2026-11-12",
+        "synced_at": "2026-11-14T21:51:24.577199+00:00"
+      }
+    },
+    {
+      "video_id": "eY65XWM7Vxo",
+      "title": "Does Soreness Mean Your Workout Worked?",
+      "topic": "Muscle Soreness Versus Growth",
+      "series": "Gym Myth Court",
+      "episode_number": 2,
+      "episode_topic": "Is soreness proof that a workout worked?",
+      "hook": "Is severe muscle soreness actual proof of growth?",
+      "script_word_count": 50,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-13T12:07:08.727664+00:00",
+      "privacy": "public",
+      "status": "uploaded"
+    },
+    {
+      "video_id": "euAvCjxlmdY",
+      "title": "Does Fasted Cardio Burn More Body Fat?",
+      "topic": "Fasted Cardio For Fat Loss",
+      "series": "Gym Myth Court",
+      "episode_number": 3,
+      "episode_topic": "Can fasted cardio burn more body fat overall?",
+      "hook": "Does running on empty burn more fat?",
+      "script_word_count": 56,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-13T18:05:59.808203+00:00",
+      "privacy": "public",
+      "status": "uploaded"
+    },
+    {
+      "video_id": "5PNVItvN1I0",
+      "title": "Does Eating Late Cause Fat Gain?",
+      "topic": "Nighttime Eating Fat Gain",
+      "series": "Gym Myth Court",
+      "episode_number": 4,
+      "episode_topic": "Does eating late automatically cause fat gain?",
+      "hook": "Late night eating does not store fat.",
+      "script_word_count": 54,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-14T06:04:09.487547+00:00",
+      "privacy": "public",
+      "status": "uploaded"
+    },
+    {
+      "video_id": "NhlGMZM2_og",
+      "title": "Do High Reps Build Muscle? | Gym Myth Court",
+      "topic": "High vs Low Rep Hypertrophy",
+      "series": "Gym Myth Court",
+      "episode_number": 5,
+      "episode_topic": "Are high reps and low reps both useful for growth?",
+      "hook": "Heavy weights are not the only path to muscle.",
+      "script_word_count": 50,
+      "scene_count": 4,
+      "uploaded_at": "2026-11-14T11:51:54.816534+00:00",
+      "privacy": "public",
       "status": "uploaded"
     }
-  ]
+  ],
+  "topic_insights": [
+    {
+      "topic": "Late Night Eating Myth",
+      "videos": 1,
+      "total_views": 45,
+      "total_engaged_views": 11,
+      "avg_views_per_video": 45,
+      "avg_engaged_views_per_video": 11,
+      "avg_view_percentage": 118.71,
+      "avg_view_duration_seconds": 21.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "TRT vs Bodybuilding Steroids",
+      "videos": 1,
+      "total_views": 57,
+      "total_engaged_views": 9,
+      "avg_views_per_video": 57,
+      "avg_engaged_views_per_video": 9,
+      "avg_view_percentage": 115.04,
+      "avg_view_duration_seconds": 24.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Testosterone Recovery After Steroids",
+      "videos": 1,
+      "total_views": 46,
+      "total_engaged_views": 13,
+      "avg_views_per_video": 46,
+      "avg_engaged_views_per_video": 13,
+      "avg_view_percentage": 96.84,
+      "avg_view_duration_seconds": 18.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Steroid Speed Versus Health Cost",
+      "videos": 1,
+      "total_views": 62,
+      "total_engaged_views": 14,
+      "avg_views_per_video": 62,
+      "avg_engaged_views_per_video": 14,
+      "avg_view_percentage": 81.46,
+      "avg_view_duration_seconds": 17.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Mastering the Hip Hinge",
+      "videos": 1,
+      "total_views": 233,
+      "total_engaged_views": 46,
+      "avg_views_per_video": 233,
+      "avg_engaged_views_per_video": 46,
+      "avg_view_percentage": 73.0,
+      "avg_view_duration_seconds": 13.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Pre-Workout Sodium for Performance",
+      "videos": 1,
+      "total_views": 184,
+      "total_engaged_views": 34,
+      "avg_views_per_video": 184,
+      "avg_engaged_views_per_video": 34,
+      "avg_view_percentage": 70.8,
+      "avg_view_duration_seconds": 12.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Late Caffeine Pre-Workout Cutoff",
+      "videos": 1,
+      "total_views": 66,
+      "total_engaged_views": 17,
+      "avg_views_per_video": 66,
+      "avg_engaged_views_per_video": 17,
+      "avg_view_percentage": 68.61,
+      "avg_view_duration_seconds": 13.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Increasing Daily Fiber Intake",
+      "videos": 1,
+      "total_views": 45,
+      "total_engaged_views": 9,
+      "avg_views_per_video": 45,
+      "avg_engaged_views_per_video": 9,
+      "avg_view_percentage": 68.58,
+      "avg_view_duration_seconds": 13.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Steroids and Fertility Shutdown",
+      "videos": 1,
+      "total_views": 16,
+      "total_engaged_views": 5,
+      "avg_views_per_video": 16,
+      "avg_engaged_views_per_video": 5,
+      "avg_view_percentage": 68.1,
+      "avg_view_duration_seconds": 15.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Lean Ground Beef Swap",
+      "videos": 1,
+      "total_views": 448,
+      "total_engaged_views": 125,
+      "avg_views_per_video": 448,
+      "avg_engaged_views_per_video": 125,
+      "avg_view_percentage": 65.24,
+      "avg_view_duration_seconds": 11.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "alternate day fasting fat loss",
+      "videos": 1,
+      "total_views": 11,
+      "total_engaged_views": 4,
+      "avg_views_per_video": 11,
+      "avg_engaged_views_per_video": 4,
+      "avg_view_percentage": 60.82,
+      "avg_view_duration_seconds": 13.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Retaining Muscle After Steroid Cycles",
+      "videos": 1,
+      "total_views": 30,
+      "total_engaged_views": 6,
+      "avg_views_per_video": 30,
+      "avg_engaged_views_per_video": 6,
+      "avg_view_percentage": 60.49,
+      "avg_view_duration_seconds": 15.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Natural Testosterone On Steroids",
+      "videos": 1,
+      "total_views": 7,
+      "total_engaged_views": 2,
+      "avg_views_per_video": 7,
+      "avg_engaged_views_per_video": 2,
+      "avg_view_percentage": 57.74,
+      "avg_view_duration_seconds": 14.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Controlling the Eccentric Phase",
+      "videos": 1,
+      "total_views": 48,
+      "total_engaged_views": 6,
+      "avg_views_per_video": 48,
+      "avg_engaged_views_per_video": 6,
+      "avg_view_percentage": 50.09,
+      "avg_view_duration_seconds": 11.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Eating Protein First for Satiety",
+      "videos": 1,
+      "total_views": 216,
+      "total_engaged_views": 42,
+      "avg_views_per_video": 216,
+      "avg_engaged_views_per_video": 42,
+      "avg_view_percentage": 49.47,
+      "avg_view_duration_seconds": 10.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "RIR vs Failure Growth",
+      "videos": 1,
+      "total_views": 4,
+      "total_engaged_views": 2,
+      "avg_views_per_video": 4,
+      "avg_engaged_views_per_video": 2,
+      "avg_view_percentage": 39.72,
+      "avg_view_duration_seconds": 7.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    },
+    {
+      "topic": "Optimal Daily Protein Ceiling",
+      "videos": 1,
+      "total_views": 89,
+      "total_engaged_views": 12,
+      "avg_views_per_video": 89,
+      "avg_engaged_views_per_video": 12,
+      "avg_view_percentage": 38.1,
+      "avg_view_duration_seconds": 8.0,
+      "sample_note": "Small sample; descriptive only, not causal."
+    }
+  ],
+  "series_insights": [
+    {
+      "series": "Steroid Reality Check",
+      "videos": 6,
+      "avg_views_per_video": 36,
+      "avg_engaged_views_per_video": 8,
+      "avg_view_percentage": 79.95,
+      "subscribers_gained": 0,
+      "sample_note": "Descriptive only; directional until at least 3 videos."
+    },
+    {
+      "series": "One Mistake, One Fix",
+      "videos": 1,
+      "avg_views_per_video": 66,
+      "avg_engaged_views_per_video": 17,
+      "avg_view_percentage": 68.61,
+      "subscribers_gained": 0,
+      "sample_note": "Descriptive only; directional until at least 3 videos."
+    },
+    {
+      "series": "Fitness Science Explained",
+      "videos": 1,
+      "avg_views_per_video": 45,
+      "avg_engaged_views_per_video": 9,
+      "avg_view_percentage": 68.58,
+      "subscribers_gained": 0,
+      "sample_note": "Descriptive only; directional until at least 3 videos."
+    },
+    {
+      "series": "Fitness Myth Check",
+      "videos": 1,
+      "avg_views_per_video": 11,
+      "avg_engaged_views_per_video": 4,
+      "avg_view_percentage": 60.82,
+      "subscribers_gained": 0,
+      "sample_note": "Descriptive only; directional until at least 3 videos."
+    },
+    {
+      "series": "Gym Myth Court",
+      "videos": 1,
+      "avg_views_per_video": 4,
+      "avg_engaged_views_per_video": 2,
+      "avg_view_percentage": 39.72,
+      "subscribers_gained": 0,
+      "sample_note": "Descriptive only; directional until at least 3 videos."
+    },
+    {
+      "series": "Smart Food Choices",
+      "videos": 1,
+      "avg_views_per_video": 89,
+      "avg_engaged_views_per_video": 12,
+      "avg_view_percentage": 38.1,
+      "subscribers_gained": 0,
+      "sample_note": "Descriptive only; directional until at least 3 videos."
+    }
+  ],
+  "first_week_topic_insights": [],
+  "first_week_analytics": {
+    "source": "YouTube Analytics API daily video report",
+    "window_days": 7,
+    "comparison_method": "First 7 calendar days after each video's upload date",
+    "complete_video_windows": 0,
+    "videos": {
+      "_OiEiTu6NMA": {
+        "views_first_7_days": 184,
+        "engaged_views_first_7_days": 34,
+        "average_view_percentage_first_7_days": 75.25,
+        "average_view_duration_seconds_first_7_days": 13.23,
+        "days_since_upload_in_report": 6,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-07",
+        "period_end": "2026-11-12"
+      },
+      "gHl9vWJiinI": {
+        "views_first_7_days": 448,
+        "engaged_views_first_7_days": 125,
+        "average_view_percentage_first_7_days": 65.42,
+        "average_view_duration_seconds_first_7_days": 10.95,
+        "days_since_upload_in_report": 5,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-08",
+        "period_end": "2026-11-12"
+      },
+      "H-ml4IekN1Q": {
+        "views_first_7_days": 47,
+        "engaged_views_first_7_days": 5,
+        "average_view_percentage_first_7_days": 46.67,
+        "average_view_duration_seconds_first_7_days": 9.79,
+        "days_since_upload_in_report": 5,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-08",
+        "period_end": "2026-11-12"
+      },
+      "b243aiNVjOY": {
+        "views_first_7_days": 45,
+        "engaged_views_first_7_days": 11,
+        "average_view_percentage_first_7_days": 115.23,
+        "average_view_duration_seconds_first_7_days": 20.27,
+        "days_since_upload_in_report": 5,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-08",
+        "period_end": "2026-11-12"
+      },
+      "dBvgISRMbVM": {
+        "views_first_7_days": 216,
+        "engaged_views_first_7_days": 42,
+        "average_view_percentage_first_7_days": 49.57,
+        "average_view_duration_seconds_first_7_days": 9.93,
+        "days_since_upload_in_report": 5,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-08",
+        "period_end": "2026-11-12"
+      },
+      "Aq4HSc0G_98": {
+        "views_first_7_days": 204,
+        "engaged_views_first_7_days": 37,
+        "average_view_percentage_first_7_days": 75.3,
+        "average_view_duration_seconds_first_7_days": 12.81,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      },
+      "6XYMSYQ6wZc": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      },
+      "n_Px2uvbdMM": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      },
+      "5j5LHApqt7Y": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      },
+      "NyJIw6HUSbA": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      },
+      "rcuh_45HSQ4": {
+        "views_first_7_days": 0,
+        "engaged_views_first_7_days": 0,
+        "average_view_percentage_first_7_days": 0,
+        "average_view_duration_seconds_first_7_days": 0,
+        "days_since_upload_in_report": 4,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-09",
+        "period_end": "2026-11-12"
+      },
+      "lE-kWVPnOek": {
+        "views_first_7_days": 35,
+        "engaged_views_first_7_days": 12,
+        "average_view_percentage_first_7_days": 62.21,
+        "average_view_duration_seconds_first_7_days": 12.0,
+        "days_since_upload_in_report": 3,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-10",
+        "period_end": "2026-11-12"
+      },
+      "rC6rQSM3aaQ": {
+        "views_first_7_days": 45,
+        "engaged_views_first_7_days": 9,
+        "average_view_percentage_first_7_days": 71.28,
+        "average_view_duration_seconds_first_7_days": 13.93,
+        "days_since_upload_in_report": 3,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-10",
+        "period_end": "2026-11-12"
+      },
+      "G0YuiKS1nk8": {
+        "views_first_7_days": 89,
+        "engaged_views_first_7_days": 12,
+        "average_view_percentage_first_7_days": 36.84,
+        "average_view_duration_seconds_first_7_days": 7.88,
+        "days_since_upload_in_report": 3,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-10",
+        "period_end": "2026-11-12"
+      },
+      "SY1kufsY-Dc": {
+        "views_first_7_days": 9,
+        "engaged_views_first_7_days": 2,
+        "average_view_percentage_first_7_days": 59.48,
+        "average_view_duration_seconds_first_7_days": 12.67,
+        "days_since_upload_in_report": 2,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-11",
+        "period_end": "2026-11-12"
+      },
+      "lO3SsmLnaXY": {
+        "views_first_7_days": 62,
+        "engaged_views_first_7_days": 14,
+        "average_view_percentage_first_7_days": 84.75,
+        "average_view_duration_seconds_first_7_days": 17.92,
+        "days_since_upload_in_report": 2,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-11",
+        "period_end": "2026-11-12"
+      },
+      "Db45ORL1kwU": {
+        "views_first_7_days": 7,
+        "engaged_views_first_7_days": 2,
+        "average_view_percentage_first_7_days": 41.24,
+        "average_view_duration_seconds_first_7_days": 10.0,
+        "days_since_upload_in_report": 2,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-11",
+        "period_end": "2026-11-12"
+      },
+      "tJBzHcTT_Lc": {
+        "views_first_7_days": 11,
+        "engaged_views_first_7_days": 3,
+        "average_view_percentage_first_7_days": 67.88,
+        "average_view_duration_seconds_first_7_days": 15.0,
+        "days_since_upload_in_report": 1,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-12",
+        "period_end": "2026-11-12"
+      },
+      "sZM3yIltbek": {
+        "views_first_7_days": 46,
+        "engaged_views_first_7_days": 13,
+        "average_view_percentage_first_7_days": 96.84,
+        "average_view_duration_seconds_first_7_days": 18.0,
+        "days_since_upload_in_report": 1,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-12",
+        "period_end": "2026-11-12"
+      },
+      "m9RqM0cAIxQ": {
+        "views_first_7_days": 57,
+        "engaged_views_first_7_days": 9,
+        "average_view_percentage_first_7_days": 115.04,
+        "average_view_duration_seconds_first_7_days": 24.0,
+        "days_since_upload_in_report": 1,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-12",
+        "period_end": "2026-11-12"
+      },
+      "qgS1GiRvdk4": {
+        "views_first_7_days": 30,
+        "engaged_views_first_7_days": 6,
+        "average_view_percentage_first_7_days": 60.49,
+        "average_view_duration_seconds_first_7_days": 15.0,
+        "days_since_upload_in_report": 1,
+        "first_7_days_complete": false,
+        "period_start": "2026-11-12",
+        "period_end": "2026-11-12"
+      }
+    }
+  }
 }
