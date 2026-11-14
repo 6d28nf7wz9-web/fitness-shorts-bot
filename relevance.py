@@ -60,6 +60,25 @@ GENERIC = {
     "locker", "room", "running", "swimming"
 }
 
+# Incidental scene-setting words can appear in unrelated stock metadata
+# (e.g. "night view" on a castle returned for "kitchen counter night").
+# They must not independently establish a scene match.
+LOW_SIGNAL = {
+    "night", "nighttime", "day", "daytime", "evening", "morning",
+    "late", "early", "counter", "countertop", "closeup", "calendar",
+    "label", "container", "view", "lighting", "light", "dark", "bright",
+    "indoors", "outdoors", "background", "room", "setting"
+}
+
+# Some single-word topics are genuinely distinctive enough to stand alone.
+HIGH_CONFIDENCE_SINGLE = {
+    "steroid", "testosterone", "fertility", "sperm", "hormone",
+    "anabolic", "creatine", "insulin", "cortisol", "estrogen",
+    "progesterone", "diabetes", "glucose", "thyroid", "ovulation",
+    "menopause", "spermatogenesis", "hypogonadism", "myostatin",
+    "mitochondria", "glycogen", "leucine"
+}
+
 TRAINING_FALLBACKS = [
     "gym workout", "weight training", "fitness training"
 ]
@@ -87,6 +106,8 @@ _WEAK = {norm(w) for w in WEAK}
 _CONTEXT = {norm(w) for w in HEALTH_CONTEXT}
 _FILLER = {norm(w) for w in FILLER}
 _GENERIC = {norm(w) for w in GENERIC}
+_LOW_SIGNAL = {norm(w) for w in LOW_SIGNAL}
+_HIGH_CONFIDENCE_SINGLE = {norm(w) for w in HIGH_CONFIDENCE_SINGLE}
 
 
 def hit_words(hit):
@@ -133,19 +154,16 @@ def relevance(hit, keyword, context=""):
     hw = hit_words(hit)
     query_words = keyword_words(keyword)
     ambiguous = {"bench", "press", "row", "lat", "water", "bottle", "weight"}
-    query_specific = query_words - _GENERIC - _WEAK - ambiguous
+    query_specific = query_words - _GENERIC - _WEAK - ambiguous - _LOW_SIGNAL
 
-    # Only distinctive terms count as direct keyword matches.
+    # Require multiple distinct target terms so incidental homonyms/settings
+    # (e.g. "apple" on a bear clip or "night" on a castle) cannot pass as exact.
     direct_matches = hw & query_specific
-    if len(direct_matches) >= 2:
-        return 2
-
-    # One distinctive query-word match is enough for a specific match.
-    if query_specific and (hw & query_specific):
+    if len(direct_matches) >= 2 or direct_matches & _HIGH_CONFIDENCE_SINGLE:
         return 2
 
     # Use narration as supporting evidence, not as a replacement for the search query.
-    context_specific = scene_terms(keyword, context) - _GENERIC - _WEAK - ambiguous
+    context_specific = scene_terms(keyword, context) - _GENERIC - _WEAK - ambiguous - _LOW_SIGNAL
     if len(hw & context_specific) >= 2:
         return 2
 
