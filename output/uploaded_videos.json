@@ -294,5 +294,19 @@
     "uploaded_at": "2026-11-14T06:04:09.487547+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "NhlGMZM2_og",
+    "title": "Do High Reps Build Muscle? | Gym Myth Court",
+    "topic": "High vs Low Rep Hypertrophy",
+    "series": "Gym Myth Court",
+    "episode_number": 5,
+    "episode_topic": "Are high reps and low reps both useful for growth?",
+    "hook": "Heavy weights are not the only path to muscle.",
+    "script_word_count": 50,
+    "scene_count": 4,
+    "uploaded_at": "2026-11-14T11:51:54.816534+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
