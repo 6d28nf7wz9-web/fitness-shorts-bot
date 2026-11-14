@@ -57,6 +57,45 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
         )
         self.assertEqual(score, 0)
 
+    def test_incidental_night_tag_does_not_make_castle_a_food_match(self):
+        castle = {
+            "tags": "building castle japanese castle osaka castle crescent moon night view",
+            "pageURL": "https://example.invalid/video/osaka-castle",
+        }
+        score = relevance(
+            castle,
+            "person eating yogurt|kitchen counter night|healthy food",
+            "Late night eating does not store fat.",
+        )
+        self.assertLess(score, 2)
+
+    def test_single_apple_tag_does_not_make_a_bear_a_specific_food_match(self):
+        bear = {
+            "tags": "bear mammal apple lake animal wildlife nature jungle water",
+            "pageURL": "https://example.invalid/video/bear-apple",
+        }
+        score = relevance(
+            bear,
+            "hand holding apple|nutrition label close up|healthy food",
+            "A late snack works if it fits your calorie budget.",
+        )
+        self.assertLess(score, 2)
+
+    def test_choose_clip_rejects_castle_returned_for_nighttime_food_scene(self):
+        castle = make_hit(
+            250395,
+            "building castle japanese castle osaka castle crescent moon night view",
+        )
+        with patch("clips.search", return_value=[castle]):
+            with patch.dict(os.environ, {"ALLOW_CATEGORY_ONLY_CLIPS": "0"}):
+                with self.assertRaisesRegex(RuntimeError, "No specific footage match"):
+                    choose_clip(
+                        "person eating yogurt|kitchen counter night|healthy food",
+                        2.5,
+                        set(),
+                        context="Late night eating does not store fat.",
+                    )
+
     def test_generic_swimming_word_does_not_match_jellyfish_to_sperm_scene(self):
         jellyfish = {"tags": "jellyfish tank water marine aquarium sea swimming"}
         score = relevance(
