@@ -48,8 +48,8 @@ def load_json(path, default):
         return default
 
 
-def query_report(api, start, end, metrics, dimensions=None):
-    """Fetch every page when a dimension such as video is requested."""
+def query_report(api, start, end, metrics, dimensions=None, filters=None):
+    """Fetch every page for a supported Analytics report."""
     kwargs = {
         "ids": "channel==MINE",
         "startDate": start.isoformat(),
@@ -59,6 +59,8 @@ def query_report(api, start, end, metrics, dimensions=None):
     }
     if dimensions:
         kwargs["dimensions"] = dimensions
+    if filters:
+        kwargs["filters"] = filters
     rows = []
     headers = None
     while True:
@@ -102,17 +104,26 @@ def main():
         short_engaged_views = 0
         short_rows = 0
         if short_ids:
-            report = query_report(
-                analytics, start_90, end,
-                "views,engagedViews", dimensions="video"
-            )
-            headers = [column["name"] for column in report.get("columnHeaders", [])]
-            for row in report.get("rows", []):
-                values = dict(zip(headers, row))
-                if str(values.get("video", "")) in short_ids:
-                    short_views += int(values.get("views", 0) or 0)
-                    short_engaged_views += int(values.get("engagedViews", 0) or 0)
-                    short_rows += 1
+            # The basic video-activity report requires video as a filter.
+            # When filtering multiple video IDs, the API permits video to also
+            # be used as a dimension so results remain attributable per video.
+            # The API accepts at most 500 IDs in a multi-value video filter.
+            ordered_ids = sorted(short_ids)
+            for offset in range(0, len(ordered_ids), 500):
+                batch_ids = ordered_ids[offset:offset + 500]
+                report = query_report(
+                    analytics, start_90, end,
+                    "views,engagedViews",
+                    dimensions="video",
+                    filters=f"video=={','.join(batch_ids)}",
+                )
+                headers = [column["name"] for column in report.get("columnHeaders", [])]
+                for row in report.get("rows", []):
+                    values = dict(zip(headers, row))
+                    if str(values.get("video", "")) in short_ids:
+                        short_views += int(values.get("views", 0) or 0)
+                        short_engaged_views += int(values.get("engagedViews", 0) or 0)
+                        short_rows += 1
 
         watch_report = query_report(
             analytics, start_365, end, "estimatedMinutesWatched"
