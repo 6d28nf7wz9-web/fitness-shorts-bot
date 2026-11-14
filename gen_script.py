@@ -427,43 +427,85 @@ def performance_context(memory):
                 f"{item.get('avg_engaged_views_first_7_days')} average engaged views."
             )
 
-    # Individual examples are useful for studying hooks, but compare similar-age videos.
+    # Rank mature uploads with a balanced score instead of letting one
+    # unusually high retention percentage (often from very few views) dominate.
     videos = memory.get("analytics", {}).get("videos", {})
     if isinstance(videos, dict) and videos:
+        from datetime import date
+        import math
+
         uploads = memory.get("video_performance", [])
         metadata = {
-            item.get("video_id"): item
+            str(item.get("video_id")): item
             for item in uploads
             if isinstance(item, dict) and item.get("video_id")
         }
-        ranked = sorted(
-            videos.items(),
-            key=lambda pair: (
-                pair[1].get("average_view_percentage", 0),
-                pair[1].get("engaged_views", 0),
-                pair[1].get("views", 0),
-            ),
-            reverse=True,
-        )
-        lines.append(
-            "Recent video-level evidence (28-day reporting window; "
-            "compare videos at similar age; NOT causal):"
-        )
-        for video_id, stats in ranked[:5]:
-            item = metadata.get(video_id, {})
+        report_end = memory.get("analytics", {}).get("period_end")
+        try:
+            report_day = date.fromisoformat(str(report_end))
+        except ValueError:
+            report_day = None
+
+        eligible = []
+        for video_id, stats in videos.items():
+            item = metadata.get(str(video_id), {})
+            try:
+                upload_day = date.fromisoformat(str(item.get("uploaded_at", ""))[:10])
+            except ValueError:
+                continue
+            if report_day is None or (report_day - upload_day).days < 7:
+                continue
+            views = max(0, int(stats.get("views", 0) or 0))
+            engaged = max(0, int(stats.get("engaged_views", 0) or 0))
+            if views <= 0:
+                continue
+            eligible.append((str(video_id), stats, item, views, engaged))
+
+        if eligible:
+            max_views = max(row[3] for row in eligible)
+            ranked = []
+            for video_id, stats, item, views, engaged in eligible:
+                retention = min(max(float(stats.get("average_view_percentage", 0) or 0), 0), 150) / 150
+                engagement_rate = min(engaged / views, 1.0)
+                reach = math.log1p(views) / math.log1p(max_views) if max_views else 0
+                subscriber_rate = min(
+                    max(0, int(stats.get("subscribers_gained", 0) or 0)) / views * 100,
+                    1.0,
+                )
+                score = (
+                    0.35 * retention
+                    + 0.30 * engagement_rate
+                    + 0.25 * reach
+                    + 0.10 * subscriber_rate
+                )
+                ranked.append((score, video_id, stats, item))
+
+            ranked.sort(key=lambda row: row[0], reverse=True)
             lines.append(
-                f"- {item.get('topic') or item.get('title') or video_id}: "
-                f"{stats.get('views', 0)} views, "
-                f"{stats.get('engaged_views', 0)} engaged views, "
-                f"{stats.get('average_view_percentage', 0)}% average viewed, "
-                f"{stats.get('average_view_duration_seconds', 0)}s average duration, "
-                f"{stats.get('subscribers_gained', 0)} subscribers gained. "
-                f"Opening hook: {item.get('hook', 'not recorded')}"
+                "Mature video examples (at least 7 days old at report end), "
+                "ranked by a balanced signal: retention 35%, engaged-view rate 30%, "
+                "reach 25%, subscriber conversion 10%. Directional, not causal:"
             )
-        lines.append(
-            "Use these hooks as examples to study specificity and curiosity; "
-            "do not copy wording or infer causation from a single video."
-        )
+            for score, video_id, stats, item in ranked[:5]:
+                lines.append(
+                    f"- {item.get('topic') or item.get('title') or video_id}: "
+                    f"{stats.get('views', 0)} views, "
+                    f"{stats.get('engaged_views', 0)} engaged views, "
+                    f"{stats.get('average_view_percentage', 0)}% average viewed, "
+                    f"{stats.get('average_view_duration_seconds', 0)}s average duration, "
+                    f"{stats.get('subscribers_gained', 0)} subscribers gained; "
+                    f"learning score {score:.3f}. "
+                    f"Opening hook: {item.get('hook', 'not recorded')}"
+                )
+            lines.append(
+                "Study the strongest hooks for specificity and payoff; never copy wording. "
+                "Do not treat this score as a YouTube ranking factor."
+            )
+        else:
+            lines.append(
+                "No mature video examples available yet: wait for uploads to reach "
+                "7 days and retain their upload dates before ranking performance."
+            )
 
     if lines:
         return baseline_text + chr(10) + "Performance evidence (soft guidance only):" + chr(10) + chr(10).join(lines)
