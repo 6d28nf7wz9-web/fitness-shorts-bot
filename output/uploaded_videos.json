@@ -308,5 +308,19 @@
     "uploaded_at": "2026-11-14T11:51:54.816534+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "iKzzKB7j6KI",
+    "title": "Does Sweating More Mean a Better Workout?",
+    "topic": "Sweat Rate Versus Workout Quality",
+    "series": "Gym Myth Court",
+    "episode_number": 6,
+    "episode_topic": "Is sweating more a sign of a better workout?",
+    "hook": "Sweating buckets does not mean a better workout.",
+    "script_word_count": 56,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-15T06:06:38.819041+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
