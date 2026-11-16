@@ -1,5 +1,6 @@
 import unittest
 from hyperframes_render import fit_text, wrap_words
+from visual_engine import build_visual_panel, classify_scene, visual_css
 
 
 class HyperFramesTextLayoutTests(unittest.TestCase):
@@ -42,6 +43,25 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn("UPLOAD_PRIVACY: public", workflow)
         self.assertIn('HYPERFRAMES_RENDER: "1"', workflow)
         self.assertNotIn(r"public\n", workflow)
+
+
+    def test_scene_visuals_classify_common_fitness_topics(self):
+        self.assertEqual(classify_scene({"narration": "Water improves hydration"}), "hydration")
+        self.assertEqual(classify_scene({"narration": "Protein supports muscle growth"}), "muscle")
+        self.assertEqual(classify_scene({"narration": "Insulin is a hormone signal"}), "hormones")
+
+    def test_visual_panel_is_scene_specific_and_animated(self):
+        category, panel = build_visual_panel({"narration": "Heart rate and blood flow deliver oxygen"}, 3)
+        self.assertEqual(category, "heart")
+        self.assertIn('data-scene="3"', panel)
+        self.assertIn("CARDIOVASCULAR", panel)
+        self.assertIn("science-svg", panel)
+        self.assertIn("@keyframes orbit-dash", visual_css())
+
+    def test_visual_panel_escapes_dynamic_text(self):
+        category, panel = build_visual_panel({"narration": "<script> muscle recovery"})
+        self.assertEqual(category, "muscle")
+        self.assertNotIn("<script>", panel)
 
 
 if __name__ == "__main__":
