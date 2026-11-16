@@ -30,6 +30,16 @@ class MotionDirectorTests(unittest.TestCase):
         self.assertIn("cubic-bezier(.16,1,.3,1)", css)
         self.assertIn("@keyframes ff-panel-enter", css)
         self.assertIn("@keyframes ff-note-pulse", css)
+        self.assertIn("@keyframes ff-camera-push", css)
+        self.assertIn("@keyframes ff-camera-pull", css)
+
+    def test_scenes_alternate_layout_and_camera_movement(self):
+        plans = [plan_scene_motion({}, i, 3.0, "muscle") for i in range(1, 7)]
+        self.assertEqual(plans[0]["camera"], "push")
+        self.assertEqual(plans[1]["camera"], "drift")
+        self.assertEqual(plans[2]["camera"], "pull")
+        self.assertEqual(len({p["layout"] for p in plans}), 2)
+        self.assertTrue(all("layout-" in p["class_name"] for p in plans))
 
 
 if __name__ == "__main__":
