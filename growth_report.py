@@ -128,7 +128,7 @@ def build_report(memory):
             f"{_number(row.get('avg_engaged_views_per_video'), 0)} engaged views/video."
         )
     if not topics:
-        lines.append("- No topic has at least 2 measured videos yet; single-video topics are excluded to avoid false winners.")
+        lines.append("- No topic-level analytics yet (or no topic has at least 2 measured videos); single-video topics are excluded to avoid false winners.")
 
     lines += ["", "## Series signals", ""]
     series = [
