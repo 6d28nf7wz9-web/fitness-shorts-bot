@@ -177,8 +177,14 @@ def choose_clip(keyword, seconds, used_ids, context=""):
                 )
 
     if not candidates and reusable:
+        if os.getenv("ALLOW_REUSED_CLIPS", "0").lower() not in ("1", "true", "yes"):
+            raise RuntimeError(
+                "No unused scene-matched footage remains; refusing to reuse a clip "
+                "from another scene. Add more stock results or explicitly set "
+                "ALLOW_REUSED_CLIPS=1 for a non-production preview."
+            )
         candidates = reusable
-        print("  WARNING: Reusing relevant clips because no unused matches were found.")
+        print("  WARNING: Explicitly reusing a relevant clip; quality gate will flag cross-scene duplicates.")
 
     exact = [
         item for item in candidates.values()
