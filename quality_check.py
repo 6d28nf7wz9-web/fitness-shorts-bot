@@ -43,11 +43,12 @@ def main():
         if len(clips) != len(scenes):
             errors.append(f"Clip scenes {len(clips)} != script scenes {len(scenes)}")
         for i, (scene, info) in enumerate(zip(scenes, clips), 1):
-            if info.get("source") == "i2v":
+            if info.get("source") in ("i2v", "science_visual"):
                 if not os.path.isfile(info.get("file", "")):
-                    errors.append(f"Scene {i}: AI video file is missing")
+                    errors.append(f"Scene {i}: generated visual file is missing")
                 else:
-                    print(f"Scene {i}: AI-generated visual; stock relevance check not applicable")
+                    label = "AI-generated visual" if info.get("source") == "i2v" else "safe science-visual fallback"
+                    print(f"Scene {i}: {label}; stock relevance check not applicable")
                 continue
             narration = str(scene.get("narration", ""))
             parts = info.get("clips", [])
