@@ -65,7 +65,7 @@ def _mature_video_rows(memory):
     except ValueError:
         report_day = None
 
-    rows = []
+    candidates = []
     for video_id, stats in videos.items():
         if not isinstance(stats, dict):
             continue
@@ -84,20 +84,29 @@ def _mature_video_rows(memory):
         engagement_rate = min(1.0, engaged / max(views, 1))
         subs = max(0, int(stats.get("subscribers_gained", 0) or 0))
         subscriber_rate = min(1.0, subs / max(views, 1) * 100)
-        score = (
-            0.40 * retention / 100
-            + 0.30 * engagement_rate
-            + 0.20 * math.log1p(views) / math.log1p(max(views, 1))
-            + 0.10 * subscriber_rate
-        )
         label = item.get("topic") or item.get("title") or ""
         hook = item.get("hook") or ""
-        rows.append({
+        candidates.append({
             "video_id": str(video_id), "label": str(label), "hook": str(hook),
             "category": _category(" ".join((label, hook))),
             "views": views, "engaged": engaged, "retention": retention,
-            "score": score,
+            "engagement_rate": engagement_rate,
+            "subscriber_rate": subscriber_rate,
         })
+
+    max_views = max((row["views"] for row in candidates), default=1)
+    rows = []
+    for row in candidates:
+        reach = math.log1p(row["views"]) / math.log1p(max_views)
+        row["score"] = (
+            0.40 * row["retention"] / 100
+            + 0.30 * row["engagement_rate"]
+            + 0.20 * reach
+            + 0.10 * row["subscriber_rate"]
+        )
+        row.pop("engagement_rate", None)
+        row.pop("subscriber_rate", None)
+        rows.append(row)
     return rows
 
 
