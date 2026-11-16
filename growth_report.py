@@ -112,7 +112,7 @@ def build_report(memory):
     lines += ["", "## Topic signals", ""]
     topics = [
         row for row in memory.get("topic_insights", [])
-        if isinstance(row, dict)
+        if isinstance(row, dict) and int(row.get("videos", 0) or 0) >= 2
     ]
     topics.sort(
         key=lambda row: (
@@ -128,10 +128,13 @@ def build_report(memory):
             f"{_number(row.get('avg_engaged_views_per_video'), 0)} engaged views/video."
         )
     if not topics:
-        lines.append("- No topic-level analytics yet.")
+        lines.append("- No topic has at least 2 measured videos yet; single-video topics are excluded to avoid false winners.")
 
     lines += ["", "## Series signals", ""]
-    series = [row for row in memory.get("series_insights", []) if isinstance(row, dict)]
+    series = [
+        row for row in memory.get("series_insights", [])
+        if isinstance(row, dict) and int(row.get("videos", 0) or 0) >= 3
+    ]
     series.sort(
         key=lambda row: (
             float(row.get("avg_view_percentage", 0) or 0),
@@ -146,7 +149,7 @@ def build_report(memory):
             f"{_number(row.get('subscribers_gained'), 0)} subscribers gained."
         )
     if not series:
-        lines.append("- No series-level analytics yet.")
+        lines.append("- No series has at least 3 measured videos yet; small series are excluded from ranking.")
 
     lines += [
         "",
