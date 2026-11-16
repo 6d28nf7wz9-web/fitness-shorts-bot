@@ -54,27 +54,34 @@ def build_report(memory):
         "|---|---:|---:|---:|---:|---|",
     ]
 
-    ranked = sorted(
-        ((video_id, stats) for video_id, stats in videos.items() if isinstance(stats, dict)),
-        key=lambda pair: (
-            float(pair[1].get("average_view_percentage", 0) or 0),
-            int(pair[1].get("engaged_views", 0) or 0),
-            int(pair[1].get("views", 0) or 0),
-        ),
-        reverse=True,
-    )
-    for video_id, stats in ranked[:10]:
+    # Avoid misleading "winners" caused by tiny samples or replay-heavy retention.
+    eligible = []
+    for video_id, stats in videos.items():
+        if not isinstance(stats, dict):
+            continue
+        views = int(stats.get("views", 0) or 0)
+        engaged = int(stats.get("engaged_views", 0) or 0)
+        if views < 50 or engaged < 15:
+            continue
+        retention = max(0.0, min(100.0, float(stats.get("average_view_percentage", 0) or 0)))
+        engagement_rate = engaged / max(views, 1)
+        subs = max(0, int(stats.get("subscribers_gained", 0) or 0))
+        # Transparent directional score: retention 45%, engagement rate 35%, reach 15%, subs 5%.
+        score = (retention * .45) + (min(engagement_rate, 1.0) * 100 * .35) + (min(views / 1000, 1.0) * 15) + (min(subs / 5, 1.0) * 5)
+        eligible.append((video_id, stats, score))
+    ranked = sorted(eligible, key=lambda row: row[2], reverse=True)
+    for video_id, stats, score in ranked[:10]:
         item = metadata.get(video_id, {})
         label = item.get("topic") or item.get("title") or video_id
         hook = str(item.get("hook") or "not recorded").replace("|", "\\|").replace("\\n", " ")
         lines.append(
-            f"| {label} | {_number(stats.get('views'), 0)} | "
+            f"| {label} (score {score:.1f}) | {_number(stats.get('views'), 0)} | "
             f"{_number(stats.get('engaged_views'), 0)} | "
             f"{_number(stats.get('average_view_percentage'))}% | "
             f"{_number(stats.get('subscribers_gained'), 0)} | {hook} |"
         )
     if not ranked:
-        lines.append("| No synced video data yet | — | — | — | — | — |")
+        lines.append("| No videos passed the minimum sample (50 views, 15 engaged views) | — | — | — | — | — |")
 
     lines += ["", "## Topic signals", ""]
     topics = [
@@ -119,6 +126,7 @@ def build_report(memory):
         "",
         "## Actionable guidance",
         "",
+        "- Winner shortlist excludes videos below 50 views or 15 engaged views; score is directional, not a YouTube ranking factor.",
         "- Prioritize topics/hooks that combine retention with engaged views and subscriber gains.",
         "- Compare Shorts at similar ages; use complete first-7-day metrics when available.",
         "- Treat small samples as directional only; do not infer causation from one video.",
