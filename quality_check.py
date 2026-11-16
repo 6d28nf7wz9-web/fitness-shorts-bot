@@ -55,6 +55,13 @@ def main():
                 continue
             weak = []
             for part in parts:
+                clip_id = part.get("pixabay_id")
+                if clip_id is not None:
+                    previous_scene = used_clip_ids.get(str(clip_id))
+                    if previous_scene is not None and previous_scene != i:
+                        errors.append(f"Scene {i}: footage clip {clip_id} is reused from scene {previous_scene}")
+                    else:
+                        used_clip_ids[str(clip_id)] = i
                 hit = {"tags": part.get("tags", ""), "pageURL": part.get("page", "")}
                 score = relevance(hit, part.get("keyword", ""), narration)
                 if score < 2:
