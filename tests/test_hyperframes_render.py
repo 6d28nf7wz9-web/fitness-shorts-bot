@@ -50,6 +50,24 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertEqual(classify_scene({"narration": "Insulin is a hormone signal"}), "hormones")
         self.assertEqual(classify_scene({"narration": "Calories determine energy balance"}), "fat_loss")
 
+    def test_scene_title_overrides_broad_search_keyword(self):
+        category, _ = build_visual_panel({
+            "keyword": "gym workout|weight training|muscle",
+            "visual_title": "Supplement Boost",
+            "visual_subtitle": "Small effect on muscle",
+            "narration": "Creatine can have a small effect when training is consistent.",
+        })
+        self.assertEqual(category, "supplements")
+
+    def test_muscle_title_overrides_nutrition_terms_in_narration(self):
+        category, _ = build_visual_panel({
+            "keyword": "protein powder|healthy food|meal",
+            "visual_title": "Muscle Hypertrophy",
+            "visual_subtitle": "Significant fiber growth",
+            "narration": "Even creatine needs progressive overload for significant real gains.",
+        })
+        self.assertEqual(category, "muscle")
+
     def test_muscle_fiber_is_not_misclassified_as_dietary_fiber(self):
         category, panel = build_visual_panel({
             "narration": "Even creatine needs progressive overload for significant real gains.",
@@ -69,7 +87,7 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
             "fat_loss": "Calorie deficit and fat loss",
             "hydration": "Water and electrolyte balance",
             "exercise": "Squat exercise and joint movement",
-            "hormones": "Insulin hormone receptor signaling",
+            "hormones": "Insulin hormone receptor signaling",\n            "supplements": "Supplement dose and creatine evidence",
         }
         panels = {}
         for expected, narration in cases.items():
