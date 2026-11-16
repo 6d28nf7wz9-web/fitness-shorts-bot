@@ -152,7 +152,7 @@ video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
 .scene-footage{{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.72) saturate(1.08) contrast(1.04);transform:scale(1.045);animation:ff-camera-drift 7s ease-in-out both;}}
 .scene-bg:after{{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 71px,rgba(114,230,194,.055) 72px),repeating-linear-gradient(90deg,transparent 0 71px,rgba(114,230,194,.055) 72px);}}
 .motion-scene{{z-index:2}}
-.shade{{z-index:1;background:linear-gradient(180deg,rgba(4,10,18,.76) 0%,rgba(5,13,23,.12) 34%,rgba(5,13,23,.26) 58%,rgba(4,10,18,.84) 100%);}}
+.shade{{background:linear-gradient(180deg,rgba(4,10,18,.76) 0%,rgba(5,13,23,.12) 34%,rgba(5,13,23,.26) 58%,rgba(4,10,18,.84) 100%);}}
 </style></head><body><div id="root" data-composition-id="fitfuel-short" data-start="0" data-duration="{total:.3f}" data-width="{W}" data-height="{H}" data-fps="{FPS}" data-no-timeline>
 {''.join(blocks)}
 </div></body></html>"""
