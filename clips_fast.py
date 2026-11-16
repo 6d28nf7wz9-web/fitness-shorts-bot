@@ -33,12 +33,40 @@ def _ordered_keywords(scene):
     return keywords
 
 
-def _render_science_fallback(output_file, seconds):
-    """Create a clean branded-safe canvas when no genuinely relevant stock exists.
+def _validate_rendered_video(path, expected_seconds):
+    """Validate the actual MP4 streams; file size alone is not a validity test."""
+    if not os.path.isfile(path) or os.path.getsize(path) <= 0:
+        raise RuntimeError("FFmpeg did not create a non-empty science fallback")
 
-    HyperFrames supplies the scene-specific diagram and typography later; this
-    clip is deliberately neutral rather than substituting unrelated footage.
-    """
+    probe = subprocess.run(
+        [
+            "ffprobe", "-v", "error", "-show_entries",
+            "format=duration:stream=codec_type,width,height",
+            "-of", "json", path,
+        ],
+        check=True, capture_output=True, text=True,
+    )
+    try:
+        metadata = json.loads(probe.stdout or "{}")
+        streams = metadata.get("streams", [])
+        video = next(
+            (stream for stream in streams if stream.get("codec_type") == "video"),
+            None,
+        )
+        duration = float(metadata.get("format", {}).get("duration", 0))
+    except (TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise RuntimeError("FFprobe returned invalid science fallback metadata") from exc
+
+    if not video or not video.get("width") or not video.get("height"):
+        raise RuntimeError("Science fallback has no valid video stream")
+    if duration <= 0 or abs(duration - float(expected_seconds)) > max(1.0, expected_seconds * 0.15):
+        raise RuntimeError(
+            f"Science fallback duration mismatch: expected {expected_seconds}s, got {duration}s"
+        )
+
+
+def _render_science_fallback(output_file, seconds):
+    """Render a neutral vertical bridge; HyperFrames adds scene-specific graphics."""
     os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
     temp_file = output_file + ".tmp.mp4"
     try:
@@ -52,13 +80,16 @@ def _render_science_fallback(output_file, seconds):
                 "drawbox=x=70:y=90:w=940:h=1740:color=0x72e6c2@0.10:t=3,"
                 "format=yuv420p",
                 "-an", "-c:v", "libx264", "-preset", "veryfast",
-                "-crf", "22", "-movflags", "+faststart", temp_file,
+                "-crf", "22", "-pix_fmt", "yuv420p",
+                "-movflags", "+faststart", temp_file,
             ],
             check=True,
         )
-        if not os.path.isfile(temp_file) or os.path.getsize(temp_file) < 10000:
-            raise RuntimeError("FFmpeg did not create a valid science fallback")
+        _validate_rendered_video(temp_file, seconds)
         os.replace(temp_file, output_file)
+    except subprocess.CalledProcessError as exc:
+        detail = (exc.stderr or b"") if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+        raise RuntimeError(f"Science fallback FFmpeg/FFprobe failed: {str(detail)[:500]}") from exc
     finally:
         if os.path.exists(temp_file):
             os.remove(temp_file)
