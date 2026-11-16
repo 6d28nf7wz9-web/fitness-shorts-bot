@@ -80,7 +80,9 @@ def build_report(memory):
             f"{_number(stats.get('average_view_percentage'))}% | "
             f"{_number(stats.get('subscribers_gained'), 0)} | {hook} |"
         )
-    if not ranked:
+    if not videos:
+        lines.append("| No synced video data yet | — | — | — | — | — |")
+    elif not ranked:
         lines.append("| No videos passed the minimum sample (50 views, 15 engaged views) | — | — | — | — | — |")
 
     lines += ["", "## Topic signals", ""]
