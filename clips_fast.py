@@ -183,91 +183,61 @@ def main():
         try:
             for part_index in range(parts):
                 keyword = "|".join(keywords)
-
                 query, hit, url, portrait = choose_clip(
-                    keyword,
-                    each,
-                    used_ids,
-                    context=narration,
+                    keyword, each, used_ids, context=narration
+                )
+                clip_id = hit.get("id")
+                raw_file = os.path.join(
+                    RAW_DIR, f"s{scene_index}_{part_index}.mp4"
+                )
+                part_file = os.path.join(
+                    CLIPS_DIR, f"s{scene_index}_{part_index}.mp4"
                 )
 
-            clip_id = hit.get("id")
+                try:
+                    download(url, raw_file)
+                    if str(clip_id or "").startswith("coverr:"):
+                        from stock_sources import track_coverr_download
+                        track_coverr_download(str(clip_id).split(":", 1)[1])
 
-            raw_file = os.path.join(
-                RAW_DIR,
-                f"s{scene_index}_{part_index}.mp4"
-            )
+                    wan_file = try_animate_stock(raw_file, scene, each, part_file)
+                    if wan_file:
+                        try:
+                            process(wan_file, part_file, each, portrait)
+                        finally:
+                            if os.path.exists(wan_file):
+                                os.remove(wan_file)
+                        clip_source = "stock+wan"
+                    else:
+                        process(raw_file, part_file, each, portrait)
+                        clip_source = "stock"
 
-            part_file = os.path.join(
-                CLIPS_DIR,
-                f"s{scene_index}_{part_index}.mp4"
-            )
+                    if clip_id is not None:
+                        used_ids.add(clip_id)
+                finally:
+                    if os.path.exists(raw_file):
+                        os.remove(raw_file)
 
-            try:
-                download(url, raw_file)
+                part_files.append(part_file)
+                scene_clips.append({
+                    "source": clip_source,
+                    "query": query,
+                    "keyword": keyword,
+                    "pixabay_id": clip_id,
+                    "page": hit.get("pageURL"),
+                    "author": hit.get("user"),
+                    "tags": hit.get("tags"),
+                    "orientation": "vertical" if portrait else "wide_blur_fit",
+                    "seconds": round(each, 2),
+                })
 
-                if str(clip_id or "").startswith("coverr:"):
-                    from stock_sources import track_coverr_download
-                    track_coverr_download(str(clip_id).split(":", 1)[1])
-
-                # Wan may enhance one selected stock segment, using a frame
-                # from that exact Coverr/Pixabay result as its visual reference.
-                # If disabled or unsuccessful, the original stock segment is used.
-                wan_file = try_animate_stock(raw_file, scene, each, part_file)
-                if wan_file:
-                    try:
-                        process(wan_file, part_file, each, portrait)
-                    finally:
-                        if os.path.exists(wan_file):
-                            os.remove(wan_file)
-                    clip_source = "stock+wan"
-                else:
-                    process(raw_file, part_file, each, portrait)
-                    clip_source = "stock"
-
-                if clip_id is not None:
-                    used_ids.add(clip_id)
-
-            finally:
-                if os.path.exists(raw_file):
-                    os.remove(raw_file)
-
-            part_files.append(part_file)
-
-            scene_clips.append({
-                "source": clip_source,
-                "query": query,
-                "keyword": keyword,
-                "pixabay_id": clip_id,
-                "page": hit.get("pageURL"),
-                "author": hit.get("user"),
-                "tags": hit.get("tags"),
-                "orientation": (
-                    "vertical"
-                    if portrait
-                    else "wide_blur_fit"
-                ),
-                "seconds": round(each, 2),
-            })
-
-            kind = (
-                "vertical"
-                if portrait
-                else "wide (blur-fit)"
-            )
-
-            print(
-                f"  cut {part_index + 1}: "
-                f"'{query}' -> {kind}, id {clip_id}"
-            )
-
+                kind = "vertical" if portrait else "wide (blur-fit)"
                 print(
-                    f"    tags: "
-                    f"{str(hit.get('tags', ''))[:120]}"
+                    f"  cut {part_index + 1}: '{query}' -> {kind}, id {clip_id}"
                 )
+                print(f"    tags: {str(hit.get('tags', ''))[:120]}")
 
             _concat_parts(part_files, output_file, scene_index)
-
             info.append({
                 "scene": scene_index,
                 "source": "stock",
