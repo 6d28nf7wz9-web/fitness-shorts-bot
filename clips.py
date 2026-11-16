@@ -111,8 +111,13 @@ def keyword_variants(keyword, context=""):
         if phrase and len(phrase.split()) <= 4 and keyword_is_relevant(phrase):
             variants.append(phrase)
 
-    for value in (keyword, context):
-        variants.extend(fallbacks_for(value))
+    # Prefer the scene-authored search targets. Broad category fallbacks
+    # (for example "healthy food") can return visually unrelated clips and
+    # must not compete with specific targets such as "barbell plates".
+    # Use category fallbacks only when the scene supplied no usable target.
+    if not variants:
+        for value in (keyword, context):
+            variants.extend(fallbacks_for(value))
 
     seen, result = set(), []
     for term in variants:
