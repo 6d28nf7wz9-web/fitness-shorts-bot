@@ -85,6 +85,30 @@ def build_report(memory):
     elif not ranked:
         lines.append("| No videos passed the minimum sample (50 views, 15 engaged views) | — | — | — | — | — |")
 
+    # First-week comparison only uses fully completed seven-day windows.
+    first_week = memory.get("first_week_analytics", {}).get("videos", {})
+    complete = []
+    for video_id, fw in first_week.items():
+        if not isinstance(fw, dict) or not fw.get("first_7_days_complete"):
+            continue
+        views7 = int(fw.get("views_first_7_days", 0) or 0)
+        engaged7 = int(fw.get("engaged_views_first_7_days", 0) or 0)
+        retention7 = float(fw.get("average_view_percentage_first_7_days", 0) or 0)
+        item = metadata.get(video_id, {})
+        complete.append((video_id, item, fw, views7, engaged7, retention7))
+    complete.sort(key=lambda row: (row[5], row[4], row[3]), reverse=True)
+    lines += ["", "## First 7 days — completed windows only", ""]
+    if complete:
+        lines += ["| Video/topic | Views (7d) | Engaged (7d) | Avg viewed |", "|---|---:|---:|---:|"]
+        for video_id, item, fw, views7, engaged7, retention7 in complete[:10]:
+            label = item.get("topic") or item.get("title") or video_id
+            lines.append(f"| {label} | {views7} | {engaged7} | {retention7:.1f}% |")
+    else:
+        lines.append("- No fully completed 7-day windows in this sync; newer uploads are intentionally excluded.")
+    partial = sum(1 for fw in first_week.values() if isinstance(fw, dict) and not fw.get("first_7_days_complete"))
+    if partial:
+        lines.append(f"- {partial} additional uploads have incomplete windows and are not ranked.")
+
     lines += ["", "## Topic signals", ""]
     topics = [
         row for row in memory.get("topic_insights", [])
