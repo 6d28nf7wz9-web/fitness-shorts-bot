@@ -100,14 +100,14 @@ def keyword_variants(keyword, context=""):
     """Build short, searchable phrases; never send full narration sentences to APIs."""
     variants = []
     for term in str(keyword or "").split("|"):
-        term = re.sub(r"\\s+", " ", term).strip(" ,.;:-")
+        term = re.sub(r"\s+", " ", term).strip(" ,.;:-")
         # Search APIs work best with concise phrases; discard sentence-length prompts.
         if term and len(term.split()) <= 5 and keyword_is_relevant(term):
             variants.append(term)
 
     # Context contributes only short authored phrases, never the complete narration.
     for phrase in re.split(r"[,;.!?:]+", str(context or "")):
-        phrase = re.sub(r"\\s+", " ", phrase).strip(" ,.;:-")
+        phrase = re.sub(r"\s+", " ", phrase).strip(" ,.;:-")
         if phrase and len(phrase.split()) <= 4 and keyword_is_relevant(phrase):
             variants.append(phrase)
 
