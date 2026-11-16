@@ -33,6 +33,37 @@ def _ordered_keywords(scene):
     return keywords
 
 
+def _render_science_fallback(output_file, seconds):
+    """Create a clean branded-safe canvas when no genuinely relevant stock exists.
+
+    HyperFrames supplies the scene-specific diagram and typography later; this
+    clip is deliberately neutral rather than substituting unrelated footage.
+    """
+    os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
+    temp_file = output_file + ".tmp.mp4"
+    try:
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-f", "lavfi", "-i",
+                "color=c=0x07111d:s=1080x1920:r=30",
+                "-t", str(seconds),
+                "-vf",
+                "drawbox=x=70:y=90:w=940:h=1740:color=0x72e6c2@0.10:t=3,"
+                "format=yuv420p",
+                "-an", "-c:v", "libx264", "-preset", "veryfast",
+                "-crf", "22", "-movflags", "+faststart", temp_file,
+            ],
+            check=True,
+        )
+        if not os.path.isfile(temp_file) or os.path.getsize(temp_file) < 10000:
+            raise RuntimeError("FFmpeg did not create a valid science fallback")
+        os.replace(temp_file, output_file)
+    finally:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
+
 def _concat_parts(part_files, output_file, scene_index):
     """Concatenate video segments into one scene video."""
     if not part_files:
@@ -149,15 +180,16 @@ def main():
         part_files = []
         scene_clips = []
 
-        for part_index in range(parts):
-            keyword = "|".join(keywords)
+        try:
+            for part_index in range(parts):
+                keyword = "|".join(keywords)
 
-            query, hit, url, portrait = choose_clip(
-                keyword,
-                each,
-                used_ids,
-                context=narration,
-            )
+                query, hit, url, portrait = choose_clip(
+                    keyword,
+                    each,
+                    used_ids,
+                    context=narration,
+                )
 
             clip_id = hit.get("id")
 
@@ -229,30 +261,45 @@ def main():
                 f"'{query}' -> {kind}, id {clip_id}"
             )
 
+                print(
+                    f"    tags: "
+                    f"{str(hit.get('tags', ''))[:120]}"
+                )
+
+            _concat_parts(part_files, output_file, scene_index)
+
+            info.append({
+                "scene": scene_index,
+                "source": "stock",
+                "narration": narration,
+                "keywords": keywords,
+                "file": output_file,
+                "seconds": seconds,
+                "clips": scene_clips,
+                "pixabay_ids": [clip["pixabay_id"] for clip in scene_clips],
+            })
+        except RuntimeError as exc:
+            if "No specific footage match" not in str(exc):
+                raise
             print(
-                f"    tags: "
-                f"{str(hit.get('tags', ''))[:120]}"
+                f"  No verified stock match for scene {scene_index}; "
+                "using a clean science-visual canvas instead."
             )
-
-        _concat_parts(
-            part_files,
-            output_file,
-            scene_index,
-        )
-
-        info.append({
-            "scene": scene_index,
-            "source": "stock",
-            "narration": narration,
-            "keywords": keywords,
-            "file": output_file,
-            "seconds": seconds,
-            "clips": scene_clips,
-            "pixabay_ids": [
-                clip["pixabay_id"]
-                for clip in scene_clips
-            ],
-        })
+            for path in part_files:
+                if os.path.exists(path):
+                    os.remove(path)
+            _render_science_fallback(output_file, seconds)
+            info.append({
+                "scene": scene_index,
+                "source": "science_visual",
+                "narration": narration,
+                "keywords": keywords,
+                "file": output_file,
+                "seconds": seconds,
+                "clips": [],
+                "pixabay_ids": [],
+                "fallback_reason": "No semantically verified stock footage",
+            })
 
     with open(
         "output/clips_info.json",
