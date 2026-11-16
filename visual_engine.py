@@ -27,14 +27,24 @@ RULES = [
 
 
 def classify_scene(scene):
-    """Classify from authored scene intent first; broad stock-search keywords are fallback only."""
-    for group in (("visual_title", "visual_subtitle"), ("narration",), ("keyword",)):
-        source = " ".join(str(scene.get(k, "")) for k in group).lower()
+    """Use visible scene intent before narration so one topic cannot dominate every panel."""
+    visual_sources = (
+        " ".join(str(scene.get(k, "")) for k in ("visual_title", "visual_subtitle")),
+        str(scene.get("keyword", "")),
+    )
+    for source in visual_sources:
+        source = source.lower()
         for category, pattern in RULES:
             if re.search(pattern, source):
                 return category
-    return "general"
 
+    # Narration is fallback only; a related term such as creatine must not
+    # override a visible scene specifically about loading or repetitions.
+    source = str(scene.get("narration", "")).lower()
+    for category, pattern in RULES:
+        if re.search(pattern, source):
+            return category
+    return "general"
 
 
 def _label(value, fallback, limit=22):
