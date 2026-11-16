@@ -20,6 +20,7 @@ jobs:
       YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+      EXPECTED_YOUTUBE_CHANNEL_ID: UC9t30aJ_9gSxrNaBhFvRnEg
       ANALYTICS_WINDOW_DAYS: "28"
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +36,7 @@ jobs:
         run: python analytics_sync.py
       - name: Build growth report from fresh analytics
         run: python growth_report.py
-      - name: Build monetization progress report
+      - name: Build monetization progress report (verify Fit Fuel channel identity)
         run: python monetization_report.py
       - name: Upload growth report for review
         if: always()
