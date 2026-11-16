@@ -50,6 +50,17 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertEqual(classify_scene({"narration": "Insulin is a hormone signal"}), "hormones")
         self.assertEqual(classify_scene({"narration": "Calories determine energy balance"}), "fat_loss")
 
+    def test_muscle_fiber_is_not_misclassified_as_dietary_fiber(self):
+        category, panel = build_visual_panel({
+            "narration": "Even creatine needs progressive overload for significant real gains.",
+            "keyword": "muscle cross-section|gym workout|weight training",
+            "visual_title": "Muscle Hypertrophy",
+            "visual_subtitle": "Significant fiber growth",
+        }, 4)
+        self.assertEqual(category, "muscle")
+        self.assertIn("MUSCLE FIBER ADAPTATION", panel)
+        self.assertNotIn("NUTRIENT PATHWAY", panel)
+
     def test_each_topic_has_distinct_visual_metaphor(self):
         cases = {
             "muscle": "Muscle fibers adapt to mechanical tension",
