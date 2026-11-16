@@ -33,6 +33,8 @@ jobs:
         run: python growth_report.py
       - name: Sync video analytics
         run: python analytics_sync.py
+      - name: Build growth report from fresh analytics
+        run: python growth_report.py
       - name: Build monetization progress report
         run: python monetization_report.py
       - name: Upload growth report for review
