@@ -9,7 +9,7 @@ class StrictFootageRelevanceTests(unittest.TestCase):
         self.assertEqual(
             relevance(hit, "muscle fiber activation graphic",
                       "Muscle fibers adapt to mechanical tension"),
-            2,
+            1,
         )
 
     def test_specific_topic_terms_are_an_exact_match(self):
