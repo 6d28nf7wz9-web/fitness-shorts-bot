@@ -123,3 +123,12 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_science_scene_background_never_uses_unmatched_stock_clip(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        self.assertIn('class="scene-bg clip"', renderer)
+        self.assertIn('category, science_panel = build_visual_panel(scene, i)', renderer)
+        self.assertNotIn('src="assets/scene_{i}.mp4"', renderer)
+        self.assertIn(".scene-bg", renderer)
