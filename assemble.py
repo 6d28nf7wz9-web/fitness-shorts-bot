@@ -87,23 +87,42 @@ def build_captions(script, audio):
     return "\n".join(lines) + "\n"
 
 
+def validate_preflight(scenes, audio, hyperframes_enabled=True, root="."):
+    """Validate required inputs for the selected renderer.
+
+    HyperFrames builds scene-specific motion graphics itself, so it must not
+    require legacy FFmpeg scene clip files. The legacy concat renderer does.
+    """
+    if not scenes or len(scenes) != len(audio):
+        raise SystemExit(
+            f"Preflight failed: {len(scenes)} script scenes but {len(audio)} audio files"
+        )
+
+    for i, item in enumerate(audio, 1):
+        voice = item.get("file", "")
+        voice_path = os.path.join(root, voice) if voice and not os.path.isabs(voice) else voice
+        if not voice_path or not os.path.isfile(voice_path) or os.path.getsize(voice_path) < 10000:
+            raise SystemExit(f"Preflight failed: missing or invalid audio file: {voice}")
+        if item.get("scene") != i or float(item.get("seconds", 0)) <= 0:
+            raise SystemExit(f"Preflight failed: invalid audio metadata for scene {i}")
+
+        if not hyperframes_enabled:
+            clip = os.path.join(root, "output", "clips", f"scene_{i}.mp4")
+            if not os.path.isfile(clip) or os.path.getsize(clip) < 10000:
+                raise SystemExit(f"Preflight failed: missing or invalid file: {clip}")
+
+    mode = "audio assets (HyperFrames renders visuals)" if hyperframes_enabled else "legacy scene clips and audio"
+    print(f"Preflight passed: {len(scenes)} scenes, verified {mode}.")
+
+
 def main():
     with open("output/script.json", encoding="utf-8") as f:
         script = json.load(f)
     with open("output/audio_info.json", encoding="utf-8") as f:
         audio = json.load(f)
     scenes = script.get("scenes", [])
-    if not scenes or len(scenes) != len(audio):
-        raise SystemExit(f"Preflight failed: {len(scenes)} script scenes but {len(audio)} audio files")
-    for i, item in enumerate(audio, 1):
-        clip = f"output/clips/scene_{i}.mp4"
-        voice = item.get("file", "")
-        for path in (clip, voice):
-            if not path or not os.path.isfile(path) or os.path.getsize(path) < 10000:
-                raise SystemExit(f"Preflight failed: missing or invalid file: {path}")
-        if item.get("scene") != i or item.get("seconds", 0) <= 0:
-            raise SystemExit(f"Preflight failed: invalid audio metadata for scene {i}")
-    print(f"Preflight passed: {len(scenes)} scenes, all clips and audio files verified.")
+    hyperframes_enabled = os.getenv("HYPERFRAMES_RENDER", "1").lower() not in ("0", "false", "no", "off")
+    validate_preflight(scenes, audio, hyperframes_enabled=hyperframes_enabled)
 
     n = len(audio)
     secs = [float(a["seconds"]) for a in audio]
@@ -166,4 +185,5 @@ def main():
         print("Warning: longer than 58 seconds. Shorts must be under 60.")
 
 
-main()
+if __name__ == "__main__":
+    main()
