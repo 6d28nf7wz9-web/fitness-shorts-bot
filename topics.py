@@ -39,10 +39,19 @@ def _words(text):
 
 
 def similarity(a, b):
+    """Measure semantic overlap without false positives from shared short phrases.
+
+    Character-level similarity is useful for reordered/near-identical titles,
+    but can over-penalize distinct angles that share a phrase (e.g. supplements
+    vs. tracking progressive overload). Require meaningful token overlap before
+    allowing it to raise the score; token Jaccard remains the reliable baseline.
+    """
     ratio = difflib.SequenceMatcher(None, a.lower().strip(), b.lower().strip()).ratio()
     wa, wb = _words(a), _words(b)
     overlap = len(wa & wb) / len(wa | wb) if wa and wb else 0.0
-    return max(ratio, overlap)
+    if overlap >= 0.55:
+        return max(ratio, overlap)
+    return overlap
 
 
 def too_similar(topic, used, threshold=THRESHOLD):
