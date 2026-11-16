@@ -139,8 +139,8 @@ def main():
                 f'data-duration="{enddur}" data-track-index="0"></div>'
             )
         category, science_panel = build_visual_panel(scene, i)
-        kinetic = kinetic_html(scene.get('narration', ''), category, dur, scene.get('word_timings'))
-        sound_cues.extend(sound_cue_events(scene.get('narration', ''), category, dur, scene.get('word_timings'), cursor))
+        kinetic = kinetic_html(scene.get('narration', ''), category, dur, meta.get('word_timings'))
+        sound_cues.extend(sound_cue_events(scene.get('narration', ''), category, dur, meta.get('word_timings'), cursor))
         presenter = presenter_html()
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         blocks.append(f"""
