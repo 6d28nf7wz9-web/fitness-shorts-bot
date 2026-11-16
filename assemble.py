@@ -160,6 +160,33 @@ def main():
         cmd += ["-i", item["file"]]
     cmd += ["-stream_loop", "-1", "-i", music]
 
+    # Sparse, narration-aligned tactile cues; never compete with the voice.
+    cue_path = "output/hyperframes/sound_cues.json"
+    sfx_path = "output/motion_sfx.wav"
+    sfx_ready = False
+    if visual and os.path.isfile(cue_path):
+        try:
+            with open(cue_path, encoding="utf-8") as f:
+                cues = json.load(f)
+        except (OSError, ValueError):
+            cues = []
+        cues = [x for x in cues if 0 <= float(x.get("time", -1)) < total]
+        if cues:
+            sfx_cmd = ["ffmpeg", "-y", "-loglevel", "error"]
+            sfx_filters, sfx_labels = [], []
+            for idx, cue in enumerate(cues):
+                kind = cue.get("kind")
+                freq, dur, gain = (360, .16, .045) if kind == "scene_whoosh" else (1320, .065, .075)
+                sfx_cmd += ["-f", "lavfi", "-i", f"sine=frequency={freq}:duration={dur}:sample_rate=44100"]
+                delay = max(0, int(float(cue["time"]) * 1000))
+                sfx_filters.append(f"[{idx}:a]volume={gain},adelay={delay}|{delay}[s{idx}]")
+                sfx_labels.append(f"[s{idx}]")
+            sfx_filters.append("".join(sfx_labels) + f"amix=inputs={len(cues)}:duration=longest:normalize=0,apad,atrim=0:{total}[sfx]")
+            sfx_cmd += ["-filter_complex", ";".join(sfx_filters), "-map", "[sfx]", "-c:a", "pcm_s16le", sfx_path]
+            subprocess.run(sfx_cmd, check=True)
+            cmd += ["-i", sfx_path]
+            sfx_ready = True
+
     parts = []
     if visual:
         parts.append(f"[0:v]ass={ASS_FILE}[v]")
@@ -175,7 +202,12 @@ def main():
     parts.append("".join(f"[a{i}]" for i in range(n)) + f"concat=n={n}:v=0:a=1[voice]")
     fade_start = max(total - 1.2, 0)
     parts.append(f"[{music_index}:a]atrim=0:{total},asetpts=PTS-STARTPTS,aresample=44100,aformat=channel_layouts=stereo,volume={MUSIC_VOLUME},afade=t=in:d=0.5,afade=t=out:st={fade_start}:d=1.2[mus]")
-    parts.append("[voice][mus]amix=inputs=2:duration=first:dropout_transition=0,volume=2,alimiter=limit=0.95[aout]")
+    if sfx_ready:
+        sfx_index = music_index + 1
+        parts.append(f"[{sfx_index}:a]volume=0.7[sfx]")
+        parts.append("[voice][mus][sfx]amix=inputs=3:duration=first:dropout_transition=0,volume=2,alimiter=limit=0.95[aout]")
+    else:
+        parts.append("[voice][mus]amix=inputs=2:duration=first:dropout_transition=0,volume=2,alimiter=limit=0.95[aout]")
     cmd += ["-filter_complex", ";".join(parts), "-map", "[v]", "-map", "[aout]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", str(total), FINAL]
     print("Final mux: HyperFrames visuals + scene-timed voice + safe word captions + music")
     subprocess.run(cmd, check=True)
