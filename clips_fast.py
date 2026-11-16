@@ -21,8 +21,8 @@ MIN_PARTS = 1
 def sentence_contexts(narration, count):
     """Distribute sentence-sized narration context across B-roll cuts."""
     sentences = [
-        re.sub(r"\\s+", " ", item).strip()
-        for item in re.split(r"(?<=[.!?])\\s+", str(narration or ""))
+        re.sub(r"\s+", " ", item).strip()
+        for item in re.split(r"(?<=[.!?])\s+", str(narration or ""))
         if item.strip()
     ]
     if not sentences:
