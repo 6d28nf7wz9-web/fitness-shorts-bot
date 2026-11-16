@@ -96,17 +96,29 @@ def pick_file(hit):
 
 
 def keyword_variants(keyword, context=""):
-    variants=[]
-    for value in (keyword, context):
-        for term in str(value or "").split("|"):
-            term=term.strip()
-            if term and keyword_is_relevant(term): variants.append(term)
+    """Build short, searchable phrases; never send full narration sentences to APIs."""
+    variants = []
+    for term in str(keyword or "").split("|"):
+        term = re.sub(r"\\s+", " ", term).strip(" ,.;:-")
+        # Search APIs work best with concise phrases; discard sentence-length prompts.
+        if term and len(term.split()) <= 5 and keyword_is_relevant(term):
+            variants.append(term)
+
+    # Context contributes only short authored phrases, never the complete narration.
+    for phrase in re.split(r"[,;.!?:]+", str(context or "")):
+        phrase = re.sub(r"\\s+", " ", phrase).strip(" ,.;:-")
+        if phrase and len(phrase.split()) <= 4 and keyword_is_relevant(phrase):
+            variants.append(phrase)
+
     for value in (keyword, context):
         variants.extend(fallbacks_for(value))
-    seen=set(); result=[]
+
+    seen, result = set(), []
     for term in variants:
-        key=term.lower().strip()
-        if key and key not in seen: seen.add(key); result.append(term)
+        key = term.lower().strip()
+        if key and key not in seen:
+            seen.add(key)
+            result.append(term)
     return result
 
 
