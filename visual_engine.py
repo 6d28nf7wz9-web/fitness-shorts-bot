@@ -18,8 +18,9 @@ RULES = [
     ("heart", r"\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\b"),
     ("hormones", r"\b(?:hormone\w*|insulin|cortisol|testosterone|estrogen|ghrelin|leptin|receptor|thyroid)\b"),
     ("fat_loss", r"\b(?:fat loss|fat gain|calorie\w*|energy balance|burn fat|weight loss|calorie deficit)\b"),
-    ("nutrition", r"\b(?:food|meal|nutrition|digest\w*|absorption|fiber|carbohydrate\w*|protein intake|nutrient\w*)\b"),
-    ("muscle", r"\b(?:muscle\w*|hypertrophy|strength|progressive overload|protein synthesis|muscle recovery)\b"),
+    # Muscle must precede nutrition: "muscle fiber" is anatomy, not dietary fiber.
+    ("muscle", r"\b(?:muscle\w*|muscle fiber\w*|hypertrophy|strength|progressive overload|protein synthesis|muscle recovery)\b"),
+    ("nutrition", r"\b(?:food|meal|nutrition|digest\w*|absorption|dietary fiber|carbohydrate\w*|protein intake|nutrient\w*)\b"),
     ("exercise", r"\b(?:exercise|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\b"),
 ]
 
