@@ -40,10 +40,10 @@ def _svg(category, labels):
       <path class="orbit orbit-a" d="M90 215 C170 30 590 30 670 215 C590 400 170 400 90 215Z"/>
       <path class="orbit orbit-b" d="M130 215 C220 80 540 80 630 215 C540 350 220 350 130 215Z"/>
       <path class="flow-line" d="M170 215 H590"/>
-      <g class="node node-left"><circle cx="170" cy="215" r="58"/><circle cx="170" cy="215" r="43" class="node-core"/><text x="170" y="221">\${safe[0]}</text></g>
+      <g class="node node-left"><circle cx="170" cy="215" r="58"/><circle cx="170" cy="215" r="43" class="node-core"/><text x="170" y="221">${safe[0]}</text></g>
       <g class="node node-center"><circle cx="380" cy="215" r="76"/><circle cx="380" cy="215" r="58" class="node-core"/><path d="M350 215 l20 20 42 -48" class="check"/></g>
-      <g class="node node-right"><circle cx="590" cy="215" r="58"/><circle cx="590" cy="215" r="43" class="node-core"/><text x="590" y="221">\${safe[2]}</text></g>
-      <text class="micro-label" x="380" y="345">\${safe[1]}</text>
+      <g class="node node-right"><circle cx="590" cy="215" r="58"/><circle cx="590" cy="215" r="43" class="node-core"/><text x="590" y="221">${safe[2]}</text></g>
+      <text class="micro-label" x="380" y="345">${safe[1]}</text>
       <circle class="particle p1" cx="260" cy="110" r="6"/><circle class="particle p2" cx="500" cy="320" r="5"/><circle class="particle p3" cx="610" cy="105" r="4"/>
     </svg>"""
 
