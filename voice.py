@@ -52,9 +52,24 @@ async def try_voice(text, path, voice):
             rate=RATE,
         )
 
-        await asyncio.wait_for(
-            communicate.save(temp_path),
-            timeout=REQUEST_TIMEOUT,
+        async def stream_to_file():
+            boundaries = []
+            with open(temp_path, "wb") as audio_file:
+                async for chunk in communicate.stream():
+                    if chunk.get("type") == "audio":
+                        audio_file.write(chunk.get("data", b""))
+                    elif chunk.get("type") == "WordBoundary":
+                        # Edge TTS timestamps are 100-nanosecond ticks.
+                        boundaries.append({
+                            "text": str(chunk.get("text", "")),
+                            "start": float(chunk.get("offset", 0)) / 10_000_000,
+                            "end": (float(chunk.get("offset", 0)) +
+                                    float(chunk.get("duration", 0))) / 10_000_000,
+                        })
+            return boundaries
+
+        word_timings = await asyncio.wait_for(
+            stream_to_file(), timeout=REQUEST_TIMEOUT
         )
 
         if not os.path.exists(temp_path):
