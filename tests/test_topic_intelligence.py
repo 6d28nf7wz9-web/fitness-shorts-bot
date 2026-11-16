@@ -1,6 +1,7 @@
 """Tests for analytics-driven topic and hook recommendations."""
 import unittest
 from topic_intelligence import recommend_topics, hook_learning, _mature_video_rows
+from topics import similarity, too_similar
 
 
 class TopicIntelligenceTests(unittest.TestCase):
@@ -36,6 +37,12 @@ class TopicIntelligenceTests(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         self.assertIn(rows[0]["pattern"], ("specific curiosity question", "direct challenge or mistake correction"))
         self.assertGreaterEqual(rows[0]["views"], 25)
+
+    def test_duplicate_guard_distinguishes_shared_phrase_from_same_topic(self):
+        old = ["Tracking Progressive Overload"]
+        self.assertFalse(too_similar("Can Supplements Replace Progressive Overload?", old, threshold=0.68))
+        self.assertTrue(too_similar("Progressive Overload Tracking", old, threshold=0.68))
+        self.assertGreater(similarity("Progressive Overload Tracking", old[0]), 0.68)
 
     def test_empty_memory_returns_exploration_candidates(self):
         rows = recommend_topics({})

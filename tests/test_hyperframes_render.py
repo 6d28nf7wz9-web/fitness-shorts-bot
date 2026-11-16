@@ -44,25 +44,91 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn('HYPERFRAMES_RENDER: "1"', workflow)
         self.assertNotIn(r"public\n", workflow)
 
-
     def test_scene_visuals_classify_common_fitness_topics(self):
         self.assertEqual(classify_scene({"narration": "Water improves hydration"}), "hydration")
         self.assertEqual(classify_scene({"narration": "Protein supports muscle growth"}), "muscle")
         self.assertEqual(classify_scene({"narration": "Insulin is a hormone signal"}), "hormones")
+        self.assertEqual(classify_scene({"narration": "Calories determine energy balance"}), "fat_loss")
 
-    def test_visual_panel_is_scene_specific_and_animated(self):
-        category, panel = build_visual_panel({"narration": "Heart rate and blood flow deliver oxygen"}, 3)
-        self.assertEqual(category, "heart")
-        self.assertIn('data-scene="3"', panel)
-        self.assertIn("CARDIOVASCULAR", panel)
-        self.assertIn("science-svg", panel)
-        self.assertIn("@keyframes orbit-dash", visual_css())
+    def test_scene_title_overrides_broad_search_keyword(self):
+        category, _ = build_visual_panel({
+            "keyword": "gym workout|weight training|muscle",
+            "visual_title": "Supplement Boost",
+            "visual_subtitle": "Small effect on muscle",
+            "narration": "Creatine can have a small effect when training is consistent.",
+        })
+        self.assertEqual(category, "supplements")
 
-    def test_visual_panel_escapes_dynamic_text(self):
-        category, panel = build_visual_panel({"narration": "<script> muscle recovery"})
+    def test_muscle_title_overrides_nutrition_terms_in_narration(self):
+        category, _ = build_visual_panel({
+            "keyword": "protein powder|healthy food|meal",
+            "visual_title": "Muscle Hypertrophy",
+            "visual_subtitle": "Significant fiber growth",
+            "narration": "Even creatine needs progressive overload for significant real gains.",
+        })
         self.assertEqual(category, "muscle")
+
+    def test_muscle_fiber_is_not_misclassified_as_dietary_fiber(self):
+        category, panel = build_visual_panel({
+            "narration": "Even creatine needs progressive overload for significant real gains.",
+            "keyword": "muscle cross-section|gym workout|weight training",
+            "visual_title": "Muscle Hypertrophy",
+            "visual_subtitle": "Significant fiber growth",
+        }, 4)
+        self.assertEqual(category, "muscle")
+        self.assertIn("MUSCLE FIBER ADAPTATION", panel)
+        self.assertNotIn("NUTRIENT PATHWAY", panel)
+
+    def test_each_topic_has_distinct_visual_metaphor(self):
+        cases = {
+            "muscle": "Muscle fibers adapt to mechanical tension",
+            "nutrition": "Food digestion and nutrient absorption",
+            "heart": "Heart pumps blood and oxygen",
+            "fat_loss": "Calorie deficit and fat loss",
+            "hydration": "Water and electrolyte balance",
+            "exercise": "Squat exercise and joint movement",
+            "hormones": "Insulin hormone receptor signaling",
+            "supplements": "Supplement dose and creatine evidence",
+        }
+        panels = {}
+        for expected, narration in cases.items():
+            category, panel = build_visual_panel({"narration": narration}, 7)
+            self.assertEqual(category, expected)
+            self.assertIn(f"panel-{expected}", panel)
+            self.assertIn('data-scene="7"', panel)
+            panels[expected] = panel
+        self.assertEqual(len(set(panels.values())), len(cases))
+        self.assertIn("fiber-group", panels["muscle"])
+        self.assertIn("heart-shape", panels["heart"])
+        self.assertIn("electrolytes", panels["hydration"])
+        self.assertIn("receptor", panels["hormones"])
+
+    def test_dynamic_scene_labels_are_escaped(self):
+        _, panel = build_visual_panel({
+            "narration": "Muscle recovery",
+            "visual_title": "<script>alert(1)</script>",
+            "visual_subtitle": "Repair & rebuild",
+        }, 4)
         self.assertNotIn("<script>", panel)
+        self.assertIn("&lt;script&gt;", panel)
+        self.assertIn("Repair &amp; rebuild", panel)
+
+    def test_svg_ids_are_unique_per_scene(self):
+        _, first = build_visual_panel({"narration": "Muscle growth"}, 1)
+        _, second = build_visual_panel({"narration": "Heart rate"}, 2)
+        self.assertIn('id="panelGlow1"', first)
+        self.assertIn('id="panelGlow2"', second)
+        self.assertIn("@keyframes heartbeat", visual_css())
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_science_scene_background_never_uses_unmatched_stock_clip(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        self.assertIn('class="scene-bg clip"', renderer)
+        self.assertIn('category, science_panel = build_visual_panel(scene, i)', renderer)
+        self.assertNotIn('src="assets/scene_{i}.mp4"', renderer)
+        self.assertIn(".scene-bg", renderer)

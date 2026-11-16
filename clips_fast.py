@@ -33,6 +33,37 @@ def _ordered_keywords(scene):
     return keywords
 
 
+def _render_science_fallback(output_file, seconds):
+    """Create a clean branded-safe canvas when no genuinely relevant stock exists.
+
+    HyperFrames supplies the scene-specific diagram and typography later; this
+    clip is deliberately neutral rather than substituting unrelated footage.
+    """
+    os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
+    temp_file = output_file + ".tmp.mp4"
+    try:
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-f", "lavfi", "-i",
+                "color=c=0x07111d:s=1080x1920:r=30",
+                "-t", str(seconds),
+                "-vf",
+                "drawbox=x=70:y=90:w=940:h=1740:color=0x72e6c2@0.10:t=3,"
+                "format=yuv420p",
+                "-an", "-c:v", "libx264", "-preset", "veryfast",
+                "-crf", "22", "-movflags", "+faststart", temp_file,
+            ],
+            check=True,
+        )
+        if not os.path.isfile(temp_file) or os.path.getsize(temp_file) < 10000:
+            raise RuntimeError("FFmpeg did not create a valid science fallback")
+        os.replace(temp_file, output_file)
+    finally:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
+
 def _concat_parts(part_files, output_file, scene_index):
     """Concatenate video segments into one scene video."""
     if not part_files:
@@ -149,110 +180,96 @@ def main():
         part_files = []
         scene_clips = []
 
-        for part_index in range(parts):
-            keyword = "|".join(keywords)
+        try:
+            for part_index in range(parts):
+                keyword = "|".join(keywords)
+                query, hit, url, portrait = choose_clip(
+                    keyword, each, used_ids, context=narration
+                )
+                clip_id = hit.get("id")
+                raw_file = os.path.join(
+                    RAW_DIR, f"s{scene_index}_{part_index}.mp4"
+                )
+                part_file = os.path.join(
+                    CLIPS_DIR, f"s{scene_index}_{part_index}.mp4"
+                )
 
-            query, hit, url, portrait = choose_clip(
-                keyword,
-                each,
-                used_ids,
-                context=narration,
-            )
+                try:
+                    download(url, raw_file)
+                    if str(clip_id or "").startswith("coverr:"):
+                        from stock_sources import track_coverr_download
+                        track_coverr_download(str(clip_id).split(":", 1)[1])
 
-            clip_id = hit.get("id")
+                    wan_file = try_animate_stock(raw_file, scene, each, part_file)
+                    if wan_file:
+                        try:
+                            process(wan_file, part_file, each, portrait)
+                        finally:
+                            if os.path.exists(wan_file):
+                                os.remove(wan_file)
+                        clip_source = "stock+wan"
+                    else:
+                        process(raw_file, part_file, each, portrait)
+                        clip_source = "stock"
 
-            raw_file = os.path.join(
-                RAW_DIR,
-                f"s{scene_index}_{part_index}.mp4"
-            )
+                    if clip_id is not None:
+                        used_ids.add(clip_id)
+                finally:
+                    if os.path.exists(raw_file):
+                        os.remove(raw_file)
 
-            part_file = os.path.join(
-                CLIPS_DIR,
-                f"s{scene_index}_{part_index}.mp4"
-            )
+                part_files.append(part_file)
+                scene_clips.append({
+                    "source": clip_source,
+                    "query": query,
+                    "keyword": keyword,
+                    "pixabay_id": clip_id,
+                    "page": hit.get("pageURL"),
+                    "author": hit.get("user"),
+                    "tags": hit.get("tags"),
+                    "orientation": "vertical" if portrait else "wide_blur_fit",
+                    "seconds": round(each, 2),
+                })
 
-            try:
-                download(url, raw_file)
+                kind = "vertical" if portrait else "wide (blur-fit)"
+                print(
+                    f"  cut {part_index + 1}: '{query}' -> {kind}, id {clip_id}"
+                )
+                print(f"    tags: {str(hit.get('tags', ''))[:120]}")
 
-                if str(clip_id or "").startswith("coverr:"):
-                    from stock_sources import track_coverr_download
-                    track_coverr_download(str(clip_id).split(":", 1)[1])
-
-                # Wan may enhance one selected stock segment, using a frame
-                # from that exact Coverr/Pixabay result as its visual reference.
-                # If disabled or unsuccessful, the original stock segment is used.
-                wan_file = try_animate_stock(raw_file, scene, each, part_file)
-                if wan_file:
-                    try:
-                        process(wan_file, part_file, each, portrait)
-                    finally:
-                        if os.path.exists(wan_file):
-                            os.remove(wan_file)
-                    clip_source = "stock+wan"
-                else:
-                    process(raw_file, part_file, each, portrait)
-                    clip_source = "stock"
-
-                if clip_id is not None:
-                    used_ids.add(clip_id)
-
-            finally:
-                if os.path.exists(raw_file):
-                    os.remove(raw_file)
-
-            part_files.append(part_file)
-
-            scene_clips.append({
-                "source": clip_source,
-                "query": query,
-                "keyword": keyword,
-                "pixabay_id": clip_id,
-                "page": hit.get("pageURL"),
-                "author": hit.get("user"),
-                "tags": hit.get("tags"),
-                "orientation": (
-                    "vertical"
-                    if portrait
-                    else "wide_blur_fit"
-                ),
-                "seconds": round(each, 2),
+            _concat_parts(part_files, output_file, scene_index)
+            info.append({
+                "scene": scene_index,
+                "source": "stock",
+                "narration": narration,
+                "keywords": keywords,
+                "file": output_file,
+                "seconds": seconds,
+                "clips": scene_clips,
+                "pixabay_ids": [clip["pixabay_id"] for clip in scene_clips],
             })
-
-            kind = (
-                "vertical"
-                if portrait
-                else "wide (blur-fit)"
-            )
-
+        except RuntimeError as exc:
+            if "No specific footage match" not in str(exc):
+                raise
             print(
-                f"  cut {part_index + 1}: "
-                f"'{query}' -> {kind}, id {clip_id}"
+                f"  No verified stock match for scene {scene_index}; "
+                "using a clean science-visual canvas instead."
             )
-
-            print(
-                f"    tags: "
-                f"{str(hit.get('tags', ''))[:120]}"
-            )
-
-        _concat_parts(
-            part_files,
-            output_file,
-            scene_index,
-        )
-
-        info.append({
-            "scene": scene_index,
-            "source": "stock",
-            "narration": narration,
-            "keywords": keywords,
-            "file": output_file,
-            "seconds": seconds,
-            "clips": scene_clips,
-            "pixabay_ids": [
-                clip["pixabay_id"]
-                for clip in scene_clips
-            ],
-        })
+            for path in part_files:
+                if os.path.exists(path):
+                    os.remove(path)
+            _render_science_fallback(output_file, seconds)
+            info.append({
+                "scene": scene_index,
+                "source": "science_visual",
+                "narration": narration,
+                "keywords": keywords,
+                "file": output_file,
+                "seconds": seconds,
+                "clips": [],
+                "pixabay_ids": [],
+                "fallback_reason": "No semantically verified stock footage",
+            })
 
     with open(
         "output/clips_info.json",

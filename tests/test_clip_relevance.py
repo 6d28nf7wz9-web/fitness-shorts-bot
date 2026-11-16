@@ -120,7 +120,7 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
                 )
         self.assertEqual(selected["id"], 9001)
 
-    def test_two_distinct_training_category_tags_allow_relevant_category_fallback(self):
+    def test_two_generic_training_tags_are_category_only_not_exact(self):
         generic_gym_hit = {
             "tags": "gym workout strength training fitness",
             "pageURL": "https://example.invalid/video/gym-training",
@@ -130,7 +130,7 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
             "athlete measuring health metrics|gym workout|weight training",
             "Stopping steroids never guarantees your natural testosterone returns.",
         )
-        self.assertEqual(score, 2)
+        self.assertEqual(score, 1)
 
     def test_single_ambiguous_training_tag_is_not_enough_for_category_fallback(self):
         ambiguous_hit = {
@@ -144,7 +144,7 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
         )
         self.assertLess(score, 2)
 
-    def test_choose_clip_uses_strong_category_fallback_when_exact_topic_is_unavailable(self):
+    def test_choose_clip_rejects_generic_category_fallback_by_default(self):
         gym_hit = make_hit(
             9102,
             "gym workout strength training fitness",
@@ -155,14 +155,44 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
 
         with patch("clips.search", side_effect=search_gym_fallback):
             with patch.dict(os.environ, {"ALLOW_CATEGORY_ONLY_CLIPS": "0"}):
+                with self.assertRaisesRegex(RuntimeError, "No specific footage match"):
+                    choose_clip(
+                        "athlete measuring health metrics|gym workout|weight training",
+                        2.5,
+                        set(),
+                        context="Stopping steroids never guarantees your natural testosterone returns.",
+                    )
+
+    def test_clip_reuse_is_rejected_by_default_when_no_unused_match_remains(self):
+        reused_hit = make_hit(9104, "muscle fiber anatomy activation")
+        with patch("clips.search", return_value=[reused_hit]):
+            with patch.dict(os.environ, {"ALLOW_REUSED_CLIPS": "0"}):
+                with self.assertRaisesRegex(RuntimeError, "refusing to reuse a clip"):
+                    choose_clip(
+                        "muscle fiber anatomy activation",
+                        2.5,
+                        {9104},
+                        context="Muscle fibers adapt to mechanical tension.",
+                    )
+
+    def test_category_fallback_requires_explicit_opt_in(self):
+        gym_hit = make_hit(
+            9103,
+            "gym workout strength training fitness",
+        )
+
+        def search_gym_fallback(query):
+            return [gym_hit] if query == "gym workout" else []
+
+        with patch("clips.search", side_effect=search_gym_fallback):
+            with patch.dict(os.environ, {"ALLOW_CATEGORY_ONLY_CLIPS": "1"}):
                 _, selected, _, _ = choose_clip(
                     "athlete measuring health metrics|gym workout|weight training",
                     2.5,
                     set(),
                     context="Stopping steroids never guarantees your natural testosterone returns.",
                 )
-
-        self.assertEqual(selected["id"], 9102)
+        self.assertEqual(selected["id"], 9103)
 
     def test_quality_gate_blocks_a_scene_when_every_cut_is_weak(self):
         scenes = [

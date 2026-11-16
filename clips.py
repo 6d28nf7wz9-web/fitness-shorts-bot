@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import re
 import shutil
 import subprocess
 import time
@@ -96,17 +97,34 @@ def pick_file(hit):
 
 
 def keyword_variants(keyword, context=""):
-    variants=[]
-    for value in (keyword, context):
-        for term in str(value or "").split("|"):
-            term=term.strip()
-            if term and keyword_is_relevant(term): variants.append(term)
-    for value in (keyword, context):
-        variants.extend(fallbacks_for(value))
-    seen=set(); result=[]
+    """Build short, searchable phrases; never send full narration sentences to APIs."""
+    variants = []
+    for term in str(keyword or "").split("|"):
+        term = re.sub(r"\s+", " ", term).strip(" ,.;:-")
+        # Search APIs work best with concise phrases; discard sentence-length prompts.
+        if term and len(term.split()) <= 5 and keyword_is_relevant(term):
+            variants.append(term)
+
+    # Context contributes only short authored phrases, never the complete narration.
+    for phrase in re.split(r"[,;.!?:]+", str(context or "")):
+        phrase = re.sub(r"\s+", " ", phrase).strip(" ,.;:-")
+        if phrase and len(phrase.split()) <= 4 and keyword_is_relevant(phrase):
+            variants.append(phrase)
+
+    # Prefer the scene-authored search targets. Broad category fallbacks
+    # (for example "healthy food") can return visually unrelated clips and
+    # must not compete with specific targets such as "barbell plates".
+    # Use category fallbacks only when the scene supplied no usable target.
+    if not variants:
+        for value in (keyword, context):
+            variants.extend(fallbacks_for(value))
+
+    seen, result = set(), []
     for term in variants:
-        key=term.lower().strip()
-        if key and key not in seen: seen.add(key); result.append(term)
+        key = term.lower().strip()
+        if key and key not in seen:
+            seen.add(key)
+            result.append(term)
     return result
 
 
@@ -164,8 +182,14 @@ def choose_clip(keyword, seconds, used_ids, context=""):
                 )
 
     if not candidates and reusable:
+        if os.getenv("ALLOW_REUSED_CLIPS", "0").lower() not in ("1", "true", "yes"):
+            raise RuntimeError(
+                "No unused scene-matched footage remains; refusing to reuse a clip "
+                "from another scene. Add more stock results or explicitly set "
+                "ALLOW_REUSED_CLIPS=1 for a non-production preview."
+            )
         candidates = reusable
-        print("  WARNING: Reusing relevant clips because no unused matches were found.")
+        print("  WARNING: Explicitly reusing a relevant clip; quality gate will flag cross-scene duplicates.")
 
     exact = [
         item for item in candidates.values()

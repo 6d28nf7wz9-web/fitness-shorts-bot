@@ -233,7 +233,12 @@ def search_stock_sources(query):
     if os.getenv("PEXELS_API_KEY"):
         print(f"  Pexels search: {query}")
         results.extend(_pexels(query))
-    if os.getenv("NASA_VIDEO_SEARCH", "0") == "1":
+    # NASA's archive is dominated by spacecraft, launches and astronomy.
+    # Never query it for ordinary fitness/nutrition scenes: lexical search can
+    # return technically related words but visually unrelated footage.
+    nasa_terms = {"space", "spacecraft", "planet", "earth", "moon", "mars", "astronomy", "nasa"}
+    query_terms = set(re.findall(r"[a-z]+", query.lower()))
+    if os.getenv("NASA_VIDEO_SEARCH", "0") == "1" and query_terms & nasa_terms:
         print(f"  NASA video search: {query}")
         results.extend(_nasa(query))
     results.extend(_local_mixkit_videvo(query))

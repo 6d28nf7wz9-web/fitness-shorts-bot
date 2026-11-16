@@ -34,6 +34,7 @@ def main():
     if len(str(script.get("title", ""))) > 60:
         errors.append("Title exceeds 60 characters")
 
+    used_clip_ids = {}
     if not os.path.exists(clip_path):
         warnings.append("Clip metadata not found yet; run clips_fast.py before this gate.")
     else:
@@ -42,11 +43,12 @@ def main():
         if len(clips) != len(scenes):
             errors.append(f"Clip scenes {len(clips)} != script scenes {len(scenes)}")
         for i, (scene, info) in enumerate(zip(scenes, clips), 1):
-            if info.get("source") == "i2v":
+            if info.get("source") in ("i2v", "science_visual"):
                 if not os.path.isfile(info.get("file", "")):
-                    errors.append(f"Scene {i}: AI video file is missing")
+                    errors.append(f"Scene {i}: generated visual file is missing")
                 else:
-                    print(f"Scene {i}: AI-generated visual; stock relevance check not applicable")
+                    label = "AI-generated visual" if info.get("source") == "i2v" else "safe science-visual fallback"
+                    print(f"Scene {i}: {label}; stock relevance check not applicable")
                 continue
             narration = str(scene.get("narration", ""))
             parts = info.get("clips", [])
@@ -55,19 +57,21 @@ def main():
                 continue
             weak = []
             for part in parts:
+                clip_id = part.get("pixabay_id")
+                if clip_id is not None:
+                    previous_scene = used_clip_ids.get(str(clip_id))
+                    if previous_scene is not None and previous_scene != i:
+                        errors.append(f"Scene {i}: footage clip {clip_id} is reused from scene {previous_scene}")
+                    else:
+                        used_clip_ids[str(clip_id)] = i
                 hit = {"tags": part.get("tags", ""), "pageURL": part.get("page", "")}
                 score = relevance(hit, part.get("keyword", ""), narration)
                 if score < 2:
                     weak.append(str(part.get("pixabay_id")))
-            if weak and len(weak) == len(parts):
+            if weak:
                 errors.append(
-                    f"Scene {i}: all {len(parts)} footage cuts lack a specific scene match "
-                    f"(IDs {', '.join(weak[:4])}); blocking upload"
-                )
-            elif weak:
-                warnings.append(
                     f"Scene {i}: {len(weak)}/{len(parts)} footage cuts lack a specific scene match "
-                    f"(IDs {', '.join(weak[:4])})"
+                    f"(IDs {', '.join(weak[:4])}); blocking upload"
                 )
 
     print(f"Quality gate: {len(scenes)} scenes, {total} spoken words")

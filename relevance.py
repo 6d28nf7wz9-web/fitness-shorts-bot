@@ -171,11 +171,9 @@ def relevance(hit, keyword, context=""):
     if target_category not in ("food", "training"):
         target_category = category(context)
 
-    # A category fallback is considered sufficiently grounded only when the
-    # stock metadata contains at least two distinct words from the intended
-    # fitness/food category. This lets relevant generic footage keep rendering
-    # when exact medical-topic footage is unavailable, without accepting a
-    # single ambiguous tag (for example, "swimming" on an unrelated animal).
+    # Generic category footage is never an exact scene match. It may be
+    # used only when the caller explicitly enables category-only fallback;
+    # otherwise scene selection and the pre-upload gate must reject it.
     if target_category == "food":
         category_matches = hw & _FOOD
     elif target_category == "training":
@@ -183,8 +181,6 @@ def relevance(hit, keyword, context=""):
     else:
         category_matches = set()
 
-    if len(category_matches) >= 2:
-        return 2
     if category_matches:
         return 1
 

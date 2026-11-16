@@ -21,7 +21,7 @@ class PresenterLayoutTests(unittest.TestCase):
     def test_short_presenter_is_in_upper_left_safe_zone(self):
         layout = read_avatar_layouts()["short"]
         top = 1920 - layout["h"] - layout["bottom"]
-        self.assertEqual(layout["x"], "32")
+        self.assertEqual(layout["x"], "50")
         self.assertGreaterEqual(top, 0)
         self.assertLess(top + layout["h"], 420)
 

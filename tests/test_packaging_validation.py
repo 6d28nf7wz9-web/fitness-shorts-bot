@@ -1,9 +1,22 @@
 """Tests for FitFuel upload title and description packaging checks."""
 import unittest
-from gen_script import validate_packaging
+from gen_script import validate_packaging, ensure_final_cta
 
 
 class PackagingValidationTests(unittest.TestCase):
+    def test_repairs_missing_question_and_follow_cta(self):
+        data = {"scenes": [{"narration": "A useful final point."}]}
+        ensure_final_cta(data)
+        final = data["scenes"][-1]["narration"]
+        self.assertIn("?", final)
+        self.assertIn("follow", final.lower())
+
+    def test_does_not_duplicate_existing_cta(self):
+        original = "What would you change? Follow FitFuel for more."
+        data = {"scenes": [{"narration": original}]}
+        ensure_final_cta(data)
+        self.assertEqual(data["scenes"][-1]["narration"], original)
+
     def test_accepts_relevant_concise_metadata(self):
         self.assertIsNone(validate_packaging(
             "Why Daily Steps Matter for Fat Loss",
