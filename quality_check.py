@@ -34,7 +34,7 @@ def main():
     if len(str(script.get("title", ""))) > 60:
         errors.append("Title exceeds 60 characters")
 
-    if not os.path.exists(clip_path):
+    used_clip_ids = {}\n    if not os.path.exists(clip_path):
         warnings.append("Clip metadata not found yet; run clips_fast.py before this gate.")
     else:
         with open(clip_path, encoding="utf-8") as f:
