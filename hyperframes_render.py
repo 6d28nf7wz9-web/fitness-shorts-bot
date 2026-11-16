@@ -13,6 +13,7 @@ from pathlib import Path
 
 from visual_engine import build_visual_panel, visual_css
 from motion_director import motion_css, plan_scene_motion
+from production_motion_engine import kinetic_html, presenter_html, motion_engine_css, sound_cue_events
 
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
@@ -109,6 +110,8 @@ def main():
 """
     css += visual_css()
     css += motion_css()
+    css += motion_engine_css()
+    sound_cues = []
     blocks = []
     cursor = 0.0
     for i, (scene, meta) in enumerate(zip(scenes, audio), 1):
@@ -136,6 +139,9 @@ def main():
                 f'data-duration="{enddur}" data-track-index="0"></div>'
             )
         category, science_panel = build_visual_panel(scene, i)
+        kinetic = kinetic_html(scene.get('narration', ''), category, dur, scene.get('word_timings'))
+        sound_cues.extend(sound_cue_events(scene.get('narration', ''), category, dur, scene.get('word_timings'), cursor))
+        presenter = presenter_html()
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         blocks.append(f"""
 <div id="overlay{i}" class="clip motion-scene {motion['class_name']}" data-motion-style="{motion['style']}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
@@ -143,6 +149,7 @@ def main():
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
  <div class="subbox"><div class="sub" style="font-size:{sub_size}px">{sub_html}</div></div>
+ {kinetic}{presenter}
  {science_panel}
 </div>""")
         cursor += dur
@@ -157,6 +164,7 @@ video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
 {''.join(blocks)}
 </div></body></html>"""
     (ROOT / "index.html").write_text(html_doc, encoding="utf-8")
+    (ROOT / "sound_cues.json").write_text(json.dumps(sound_cues, ensure_ascii=False, indent=2), encoding="utf-8")
     # Guard against accidental overlay/caption collision: caption ASS is bottom
     # anchored in assemble.py, visual text is confined to the middle safe zone.
     print(f"HyperFrames composition: {len(scenes)} scenes, {total:.2f}s; safe title/subtitle zones")
