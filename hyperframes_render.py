@@ -11,6 +11,8 @@ import subprocess
 import shutil
 from pathlib import Path
 
+from visual_engine import build_visual_panel, visual_css
+
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
 SAFE_TITLE_WIDTH = 880
@@ -81,6 +83,7 @@ def main():
 .sub{font-weight:700;line-height:1.22;color:#72e6c2;text-shadow:0 3px 18px #000;max-width:820px;overflow-wrap:anywhere}
 
 """
+    css += visual_css()
     blocks = []
     cursor = 0.0
     for i, (scene, meta) in enumerate(zip(scenes, audio), 1):
@@ -98,12 +101,14 @@ def main():
             raise SystemExit(f"Missing visual scene {i}: {source}")
         shutil.copy2(source, assets / f"scene_{i}.mp4")
         blocks.append(f'<video id="bg{i}" data-start="{start}" data-duration="{enddur}" data-track-index="0" data-volume="0" muted src="assets/scene_{i}.mp4"></video>')
+        _, science_panel = build_visual_panel(scene, i)
         blocks.append(f"""
 <div id="overlay{i}" class="clip" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
  <div class="subbox"><div class="sub" style="font-size:{sub_size}px">{sub_html}</div></div>
+ {science_panel}
 </div>""")
         cursor += dur
     html_doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FitFuel HyperFrames render</title><style>{css}
