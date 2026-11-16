@@ -14,19 +14,19 @@ CATEGORIES = {
 }
 
 RULES = [
-    ("muscle", r"\bmuscle|hypertrophy|growth|recovery|strength|progressive overload|protein synthesis\b"),
-    ("hydration", r"\bwater|hydration|dehydrat|electrolyte|sodium\b"),
-    ("heart", r"\bheart|blood|circulation|cardio|oxygen|pulse\b"),
-    ("hormones", r"\bhormone|insulin|cortisol|testosterone|estrogen|ghrelin|leptin\b"),
-    ("fat_loss", r"\bfat loss|fat gain|calorie|energy balance|burn fat|weight loss\b"),
-    ("nutrition", r"\bprotein|food|meal|eat|nutrition|digest|fiber|carb|fat intake\b"),
-    ("exercise", r"\bexercise|squat|deadlift|curl|press|rep|set|workout|training|joint\b"),
+    ("hydration", r"\b(?:hydration|dehydrat\w*|electrolyte\w*|sodium|potassium|fluid balance)\b"),
+    ("heart", r"\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\b"),
+    ("hormones", r"\b(?:hormone\w*|insulin|cortisol|testosterone|estrogen|ghrelin|leptin|receptor|thyroid)\b"),
+    ("fat_loss", r"\b(?:fat loss|fat gain|calorie\w*|energy balance|burn fat|weight loss|calorie deficit)\b"),
+    ("nutrition", r"\b(?:food|meal|nutrition|digest\w*|absorption|fiber|carbohydrate\w*|protein intake|nutrient\w*)\b"),
+    ("muscle", r"\b(?:muscle\w*|hypertrophy|strength|progressive overload|protein synthesis|muscle recovery)\b"),
+    ("exercise", r"\b(?:exercise|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\b"),
 ]
 
 
 def classify_scene(scene):
     source = " ".join(str(scene.get(k, "")) for k in
-                      ("narration", "keyword", "visual_title", "visual_subtitle")).lower()
+                      ("keyword", "visual_title", "visual_subtitle", "narration")).lower()
     for category, pattern in RULES:
         if re.search(pattern, source):
             return category
