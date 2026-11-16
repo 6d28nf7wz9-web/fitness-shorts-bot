@@ -61,6 +61,12 @@ def motion_css():
 .motion-scene .science-kicker { animation: ff-kicker-enter 420ms 80ms cubic-bezier(.16,1,.3,1) both; }
 .motion-scene .science-heading { animation: ff-heading-enter 480ms 140ms cubic-bezier(.16,1,.3,1) both; }
 .motion-scene .science-svg { animation: ff-diagram-enter 560ms 200ms cubic-bezier(.16,1,.3,1) both; }
+.motion-hook { animation: ff-transition-hook 560ms cubic-bezier(.16,1,.3,1) both; }
+.motion-support { animation: ff-transition-support 480ms cubic-bezier(.22,1,.36,1) both; }
+.motion-payoff { animation: ff-transition-payoff 620ms cubic-bezier(.16,1,.3,1) both; }
+@keyframes ff-transition-hook { from { opacity:0; clip-path:inset(8% 0 8% 0); transform:scale(1.035); } to { opacity:1; clip-path:inset(0); transform:scale(1); } }
+@keyframes ff-transition-support { from { opacity:0; transform:translateX(34px); filter:blur(4px); } to { opacity:1; transform:translateX(0); filter:blur(0); } }
+@keyframes ff-transition-payoff { from { opacity:0; clip-path:circle(12% at 50% 50%); transform:scale(.97); } to { opacity:1; clip-path:circle(100% at 50% 50%); transform:scale(1); } }
 .layout-left .science-panel { left: 70px; right: 125px; }
 .layout-right .science-panel { left: 125px; right: 70px; }
 .layout-center .science-panel { left: 95px; right: 95px; }
