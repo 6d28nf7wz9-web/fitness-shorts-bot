@@ -13,7 +13,7 @@ from pathlib import Path
 
 from visual_engine import build_visual_panel, visual_css
 from motion_director import motion_css, plan_scene_motion
-from production_motion_engine import kinetic_html, presenter_html, motion_engine_css, sound_cue_events
+from production_motion_engine import kinetic_html, motion_engine_css, sound_cue_events
 
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
@@ -141,7 +141,6 @@ def main():
         category, science_panel = build_visual_panel(scene, i)
         kinetic = kinetic_html(scene.get('narration', ''), category, dur, meta.get('word_timings'))
         sound_cues.extend(sound_cue_events(scene.get('narration', ''), category, dur, meta.get('word_timings'), cursor))
-        presenter = presenter_html()
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         blocks.append(f"""
 <div id="overlay{i}" class="clip motion-scene {motion['class_name']}" data-motion-style="{motion['style']}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
@@ -149,7 +148,7 @@ def main():
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
  <div class="subbox"><div class="sub" style="font-size:{sub_size}px">{sub_html}</div></div>
- {kinetic}{presenter}
+ {kinetic}
  {science_panel}
 </div>""")
         cursor += dur
