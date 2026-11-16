@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/scene-specific-science-visuals
+      - experiment/motion-skills-video-engine
   schedule:
     - cron: "17 5 * * *"
     - cron: "17 11 * * *"
