@@ -10,10 +10,10 @@ FINAL = "output/final.mp4"
 MUSIC_VOLUME = 0.12
 FONT = "DejaVu Sans"
 MAX_TEXT_WIDTH = 920
-BASE_SIZE = 76
-MIN_SIZE = 48
-CHAR_WIDTH = 0.80
-MAX_CHARS = 28
+BASE_SIZE = 70
+MIN_SIZE = 42
+CHAR_WIDTH = 0.72
+MAX_CHARS = 34
 
 HEADER = f"""[Script Info]
 ScriptType: v4.00+
