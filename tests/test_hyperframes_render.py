@@ -87,7 +87,8 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
             "fat_loss": "Calorie deficit and fat loss",
             "hydration": "Water and electrolyte balance",
             "exercise": "Squat exercise and joint movement",
-            "hormones": "Insulin hormone receptor signaling",\n            "supplements": "Supplement dose and creatine evidence",
+            "hormones": "Insulin hormone receptor signaling",
+            "supplements": "Supplement dose and creatine evidence",
         }
         panels = {}
         for expected, narration in cases.items():
