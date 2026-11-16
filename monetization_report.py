@@ -89,6 +89,12 @@ def main():
         if not channels:
             raise SystemExit("No YouTube channel was returned for the authorized account.")
         channel_id = channels[0].get("id")
+        expected_channel_id = os.getenv("EXPECTED_YOUTUBE_CHANNEL_ID", "").strip()
+        if expected_channel_id and channel_id != expected_channel_id:
+            raise SystemExit(
+                "Authorized YouTube account mismatch: expected channel "
+                f"{expected_channel_id}, received {channel_id}. No monetization report was written."
+            )
         channel_title = channels[0].get("snippet", {}).get("title")
         stats = channels[0].get("statistics", {})
         subscriber_count = int(stats["subscriberCount"]) if stats.get("subscriberCount") else None
@@ -154,14 +160,24 @@ def main():
             return None
         return round(min(value / target * 100, 100), 2)
 
+    owner_memory = load_json("performance_memory.json", {})
+    owner_baseline_subscribers = owner_memory.get("baseline", {}).get("subscribers") if isinstance(owner_memory, dict) else None
+
     report = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "data_through": end.isoformat(),
         "channel": {
+            "identity_verified": bool(expected_channel_id and channel_id == expected_channel_id),
             "channel_id": channel_id,
             "channel_title": channel_title,
             "subscribers": subscriber_count,
             "total_channel_views_lifetime": total_channel_views,
+            "owner_provided_baseline_subscribers": owner_baseline_subscribers,
+            "subscriber_count_difference_vs_owner_baseline": (
+                subscriber_count - int(owner_baseline_subscribers)
+                if subscriber_count is not None and owner_baseline_subscribers is not None
+                else None
+            ),
         },
         "last_90_days": {
             "uploaded_public_shorts_in_log": public_uploads_90d,

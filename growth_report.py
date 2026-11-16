@@ -3,6 +3,8 @@ import json
 import os
 from datetime import datetime, timezone
 
+from topic_intelligence import recommend_topics, hook_learning
+
 MEMORY_PATH = os.getenv("FITFUEL_MEMORY_PATH", "performance_memory.json")
 OUTPUT_PATH = os.getenv("FITFUEL_GROWTH_REPORT", "output/growth_report.md")
 
@@ -150,6 +152,30 @@ def build_report(memory):
         )
     if not series:
         lines.append("- No series has at least 3 measured videos yet; small series are excluded from ranking.")
+
+    # Bring the same measured topic/hook intelligence used by generation into the human report.
+    used_topics = memory.get("used_topics", [])
+    recommendations = recommend_topics(memory, used=used_topics, trends=memory.get("trends", []), limit=5)
+    lines += ["", "## Next topic recommendations", ""]
+    if recommendations:
+        lines += ["| Candidate | Category | Signal | Mature videos |", "|---|---|---|---:|"]
+        for item in recommendations:
+            lines.append(
+                f"| {item['topic']} | {item['category']} | {item['evidence']} (score {item['score']:.3f}) | {item['evidence_videos']} |"
+            )
+    else:
+        lines.append("- No eligible topic candidates; check topic history and analytics freshness.")
+
+    hooks = hook_learning(memory, limit=4)
+    lines += ["", "## Hook patterns worth testing", ""]
+    if hooks:
+        for item in hooks:
+            lines.append(
+                f"- **{item['pattern']}** — {item['topic']}: {item['views']} views, "
+                f"{item['retention']:.1f}% average viewed. Use the mechanism, not the wording."
+            )
+    else:
+        lines.append("- No adequately sampled mature hooks yet; test distinct, specific opening mechanisms.")
 
     lines += [
         "",

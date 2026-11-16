@@ -25,12 +25,16 @@ class GrowthReportTests(unittest.TestCase):
         self.assertIn("38.2%", report)
         self.assertIn("Strength", report)
         self.assertIn("Myth check", report)
+        self.assertIn("Next topic recommendations", report)
+        self.assertIn("Hook patterns worth testing", report)
 
     def test_empty_memory_is_safe_and_explains_missing_data(self):
         report = build_report({})
         self.assertIn("No synced video data yet", report)
         self.assertIn("No topic-level analytics yet", report)
         self.assertIn("YouTube Studio > Earn", report)
+        self.assertIn("Next topic recommendations", report)
+        self.assertIn("No adequately sampled mature hooks", report)
 
 
 if __name__ == "__main__":

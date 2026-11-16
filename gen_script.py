@@ -661,9 +661,10 @@ STRICT SCRIPT RULES:
 - Before returning, verify: 4-5 scenes, 50-55 total narration words,
   first scene 4-9 words, final scene has "?" and "follow", and sources
   are selected only from the supplied PMID list.
-- Title must accurately match the video
-  and include the main topic naturally.
-- Description: concise, relevant, no keyword stuffing.
+- Title must accurately match the video, include the main topic naturally, and stay within 60 characters.
+- Front-load the clearest topic phrase; create curiosity through a specific viewer problem or useful payoff, never misleading clickbait.
+- Make each title distinct from recent uploads; avoid generic titles such as "Build Muscle Faster" without a specific angle.
+- Description: first sentence states the concrete viewer benefit; second sentence adds useful context or a natural FitFuel follow invitation. Keep it concise and relevant, with no keyword stuffing.
 - Hashtags: 4-6 relevant tags.
 - Cover evidence-based fitness advice and controversial topics (including anabolic steroids, TRT, hormones, and PEDs) in a balanced, educational, non-promotional way.
 - Explain risks and uncertainty clearly; never provide steroid/SARM cycles, doses, sourcing, stacking, or instructions to evade medical supervision.
@@ -745,6 +746,29 @@ def repair_keywords(data):
         scene["keyword"] = " | ".join(valid[:3])
 
     return data
+
+
+def validate_packaging(title, topic, description):
+    """Reject weak or disconnected upload metadata before rendering/upload."""
+    title = str(title or "").strip()
+    topic_words = {
+        word for word in re.findall(r"[a-z0-9]+", str(topic or "").lower())
+        if word not in {"the", "and", "for", "with", "your", "why", "how", "what", "does", "can"}
+    }
+    title_words = set(re.findall(r"[a-z0-9]+", title.lower()))
+    description = str(description or "").strip()
+
+    if not title:
+        return "title is empty"
+    if len(title) > 60:
+        return "title exceeds 60 characters"
+    if "#" in title:
+        return "title must not contain hashtags"
+    if topic_words and not (topic_words & title_words):
+        return "title must naturally include a main topic keyword"
+    if len(description) < 25:
+        return "description is too short to explain the viewer benefit"
+    return None
 
 
 def validate(data):
@@ -850,8 +874,9 @@ def validate(data):
     if hook.endswith("?") and len(hook.split()) < 5:
         return "hook question is too short to establish a specific curiosity"
 
-    if len(str(data["title"]).strip()) > 60:
-        return "title exceeds 60 characters"
+    packaging_problem = validate_packaging(data["title"], data["topic"], data["description"])
+    if packaging_problem:
+        return packaging_problem
 
     if len(str(data["topic"]).split()) < 2:
         return "topic label is too vague"
