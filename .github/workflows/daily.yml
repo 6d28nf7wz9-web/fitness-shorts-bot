@@ -1,6 +1,9 @@
 name: Daily Short
 
 on:
+  push:
+    branches:
+      - feature/scene-specific-science-visuals
   schedule:
     - cron: "17 5 * * *"
     - cron: "17 11 * * *"
@@ -39,7 +42,7 @@ jobs:
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
       UPLOAD_PRIVACY: public
-      SKIP_UPLOAD: ${{ inputs.preview_only && '1' || '' }}
+      SKIP_UPLOAD: ${{ (github.event_name == 'push' || inputs.preview_only) && '1' || '' }}
       HYPERFRAMES_RENDER: "1"
     steps:
       - uses: actions/checkout@v4
