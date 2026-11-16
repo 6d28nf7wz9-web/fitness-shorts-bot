@@ -15,14 +15,14 @@ CATEGORIES = {
 }
 
 RULES = [
-    ("supplements", r"\\b(?:supplement\\w*|creatine|caffeine|pre[- ]?workout|protein powder|ergogenic aid)\\b"),
-    ("hydration", r"\\b(?:hydration|dehydrat\\w*|electrolyte\\w*|sodium|potassium|fluid balance)\\b"),
-    ("heart", r"\\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\\b"),
-    ("hormones", r"\\b(?:hormone\\w*|insulin|cortisol|testosterone|estrogen|ghrelin|leptin|receptor|thyroid)\\b"),
-    ("fat_loss", r"\\b(?:fat loss|fat gain|calorie\\w*|energy balance|burn fat|weight loss|calorie deficit)\\b"),
-    ("muscle", r"\\b(?:muscle\\w*|muscle fiber\\w*|hypertrophy|strength|progressive overload|protein synthesis|muscle recovery)\\b"),
-    ("nutrition", r"\\b(?:food|meal|nutrition|digest\\w*|absorption|dietary fiber|carbohydrate\\w*|protein intake|nutrient\\w*)\\b"),
-    ("exercise", r"\\b(?:exercise|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\\b"),
+    ("supplements", r"\b(?:supplement\w*|creatine|caffeine|pre[- ]?workout|protein powder|ergogenic aid)\b"),
+    ("hydration", r"\b(?:hydration|dehydrat\w*|electrolyte\w*|sodium|potassium|fluid balance)\b"),
+    ("heart", r"\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\b"),
+    ("hormones", r"\b(?:hormone\w*|insulin|cortisol|testosterone|estrogen|ghrelin|leptin|receptor|thyroid)\b"),
+    ("fat_loss", r"\b(?:fat loss|fat gain|calorie\w*|energy balance|burn fat|weight loss|calorie deficit)\b"),
+    ("muscle", r"\b(?:muscle\w*|muscle fiber\w*|hypertrophy|strength|progressive overload|protein synthesis|muscle recovery)\b"),
+    ("nutrition", r"\b(?:food|meal|nutrition|digest\w*|absorption|dietary fiber|carbohydrate\w*|protein intake|nutrient\w*)\b"),
+    ("exercise", r"\b(?:exercise|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\b"),
 ]
 
 
