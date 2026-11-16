@@ -183,9 +183,8 @@ def relevance(hit, keyword, context=""):
     else:
         category_matches = set()
 
-    # Broad category overlap is useful only as a warning-level match.
-    # It must not be promoted to an exact match (e.g. generic outdoor footage
-    # returned for a muscle-growth narration).
+    if len(category_matches) >= 2:
+        return 2
     if category_matches:
         return 1
 
