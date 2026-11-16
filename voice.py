@@ -84,7 +84,7 @@ async def try_voice(text, path, voice):
         # Replace the final file only after validation
         os.replace(temp_path, path)
 
-        return True
+        return word_timings
 
     finally:
         if os.path.exists(temp_path):
@@ -107,10 +107,10 @@ async def make_audio(text, path):
                     f"(attempt {attempt}/{MAX_RETRIES})"
                 )
 
-                await try_voice(text, path, voice)
+                word_timings = await try_voice(text, path, voice)
 
                 print(f"Audio created successfully using {voice}")
-                return voice
+                return voice, word_timings
 
             except Exception as e:
                 last_error = e
@@ -147,7 +147,7 @@ async def main():
 
         path = f"{OUT_DIR}/scene_{i}.mp3"
 
-        used_voice = await make_audio(narration, path)
+        used_voice, word_timings = await make_audio(narration, path)
 
         seconds = round(get_duration(path), 2)
 
@@ -156,6 +156,7 @@ async def main():
             "file": path,
             "seconds": seconds,
             "voice": used_voice,
+            "word_timings": word_timings,
         })
 
         print(f"Scene {i}: {seconds}s")
