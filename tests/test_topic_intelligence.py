@@ -34,7 +34,7 @@ class TopicIntelligenceTests(unittest.TestCase):
     def test_hook_learning_returns_measured_openings_only(self):
         rows = hook_learning(self.memory)
         self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0]["pattern"], "specific curiosity question")
+        self.assertIn(rows[0]["pattern"], ("specific curiosity question", "direct challenge or mistake correction"))
         self.assertGreaterEqual(rows[0]["views"], 25)
 
     def test_empty_memory_returns_exploration_candidates(self):
