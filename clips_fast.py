@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 
 from wan_stock_assist import try_animate_stock
@@ -15,6 +16,18 @@ from clips import (
 PART_SECONDS = float(os.getenv("PART_SECONDS", "2.6"))
 MAX_PARTS = 4
 MIN_PARTS = 1
+
+
+def sentence_contexts(narration, count):
+    """Distribute sentence-sized narration context across B-roll cuts."""
+    sentences = [
+        re.sub(r"\\s+", " ", item).strip()
+        for item in re.split(r"(?<=[.!?])\\s+", str(narration or ""))
+        if item.strip()
+    ]
+    if not sentences:
+        return [str(narration or "")] * max(1, count)
+    return [sentences[min(i, len(sentences) - 1)] for i in range(max(1, count))]
 
 
 def _ordered_keywords(scene):
@@ -203,6 +216,7 @@ def main():
         )
 
         each = seconds / parts
+        cut_contexts = sentence_contexts(narration, parts)
         print(f"  stock fallback: {parts} cuts")
         print(
             f"  search priority: {', '.join(keywords)}"
@@ -214,8 +228,9 @@ def main():
         try:
             for part_index in range(parts):
                 keyword = "|".join(keywords)
+                sentence_context = cut_contexts[part_index]
                 query, hit, url, portrait = choose_clip(
-                    keyword, each, used_ids, context=narration
+                    keyword, each, used_ids, context=sentence_context
                 )
                 clip_id = hit.get("id")
                 raw_file = os.path.join(
@@ -254,6 +269,7 @@ def main():
                     "source": clip_source,
                     "query": query,
                     "keyword": keyword,
+                    "sentence_context": sentence_context,
                     "pixabay_id": clip_id,
                     "page": hit.get("pageURL"),
                     "author": hit.get("user"),
