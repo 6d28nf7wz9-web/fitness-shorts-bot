@@ -19,7 +19,7 @@ BOB = 6  # pixels of gentle up and down movement
 # h = presenter height; x and bottom keep it outside the Shorts title/caption safe zones.
 # The Shorts presenter sits in the upper-left corner, below the brand line and above titles.
 LAYOUTS = {
-    "short": {"h": 220, "x": "32", "bottom": 1520},
+    "short": {"h": 190, "x": "50", "bottom": 1520},
     "long": {"h": 280, "x": "W-w-40", "bottom": 24},
 }
 
@@ -204,11 +204,22 @@ def render(video, samples, layout):
     write_list(states, paths, list_path)
 
     tmp = video[:-4] + "_av.mp4"
-    fc = (
-        f"[1:v]fps={OUT_FPS},format=rgba[av];"
-        f"[0:v][av]overlay=x={cfg['x']}:y='H-h-{cfg['bottom']}+{BOB}*sin(2*PI*t*0.9)'"
-        f":eof_action=repeat:format=auto[v]"
-    )
+    if layout == "short":
+        # A restrained branded backing makes the presenter feel anchored to the
+        # frame instead of appearing as a floating cutout in the corner.
+        fc = (
+            "[0:v]drawbox=x=28:y=188:w=220:h=220:color=0x071624@0.78:t=fill,"
+            "drawbox=x=28:y=188:w=220:h=220:color=0x72e6c2@0.72:t=3[base];"
+            f"[1:v]fps={OUT_FPS},format=rgba[av];"
+            f"[base][av]overlay=x={cfg['x']}:y='H-h-{cfg['bottom']}+{BOB}*sin(2*PI*t*0.9)'"
+            ":eof_action=repeat:format=auto[v]"
+        )
+    else:
+        fc = (
+            f"[1:v]fps={OUT_FPS},format=rgba[av];"
+            f"[0:v][av]overlay=x={cfg['x']}:y='H-h-{cfg['bottom']}+{BOB}*sin(2*PI*t*0.9)'"
+            ":eof_action=repeat:format=auto[v]"
+        )
     cmd = [
         "ffmpeg", "-y", "-loglevel", "error",
         "-i", video, "-f", "concat", "-safe", "0", "-i", list_path,
