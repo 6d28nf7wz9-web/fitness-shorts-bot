@@ -12,6 +12,7 @@ import shutil
 from pathlib import Path
 
 from visual_engine import build_visual_panel, visual_css
+from motion_director import motion_css, plan_scene_motion
 
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
@@ -84,6 +85,7 @@ def main():
 
 """
     css += visual_css()
+    css += motion_css()
     blocks = []
     cursor = 0.0
     for i, (scene, meta) in enumerate(zip(scenes, audio), 1):
@@ -101,8 +103,9 @@ def main():
         # Use a branded motion-graphic canvas and the classified SVG diagram.
         blocks.append(f'<div id="bg{i}" class="scene-bg clip" data-start="{start}" data-duration="{enddur}" data-track-index="0"></div>')
         category, science_panel = build_visual_panel(scene, i)
+        motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         blocks.append(f"""
-<div id="overlay{i}" class="clip" data-start="{start}" data-duration="{enddur}" data-track-index="2">
+<div id="overlay{i}" class="clip motion-scene {motion['class_name']}" data-motion-style="{motion['style']}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
