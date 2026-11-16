@@ -18,6 +18,29 @@ ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
 SAFE_TITLE_WIDTH = 880
 SAFE_SUB_WIDTH = 820
+
+def prepare_scene_footage(scene_index, assets_dir):
+    """Copy only footage that passed the semantic stock matcher into the render."""
+    info_path = Path("output/clips_info.json")
+    if not info_path.exists():
+        return None
+    try:
+        records = json.loads(info_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    record = next((item for item in records if int(item.get("scene", 0)) == scene_index), None)
+    if not record or record.get("source") != "stock":
+        return None
+    clips = record.get("clips") or []
+    if not clips or any(item.get("source") not in ("stock", "stock+wan") for item in clips):
+        return None
+    source = Path(record.get("file", f"output/clips/scene_{scene_index}.mp4"))
+    if not source.is_file() or source.stat().st_size < 10_000:
+        return None
+    destination = assets_dir / f"scene_{scene_index}_broll.mp4"
+    shutil.copy2(source, destination)
+    return destination.name
+
 def wrap_words(text, limit):
     words = re.sub(r"\s+", " ", str(text or "")).strip().split()
     lines, current = [], ""
@@ -98,10 +121,20 @@ def main():
         sub_html = "<br>".join(html.escape(x) for x in sub_lines)
         start = f"{cursor:.3f}"
         enddur = f"{dur:.3f}"
-        # Do not place arbitrary stock footage behind science scenes: it can be
-        # semantically unrelated (e.g. flowers behind a muscle-science scene).
-        # Use a branded motion-graphic canvas and the classified SVG diagram.
-        blocks.append(f'<div id="bg{i}" class="scene-bg clip" data-start="{start}" data-duration="{enddur}" data-track-index="0"></div>')
+        # Only use scene footage that clips_fast.py selected with an exact
+        # semantic match. Science fallback scenes keep the designed motion canvas.
+        footage_name = prepare_scene_footage(i, assets)
+        if footage_name:
+            blocks.append(
+                f'<video id="broll{i}" class="scene-footage" muted playsinline '
+                f'data-start="{start}" data-duration="{enddur}" data-track-index="0" '
+                f'src="assets/{html.escape(footage_name, quote=True)}"></video>'
+            )
+        else:
+            blocks.append(
+                f'<div id="bg{i}" class="scene-bg clip" data-start="{start}" '
+                f'data-duration="{enddur}" data-track-index="0"></div>'
+            )
         category, science_panel = build_visual_panel(scene, i)
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         blocks.append(f"""
@@ -115,8 +148,11 @@ def main():
         cursor += dur
     html_doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FitFuel HyperFrames render</title><style>{css}
 video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
-.scene-bg{{position:absolute;inset:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.32),transparent 58%),linear-gradient(155deg,#07111d 0%,#10263a 48%,#07111d 100%);}}
+.scene-bg{{position:absolute;z-index:0;inset:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.32),transparent 58%),linear-gradient(155deg,#07111d 0%,#10263a 48%,#07111d 100%);}}
+.scene-footage{{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.72) saturate(1.08) contrast(1.04);transform:scale(1.045);animation:ff-camera-drift 7s ease-in-out both;}}
 .scene-bg:after{{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 71px,rgba(114,230,194,.055) 72px),repeating-linear-gradient(90deg,transparent 0 71px,rgba(114,230,194,.055) 72px);}}
+.motion-scene{{z-index:2}}
+.shade{{z-index:1;background:linear-gradient(180deg,rgba(4,10,18,.76) 0%,rgba(5,13,23,.12) 34%,rgba(5,13,23,.26) 58%,rgba(4,10,18,.84) 100%);}}
 </style></head><body><div id="root" data-composition-id="fitfuel-short" data-start="0" data-duration="{total:.3f}" data-width="{W}" data-height="{H}" data-fps="{FPS}" data-no-timeline>
 {''.join(blocks)}
 </div></body></html>"""
