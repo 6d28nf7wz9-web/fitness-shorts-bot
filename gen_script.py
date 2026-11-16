@@ -771,6 +771,27 @@ def validate_packaging(title, topic, description):
     return None
 
 
+def ensure_final_cta(data):
+    """Deterministically repair a missing final-scene question/follow CTA."""
+    scenes = data.get("scenes")
+    if not isinstance(scenes, list) or not scenes or not isinstance(scenes[-1], dict):
+        return data
+    final = str(scenes[-1].get("narration", "")).strip()
+    lower = final.lower()
+    missing_question = "?" not in final
+    missing_follow = not any(word in lower for word in ("follow", "next episode", "next part"))
+    if missing_question or missing_follow:
+        addition = "What would you try? Follow FitFuel for more."
+        if missing_question and missing_follow:
+            final = f"{final} {addition}".strip()
+        elif missing_question:
+            final = f"{final} What would you try?".strip()
+        else:
+            final = f"{final} Follow FitFuel for more.".strip()
+    scenes[-1]["narration"] = final
+    return data
+
+
 def validate(data):
     required = (
         "series",
@@ -1092,7 +1113,8 @@ def generate_script():
                     flush=True,
                 )
 
-                data = repair_keywords(parse_json(response_text))
+                data = ensure_final_cta(parse_json(response_text))
+                data = repair_keywords(data)
                 problem = validate(data)
                 if problem:
                     last_problem = problem
