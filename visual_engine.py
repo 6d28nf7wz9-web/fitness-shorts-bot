@@ -18,12 +18,12 @@ def classify_scene(scene):
     text = " ".join(str(scene.get(k, "")) for k in
                     ("narration", "keyword", "visual_title", "visual_subtitle")).lower()
     rules = [
+        ("muscle", r"muscle|hypertrophy|growth|recovery|strength|progressive overload"),
         ("hydration", r"water|hydration|dehydrat|electrolyte"),
         ("heart", r"heart|blood|circulation|cardio|oxygen"),
         ("hormones", r"hormone|insulin|cortisol|testosterone|estrogen|ghrelin|leptin"),
         ("fat_loss", r"fat loss|fat gain|calorie|energy balance|burn fat|weight loss"),
         ("nutrition", r"protein|food|meal|eat|nutrition|digest|fiber|carb|fat intake"),
-        ("muscle", r"muscle|hypertrophy|growth|recovery|strength|progressive overload"),
         ("exercise", r"exercise|squat|deadlift|curl|press|rep|set|workout|training"),
     ]
     for category, pattern in rules:
