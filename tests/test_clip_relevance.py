@@ -163,6 +163,18 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
                         context="Stopping steroids never guarantees your natural testosterone returns.",
                     )
 
+    def test_clip_reuse_is_rejected_by_default_when_no_unused_match_remains(self):
+        reused_hit = make_hit(9104, "muscle fiber anatomy activation")
+        with patch("clips.search", return_value=[reused_hit]):
+            with patch.dict(os.environ, {"ALLOW_REUSED_CLIPS": "0"}):
+                with self.assertRaisesRegex(RuntimeError, "refusing to reuse a clip"):
+                    choose_clip(
+                        "muscle fiber anatomy activation",
+                        2.5,
+                        {9104},
+                        context="Muscle fibers adapt to mechanical tension.",
+                    )
+
     def test_category_fallback_requires_explicit_opt_in(self):
         gym_hit = make_hit(
             9103,
