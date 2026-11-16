@@ -2,13 +2,15 @@ name: HyperFrames production integration test
 
 on:
   push:
-    branches: [main]
+    branches: [main, experiment/motion-skills-video-engine]
     paths:
       - 'hyperframes_render.py'
+      - 'motion_director.py'
+      - 'tests/test_motion_director.py'
       - 'assemble.py'
       - '.github/workflows/hyperframes-integration.yml'
   pull_request:
-    branches: [main]
+    branches: [main, feature/scene-specific-science-visuals]
     paths:
       - 'hyperframes_render.py'
       - 'assemble.py'
