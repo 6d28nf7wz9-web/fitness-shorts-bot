@@ -101,7 +101,7 @@ jobs:
         run: python upload.py
 
       - name: Save preview video artifact
-        if: ${{ inputs.preview_only }}
+        if: ${{ github.event_name == 'push' || inputs.preview_only }}
         uses: actions/upload-artifact@v4
         with:
           name: fitfuel-short-preview
