@@ -121,11 +121,8 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn("@keyframes heartbeat", visual_css())
 
 
-if __name__ == "__main__":
-    unittest.main()
 
-
-    def test_science_scene_background_never_uses_unmatched_stock_clip(self):
+    def test_scene_background_uses_verified_broll_or_science_canvas(self):
         with open("hyperframes_render.py", encoding="utf-8") as f:
             renderer = f.read()
         self.assertIn("prepare_scene_footage(i, assets)", renderer)
@@ -134,3 +131,49 @@ if __name__ == "__main__":
         self.assertIn('category, science_panel = build_visual_panel(scene, i)', renderer)
         self.assertIn(".scene-bg", renderer)
         self.assertIn(".scene-footage", renderer)
+
+    def test_scene_footage_requires_verified_stock_metadata(self):
+        from hyperframes_render import prepare_scene_footage
+        import json, os, tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "output").mkdir()
+            assets = root / "assets"
+            assets.mkdir()
+            clip = root / "output" / "scene.mp4"
+            clip.write_bytes(b"x" * 12000)
+            metadata = [{"scene": 1, "source": "stock", "file": str(clip),
+                         "clips": [{"source": "stock", "pixabay_id": 123}]}]
+            (root / "output" / "clips_info.json").write_text(json.dumps(metadata), encoding="utf-8")
+            old = os.getcwd()
+            try:
+                os.chdir(root)
+                self.assertEqual(prepare_scene_footage(1, assets), "scene_1_broll.mp4")
+                self.assertTrue((assets / "scene_1_broll.mp4").is_file())
+            finally:
+                os.chdir(old)
+
+    def test_science_fallback_rejects_unverified_footage(self):
+        from hyperframes_render import prepare_scene_footage
+        import json, os, tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "output").mkdir()
+            assets = root / "assets"
+            assets.mkdir()
+            clip = root / "output" / "scene.mp4"
+            clip.write_bytes(b"x" * 12000)
+            metadata = [{"scene": 1, "source": "science_visual", "file": str(clip), "clips": []}]
+            (root / "output" / "clips_info.json").write_text(json.dumps(metadata), encoding="utf-8")
+            old = os.getcwd()
+            try:
+                os.chdir(root)
+                self.assertIsNone(prepare_scene_footage(1, assets))
+            finally:
+                os.chdir(old)
+
+
+if __name__ == "__main__":
+    unittest.main()
