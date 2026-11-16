@@ -120,6 +120,7 @@ GEMINI_MAX_MODELS = _positive_int_env("GEMINI_MAX_MODELS", 3)
 GEMINI_MAX_GENERATION_ATTEMPTS = _positive_int_env("GEMINI_MAX_GENERATION_ATTEMPTS", 2)
 
 from series_engine import next_episode, SERIES as SERIES_PLAN
+from topic_intelligence import recommend_topics, hook_learning
 
 SERIES = list(SERIES_PLAN)
 
@@ -506,6 +507,36 @@ def performance_context(memory):
                 "No mature video examples available yet: wait for uploads to reach "
                 "7 days and retain their upload dates before ranking performance."
             )
+
+    # Use only mature, adequately sampled videos to guide the next topic and hook.
+    recommendations = recommend_topics(memory, used=all_used(), trends=load_trends(), limit=5)
+    if recommendations:
+        lines.append(
+            "Analytics-driven topic shortlist (directional; use a fresh angle, "
+            "and keep the assigned series relevant):"
+        )
+        for item in recommendations:
+            lines.append(
+                f"- {item['topic']} [{item['category']}; score {item['score']}; "
+                f"{item['evidence_videos']} mature videos; {item['evidence']}]"
+            )
+
+    hook_examples = hook_learning(memory, limit=4)
+    if hook_examples:
+        lines.append(
+            "Measured opening-hook examples (learn the mechanism, never copy wording):"
+        )
+        for item in hook_examples:
+            lines.append(
+                f"- Pattern: {item['pattern']}; topic: {item['topic']}; "
+                f"{item['views']} views; {item['retention']}% average viewed; "
+                f"example: {item['hook']}"
+            )
+    else:
+        lines.append(
+            "No adequately sampled mature hooks yet; prioritize clear, specific "
+            "viewer problems and test distinct hook mechanisms."
+        )
 
     if lines:
         return baseline_text + chr(10) + "Performance evidence (soft guidance only):" + chr(10) + chr(10).join(lines)
