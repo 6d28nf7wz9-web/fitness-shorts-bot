@@ -34,21 +34,31 @@ RULES = [
 
 
 def classify_scene(scene):
-    """Use visible scene intent before narration so one topic cannot dominate every panel."""
-    # Headline intent wins over a secondary subtitle mention.
+    """Classify by the strongest visible intent, not by the first generic keyword."""
+    # A clear headline is authoritative. If the headline is neutral, compare
+    # keyword and subtitle matches by specificity so "resistance training"
+    # cannot hide a more informative "muscle fibers" teaching point.
     visual_sources = (
-        str(scene.get("visual_title", "")),
-        str(scene.get("keyword", "")),
-        str(scene.get("visual_subtitle", "")),
+        (str(scene.get("visual_title", "")).lower(), 100),
+        (str(scene.get("visual_subtitle", "")).lower(), 65),
+        (str(scene.get("keyword", "")).lower(), 45),
     )
-    for source in visual_sources:
-        source = source.lower()
-        for category, pattern in RULES:
+    scores = {}
+    for source, weight in visual_sources:
+        if not source:
+            continue
+        for order, (category, pattern) in enumerate(RULES):
             if re.search(pattern, source):
-                return category
+                # Broad exercise words are useful fallbacks, not stronger than
+                # specific physiology/nutrition language in the same scene.
+                specificity = 0.35 if category == "exercise" else 1.0
+                score = weight * specificity
+                if category not in scores or score > scores[category][0]:
+                    scores[category] = (score, -order)
+    if scores:
+        return max(scores, key=lambda key: scores[key])
 
-    # Narration is fallback only; a related term such as creatine must not
-    # override a visible scene specifically about loading or repetitions.
+    # Only use narration when the visible scene metadata contains no intent.
     source = str(scene.get("narration", "")).lower()
     for category, pattern in RULES:
         if re.search(pattern, source):
