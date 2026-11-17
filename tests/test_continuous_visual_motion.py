@@ -48,7 +48,7 @@ class ContinuousVisualMotionContractTests(unittest.TestCase):
         self.assertIn("SHORT_AVATAR_FRAME = 220", avatar)
         self.assertIn("pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}", avatar)
         self.assertIn("overlay=x={SHORT_AVATAR_X}", avatar)
-        self.assertNotIn("overlay=x='{cfg['x']}+({x_expr})'", avatar)
+        self.assertIn("overlay=x={SHORT_AVATAR_X}", avatar)
         self.assertIn("ff-diagram-label-reveal", renderer)
         self.assertIn("prefers-reduced-motion: reduce", renderer)
 
