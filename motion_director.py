@@ -23,6 +23,8 @@ def plan_scene_motion(scene, index, duration, category, is_last=False):
     emphasis = "headline" if index % 2 else "diagram"
     transitions = ("wipe", "slide-up", "zoom", "reveal")
     transition = "hook" if role == "hook" else "payoff" if role == "payoff" else transitions[(index - 2) % len(transitions)]
+    # Cycle through distinct, deterministic entrances for typography and diagrams.
+    motion_variant = ("rise", "scale", "slide", "focus", "snap")[(index - 1) % 5]
     return {
         "role": role,
         "transition": transition,
@@ -31,7 +33,8 @@ def plan_scene_motion(scene, index, duration, category, is_last=False):
         "layout": layout,
         "camera": camera,
         "emphasis": emphasis,
-        "class_name": f"motion-{role} motion-{pace} focus-{focus} layout-{layout} camera-{camera} emphasis-{emphasis} transition-{transition}",
+        "variant": motion_variant,
+        "class_name": f"motion-{role} motion-{pace} focus-{focus} layout-{layout} camera-{camera} emphasis-{emphasis} transition-{transition} variant-{motion_variant}",
         "style": f"{role}:{pace}:{focus}:{layout}:{camera}:{emphasis}:{transition}",
     }
 
@@ -110,6 +113,16 @@ def motion_css():
 @keyframes ff-camera-drift { from { transform: scale(1.06) translate3d(-1%,0,0); } to { transform: scale(1.12) translate3d(1%,0,0); } }
 @keyframes ff-camera-push { from { transform: scale(1.02); } to { transform: scale(1.17); } }
 @keyframes ff-camera-pull { from { transform: scale(1.17); } to { transform: scale(1.04); } }
+.variant-rise .title,.variant-rise .science-heading { animation: ff-variant-rise 560ms cubic-bezier(.16,1,.3,1) both; }
+.variant-scale .title,.variant-scale .science-svg { animation: ff-variant-scale 620ms cubic-bezier(.16,1,.3,1) both; }
+.variant-slide .title,.variant-slide .science-panel { animation: ff-variant-slide 600ms cubic-bezier(.16,1,.3,1) both; }
+.variant-focus .title,.variant-focus .science-svg { animation: ff-variant-focus 680ms cubic-bezier(.16,1,.3,1) both; }
+.variant-snap .title,.variant-snap .science-panel { animation: ff-variant-snap 420ms cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes ff-variant-rise { from{opacity:0;transform:translateY(38px)} to{opacity:1;transform:translateY(0)} }
+@keyframes ff-variant-scale { from{opacity:0;transform:scale(.82)} to{opacity:1;transform:scale(1)} }
+@keyframes ff-variant-slide { from{opacity:0;transform:translateX(42px)} to{opacity:1;transform:translateX(0)} }
+@keyframes ff-variant-focus { from{opacity:0;filter:blur(9px);transform:scale(1.04)} to{opacity:1;filter:blur(0);transform:scale(1)} }
+@keyframes ff-variant-snap { from{opacity:0;transform:scale(.9) translateY(16px)} 75%{transform:scale(1.025)} to{opacity:1;transform:scale(1)} }
 """
 
 
