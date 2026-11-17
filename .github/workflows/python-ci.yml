@@ -39,6 +39,8 @@ jobs:
         run: python -m unittest discover -s tests -p "test_hyperframes_render.py" -v
       - name: Test Motion Skills scene direction
         run: python -m unittest discover -s tests -p "test_motion_director.py" -v
+      - name: Test scene-specific science diagrams
+        run: python -m unittest discover -s tests -p "test_visual_engine_scene_priority.py" -v
       - name: Test synchronized production motion engine
         run: python -m unittest discover -s tests -p "test_production_motion_engine.py" -v
       - name: Test spoken-action B-roll targeting and continuous visual motion
