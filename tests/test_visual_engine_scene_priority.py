@@ -20,7 +20,7 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
         }
         category, panel = build_visual_panel(scene, 2)
         self.assertEqual(category, "creatine")
-        self.assertIn("CREATINE & ATP RECYCLING", panel)
+        self.assertIn("CREATINE &amp; ATP RECYCLING", panel)
         self.assertIn("atp-node", panel)
 
     def test_smart_lifting_headline_wins_over_supplement_subtitle(self):
