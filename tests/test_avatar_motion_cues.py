@@ -62,6 +62,12 @@ class AvatarMotionCueTests(unittest.TestCase):
         self.assertEqual(result, ["wide", "closed", "wide", "wide"])
         self.assertEqual(states, ["mid", "closed", "open", "wide"])
 
+    def test_short_presenter_overlay_stays_inside_fixed_anchor_box(self):
+        from pathlib import Path
+        source = Path("avatar.py").read_text(encoding="utf-8")
+        self.assertIn('overlay=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}', source)
+        self.assertNotIn("overlay=x='{SHORT_AVATAR_X}+({x_expr})'", source)
+
     def test_long_layout_has_no_short_scene_cues(self):
         self.assertEqual(scene_motion_cues("long"), [])
 
