@@ -40,6 +40,8 @@ class ContinuousVisualMotionContractTests(unittest.TestCase):
         self.assertIn("presenter_gesture(", renderer)
         self.assertIn("presenter_expression(", renderer)
         self.assertIn("css += presenter_css()", renderer)
+        self.assertIn("ff-diagram-label-reveal", renderer)
+        self.assertIn("prefers-reduced-motion: reduce", renderer)
         css = presenter_css()
         for gesture in ("point", "explain", "compare", "demonstrate"):
             self.assertIn('data-gesture="' + gesture + '"', css)
