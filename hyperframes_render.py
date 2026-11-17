@@ -111,13 +111,15 @@ def main():
     css += visual_css()
     css += motion_css()
     css += motion_engine_css()
-    # HyperFrames renders every scene in one browser composition. CSS animations
-    # therefore need the scene's absolute timeline offset, not just local time.
+    # HyperFrames activates each clip on its own scene boundary. CSS animations
+    # must therefore use clip-local time (zero delay); adding the composition's
+    # absolute scene start here double-delays later scenes and leaves their
+    # title/science panel invisible for most or all of the shot.
     css += """
-.motion-scene{animation-delay:var(--scene-start,0s)!important}
+.motion-scene{animation-delay:0s!important}
 .motion-scene .title,.motion-scene .sub,.motion-scene .science-panel,
 .motion-scene .science-kicker,.motion-scene .science-heading,.motion-scene .science-svg{
-  animation-delay:var(--scene-start,0s)!important;
+  animation-delay:0s!important;
 }
 """ + """
 /* Progressive disclosure: reveal the diagram's claim, then its evidence. */
@@ -232,7 +234,7 @@ def main():
                 f'<div id="bg{i}" class="scene-bg clip" data-start="{start}" '
                 f'data-duration="{enddur}" data-track-index="0"></div>'
             )
-        kinetic = kinetic_html(scene.get('narration', ''), category, dur, meta.get('word_timings'), scene_start=cursor)
+        kinetic = kinetic_html(scene.get('narration', ''), category, dur, meta.get('word_timings'), scene_start=0.0)
         sound_cues.extend(sound_cue_events(scene.get('narration', ''), category, dur, meta.get('word_timings'), cursor))
         blocks.append(f"""
 <div id="overlay{i}" class="clip motion-scene science-{category} motion-scene-{i} {motion['class_name']}" data-motion-style="{motion['style']}" style="--scene-start:{start}s" data-start="{start}" data-duration="{enddur}" data-track-index="2">
