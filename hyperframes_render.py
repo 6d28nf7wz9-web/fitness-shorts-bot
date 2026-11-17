@@ -216,12 +216,14 @@ def main():
         sub_html = "<br>".join(html.escape(x) for x in sub_lines)
         start = f"{cursor:.3f}"
         enddur = f"{dur:.3f}"
+        category, science_panel = build_visual_panel(scene, i)
+        motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         # Only use scene footage that clips_fast.py selected with an exact
         # semantic match. Science fallback scenes keep the designed motion canvas.
         footage_name = prepare_scene_footage(i, assets)
         if footage_name:
             blocks.append(
-                f'<video id="broll{i}" class="scene-footage" muted playsinline '
+                f'<video id="broll{i}" class="scene-footage camera-{motion["camera"]}" style="--scene-start:{start}s" muted playsinline '
                 f'data-start="{start}" data-duration="{enddur}" data-track-index="0" '
                 f'src="assets/{html.escape(footage_name, quote=True)}"></video>'
             )
@@ -230,10 +232,8 @@ def main():
                 f'<div id="bg{i}" class="scene-bg clip" data-start="{start}" '
                 f'data-duration="{enddur}" data-track-index="0"></div>'
             )
-        category, science_panel = build_visual_panel(scene, i)
         kinetic = kinetic_html(scene.get('narration', ''), category, dur, meta.get('word_timings'), scene_start=cursor)
         sound_cues.extend(sound_cue_events(scene.get('narration', ''), category, dur, meta.get('word_timings'), cursor))
-        motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         blocks.append(f"""
 <div id="overlay{i}" class="clip motion-scene science-{category} motion-scene-{i} {motion['class_name']}" data-motion-style="{motion['style']}" style="--scene-start:{start}s" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
@@ -246,6 +246,10 @@ def main():
         cursor += dur
     html_doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FitFuel HyperFrames render</title><style>{css}
 video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
+.scene-footage{{animation-delay:var(--scene-start,0s)!important}}
+.scene-footage.camera-push{{animation:ff-camera-push 7s ease-in-out both}}
+.scene-footage.camera-drift{{animation:ff-camera-drift 7s ease-in-out both}}
+.scene-footage.camera-pull{{animation:ff-camera-pull 7s ease-in-out both}}
 .scene-bg{{position:absolute;z-index:0;inset:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.32),transparent 58%),linear-gradient(155deg,#07111d 0%,#10263a 48%,#07111d 100%);}}
 .scene-footage{{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.72) saturate(1.08) contrast(1.04);transform:scale(1.045);animation:ff-camera-drift 7s ease-in-out both;}}
 .scene-bg:after{{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 71px,rgba(114,230,194,.055) 72px),repeating-linear-gradient(90deg,transparent 0 71px,rgba(114,230,194,.055) 72px);}}
