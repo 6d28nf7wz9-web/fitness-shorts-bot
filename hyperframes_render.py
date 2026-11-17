@@ -111,7 +111,15 @@ def main():
     css += visual_css()
     css += motion_css()
     css += motion_engine_css()
+    # HyperFrames renders every scene in one browser composition. CSS animations
+    # therefore need the scene's absolute timeline offset, not just local time.
     css += """
+.motion-scene{animation-delay:var(--scene-start,0s)!important}
+.motion-scene .title,.motion-scene .sub,.motion-scene .science-panel,
+.motion-scene .science-kicker,.motion-scene .science-heading,.motion-scene .science-svg{
+  animation-delay:var(--scene-start,0s)!important;
+}
+""" + """
 /* Progressive disclosure: reveal the diagram's claim, then its evidence. */
 .science-svg .diagram-label{opacity:0;animation:ff-diagram-label-reveal .55s .28s cubic-bezier(.16,1,.3,1) both}
 .science-svg .diagram-note{opacity:0;animation:ff-diagram-label-reveal .55s 1.05s cubic-bezier(.16,1,.3,1) both,ff-diagram-note-hold 3.4s 1.7s ease-in-out infinite alternate}
@@ -223,11 +231,11 @@ def main():
                 f'data-duration="{enddur}" data-track-index="0"></div>'
             )
         category, science_panel = build_visual_panel(scene, i)
-        kinetic = kinetic_html(scene.get('narration', ''), category, dur, meta.get('word_timings'))
+        kinetic = kinetic_html(scene.get('narration', ''), category, dur, meta.get('word_timings'), scene_start=cursor)
         sound_cues.extend(sound_cue_events(scene.get('narration', ''), category, dur, meta.get('word_timings'), cursor))
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         blocks.append(f"""
-<div id="overlay{i}" class="clip motion-scene science-{category} motion-scene-{i} {motion['class_name']}" data-motion-style="{motion['style']}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
+<div id="overlay{i}" class="clip motion-scene science-{category} motion-scene-{i} {motion['class_name']}" data-motion-style="{motion['style']}" style="--scene-start:{start}s" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
