@@ -61,7 +61,7 @@ def motion_css():
 .motion-scene .science-kicker { animation: ff-kicker-enter 420ms 80ms cubic-bezier(.16,1,.3,1) both; }
 .motion-scene .science-heading { animation: ff-heading-enter 480ms 140ms cubic-bezier(.16,1,.3,1) both; }
 .motion-scene .science-svg { animation: ff-diagram-enter 560ms 200ms cubic-bezier(.16,1,.3,1) both; }
-.motion-hook { animation: ff-transition-hook 560ms cubic-bezier(.16,1,.3,1) both; animation-delay:var(--scene-start,0s); }
+.motion-hook { animation: ff-transition-hook 560ms cubic-bezier(.16,1,.3,1) both; }
 .motion-support { animation: ff-transition-support 480ms cubic-bezier(.22,1,.36,1) both; animation-delay:var(--scene-start,0s); }
 .motion-payoff { animation: ff-transition-payoff 620ms cubic-bezier(.16,1,.3,1) both; animation-delay:var(--scene-start,0s); }
 @keyframes ff-transition-hook { from { opacity:0; clip-path:inset(8% 0 8% 0); transform:scale(1.035); } to { opacity:1; clip-path:inset(0); transform:scale(1); } }
