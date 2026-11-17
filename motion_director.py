@@ -21,15 +21,18 @@ def plan_scene_motion(scene, index, duration, category, is_last=False):
     layout = ("right" if index % 3 == 2 else "left") if category != "general" else "center"
     camera = ("push" if index % 3 == 1 else "drift" if index % 3 == 2 else "pull")
     emphasis = "headline" if index % 2 else "diagram"
+    transitions = ("wipe", "slide-up", "zoom", "reveal")
+    transition = "hook" if role == "hook" else "payoff" if role == "payoff" else transitions[(index - 2) % len(transitions)]
     return {
         "role": role,
+        "transition": transition,
         "pace": pace,
         "focus": focus,
         "layout": layout,
         "camera": camera,
         "emphasis": emphasis,
-        "class_name": f"motion-{role} motion-{pace} focus-{focus} layout-{layout} camera-{camera} emphasis-{emphasis}",
-        "style": f"{role}:{pace}:{focus}:{layout}:{camera}:{emphasis}",
+        "class_name": f"motion-{role} motion-{pace} focus-{focus} layout-{layout} camera-{camera} emphasis-{emphasis} transition-{transition}",
+        "style": f"{role}:{pace}:{focus}:{layout}:{camera}:{emphasis}:{transition}",
     }
 
 
@@ -64,9 +67,17 @@ def motion_css():
 .motion-hook { animation: ff-transition-hook 560ms cubic-bezier(.16,1,.3,1) both; }
 .motion-support { animation: ff-transition-support 480ms cubic-bezier(.22,1,.36,1) both; }
 .motion-payoff { animation: ff-transition-payoff 620ms cubic-bezier(.16,1,.3,1) both; }
+.transition-slide-up { animation: ff-transition-slide-up 520ms cubic-bezier(.16,1,.3,1) both; }
+.transition-wipe { animation: ff-transition-wipe 560ms cubic-bezier(.16,1,.3,1) both; }
+.transition-zoom { animation: ff-transition-zoom 520ms cubic-bezier(.16,1,.3,1) both; }
+.transition-reveal { animation: ff-transition-reveal 540ms cubic-bezier(.16,1,.3,1) both; }
 @keyframes ff-transition-hook { from { opacity:0; clip-path:inset(8% 0 8% 0); transform:scale(1.035); } to { opacity:1; clip-path:inset(0); transform:scale(1); } }
 @keyframes ff-transition-support { from { opacity:0; transform:translateX(34px); filter:blur(4px); } to { opacity:1; transform:translateX(0); filter:blur(0); } }
 @keyframes ff-transition-payoff { from { opacity:0; clip-path:circle(12% at 50% 50%); transform:scale(.97); } to { opacity:1; clip-path:circle(100% at 50% 50%); transform:scale(1); } }
+@keyframes ff-transition-slide-up { from { opacity:0; transform:translateY(54px); filter:blur(5px); } to { opacity:1; transform:translateY(0); filter:blur(0); } }
+@keyframes ff-transition-wipe { from { opacity:1; clip-path:inset(0 100% 0 0); } to { opacity:1; clip-path:inset(0); } }
+@keyframes ff-transition-zoom { from { opacity:0; transform:scale(1.09); filter:blur(7px); } to { opacity:1; transform:scale(1); filter:blur(0); } }
+@keyframes ff-transition-reveal { from { opacity:0; clip-path:inset(50% 0); } to { opacity:1; clip-path:inset(0); } }
 .layout-left .science-panel { left: 70px; right: 125px; }
 .layout-right .science-panel { left: 125px; right: 70px; }
 .layout-center .science-panel { left: 95px; right: 95px; }
