@@ -108,7 +108,6 @@ def motion_engine_css():
  18%{opacity:1;transform:translateY(0) scale(1.08)}35%,82%{opacity:1;transform:scale(1)}
  100%{opacity:0;transform:translateY(-8px) scale(.98)}}
 /* Scene entrance varies by shot intent; transitions remain short and legible. */
-.motion-scene{animation:ff-scene-enter 520ms cubic-bezier(.16,1,.3,1) both}
 .motion-hook{--transition-origin:50% 50%}
 .motion-support{--transition-origin:50% 60%}
 .motion-payoff{--transition-origin:50% 45%}
