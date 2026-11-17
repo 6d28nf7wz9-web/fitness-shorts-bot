@@ -44,6 +44,28 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
         self.assertIn("PROGRESSIVE OVERLOAD", panel)
         self.assertIn("progress-line", panel)
 
+    def test_specific_subtitle_beats_generic_training_keyword(self):
+        scene = {
+            "visual_title": "The Primary Signal",
+            "keyword": "Resistance Training",
+            "visual_subtitle": "Tension Activates Muscle Fibers",
+            "narration": "Resistance training creates a signal for adaptation.",
+        }
+        category, panel = build_visual_panel(scene, 3)
+        self.assertEqual(category, "muscle")
+        self.assertIn("MUSCLE FIBER ADAPTATION", panel)
+        self.assertIn("fiber-group", panel)
+
+    def test_track_your_progress_uses_progression_chart(self):
+        scene = {
+            "visual_title": "Track Your Progress",
+            "visual_subtitle": "Record Each Session",
+            "narration": "Measure your weekly progress.",
+        }
+        category, panel = build_visual_panel(scene, 4)
+        self.assertEqual(category, "tracking")
+        self.assertIn("progress-line", panel)
+
     def test_protein_headline_uses_nutrition_pathway(self):
         scene = {
             "visual_title": "Protein Needs Resistance",
