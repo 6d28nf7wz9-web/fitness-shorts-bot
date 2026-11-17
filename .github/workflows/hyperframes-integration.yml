@@ -6,7 +6,13 @@ on:
     paths:
       - 'hyperframes_render.py'
       - 'motion_director.py'
+      - 'visual_engine.py'
+      - 'avatar.py'
+      - 'avatar_motion.py'
+      - 'production_motion_engine.py'
       - 'tests/test_motion_director.py'
+      - 'tests/test_visual_engine_scene_priority.py'
+      - 'tests/test_avatar_motion_cues.py'
       - 'assemble.py'
       - '.github/workflows/hyperframes-integration.yml'
   pull_request:
@@ -16,6 +22,12 @@ on:
       - 'assemble.py'
       - '.github/workflows/hyperframes-integration.yml'
       - 'tests/test_hyperframes_render.py'
+      - 'visual_engine.py'
+      - 'avatar.py'
+      - 'avatar_motion.py'
+      - 'production_motion_engine.py'
+      - 'tests/test_visual_engine_scene_priority.py'
+      - 'tests/test_avatar_motion_cues.py'
   workflow_dispatch:
 
 permissions:
