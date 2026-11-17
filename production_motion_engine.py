@@ -68,14 +68,14 @@ def emphasize_words(narration, category, duration, word_timings=None, limit=7):
     return selected
 
 
-def kinetic_html(narration, category, duration, word_timings=None):
+def kinetic_html(narration, category, duration, word_timings=None, scene_start=0.0):
     spans = []
     for item in emphasize_words(narration, category, duration, word_timings):
         word = html.escape(item["word"])
         start, end = item["start"], item["end"]
         spans.append(
             f'<span class="kinetic-word" style="--word-start:{start:.3f}s;'
-            f'--word-duration:{max(.12, end-start):.3f}s">{word}</span>'
+            f'--word-duration:{max(.12, end-start):.3f}s;--word-delay:{float(scene_start) + start:.3f}s">{word}</span>'
         )
     if not spans:
         return ""
@@ -101,7 +101,7 @@ def motion_engine_css():
  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;pointer-events:none}
 .kinetic-word{display:inline-block;opacity:0;transform:translateY(18px) scale(.92);
  animation:ff-word-hit var(--word-duration) cubic-bezier(.16,1,.3,1) both;
- animation-delay:var(--word-start);font-size:46px;font-weight:900;letter-spacing:1px;
+ animation-delay:var(--word-delay);font-size:46px;font-weight:900;letter-spacing:1px;
  color:#72e6c2;text-shadow:0 4px 22px #000,0 0 20px rgba(114,230,194,.35)}
 @keyframes ff-word-hit{0%{opacity:0;transform:translateY(18px) scale(.92)}
  18%{opacity:1;transform:translateY(0) scale(1.08)}35%,82%{opacity:1;transform:scale(1)}
