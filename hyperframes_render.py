@@ -113,6 +113,27 @@ def main():
     css += motion_engine_css()
     css += presenter_css()
     css += """
+/* Progressive disclosure: reveal the diagram's claim, then its evidence. */
+.science-svg .diagram-label{opacity:0;animation:ff-diagram-label-reveal .55s .28s cubic-bezier(.16,1,.3,1) both}
+.science-svg .diagram-note{opacity:0;animation:ff-diagram-label-reveal .55s 1.05s cubic-bezier(.16,1,.3,1) both,ff-diagram-note-hold 3.4s 1.7s ease-in-out infinite alternate}
+.science-muscle .fiber-two{animation-delay:.25s,.25s}
+.science-muscle .fiber-three{animation-delay:.5s,.5s}
+.science-muscle .fiber-four{animation-delay:.75s,.75s}
+.science-nutrition .fuel-dots circle:nth-child(2){animation-delay:.25s}
+.science-nutrition .fuel-dots circle:nth-child(3){animation-delay:.5s}
+.science-heart .oxygen-two{animation-delay:.2s}
+.science-heart .oxygen-three{animation-delay:.4s}
+.science-heart .oxygen-four{animation-delay:.6s}
+.science-hydration .electrolytes circle:nth-child(2){animation-delay:.25s}
+.science-hydration .electrolytes circle:nth-child(3){animation-delay:.5s}
+.science-hormones .signal-dots circle:nth-child(2){animation-delay:.2s}
+.science-hormones .signal-dots circle:nth-child(3){animation-delay:.4s}
+.science-creatine .creatine-dot:nth-of-type(2){animation-delay:.25s}
+.science-creatine .creatine-dot:nth-of-type(3){animation-delay:.5s}
+@keyframes ff-diagram-label-reveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ff-diagram-note-hold{from{opacity:1}to{opacity:.78}}
+"""
+    css += """
 @media (prefers-reduced-motion: reduce) {
   .motion-scene *, .science-panel:before {
     animation: none !important;
