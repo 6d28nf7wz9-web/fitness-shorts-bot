@@ -88,7 +88,8 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
             "hydration": "Water and electrolyte balance",
             "exercise": "Squat exercise and joint movement",
             "hormones": "Insulin hormone receptor signaling",
-            "supplements": "Supplement dose and creatine evidence",
+            "supplements": "Supplement dose and caffeine evidence",
+            "creatine": "Creatine supports ATP recycling during hard efforts",
         }
         panels = {}
         for expected, narration in cases.items():
@@ -102,6 +103,7 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn("heart-shape", panels["heart"])
         self.assertIn("electrolytes", panels["hydration"])
         self.assertIn("receptor", panels["hormones"])
+        self.assertIn("atp-node", panels["creatine"])
 
     def test_dynamic_scene_labels_are_escaped(self):
         _, panel = build_visual_panel({
