@@ -38,8 +38,12 @@ def classify_scene(scene):
     # A clear headline is authoritative. If the headline is neutral, compare
     # keyword and subtitle matches by specificity so "resistance training"
     # cannot hide a more informative "muscle fibers" teaching point.
+    title_source = str(scene.get("visual_title", "")).lower()
+    for category, pattern in RULES:
+        if re.search(pattern, title_source):
+            return category
+
     visual_sources = (
-        (str(scene.get("visual_title", "")).lower(), 100),
         (str(scene.get("visual_subtitle", "")).lower(), 65),
         (str(scene.get("keyword", "")).lower(), 45),
     )
