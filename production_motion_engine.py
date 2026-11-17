@@ -86,13 +86,13 @@ def kinetic_html(narration, category, duration, word_timings=None):
 def presenter_gesture(narration, category):
     """Select a readable gesture from the actual teaching intent."""
     text = str(narration or "").lower()
-    if re.search(r"\\b(point|show|look|notice|this|here|target|watch)\\b", text):
+    if re.search(r"\b(point|show|look|notice|this|here|target|watch)\b", text):
         return "point"
-    if re.search(r"\\b(compare|versus|instead|difference|whereas|while)\\b", text):
+    if re.search(r"\b(compare|versus|instead|difference|whereas|while)\b", text):
         return "compare"
-    if re.search(r"\\b(demonstrate|perform|bend|extend|lower|raise|rotate|squat|press|pull|hinge)\\b", text):
+    if re.search(r"\b(demonstrate|perform|bend|extend|lower|raise|rotate|squat|press|pull|hinge)\b", text):
         return "demonstrate"
-    if re.search(r"\\b(why|because|remember|important|means|therefore|explain)\\b", text):
+    if re.search(r"\b(why|because|remember|important|means|therefore|explain)\b", text):
         return "explain"
     if category in ("muscle", "exercise", "heart"):
         return "demonstrate"
@@ -104,13 +104,13 @@ def presenter_gesture(narration, category):
 def presenter_expression(narration, category):
     """Choose a subtle facial expression from the emotional/teaching cue."""
     text = str(narration or "").lower()
-    if re.search(r"\\b(surprising|surprisingly|wow|shocking|unexpected|myth|mistake)\\b", text):
+    if re.search(r"\b(surprising|surprisingly|wow|shocking|unexpected|myth|mistake)\b", text):
         return "surprise"
-    if re.search(r"\\b(warning|avoid|danger|risk|wrong|stop|careful|injury)\\b", text):
+    if re.search(r"\b(warning|avoid|danger|risk|wrong|stop|careful|injury)\b", text):
         return "concern"
-    if re.search(r"\\b(great|excellent|success|stronger|progress|result|improve|benefit)\\b", text):
+    if re.search(r"\b(great|excellent|success|stronger|progress|result|improve|benefit)\b", text):
         return "smile"
-    if re.search(r"\\b(focus|technique|precision|control|form|mechanics)\\b", text) or category == "exercise":
+    if re.search(r"\b(focus|technique|precision|control|form|mechanics)\b", text) or category == "exercise":
         return "focused"
     return "neutral"
 
