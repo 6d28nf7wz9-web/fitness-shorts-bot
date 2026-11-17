@@ -8,7 +8,7 @@ import re
 
 _WORD = re.compile(r"\b[\w'-]+\b", re.UNICODE)
 _IMPORTANT = {
-    "muscle": {"tension", "repair", "growth", "protein", "strength", "hypertrophy", "recovery"},
+    "muscle": {"protein", "tension", "repair", "growth", "protein", "strength", "hypertrophy", "recovery"},
     "nutrition": {"protein", "carbohydrate", "fiber", "absorption", "nutrient", "meal", "fuel"},
     "heart": {"heart", "blood", "oxygen", "pulse", "cardio", "circulation"},
     "fat_loss": {"calorie", "deficit", "energy", "fat", "intake", "expenditure"},
