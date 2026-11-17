@@ -109,6 +109,17 @@ _GENERIC = {norm(w) for w in GENERIC}
 _LOW_SIGNAL = {norm(w) for w in LOW_SIGNAL}
 _HIGH_CONFIDENCE_SINGLE = {norm(w) for w in HIGH_CONFIDENCE_SINGLE}
 
+# Reject visually unrelated scenery even when stock metadata contains a stray
+# fitness keyword (e.g. "training load" returning a harbor or beach aerial).
+OFF_TOPIC_SCENERY = {
+    "beach", "ocean", "sea", "coast", "coastal", "coastline", "shore",
+    "port", "harbor", "harbour", "ship", "ships", "boat", "boats",
+    "cargo", "shipping", "forklift", "warehouse", "airport", "airplane",
+    "highway", "motorway", "roadway", "landscape", "aerial", "drone",
+    "skyline", "cityscape", "construction", "crane", "industrial", "factory",
+}
+_OFF_TOPIC_SCENERY = {norm(w) for w in OFF_TOPIC_SCENERY}
+
 
 def hit_words(hit):
     slug = str(hit.get("pageURL", "")).rstrip("/").split("/")[-1]
@@ -152,6 +163,11 @@ def relevance(hit, keyword, context=""):
     """0=off-topic, 1=category match, 2=specific keyword match."""
 
     hw = hit_words(hit)
+    explicit_scene_words = words_of(f"{keyword} {context}") - _FILLER
+    unrelated_scenery = hw & _OFF_TOPIC_SCENERY
+    if unrelated_scenery and not (unrelated_scenery & explicit_scene_words):
+        return 0
+
     query_words = keyword_words(keyword)
     ambiguous = {"bench", "press", "row", "lat", "water", "bottle", "weight"}
     query_specific = query_words - _GENERIC - _WEAK - ambiguous - _LOW_SIGNAL
