@@ -18,7 +18,7 @@ CATEGORIES = {
 }
 
 RULES = [
-    ("tracking", r"\b(?:track(?:ing)? (?:your )?lifts?|log(?:ging)? (?:your )?lifts?|training log|progressive overload|strength progression|weekly progression|rep progression)\b"),
+    ("tracking", r"\b(?:track(?:ing)? (?:your )?(?:lifts?|progress|workouts?)|log(?:ging)? (?:your )?lifts?|training log|progress tracking|progressive overload|strength progression|weekly progression|rep progression)\b"),
     ("nutrition", r"\b(?:protein needs?|protein intake|protein synthesis|amino acids?|whey protein)\b"),
     ("creatine", r"\bcreatine\b"),
     ("recovery", r"\b(?:recovery|recover\w*|rest day\w*|deload\w*|sleep quality|muscle repair)\b"),
