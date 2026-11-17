@@ -31,19 +31,45 @@ def sentence_contexts(narration, count):
 
 
 def _ordered_keywords(scene):
-    """Return scene search keywords in their original priority order."""
+    """Return authored targets first, then precise exercise-action variants."""
     raw = str(scene.get("keyword", "")).strip()
+    keywords = [item.strip() for item in raw.split("|") if item.strip()]
 
-    keywords = [
-        item.strip()
-        for item in raw.split("|")
-        if item.strip()
-    ]
+    # Exercise B-roll should show the movement being explained, not generic
+    # gym activity. Add tightly scoped search phrases from the scene intent.
+    context = " ".join(str(scene.get(key, "")) for key in
+                       ("visual_title", "visual_subtitle", "narration", "description")).lower()
+    exercise_targets = (
+        (r"\\bromanian deadlift\\b|\\brdl\\b", ["romanian deadlift", "dumbbell romanian deadlift", "barbell hip hinge"]),
+        (r"\\bdeadlift\\b", ["barbell deadlift", "deadlift exercise", "hip hinge lifting"]),
+        (r"\\bsquat\\b", ["barbell squat", "person performing squat", "squat exercise"]),
+        (r"\\blunge\\b", ["dumbbell lunge", "walking lunge exercise", "split squat"]),
+        (r"\\bbench press\\b", ["barbell bench press", "bench press exercise", "chest pressing"]),
+        (r"\\bpush[- ]?up\\b", ["push up exercise", "person doing pushups", "pushup form"]),
+        (r"\\bpull[- ]?up\\b", ["pull up exercise", "person doing pullups", "hanging pullup"]),
+        (r"\\blat pulldown\\b", ["lat pulldown machine", "cable lat pulldown", "back pulldown exercise"]),
+        (r"\\bbicep curl\\b|\\bcurl\\b", ["dumbbell bicep curl", "barbell curl exercise", "biceps training"]),
+        (r"\\bshoulder press\\b|\\boverhead press\\b", ["dumbbell shoulder press", "barbell overhead press", "shoulder press exercise"]),
+        (r"\\bplank\\b", ["forearm plank exercise", "person holding plank", "plank form"]),
+        (r"\\bhip thrust\\b", ["barbell hip thrust", "hip thrust exercise", "glute bridge movement"]),
+        (r"\\browing\\b|\\bseated row\\b", ["seated cable row", "bent over barbell row", "rowing exercise"]),
+        (r"\\bcalf raise\\b", ["standing calf raise", "seated calf raise", "calf raise exercise"]),
+    )
+    if re.search(r"\\b(exercise|workout|training|lift|lifting|repetition|rep|form|movement)\\b", context):
+        for pattern, variants in exercise_targets:
+            if re.search(pattern, context):
+                keywords.extend(variants)
+                break
 
-    if not keywords:
-        keywords = ["gym workout", "healthy food"]
+    # Preserve priority and remove duplicate search calls.
+    seen, ordered = set(), []
+    for item in keywords:
+        key = item.lower()
+        if key not in seen:
+            seen.add(key)
+            ordered.append(item)
 
-    return keywords
+    return ordered or ["gym workout"]
 
 
 def _validate_rendered_video(path, expected_seconds):
