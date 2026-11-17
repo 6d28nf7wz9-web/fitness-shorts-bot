@@ -241,7 +241,45 @@ def render(video, samples, layout):
         "-c:a", "copy", "-movflags", "+faststart",
         "-t", f"{dur:.3f}", tmp,
     ]
-    subprocess.run(cmd, check=True)
+    # Keep the presenter pipeline resilient: FFmpeg builds differ across hosted
+    # runners, and some filter builds reject a scene-motion expression even when
+    # the same expression is valid locally. Retry with a simple, deterministic
+    # compositor while preserving the audio-driven mouth frames.
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as first_error:
+        detail = (first_error.stderr or first_error.stdout or str(first_error)).strip()
+        print("Avatar motion render failed; retrying with safe lip-sync compositor.")
+        if detail:
+            print("FFmpeg motion-render diagnostic:", detail[-4000:])
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+        if layout == "short":
+            safe_fc = (
+                f"[0:v]drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x071624@0.78:t=fill,"
+                f"drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x72e6c2@0.72:t=3[base];"
+                f"[1:v]fps={OUT_FPS},format=rgba,"
+                f"pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:(ow-iw)/2:(oh-ih)/2:color=black@0[av];"
+                f"[base][av]overlay=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:eof_action=repeat:format=auto[v]"
+            )
+        else:
+            safe_fc = (
+                f"[1:v]fps={OUT_FPS},format=rgba[av];"
+                f"[0:v][av]overlay=x={cfg['x']}:y='H-h-{cfg['bottom']}'"
+                ":eof_action=repeat:format=auto[v]"
+            )
+        safe_cmd = list(cmd)
+        safe_cmd[safe_cmd.index("-filter_complex") + 1] = safe_fc
+        try:
+            subprocess.run(safe_cmd, check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as fallback_error:
+            fallback_detail = (fallback_error.stderr or fallback_error.stdout or str(fallback_error)).strip()
+            raise RuntimeError(
+                "Avatar rendering failed in both motion and safe compositor modes. "
+                + fallback_detail[-4000:]
+            ) from fallback_error
+
     os.replace(tmp, video)
     os.remove(list_path)
     with open(marker, "w") as f:
