@@ -221,7 +221,8 @@ def render(video, samples, layout):
         fc = (
             f"[0:v]drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x071624@0.78:t=fill,"
             f"drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x72e6c2@0.72:t=3[base];"
-            f"[1:v]fps={OUT_FPS},format=rgba,rotate='{angle_expr}':c=none:ow=iw:oh=ih,"
+            f"[1:v]fps={OUT_FPS},scale={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:force_original_aspect_ratio=decrease,format=rgba,"
+            f"rotate='{angle_expr}':c=none:ow=iw:oh=ih,"
             f"pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:(ow-iw)/2:(oh-ih)/2:color=black@0[av];"
             f"[base][av]overlay=x={SHORT_AVATAR_X}:y='{SHORT_AVATAR_Y}+{BOB}*sin(2*PI*t*0.9)'"
             ":eof_action=repeat:format=auto[v]"
@@ -259,7 +260,7 @@ def render(video, samples, layout):
             safe_fc = (
                 f"[0:v]drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x071624@0.78:t=fill,"
                 f"drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x72e6c2@0.72:t=3[base];"
-                f"[1:v]fps={OUT_FPS},format=rgba,"
+                f"[1:v]fps={OUT_FPS},scale={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:force_original_aspect_ratio=decrease,format=rgba,"
                 f"pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:(ow-iw)/2:(oh-ih)/2:color=black@0[av];"
                 f"[base][av]overlay=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:eof_action=repeat:format=auto[v]"
             )
