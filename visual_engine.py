@@ -4,6 +4,7 @@ import re
 
 CATEGORIES = {
     "muscle": ("MUSCLE FIBER ADAPTATION", ["MECHANICAL TENSION", "REPAIR", "GROWTH"]),
+    "recovery": ("RECOVERY & ADAPTATION", ["TRAINING STRESS", "REST", "REBUILD"]),
     "nutrition": ("NUTRIENT PATHWAY", ["FOOD", "ABSORPTION", "FUEL"]),
     "heart": ("CARDIOVASCULAR FLOW", ["OXYGEN IN", "PUMP", "DELIVERY"]),
     "fat_loss": ("ENERGY BALANCE", ["ENERGY IN", "STORAGE", "ENERGY OUT"]),
@@ -17,6 +18,7 @@ CATEGORIES = {
 
 RULES = [
     ("creatine", r"\bcreatine\b"),
+    ("recovery", r"\b(?:recovery|recover\w*|rest day\w*|deload\w*|sleep quality|muscle repair)\b"),
     ("supplements", r"\b(?:supplement\w*|caffeine|pre[- ]?workout|protein powder|ergogenic aid)\b"),
     ("hydration", r"\b(?:hydration|dehydrat\w*|electrolyte\w*|sodium|potassium|fluid balance)\b"),
     ("heart", r"\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\b"),
@@ -59,7 +61,19 @@ def _label(value, fallback, limit=22):
 def _diagram(category, labels, uid):
     a, b, c = labels
     # Each topic has its own visual metaphor and geometry, not just recolored nodes.
-    if category == "muscle":
+    if category == "recovery":
+        body = f"""
+          <g class="recovery-cycle">
+            <circle class="recovery-clock" cx="190" cy="205" r="92"/>
+            <path class="recovery-hand" d="M190 205 V145 M190 205 L238 230"/>
+            <path class="recovery-wave" d="M330 205 H430"/>
+            <g class="recovery-stars"><circle cx="505" cy="145" r="12"/><circle cx="565" cy="205" r="9"/><circle cx="505" cy="265" r="14"/></g>
+            <path class="recovery-build" d="M610 285 V185 M585 210 L610 180 L635 210"/>
+          </g>
+          <text x="190" y="350" class="diagram-note">RESTORE</text>
+          <text x="500" y="350" class="diagram-note">ADAPT</text>
+          <text x="380" y="75" class="diagram-label">{a}  •  {b}  •  {c}</text>"""
+    elif category == "muscle":
         body = f"""
           <g class="fiber-group">
             <path class="fiber" d="M90 135 C190 85 270 185 370 135 S550 85 670 135"/>
@@ -194,6 +208,12 @@ def visual_css():
 .science-svg text{font-family:Arial,sans-serif}
 .diagram-label{fill:#72e6c2;text-anchor:middle;font-size:16px;font-weight:900;letter-spacing:2px}
 .diagram-note{fill:#eaf5ff;text-anchor:middle;font-size:14px;font-weight:800;letter-spacing:2px}
+.science-recovery .recovery-clock{fill:rgba(101,170,255,.12);stroke:#65aaff;stroke-width:8}
+.recovery-hand{stroke:#72e6c2;stroke-width:9;stroke-linecap:round;animation:ff-recovery-tick 4s linear infinite;transform-origin:190px 205px}
+.recovery-wave{stroke:#f6bd60;stroke-width:9;stroke-dasharray:12 10;animation:flow 2s linear infinite}
+.recovery-stars circle{fill:#72e6c2;animation:float 2s ease-in-out infinite alternate}
+.recovery-build{fill:none;stroke:#72e6c2;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;animation:ff-recovery-rise 2s ease-in-out infinite alternate}
+@keyframes ff-recovery-tick{to{transform:rotate(35deg)}}@keyframes ff-recovery-rise{to{transform:translateY(-12px)}}
 .fiber{fill:none;stroke:#72e6c2;stroke-width:17;stroke-linecap:round;filter:drop-shadow(0 0 8px rgba(114,230,194,.5));stroke-dasharray:24 8;animation:fiber-pulse 3s ease-in-out infinite alternate}
 .fiber-two{stroke:#65aaff;animation-delay:.3s}.fiber-three{stroke:#a4f2df;animation-delay:.6s}.fiber-four{stroke:#65aaff;animation-delay:.9s}
 .satellite circle{fill:#65aaff;stroke:#fff;stroke-width:3}.arrow{fill:none;stroke:#72e6c2;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;marker-end:none;stroke-dasharray:12 10;animation:flow 2s linear infinite}
