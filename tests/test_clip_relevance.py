@@ -8,7 +8,7 @@ import unittest
 from contextlib import redirect_stdout
 from unittest.mock import patch
 
-from clips import choose_clip
+from clips import choose_clip, keyword_variants
 from quality_check import main as quality_check_main
 from relevance import relevance
 
@@ -206,6 +206,43 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
                 self.assertIn("blocking upload", captured.getvalue())
             finally:
                 os.chdir(original_cwd)
+
+
+    def test_narration_context_is_not_sent_to_stock_search_providers(self):
+        relevant_hit = make_hit(
+            9010,
+            "dumbbell curl biceps gym strength training",
+        )
+        narration = (
+            "Resistance-training studies show similar muscle growth across "
+            "light and heavy loads when sets reach failure."
+        )
+        searched_queries = []
+
+        def search_and_record(query):
+            searched_queries.append(query)
+            return [relevant_hit] if query == "dumbbell curl close up" else []
+
+        with patch("clips.search", side_effect=search_and_record):
+            with patch.dict(os.environ, {"ALLOW_CATEGORY_ONLY_CLIPS": "0"}):
+                _, selected, _, _ = choose_clip(
+                    "dumbbell curl close up|heavy dumbbell curl gym",
+                    2.5,
+                    set(),
+                    context=narration,
+                )
+
+        self.assertEqual(selected["id"], 9010)
+        self.assertNotIn(narration, searched_queries)
+        self.assertTrue(searched_queries)
+        self.assertTrue(all(len(query) <= 100 for query in searched_queries))
+
+    def test_overlong_authored_stock_keyword_is_bounded(self):
+        long_keyword = "resistance training " + "muscle growth " * 20
+        variants = keyword_variants(long_keyword)
+
+        self.assertTrue(variants)
+        self.assertTrue(all(len(query) <= 100 for query in variants))
 
 
 if __name__ == "__main__":
