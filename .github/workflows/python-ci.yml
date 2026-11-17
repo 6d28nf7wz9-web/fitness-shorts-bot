@@ -41,6 +41,11 @@ jobs:
         run: python -m unittest discover -s tests -p "test_motion_director.py" -v
       - name: Test synchronized production motion engine
         run: python -m unittest discover -s tests -p "test_production_motion_engine.py" -v
+      - name: Test spoken-action B-roll targeting and continuous visual motion
+        run: |
+          python -m pip install requests
+          python -m unittest discover -s tests -p "test_clips_fast_targets.py" -v
+          python -m unittest discover -s tests -p "test_continuous_visual_motion.py" -v
       - name: Test image-to-video adapters (mocked; no provider calls)
         run: |
           python -m pip install requests
