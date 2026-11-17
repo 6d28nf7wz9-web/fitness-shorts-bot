@@ -105,6 +105,18 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
         )
         self.assertLess(score, 2)
 
+    def test_lifting_search_does_not_accept_a_waterfall_or_forest_clip(self):
+        unrelated = make_hit(
+            9011,
+            "sport barbell dumbbell training fitness forest leaves waterfall river nature",
+        )
+        score = relevance(
+            unrelated,
+            "dumbbell bicep curl",
+            "Lift heavier each week to progress.",
+        )
+        self.assertEqual(score, 0)
+
     def test_training_load_does_not_accept_a_beach_or_harbor_aerial(self):
         unrelated = make_hit(
             9010,
