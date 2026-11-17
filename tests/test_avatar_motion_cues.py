@@ -42,6 +42,18 @@ class AvatarMotionCueTests(unittest.TestCase):
         self.assertIn("sin(", x)
         self.assertEqual(ffmpeg_motion_expression([], "angle"), "0")
 
+    def test_scene_gestures_have_visible_but_bounded_motion(self):
+        cues = [
+            {"start": 0, "end": 2, "gesture": "point"},
+            {"start": 2, "end": 4, "gesture": "compare"},
+        ]
+        angle = ffmpeg_motion_expression(cues, "angle")
+        x = ffmpeg_motion_expression(cues, "x")
+        self.assertIn("0.065+0.025*sin", angle)
+        self.assertIn("0.060*sin", angle)
+        self.assertIn("18+14*sin", x)
+        self.assertIn("22*sin", x)
+
     def test_expression_accents_preserve_closed_mouth_frames(self):
         states = ["mid", "closed", "open", "wide"]
         result = apply_expression_mouth_states(
