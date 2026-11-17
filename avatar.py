@@ -202,6 +202,7 @@ def render(video, samples, layout):
     cues = scene_motion_cues(layout)
     states = frame_states(codes, True, cues)
     angle_expr = ffmpeg_motion_expression(cues, "angle")
+    x_expr = ffmpeg_motion_expression(cues, "x")  # retained for the long-video layout
     total = max(len(states), 1)
     shares = ", ".join(f"{k} {states.count(k) * 100 // total}%" for k in NAMES + ["blink"])
     print("Mouth shapes used:", shares)
