@@ -125,6 +125,17 @@ OFF_TOPIC_SCENERY = {
 }
 _OFF_TOPIC_SCENERY = {norm(w) for w in OFF_TOPIC_SCENERY}
 
+# Workplace footage is a frequent false-positive for abstract supplement/energy
+# searches (e.g. a person at a laptop tagged "health" or "training"). Reject it
+# unless the narration explicitly asks for an office/work setting.
+OFF_TOPIC_WORKPLACE = {
+    "office", "desk", "desktop", "laptop", "computer", "keyboard",
+    "corporate", "business", "workplace", "coworking", "meeting",
+    "conference", "boardroom", "cubicle", "paperwork", "businessman",
+    "businesswoman", "suit", "spreadsheet",
+}
+_OFF_TOPIC_WORKPLACE = {norm(w) for w in OFF_TOPIC_WORKPLACE}
+
 
 def hit_words(hit):
     slug = str(hit.get("pageURL", "")).rstrip("/").split("/")[-1]
@@ -171,6 +182,10 @@ def relevance(hit, keyword, context=""):
     explicit_scene_words = words_of(f"{keyword} {context}") - _FILLER
     unrelated_scenery = hw & _OFF_TOPIC_SCENERY
     if unrelated_scenery and not (unrelated_scenery & explicit_scene_words):
+        return 0
+
+    unrelated_workplace = hw & _OFF_TOPIC_WORKPLACE
+    if unrelated_workplace and not (unrelated_workplace & explicit_scene_words):
         return 0
 
     query_words = keyword_words(keyword)
