@@ -11,26 +11,30 @@ CATEGORIES = {
     "exercise": ("MOVEMENT MECHANICS", ["LOAD", "JOINT", "MOTION"]),
     "hormones": ("HORMONE SIGNALING", ["SIGNAL", "RECEPTOR", "RESPONSE"]),
     "supplements": ("SUPPLEMENT EVIDENCE", ["DOSE", "EVIDENCE", "EXPECTATION"]),
+    "creatine": ("CREATINE & ATP RECYCLING", ["CREATINE", "PHOSPHOCREATINE", "ATP RECHARGE"]),
     "general": ("THE SCIENCE", ["INPUT", "PROCESS", "RESULT"]),
 }
 
 RULES = [
-    ("supplements", r"\b(?:supplement\w*|creatine|caffeine|pre[- ]?workout|protein powder|ergogenic aid)\b"),
+    ("creatine", r"\bcreatine\b"),
+    ("supplements", r"\b(?:supplement\w*|caffeine|pre[- ]?workout|protein powder|ergogenic aid)\b"),
     ("hydration", r"\b(?:hydration|dehydrat\w*|electrolyte\w*|sodium|potassium|fluid balance)\b"),
     ("heart", r"\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\b"),
     ("hormones", r"\b(?:hormone\w*|insulin|cortisol|testosterone|estrogen|ghrelin|leptin|receptor|thyroid)\b"),
     ("fat_loss", r"\b(?:fat loss|fat gain|calorie\w*|energy balance|burn fat|weight loss|calorie deficit)\b"),
-    ("muscle", r"\b(?:muscle\w*|muscle fiber\w*|hypertrophy|strength|progressive overload|protein synthesis|muscle recovery)\b"),
+    ("muscle", r"\b(?:muscle\w*|muscle fiber\w*|hypertrophy|strength|progressive overload|weekly progression|protein synthesis|muscle recovery)\b"),
     ("nutrition", r"\b(?:food|meal|nutrition|digest\w*|absorption|dietary fiber|carbohydrate\w*|protein intake|nutrient\w*)\b"),
-    ("exercise", r"\b(?:exercise|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\b"),
+    ("exercise", r"\b(?:exercise|lift\w*|weight loading|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\b"),
 ]
 
 
 def classify_scene(scene):
     """Use visible scene intent before narration so one topic cannot dominate every panel."""
+    # Headline intent wins over a secondary subtitle mention.
     visual_sources = (
-        " ".join(str(scene.get(k, "")) for k in ("visual_title", "visual_subtitle")),
+        str(scene.get("visual_title", "")),
         str(scene.get("keyword", "")),
+        str(scene.get("visual_subtitle", "")),
     )
     for source in visual_sources:
         source = source.lower()
@@ -109,6 +113,22 @@ def _diagram(category, labels, uid):
           <circle class="joint" cx="380" cy="210" r="58"/><circle class="joint-core" cx="380" cy="210" r="28"/>
           <path class="lever" d="M260 330 Q380 390 500 330"/><path class="arrow" d="M380 125 V70"/>
           <text x="380" y="375" class="diagram-note">CONTROLLED RANGE OF MOTION</text>
+          <text x="380" y="65" class="diagram-label">{a}  •  {b}  •  {c}</text>"""
+    elif category == "creatine":
+        body = f"""
+          <g class="atp-cycle">
+            <circle class="atp-node" cx="165" cy="205" r="92"/>
+            <circle class="atp-core" cx="165" cy="205" r="48"/>
+            <text x="165" y="213" class="atp-text">ATP</text>
+            <path class="arrow" d="M275 205 H385"/>
+            <circle class="adp-node" cx="480" cy="205" r="78"/>
+            <text x="480" y="213" class="atp-text">ADP</text>
+            <path class="recycle-arrow" d="M480 300 C440 390 220 390 165 305"/>
+            <circle class="creatine-dot" cx="625" cy="135" r="18"/>
+            <circle class="creatine-dot" cx="660" cy="205" r="13"/>
+            <circle class="creatine-dot" cx="625" cy="275" r="18"/>
+            <text x="635" y="345" class="diagram-note">PHOSPHOCREATINE DONATES A PHOSPHATE</text>
+          </g>
           <text x="380" y="65" class="diagram-label">{a}  •  {b}  •  {c}</text>"""
     elif category == "supplements":
         body = f"""
