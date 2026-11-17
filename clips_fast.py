@@ -25,9 +25,33 @@ def sentence_contexts(narration, count):
         for item in re.split(r"(?<=[.!?])\s+", str(narration or ""))
         if item.strip()
     ]
+    count = max(1, int(count))
     if not sentences:
-        return [str(narration or "")] * max(1, count)
-    return [sentences[min(i, len(sentences) - 1)] for i in range(max(1, count))]
+        words = str(narration or "").split()
+        if not words:
+            return [""] * count
+        return [" ".join(words[round(i * len(words) / count):round((i + 1) * len(words) / count)]) for i in range(count)]
+
+    # Group adjacent sentences by word count; never repeat the last sentence
+    # simply because a scene needs more cuts than it has punctuation marks.
+    groups = [[] for _ in range(count)]
+    loads = [0] * count
+    for sentence in sentences:
+        target = min(range(count), key=lambda idx: (loads[idx], idx))
+        groups[target].append(sentence)
+        loads[target] += len(sentence.split())
+    contexts = [" ".join(group).strip() for group in groups]
+
+    # A single long sentence still needs distinct visual beats. Split its clauses
+    # or, as a final fallback, its words into contiguous slices.
+    if len(sentences) == 1 and count > 1:
+        clauses = [part.strip() for part in re.split(r",|;|\\b(?:and|but|while|because|then)\\b", sentences[0], flags=re.I) if part.strip()]
+        if len(clauses) >= count:
+            contexts = [" ".join(clauses[round(i * len(clauses) / count):round((i + 1) * len(clauses) / count)]) for i in range(count)]
+        else:
+            words = sentences[0].split()
+            contexts = [" ".join(words[round(i * len(words) / count):round((i + 1) * len(words) / count)]) for i in range(count)]
+    return contexts
 
 
 EXERCISE_TARGETS = (
