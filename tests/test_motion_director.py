@@ -48,6 +48,15 @@ class MotionDirectorTests(unittest.TestCase):
         for name in ("rise", "scale", "slide", "focus", "snap"):
             self.assertIn("variant-" + name, css)
 
+
+    def test_scene_variants_do_not_replace_panel_breathing_animation(self):
+        css = motion_css()
+        self.assertIn(".variant-slide .title,.variant-slide .science-svg", css)
+        self.assertIn(".variant-snap .title,.variant-snap .science-svg", css)
+        self.assertNotIn(".variant-slide .science-panel", css)
+        self.assertNotIn(".variant-snap .science-panel", css)
+        self.assertIn("@keyframes ff-panel-breathe", css)
+
     def test_support_scenes_rotate_through_distinct_transitions(self):
         plans = [plan_scene_motion({}, i, 3.0, "muscle") for i in range(2, 6)]
         self.assertEqual([p["transition"] for p in plans], ["wipe", "slide-up", "zoom", "reveal"])
