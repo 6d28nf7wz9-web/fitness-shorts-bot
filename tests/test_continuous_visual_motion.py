@@ -1,6 +1,5 @@
 import unittest
 
-from production_motion_engine import presenter_css
 from visual_engine import visual_css
 
 
@@ -35,18 +34,20 @@ class ContinuousVisualMotionContractTests(unittest.TestCase):
             self.assertIn(marker, renderer)
 
     def test_presenter_is_scene_driven_and_has_reduced_motion_fallback(self):
+        with open("avatar.py", encoding="utf-8") as f:
+            avatar = f.read()
+        with open("avatar_motion.py", encoding="utf-8") as f:
+            cues = f.read()
         with open("hyperframes_render.py", encoding="utf-8") as f:
             renderer = f.read()
-        self.assertIn("presenter_gesture(", renderer)
-        self.assertIn("presenter_expression(", renderer)
-        self.assertIn("css += presenter_css()", renderer)
+        self.assertIn("scene_motion_cues(layout)", avatar)
+        self.assertIn("ffmpeg_motion_expression(cues", avatar)
+        self.assertIn("presenter_gesture(", cues)
+        self.assertIn("presenter_expression(", cues)
+        self.assertIn("apply_expression_mouth_states", avatar)
         self.assertIn("ff-diagram-label-reveal", renderer)
         self.assertIn("prefers-reduced-motion: reduce", renderer)
-        css = presenter_css()
-        for gesture in ("point", "explain", "compare", "demonstrate"):
-            self.assertIn('data-gesture="' + gesture + '"', css)
-        for expression in ("smile", "surprise", "concern", "focused"):
-            self.assertIn('data-expression="' + expression + '"', css)
+
 
 
 if __name__ == "__main__":
