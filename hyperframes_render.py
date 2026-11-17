@@ -13,7 +13,7 @@ from pathlib import Path
 
 from visual_engine import build_visual_panel, visual_css
 from motion_director import motion_css, plan_scene_motion
-from production_motion_engine import kinetic_html, motion_engine_css, sound_cue_events, presenter_html, presenter_gesture
+from production_motion_engine import kinetic_html, motion_engine_css, sound_cue_events, presenter_html, presenter_gesture, presenter_expression, presenter_css
 
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
@@ -111,6 +111,7 @@ def main():
     css += visual_css()
     css += motion_css()
     css += motion_engine_css()
+    css += presenter_css()
     # Give each scientific metaphor its own movement grammar inside the scene.
     css += """
 .science-muscle .fiber{animation:ff-fiber-travel 2.1s linear infinite,ff-fiber-breathe 1.8s ease-in-out infinite alternate}
@@ -181,7 +182,7 @@ def main():
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         blocks.append(f"""
 <div id="overlay{i}" class="clip motion-scene science-{category} motion-scene-{i} {motion['class_name']}" data-motion-style="{motion['style']}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
- <div class="shade"></div><div class="grid"></div>{presenter_html(presenter_gesture(scene.get('narration', ''), category))}
+ <div class="shade"></div><div class="grid"></div>{presenter_html(presenter_gesture(scene.get('narration', ''), category), presenter_expression(scene.get('narration', ''), category))}
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
  <div class="subbox"><div class="sub" style="font-size:{sub_size}px">{sub_html}</div></div>
