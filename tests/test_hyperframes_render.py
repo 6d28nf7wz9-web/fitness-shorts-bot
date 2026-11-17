@@ -128,7 +128,7 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         with open("hyperframes_render.py", encoding="utf-8") as f:
             renderer = f.read()
         self.assertIn("prepare_scene_footage(i, assets)", renderer)
-        self.assertIn('class="scene-footage"', renderer)
+        self.assertIn('class="scene-footage camera-', renderer)
         self.assertIn('data-track-index="0"', renderer)
         self.assertIn('category, science_panel = build_visual_panel(scene, i)', renderer)
         self.assertIn(".scene-bg", renderer)
