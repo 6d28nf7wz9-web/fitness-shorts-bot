@@ -84,14 +84,16 @@ def kinetic_html(narration, category, duration, word_timings=None):
 
 
 def presenter_gesture(narration, category):
-    """Choose a visible non-lip gesture from the spoken teaching intent."""
+    """Select a readable gesture from the actual teaching intent."""
     text = str(narration or "").lower()
-    if re.search(r"\b(point|show|look|notice|this|here|target)\b", text):
+    if re.search(r"\\b(point|show|look|notice|this|here|target|watch)\\b", text):
         return "point"
-    if re.search(r"\b(why|because|remember|important|means|therefore)\b", text):
-        return "explain"
-    if re.search(r"\b(compare|versus|instead|difference|however)\b", text):
+    if re.search(r"\\b(compare|versus|instead|difference|whereas|while)\\b", text):
         return "compare"
+    if re.search(r"\\b(demonstrate|perform|bend|extend|lower|raise|rotate|squat|press|pull|hinge)\\b", text):
+        return "demonstrate"
+    if re.search(r"\\b(why|because|remember|important|means|therefore|explain)\\b", text):
+        return "explain"
     if category in ("muscle", "exercise", "heart"):
         return "demonstrate"
     if category in ("hormones", "creatine", "nutrition"):
@@ -99,17 +101,99 @@ def presenter_gesture(narration, category):
     return "talk"
 
 
-def presenter_html(gesture="talk"):
-    """Compact vector presenter with scene-directed arm and body language."""
+def presenter_expression(narration, category):
+    """Choose a subtle facial expression from the emotional/teaching cue."""
+    text = str(narration or "").lower()
+    if re.search(r"\\b(surprising|surprisingly|wow|shocking|unexpected|myth|mistake)\\b", text):
+        return "surprise"
+    if re.search(r"\\b(warning|avoid|danger|risk|wrong|stop|careful|injury)\\b", text):
+        return "concern"
+    if re.search(r"\\b(great|excellent|success|stronger|progress|result|improve|benefit)\\b", text):
+        return "smile"
+    if re.search(r"\\b(focus|technique|precision|control|form|mechanics)\\b", text) or category == "exercise":
+        return "focused"
+    return "neutral"
+
+
+def presenter_html(gesture="talk", expression="neutral"):
+    """Small vector presenter with separate arm, torso, brow and mouth states."""
     gesture = gesture if gesture in {"talk", "point", "explain", "compare", "demonstrate"} else "talk"
-    return f"""<div class="presenter gesture-{gesture}" aria-label="FitFuel presenter">
+    expression = expression if expression in {"neutral", "smile", "surprise", "concern", "focused"} else "neutral"
+    return f"""<div class="presenter" data-gesture="{gesture}" data-expression="{expression}" aria-label="FitFuel presenter">
       <svg viewBox="0 0 100 120" role="img">
         <circle class="presenter-head" cx="50" cy="27" r="18"/>
         <path class="presenter-body" d="M20 112 Q20 62 50 62 Q80 62 80 112Z"/>
-        <path class="presenter-arm" d="M23 78 Q8 65 13 53 M77 78 Q91 67 88 54"/>
-        <circle class="presenter-eye" cx="44" cy="25" r="2"/><circle class="presenter-eye" cx="57" cy="25" r="2"/>
-        <path class="presenter-mouth" d="M43 37 Q50 42 57 37"/>
+        <path class="presenter-arm arm-left" d="M23 78 Q8 65 13 53"/>
+        <path class="presenter-arm arm-right" d="M77 78 Q91 67 88 54"/>
+        <path class="presenter-brow brow-left" d="M38 19 Q44 16 48 19"/>
+        <path class="presenter-brow brow-right" d="M52 19 Q58 16 63 19"/>
+        <circle class="presenter-eye" cx="44" cy="27" r="2"/><circle class="presenter-eye" cx="57" cy="27" r="2"/>
+        <path class="presenter-mouth mouth-neutral" d="M43 38 Q50 40 57 38"/>
+        <path class="presenter-mouth mouth-smile" d="M41 36 Q50 47 59 36"/>
+        <ellipse class="presenter-mouth mouth-surprise" cx="50" cy="39" rx="4" ry="6"/>
+        <path class="presenter-mouth mouth-concern" d="M42 42 Q50 34 58 42"/>
+        <path class="presenter-mouth mouth-focused" d="M43 39 H57"/>
       </svg></div>"""
+
+
+def presenter_css():
+    return """
+.presenter{position:absolute;z-index:9;top:235px;right:72px;width:76px;height:92px;opacity:.96;
+ filter:drop-shadow(0 5px 12px rgba(0,0,0,.5));pointer-events:none}
+.presenter svg{width:100%;height:100%;overflow:visible}
+.presenter-head{fill:#d6a17e;stroke:#f4d1b7;stroke-width:2}
+.presenter-body{fill:#72e6c2;stroke:#d7fff4;stroke-width:2;transform-origin:50px 85px;animation:ff-presenter-breathe 3.6s ease-in-out infinite}
+.presenter-arm{fill:none;stroke:#d6a17e;stroke-width:9;stroke-linecap:round;transform-box:fill-box;transform-origin:50% 10%;animation:ff-presenter-talk 2.4s ease-in-out infinite}
+.presenter-brow{fill:none;stroke:#172638;stroke-width:2.5;stroke-linecap:round}
+.presenter-eye{fill:#172638}
+.presenter-mouth{fill:none;stroke:#172638;stroke-width:2.2;stroke-linecap:round;display:none}
+.presenter .mouth-neutral{display:block}
+.presenter[data-expression="smile"] .mouth-neutral,.presenter[data-expression="smile"] .mouth-smile{display:none}
+.presenter[data-expression="smile"] .mouth-smile{display:block}
+.presenter[data-expression="surprise"] .mouth-neutral{display:none}
+.presenter[data-expression="surprise"] .mouth-surprise{display:block;fill:#172638}
+.presenter[data-expression="concern"] .mouth-neutral{display:none}
+.presenter[data-expression="concern"] .mouth-concern{display:block}
+.presenter[data-expression="focused"] .mouth-neutral{display:none}
+.presenter[data-expression="focused"] .mouth-focused{display:block}
+.presenter[data-expression="surprise"] .presenter-brow{stroke-width:3}
+.presenter[data-expression="concern"] .brow-left{transform:rotate(-13deg);transform-origin:44px 18px}
+.presenter[data-expression="concern"] .brow-right{transform:rotate(13deg);transform-origin:56px 18px}
+.presenter[data-expression="smile"] .presenter-eye{transform:scaleY(.78);transform-origin:center}
+.presenter[data-gesture="point"] .arm-right{animation:ff-presenter-point 2.8s ease-in-out infinite}
+.presenter[data-gesture="point"] .arm-left{animation:ff-presenter-rest 2.8s ease-in-out infinite}
+.presenter[data-gesture="explain"] .arm-left{animation:ff-presenter-explain 2.5s ease-in-out infinite}
+.presenter[data-gesture="explain"] .arm-right{animation:ff-presenter-explain 2.5s ease-in-out infinite reverse}
+.presenter[data-gesture="compare"] .arm-left{animation:ff-presenter-compare-left 3s ease-in-out infinite}
+.presenter[data-gesture="compare"] .arm-right{animation:ff-presenter-compare-right 3s ease-in-out infinite}
+.presenter[data-gesture="demonstrate"] .arm-left{animation:ff-presenter-demo 2.2s ease-in-out infinite}
+.presenter[data-gesture="demonstrate"] .arm-right{animation:ff-presenter-demo 2.2s ease-in-out infinite reverse}
+.presenter[data-gesture="point"] .presenter-body{animation:ff-presenter-lean 2.8s ease-in-out infinite}
+@keyframes ff-presenter-breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.025)}}
+@keyframes ff-presenter-talk{0%,100%{transform:rotate(0)}45%{transform:rotate(-7deg)}70%{transform:rotate(4deg)}}
+@keyframes ff-presenter-point{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(62deg) translateY(-7px)}}
+@keyframes ff-presenter-rest{0%,100%{transform:rotate(0)}50%{transform:rotate(-8deg)}}
+@keyframes ff-presenter-explain{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(24deg) translateY(-5px)}}
+@keyframes ff-presenter-compare-left{0%,100%{transform:rotate(-28deg)}50%{transform:rotate(12deg) translateY(-5px)}}
+@keyframes ff-presenter-compare-right{0%,100%{transform:rotate(28deg)}50%{transform:rotate(-12deg) translateY(-5px)}}
+@keyframes ff-presenter-demo{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(26deg) translateY(-8px)}}
+@keyframes ff-presenter-lean{50%{transform:translateX(-5px) rotate(-5deg)}}
+"""
+
+
+def motion_engine_css():
+    return """
+/* Kinetic emphasis is tied to each word's narration window. */
+.kinetic-line{position:absolute;z-index:8;left:100px;right:100px;top:925px;min-height:72px;
+ display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;pointer-events:none}
+.kinetic-word{display:inline-block;opacity:0;transform:translateY(18px) scale(.92);
+ animation:ff-word-hit var(--word-duration) cubic-bezier(.16,1,.3,1) both;
+ animation-delay:var(--word-delay);font-size:38px;font-weight:900;padding:5px 12px;border-radius:12px;background:rgba(7,22,36,.84);border:1px solid rgba(114,230,194,.28);letter-spacing:1px;
+ color:#72e6c2;text-shadow:0 4px 22px #000,0 0 20px rgba(114,230,194,.35)}
+@keyframes ff-word-hit{0%{opacity:0;transform:translateY(18px) scale(.92)}
+ 18%{opacity:1;transform:translateY(0) scale(1.08)}35%,82%{opacity:1;transform:scale(1)}
+ 100%{opacity:0;transform:translateY(-8px) scale(.98)}}
+"""
 
 
 def motion_engine_css():
@@ -161,5 +245,5 @@ def sound_cue_events(narration, category, duration, word_timings=None, scene_sta
     return cues
 
 
-__all__ = ["word_timeline", "emphasize_words", "kinetic_html", "presenter_html", "presenter_gesture",
+__all__ = ["word_timeline", "emphasize_words", "kinetic_html", "presenter_html", "presenter_gesture", "presenter_expression", "presenter_css",
            "motion_engine_css", "sound_cue_events"]
