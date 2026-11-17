@@ -15,12 +15,15 @@ STATE_FPS = 30
 OUT_FPS = 30
 AVATAR_DIR = os.getenv("AVATAR_DIR", "avatar")
 CACHE_DIR = "output/avatar_cache"
-BOB = 6  # pixels of gentle up and down movement
+BOB = 2  # subtle movement stays inside the fixed presenter frame
+SHORT_AVATAR_FRAME = 220
+SHORT_AVATAR_X = 28
+SHORT_AVATAR_Y = 188
 
 # h = presenter height; x and bottom keep it outside the Shorts title/caption safe zones.
 # The Shorts presenter sits in the upper-left corner, below the brand line and above titles.
 LAYOUTS = {
-    "short": {"h": 190, "x": "50", "bottom": 1520},
+    "short": {"h": 184, "x": "50", "bottom": 1520},
     "long": {"h": 280, "x": "W-w-40", "bottom": 24},
 }
 
@@ -199,7 +202,6 @@ def render(video, samples, layout):
     cues = scene_motion_cues(layout)
     states = frame_states(codes, True, cues)
     angle_expr = ffmpeg_motion_expression(cues, "angle")
-    x_expr = ffmpeg_motion_expression(cues, "x")
     total = max(len(states), 1)
     shares = ", ".join(f"{k} {states.count(k) * 100 // total}%" for k in NAMES + ["blink"])
     print("Mouth shapes used:", shares)
@@ -212,11 +214,15 @@ def render(video, samples, layout):
     if layout == "short":
         # A restrained branded backing makes the presenter feel anchored to the
         # frame instead of appearing as a floating cutout in the corner.
+        # Render the avatar inside a transparent 220x220 canvas first. The
+        # canvas is composited at the exact same coordinates as the backing box,
+        # so gestures can never make the presenter drift outside its frame.
         fc = (
-            "[0:v]drawbox=x=28:y=188:w=220:h=220:color=0x071624@0.78:t=fill,"
-            "drawbox=x=28:y=188:w=220:h=220:color=0x72e6c2@0.72:t=3[base];"
-            f"[1:v]fps={OUT_FPS},format=rgba,rotate='{angle_expr}':c=none:ow=iw:oh=ih[av];"
-            f"[base][av]overlay=x='{cfg['x']}+({x_expr})':y='H-h-{cfg['bottom']}+{BOB}*sin(2*PI*t*0.9)'"
+            f"[0:v]drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x071624@0.78:t=fill,"
+            f"drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x72e6c2@0.72:t=3[base];"
+            f"[1:v]fps={OUT_FPS},format=rgba,rotate='{angle_expr}':c=none:ow=iw:oh=ih,"
+            f"pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:(ow-iw)/2:(oh-ih)/2:color=black@0[av];"
+            f"[base][av]overlay=x={SHORT_AVATAR_X}:y='{SHORT_AVATAR_Y}+{BOB}*sin(2*PI*t*0.9)'"
             ":eof_action=repeat:format=auto[v]"
         )
     else:
