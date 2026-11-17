@@ -392,5 +392,19 @@
     "uploaded_at": "2026-11-16T18:20:02.134599+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "gvmAf471JWM",
+    "title": "How to Judge Fitness Claims Without Physiques",
+    "topic": "Judge Claims Without Physiques",
+    "series": "Natural vs Enhanced",
+    "episode_number": 6,
+    "episode_topic": "How to judge fitness claims without comparing physiques",
+    "hook": "Your physique can't judge a claim.",
+    "script_word_count": 54,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-17T06:18:55.602007+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
