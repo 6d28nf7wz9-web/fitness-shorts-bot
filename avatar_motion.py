@@ -41,20 +41,20 @@ def ffmpeg_motion_expression(cues, component):
         phase = f"(t-{start:.3f})"
         if component == "angle":
             settings = {
-                "point": "0.035+0.018*sin(2*PI*" + phase + "*0.65)",
-                "explain": "0.018*sin(2*PI*" + phase + "*0.7)",
-                "compare": "0.032*sin(2*PI*" + phase + "*1.0)",
-                "demonstrate": "0.028*sin(2*PI*" + phase + "*0.85)",
-                "talk": "0.012*sin(2*PI*" + phase + "*0.55)",
+                "point": "0.065+0.025*sin(2*PI*" + phase + "*0.65)",
+                "explain": "0.045*sin(2*PI*" + phase + "*0.7)",
+                "compare": "0.060*sin(2*PI*" + phase + "*1.0)",
+                "demonstrate": "0.055*sin(2*PI*" + phase + "*0.85)",
+                "talk": "0.030*sin(2*PI*" + phase + "*0.55)",
             }
         elif component == "x":
             settings = {
                 # Larger, scene-specific shifts prevent the presenter from feeling pinned.
-                "point": "10+9*sin(2*PI*" + phase + "*0.65)",
-                "explain": "7*sin(2*PI*" + phase + "*0.7)",
-                "compare": "12*sin(2*PI*" + phase + "*1.0)",
-                "demonstrate": "9*sin(2*PI*" + phase + "*0.85)",
-                "talk": "4*sin(2*PI*" + phase + "*0.55)",
+                "point": "18+14*sin(2*PI*" + phase + "*0.65)",
+                "explain": "12*sin(2*PI*" + phase + "*0.7)",
+                "compare": "22*sin(2*PI*" + phase + "*1.0)",
+                "demonstrate": "16*sin(2*PI*" + phase + "*0.85)",
+                "talk": "8*sin(2*PI*" + phase + "*0.55)",
             }
         else:
             raise ValueError("component must be 'angle' or 'x'")
