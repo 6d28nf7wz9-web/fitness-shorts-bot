@@ -13,7 +13,7 @@ from pathlib import Path
 
 from visual_engine import build_visual_panel, visual_css
 from motion_director import motion_css, plan_scene_motion
-from production_motion_engine import kinetic_html, motion_engine_css, sound_cue_events
+from production_motion_engine import kinetic_html, motion_engine_css, sound_cue_events, presenter_html, presenter_gesture
 
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
@@ -111,6 +111,43 @@ def main():
     css += visual_css()
     css += motion_css()
     css += motion_engine_css()
+    # Give each scientific metaphor its own movement grammar inside the scene.
+    css += """
+.science-muscle .fiber{animation:ff-fiber-travel 2.1s linear infinite,ff-fiber-breathe 1.8s ease-in-out infinite alternate}
+.science-muscle .satellite circle{animation:ff-satellite-orbit 3.4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.science-nutrition .plate{transform-origin:185px 210px;animation:ff-plate-turn 7s ease-in-out infinite alternate}
+.science-nutrition .fuel-dots circle{animation:ff-fuel-arrive 2.4s ease-in-out infinite alternate}
+.science-heart .heart-shape{animation:ff-heart-contract .86s ease-in-out infinite}
+.science-heart .oxygen{animation:ff-oxygen-flow 2.8s linear infinite}
+.science-fat_loss .balance-beam{transform-origin:380px 165px;animation:ff-energy-balance 4s ease-in-out infinite alternate}
+.science-fat_loss .energy-in circle{animation:ff-energy-in 2.2s ease-in-out infinite}
+.science-fat_loss .energy-out path{animation:ff-energy-out 2.2s ease-in-out infinite .6s}
+.science-hydration .drop{animation:ff-drop-pulse 2.6s ease-in-out infinite alternate}
+.science-hydration .electrolytes circle{animation:ff-ion-orbit 3s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.science-exercise .joint{transform-origin:380px 210px;animation:ff-joint-rotate 2.8s ease-in-out infinite alternate}
+.science-exercise .lever{animation:ff-lever-flex 2.8s ease-in-out infinite alternate;transform-origin:380px 330px}
+.science-hormones .signal-dots circle{animation:ff-signal-pass 2.4s ease-in-out infinite}
+.science-hormones .receptor{animation:ff-receptor-open 2.4s ease-in-out infinite alternate;transform-origin:475px 210px}
+.science-creatine .atp-core{animation:ff-atp-charge 2s ease-in-out infinite alternate}
+.science-creatine .creatine-dot{animation:ff-phosphate-transfer 2s ease-in-out infinite}
+.science-supplements .supplement-bottle{transform-origin:220px 240px;animation:ff-dose-rock 3s ease-in-out infinite alternate}
+.science-general .process-pulse{animation:ff-process-sequence 2.7s ease-in-out infinite}
+@keyframes ff-fiber-travel{to{stroke-dashoffset:-96}}@keyframes ff-fiber-breathe{to{opacity:.55;stroke-width:22}}
+@keyframes ff-satellite-orbit{to{transform:translateY(-18px) scale(1.15)}}
+@keyframes ff-plate-turn{to{transform:rotate(7deg)}}@keyframes ff-fuel-arrive{to{transform:translate(12px,-8px) scale(1.18);opacity:.65}}
+@keyframes ff-heart-contract{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+@keyframes ff-oxygen-flow{to{transform:translateX(42px);opacity:.35}}
+@keyframes ff-energy-balance{to{transform:rotate(5deg)}}@keyframes ff-energy-in{50%{transform:translateY(-16px)}}
+@keyframes ff-energy-out{50%{transform:translateY(-18px) scale(1.12)}}
+@keyframes ff-drop-pulse{to{transform:translateY(-10px) scale(1.04);filter:drop-shadow(0 0 20px #65aaff)}}
+@keyframes ff-ion-orbit{to{transform:translateY(-12px) scale(1.14)}}
+@keyframes ff-joint-rotate{to{transform:rotate(12deg)}}@keyframes ff-lever-flex{to{transform:rotate(-7deg)}}
+@keyframes ff-signal-pass{0%,100%{transform:translateX(-12px);opacity:.45}50%{transform:translateX(35px);opacity:1}}
+@keyframes ff-receptor-open{to{transform:scaleY(1.12)}}
+@keyframes ff-atp-charge{to{filter:brightness(1.7) drop-shadow(0 0 18px #72e6c2)}}
+@keyframes ff-phosphate-transfer{50%{transform:translate(-90px,50px)}}
+@keyframes ff-dose-rock{to{transform:rotate(4deg)}}@keyframes ff-process-sequence{0%,100%{opacity:.45}50%{opacity:1;transform:scale(1.3)}}
+"""
     sound_cues = []
     blocks = []
     cursor = 0.0
@@ -143,8 +180,8 @@ def main():
         sound_cues.extend(sound_cue_events(scene.get('narration', ''), category, dur, meta.get('word_timings'), cursor))
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         blocks.append(f"""
-<div id="overlay{i}" class="clip motion-scene {motion['class_name']}" data-motion-style="{motion['style']}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
- <div class="shade"></div><div class="grid"></div>
+<div id="overlay{i}" class="clip motion-scene science-{category} motion-scene-{i} {motion['class_name']}" data-motion-style="{motion['style']}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
+ <div class="shade"></div><div class="grid"></div>{presenter_html(presenter_gesture(scene.get('narration', ''), category))}
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
  <div class="subbox"><div class="sub" style="font-size:{sub_size}px">{sub_html}</div></div>
