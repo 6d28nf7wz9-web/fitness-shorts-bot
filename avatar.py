@@ -224,7 +224,7 @@ def render(video, samples, layout):
             f"[1:v]fps={OUT_FPS},scale={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:force_original_aspect_ratio=decrease,format=rgba,"
             f"rotate='{angle_expr}':c=none:ow=iw:oh=ih,"
             f"pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:(ow-iw)/2:(oh-ih)/2:color=black@0[av];"
-            f"[base][av]overlay=x='{SHORT_AVATAR_X}+({x_expr})':y='{SHORT_AVATAR_Y}+5*sin(2*PI*t*0.9)+2*sin(2*PI*t*1.8)'"
+            f"[base][av]overlay=x='{SHORT_AVATAR_X}+({x_expr})':y='{SHORT_AVATAR_Y}+9*sin(2*PI*t*0.9)+3.5*sin(2*PI*t*1.8)'"
             ":eof_action=repeat:format=auto[v]"
         )
     else:
