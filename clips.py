@@ -95,18 +95,48 @@ def pick_file(hit):
     return None
 
 
+MAX_STOCK_QUERY_CHARS = 100
+
+
+def _normalize_stock_query(value):
+    """Keep provider search terms concise and within Pixabay's q length limit."""
+    term = " ".join(str(value or "").split())
+    if len(term) <= MAX_STOCK_QUERY_CHARS:
+        return term
+
+    words = []
+    for word in term.split():
+        candidate = " ".join(words + [word])
+        if len(candidate) > MAX_STOCK_QUERY_CHARS:
+            break
+        words.append(word)
+    return " ".join(words)
+
+
 def keyword_variants(keyword, context=""):
-    variants=[]
-    for value in (keyword, context):
-        for term in str(value or "").split("|"):
-            term=term.strip()
-            if term and keyword_is_relevant(term): variants.append(term)
-    for value in (keyword, context):
-        variants.extend(fallbacks_for(value))
-    seen=set(); result=[]
+    """Build searches from authored scene keywords, never full narration.
+
+    Narration remains available to relevance scoring, but sending it to stock
+    providers creates long, noisy queries and can trigger provider HTTP 400s.
+    """
+    variants = []
+    for raw_term in str(keyword or "").split("|"):
+        term = _normalize_stock_query(raw_term)
+        if term and keyword_is_relevant(term):
+            variants.append(term)
+
+    variants.extend(
+        _normalize_stock_query(term)
+        for term in fallbacks_for(keyword)
+    )
+
+    seen = set()
+    result = []
     for term in variants:
-        key=term.lower().strip()
-        if key and key not in seen: seen.add(key); result.append(term)
+        key = term.lower().strip()
+        if key and key not in seen:
+            seen.add(key)
+            result.append(term)
     return result
 
 
