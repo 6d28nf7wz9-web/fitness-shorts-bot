@@ -83,9 +83,26 @@ def kinetic_html(narration, category, duration, word_timings=None):
     return '<div class="kinetic-line" aria-label="Spoken key terms">' + " ".join(spans) + "</div>"
 
 
-def presenter_html():
-    """Compact, self-contained presenter mark in a reserved top-right safe zone."""
-    return """<div class="presenter" aria-label="FitFuel presenter">
+def presenter_gesture(narration, category):
+    """Choose a visible non-lip gesture from the spoken teaching intent."""
+    text = str(narration or "").lower()
+    if re.search(r"\\b(point|show|look|notice|this|here|target)\\b", text):
+        return "point"
+    if re.search(r"\\b(why|because|remember|important|means|therefore)\\b", text):
+        return "explain"
+    if re.search(r"\\b(compare|versus|instead|difference|however)\\b", text):
+        return "compare"
+    if category in ("muscle", "exercise", "heart"):
+        return "demonstrate"
+    if category in ("hormones", "creatine", "nutrition"):
+        return "explain"
+    return "talk"
+
+
+def presenter_html(gesture="talk"):
+    """Compact vector presenter with scene-directed arm and body language."""
+    gesture = gesture if gesture in {"talk", "point", "explain", "compare", "demonstrate"} else "talk"
+    return f"""<div class="presenter gesture-{gesture}" aria-label="FitFuel presenter">
       <svg viewBox="0 0 100 120" role="img">
         <circle class="presenter-head" cx="50" cy="27" r="18"/>
         <path class="presenter-body" d="M20 112 Q20 62 50 62 Q80 62 80 112Z"/>
@@ -119,7 +136,7 @@ def motion_engine_css():
 .presenter svg{width:100%;height:100%;overflow:visible}
 .presenter-head{fill:#d6a17e;stroke:#f4d1b7;stroke-width:2}
 .presenter-body{fill:#72e6c2;stroke:#d7fff4;stroke-width:2}
-.presenter-arm{fill:none;stroke:#d6a17e;stroke-width:9;stroke-linecap:round;transform-origin:50px 65px;animation:ff-presenter-gesture 2.4s ease-in-out infinite}
+.presenter-arm{fill:none;stroke:#d6a17e;stroke-width:9;stroke-linecap:round;transform-origin:50px 65px;animation:ff-presenter-gesture 2.4s ease-in-out infinite}\n.presenter.gesture-point .presenter-arm{animation:ff-presenter-point 2.8s ease-in-out infinite}\n.presenter.gesture-explain .presenter-arm{animation:ff-presenter-explain 2.5s ease-in-out infinite}\n.presenter.gesture-compare .presenter-arm{animation:ff-presenter-compare 3s ease-in-out infinite}\n.presenter.gesture-demonstrate .presenter-arm{animation:ff-presenter-demo 2.2s ease-in-out infinite}\n.presenter.gesture-point .presenter-body{animation:ff-presenter-lean 2.8s ease-in-out infinite}\n@keyframes ff-presenter-point{0%,100%{transform:rotate(-4deg) translateY(-2px)}50%{transform:rotate(32deg) translateY(-5px)}}\n@keyframes ff-presenter-explain{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(10deg) translateY(-7px)}}\n@keyframes ff-presenter-compare{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(16deg) translateY(-4px)}}\n@keyframes ff-presenter-demo{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(22deg) translateY(-8px)}}\n@keyframes ff-presenter-lean{50%{transform:translateX(-5px) rotate(-5deg)}}
 .presenter-eye{fill:#172638}.presenter-mouth{fill:none;stroke:#172638;stroke-width:2;stroke-linecap:round}
 @keyframes ff-presenter-gesture{0%,100%{transform:rotate(0)}45%{transform:rotate(-7deg)}70%{transform:rotate(4deg)}}
 """
@@ -134,5 +151,5 @@ def sound_cue_events(narration, category, duration, word_timings=None, scene_sta
     return cues
 
 
-__all__ = ["word_timeline", "emphasize_words", "kinetic_html", "presenter_html",
+__all__ = ["word_timeline", "emphasize_words", "kinetic_html", "presenter_html", "presenter_gesture",
            "motion_engine_css", "sound_cue_events"]
