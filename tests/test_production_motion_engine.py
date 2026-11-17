@@ -74,7 +74,7 @@ class ProductionMotionEngineTests(unittest.TestCase):
     def test_motion_css_has_separate_word_and_presenter_animation(self):
         css = motion_engine_css()
         self.assertIn("@keyframes ff-word-hit", css)
-        self.assertIn("@keyframes ff-presenter-gesture", css)
+        self.assertIn("@keyframes ff-presenter-talk", __import__("production_motion_engine").presenter_css())
 
     def test_sound_cues_are_sparse_and_scene_relative(self):
         cues = sound_cue_events("Protein supports muscle growth", "muscle", 3.0, scene_start=5.0)
