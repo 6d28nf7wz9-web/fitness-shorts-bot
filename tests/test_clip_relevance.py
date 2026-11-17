@@ -105,6 +105,18 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
         )
         self.assertLess(score, 2)
 
+    def test_training_load_does_not_accept_a_beach_or_harbor_aerial(self):
+        unrelated = make_hit(
+            9010,
+            "aerial beach coastline ocean port harbor cargo ship industrial",
+        )
+        score = relevance(
+            unrelated,
+            "progressive training load",
+            "Gradually increasing training load improves strength adaptation.",
+        )
+        self.assertEqual(score, 0)
+
     def test_real_scene_specific_terms_still_select_a_matching_clip(self):
         relevant_hit = make_hit(
             9001,
