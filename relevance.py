@@ -117,6 +117,11 @@ OFF_TOPIC_SCENERY = {
     "cargo", "shipping", "forklift", "warehouse", "airport", "airplane",
     "highway", "motorway", "roadway", "landscape", "aerial", "drone",
     "skyline", "cityscape", "construction", "crane", "industrial", "factory",
+    # Nature/water scenery often carries incidental fitness tags but is not
+    # usable footage for a specific lifting or nutrition narration.
+    "forest", "woods", "woodland", "waterfall", "river", "stream", "lake",
+    "waterway", "trees", "leaves", "grass", "meadow", "mountain", "wildlife",
+    "bird", "birds", "animal", "animals", "jungle", "garden", "parkland",
 }
 _OFF_TOPIC_SCENERY = {norm(w) for w in OFF_TOPIC_SCENERY}
 
