@@ -8,8 +8,7 @@ import numpy as np
 from PIL import Image
 
 from ffaudio import load_audio
-from production_motion_engine import presenter_expression, presenter_gesture
-from visual_engine import classify_scene
+from avatar_motion import apply_expression_mouth_states, ffmpeg_motion_expression, scene_motion_cues
 
 SR = 16000
 STATE_FPS = 30
@@ -148,76 +147,10 @@ def analyze(samples):
     return np.array(out, dtype=int)
 
 
-def scene_motion_cues(layout):
-    """Map each spoken scene to presenter body-language and expression cues."""
-    if layout != "short":
-        return []
-    try:
-        with open("output/script.json", encoding="utf-8") as f:
-            scenes = json.load(f).get("scenes", [])
-        with open("output/audio_info.json", encoding="utf-8") as f:
-            audio = json.load(f)
-    except (OSError, ValueError, TypeError):
-        return []
-
-    cues, cursor = [], 0.0
-    for scene, timing in zip(scenes, audio):
-        duration = max(0.0, float(timing.get("seconds", 0)))
-        category = classify_scene(scene)
-        narration = scene.get("narration", "")
-        cues.append({
-            "start": round(cursor, 3),
-            "end": round(cursor + duration, 3),
-            "gesture": presenter_gesture(narration, category),
-            "expression": presenter_expression(narration, category),
-        })
-        cursor += duration
-    return cues
-
-
-def _motion_expression(cues, component):
-    """Build a bounded FFmpeg expression for subtle per-scene presenter motion."""
-    expression = "0"
-    for cue in reversed(cues):
-        gesture = cue.get("gesture", "talk")
-        start, end = float(cue["start"]), float(cue["end"])
-        phase = f"(t-{start:.3f})"
-        if component == "angle":
-            settings = {
-                "point": ("0.035+0.018*sin(2*PI*" + phase + "*0.65)", 0),
-                "explain": ("0.018*sin(2*PI*" + phase + "*0.7)", 0),
-                "compare": ("0.032*sin(2*PI*" + phase + "*1.0)", 0),
-                "demonstrate": ("0.028*sin(2*PI*" + phase + "*0.85)", 0),
-                "talk": ("0.012*sin(2*PI*" + phase + "*0.55)", 0),
-            }
-            value = settings.get(gesture, settings["talk"])[0]
-        else:
-            settings = {
-                "point": "5+2*sin(2*PI*" + phase + "*0.65)",
-                "explain": "2*sin(2*PI*" + phase + "*0.7)",
-                "compare": "7*sin(2*PI*" + phase + "*1.0)",
-                "demonstrate": "3*sin(2*PI*" + phase + "*0.85)",
-                "talk": "1.5*sin(2*PI*" + phase + "*0.55)",
-            }
-            value = settings.get(gesture, settings["talk"])
-        expression = f"if(between(t,{start:.3f},{end:.3f}),{value},{expression})"
-    return expression
-
-
 def frame_states(codes, can_blink, expression_events=None):
     states = [NAMES[int(c)] for c in codes]
     n = len(states)
-    # Brief expression accents use existing mouth sprites without breaking the
-    # audio-driven lip-sync sequence for the rest of the line.
-    for event in expression_events or []:
-        start = max(0, int(float(event.get("start", 0)) * STATE_FPS))
-        end = min(n, start + 7)
-        expression = event.get("expression")
-        target = {"smile": "wide", "surprise": "open", "concern": "round"}.get(expression)
-        if target:
-            for frame in range(start, end):
-                if states[frame] != "closed":
-                    states[frame] = target
+    states = apply_expression_mouth_states(states, expression_events, STATE_FPS)
     if can_blink:
         i = random.randint(50, 100)
         while i < n:
@@ -265,8 +198,8 @@ def render(video, samples, layout):
     codes = analyze(samples)
     cues = scene_motion_cues(layout)
     states = frame_states(codes, True, cues)
-    angle_expr = _motion_expression(cues, "angle")
-    x_expr = _motion_expression(cues, "x")
+    angle_expr = ffmpeg_motion_expression(cues, "angle")
+    x_expr = ffmpeg_motion_expression(cues, "x")
     total = max(len(states), 1)
     shares = ", ".join(f"{k} {states.count(k) * 100 // total}%" for k in NAMES + ["blink"])
     print("Mouth shapes used:", shares)
