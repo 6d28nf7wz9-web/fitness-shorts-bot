@@ -115,9 +115,9 @@ def motion_css():
 @keyframes ff-camera-pull { from { transform: scale(1.17); } to { transform: scale(1.04); } }
 .variant-rise .title,.variant-rise .science-heading { animation: ff-variant-rise 560ms cubic-bezier(.16,1,.3,1) both; }
 .variant-scale .title,.variant-scale .science-svg { animation: ff-variant-scale 620ms cubic-bezier(.16,1,.3,1) both; }
-.variant-slide .title,.variant-slide .science-panel { animation: ff-variant-slide 600ms cubic-bezier(.16,1,.3,1) both; }
+.variant-slide .title,.variant-slide .science-svg { animation: ff-variant-slide 600ms cubic-bezier(.16,1,.3,1) both; }
 .variant-focus .title,.variant-focus .science-svg { animation: ff-variant-focus 680ms cubic-bezier(.16,1,.3,1) both; }
-.variant-snap .title,.variant-snap .science-panel { animation: ff-variant-snap 420ms cubic-bezier(.2,1.4,.4,1) both; }
+.variant-snap .title,.variant-snap .science-svg { animation: ff-variant-snap 420ms cubic-bezier(.2,1.4,.4,1) both; }
 @keyframes ff-variant-rise { from{opacity:0;transform:translateY(38px)} to{opacity:1;transform:translateY(0)} }
 @keyframes ff-variant-scale { from{opacity:0;transform:scale(.82)} to{opacity:1;transform:scale(1)} }
 @keyframes ff-variant-slide { from{opacity:0;transform:translateX(42px)} to{opacity:1;transform:translateX(0)} }
