@@ -30,46 +30,65 @@ def sentence_contexts(narration, count):
     return [sentences[min(i, len(sentences) - 1)] for i in range(max(1, count))]
 
 
-def _ordered_keywords(scene):
-    """Return authored targets first, then precise exercise-action variants."""
-    raw = str(scene.get("keyword", "")).strip()
-    keywords = [item.strip() for item in raw.split("|") if item.strip()]
+EXERCISE_TARGETS = (
+    (r"\\bromanian deadlift\\b|\\brdl\\b", ["romanian deadlift", "dumbbell romanian deadlift", "barbell hip hinge"]),
+    (r"\\bdeadlift\\b", ["barbell deadlift", "deadlift exercise", "hip hinge lifting"]),
+    (r"\\bsquat\\b", ["barbell squat", "person performing squat", "squat exercise"]),
+    (r"\\blunge\\b|\\bsplit squat\\b", ["dumbbell lunge", "walking lunge exercise", "split squat"]),
+    (r"\\bbench press\\b", ["barbell bench press", "bench press exercise", "chest pressing"]),
+    (r"\\bpush[- ]?up\\b", ["push up exercise", "person doing pushups", "pushup form"]),
+    (r"\\bpull[- ]?up\\b", ["pull up exercise", "person doing pullups", "hanging pullup"]),
+    (r"\\blat pulldown\\b", ["lat pulldown machine", "cable lat pulldown", "back pulldown exercise"]),
+    (r"\\bbicep curl\\b|\\bcurl\\b", ["dumbbell bicep curl", "barbell curl exercise", "biceps training"]),
+    (r"\\bshoulder press\\b|\\boverhead press\\b", ["dumbbell shoulder press", "barbell overhead press", "shoulder press exercise"]),
+    (r"\\bplank\\b", ["forearm plank exercise", "person holding plank", "plank form"]),
+    (r"\\bhip thrust\\b", ["barbell hip thrust", "hip thrust exercise", "glute bridge movement"]),
+    (r"\\browing\\b|\\bseated row\\b|\\bbent[- ]over row\\b", ["seated cable row", "bent over barbell row", "rowing exercise"]),
+    (r"\\bcalf raise\\b", ["standing calf raise", "seated calf raise", "calf raise exercise"]),
+)
 
-    # Exercise B-roll should show the movement being explained, not generic
-    # gym activity. Add tightly scoped search phrases from the scene intent.
-    context = " ".join([str(scene.get("keyword", ""))] + [str(scene.get(key, "")) for key in
-                       ("visual_title", "visual_subtitle", "narration", "description")]).lower()
-    exercise_targets = (
-        (r"\bromanian deadlift\b|\brdl\b", ["romanian deadlift", "dumbbell romanian deadlift", "barbell hip hinge"]),
-        (r"\bdeadlift\b", ["barbell deadlift", "deadlift exercise", "hip hinge lifting"]),
-        (r"\bsquat\b", ["barbell squat", "person performing squat", "squat exercise"]),
-        (r"\blunge\b", ["dumbbell lunge", "walking lunge exercise", "split squat"]),
-        (r"\bbench press\b", ["barbell bench press", "bench press exercise", "chest pressing"]),
-        (r"\bpush[- ]?up\b", ["push up exercise", "person doing pushups", "pushup form"]),
-        (r"\bpull[- ]?up\b", ["pull up exercise", "person doing pullups", "hanging pullup"]),
-        (r"\blat pulldown\b", ["lat pulldown machine", "cable lat pulldown", "back pulldown exercise"]),
-        (r"\bbicep curl\b|\bcurl\b", ["dumbbell bicep curl", "barbell curl exercise", "biceps training"]),
-        (r"\bshoulder press\b|\boverhead press\b", ["dumbbell shoulder press", "barbell overhead press", "shoulder press exercise"]),
-        (r"\bplank\b", ["forearm plank exercise", "person holding plank", "plank form"]),
-        (r"\bhip thrust\b", ["barbell hip thrust", "hip thrust exercise", "glute bridge movement"]),
-        (r"\browing\b|\bseated row\b", ["seated cable row", "bent over barbell row", "rowing exercise"]),
-        (r"\bcalf raise\b", ["standing calf raise", "seated calf raise", "calf raise exercise"]),
-    )
-    if re.search(r"\b(exercise|workout|training|lift|lifting|repetition|rep|form|movement)\b", context):
-        for pattern, variants in exercise_targets:
-            if re.search(pattern, context):
-                keywords.extend(variants)
-                break
 
-    # Preserve priority and remove duplicate search calls.
-    seen, ordered = set(), []
-    for item in keywords:
+def _exercise_variants(text):
+    """Return only exercise-specific queries actually named in this narration slice."""
+    text = str(text or "").lower()
+    for pattern, variants in EXERCISE_TARGETS:
+        if re.search(pattern, text):
+            return list(variants)
+    return []
+
+
+def _dedupe(items):
+    seen, result = set(), []
+    for item in items:
+        item = str(item or "").strip()
         key = item.lower()
-        if key not in seen:
+        if item and key not in seen:
             seen.add(key)
-            ordered.append(item)
+            result.append(item)
+    return result
 
-    return ordered or ["gym workout"]
+
+def _ordered_keywords(scene):
+    """Prioritize exact movement named by the full scene before broad authored terms."""
+    raw = str(scene.get("keyword", "")).strip()
+    authored = [item.strip() for item in raw.split("|") if item.strip()]
+    context = " ".join([raw] + [
+        str(scene.get(key, "")) for key in
+        ("visual_title", "visual_subtitle", "narration", "description")
+    ])
+    return _dedupe(_exercise_variants(context) + authored) or ["gym workout"]
+
+
+def _cut_keywords(scene, sentence_context, base_keywords=None):
+    """Re-rank B-roll searches per spoken sentence so each cut depicts its own action."""
+    base = list(base_keywords or _ordered_keywords(scene))
+    slice_targets = _exercise_variants(sentence_context)
+    scene_targets = _exercise_variants(" ".join([
+        str(scene.get("visual_title", "")),
+        str(scene.get("visual_subtitle", "")),
+        str(scene.get("keyword", "")),
+    ]))
+    return _dedupe(slice_targets + scene_targets + base) or ["gym workout"]
 
 
 def _validate_rendered_video(path, expected_seconds):
@@ -253,8 +272,9 @@ def main():
 
         try:
             for part_index in range(parts):
-                keyword = "|".join(keywords)
                 sentence_context = cut_contexts[part_index]
+                cut_keywords = _cut_keywords(scene, sentence_context, keywords)
+                keyword = "|".join(cut_keywords)
                 query, hit, url, portrait = choose_clip(
                     keyword, each, used_ids, context=sentence_context
                 )
