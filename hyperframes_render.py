@@ -112,6 +112,15 @@ def main():
     css += motion_css()
     css += motion_engine_css()
     css += presenter_css()
+    css += """
+@media (prefers-reduced-motion: reduce) {
+  .motion-scene *, .science-panel:before {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+"""
     # Give each scientific metaphor its own movement grammar inside the scene.
     css += """
 .science-muscle .fiber{animation:ff-fiber-travel 2.1s linear infinite,ff-fiber-breathe 1.8s ease-in-out infinite alternate}
