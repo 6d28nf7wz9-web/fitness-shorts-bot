@@ -178,6 +178,23 @@ def main():
 @keyframes ff-phosphate-transfer{50%{transform:translate(-90px,50px)}}
 @keyframes ff-dose-rock{to{transform:rotate(4deg)}}@keyframes ff-process-sequence{0%,100%{opacity:.45}50%{opacity:1;transform:scale(1.3)}}
 """
+    # Re-apply stagger offsets after category animation shorthands are declared.
+    css += """
+.science-muscle .fiber-two{animation-delay:.25s,.25s}
+.science-muscle .fiber-three{animation-delay:.5s,.5s}
+.science-muscle .fiber-four{animation-delay:.75s,.75s}
+.science-nutrition .fuel-dots circle:nth-child(2){animation-delay:.25s}
+.science-nutrition .fuel-dots circle:nth-child(3){animation-delay:.5s}
+.science-heart .oxygen-two{animation-delay:.2s}
+.science-heart .oxygen-three{animation-delay:.4s}
+.science-heart .oxygen-four{animation-delay:.6s}
+.science-hydration .electrolytes circle:nth-child(2){animation-delay:.25s}
+.science-hydration .electrolytes circle:nth-child(3){animation-delay:.5s}
+.science-hormones .signal-dots circle:nth-child(2){animation-delay:.2s}
+.science-hormones .signal-dots circle:nth-child(3){animation-delay:.4s}
+.science-creatine .creatine-dot:nth-of-type(2){animation-delay:.25s}
+.science-creatine .creatine-dot:nth-of-type(3){animation-delay:.5s}
+"""
     sound_cues = []
     blocks = []
     cursor = 0.0
