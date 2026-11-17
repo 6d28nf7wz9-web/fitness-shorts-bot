@@ -69,14 +69,14 @@ def emphasize_words(narration, category, duration, word_timings=None, limit=7):
     return selected
 
 
-def kinetic_html(narration, category, duration, word_timings=None, scene_start=0.0):
+def kinetic_html(narration, category, duration, word_timings=None):
     spans = []
     for item in emphasize_words(narration, category, duration, word_timings):
         word = html.escape(item["word"])
         start, end = item["start"], item["end"]
         spans.append(
             f'<span class="kinetic-word" style="--word-start:{start:.3f}s;'
-            f'--word-duration:{max(.12, end-start):.3f}s;--word-delay:{float(scene_start) + start:.3f}s">{word}</span>'
+            f'--word-duration:{max(.12, end-start):.3f}s;--word-delay:{start:.3f}s">{word}</span>'
         )
     if not spans:
         return ""
