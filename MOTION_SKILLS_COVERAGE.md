@@ -67,8 +67,8 @@ Catalog checked: 2026-11-17. The hub defines 56 agent-workflow skills across 19 
 ## Current implementation and verification
 
 - `clips_fast.py`: sentence-specific query ranking. Named exercises such as Romanian deadlift, squat, bench press, hip thrust and others take priority over broad gym queries; each cut uses its own spoken sentence as context.
-- `visual_engine.py` + `hyperframes_render.py`: distinct SVG diagrams remain topic-specific. Their existing flow/pulse animations continue throughout scenes; the HyperFrames scene layer adds additional category-specific motion tracks rather than a one-time entrance-only effect.
-- `production_motion_engine.py`: presenter gesture and expression are chosen from the narration. Gesture states: point, explain, compare, demonstrate, talk. Expression states: neutral, smile, surprise, concern, focused.
+- `visual_engine.py` + `hyperframes_render.py`: distinct SVG diagrams remain topic-specific. Their existing flow/pulse animations continue throughout scenes; the HyperFrames scene layer adds category-specific motion tracks and staggered progressive reveals (claim → evidence) rather than a one-time entrance-only effect.
+- `avatar_motion.py` + `avatar.py`: the existing real presenter (not a second cartoon avatar) receives timecoded point / explain / compare / demonstrate / talk body-language cues. The existing lip-sync sprites receive short smile / surprise / concern accents while preserving closed-mouth frames; subtle FFmpeg lean/rotation follows each scene.
 - `motion_director.py`: hook/support/payoff, shot pacing, focal hierarchy, composition and camera movement.
 - Preview and CI must stay upload-disabled. No change to YouTube upload settings is authorized by this document.
 
