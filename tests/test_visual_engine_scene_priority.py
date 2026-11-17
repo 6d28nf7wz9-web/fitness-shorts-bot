@@ -12,15 +12,26 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
         }
         self.assertEqual(classify_scene(scene), "exercise")
 
-    def test_creatine_scene_uses_supplement_diagram(self):
+    def test_creatine_scene_uses_atp_recycling_diagram(self):
         scene = {
             "visual_title": "Creatine Effect",
             "visual_subtitle": "Supports Training Output",
             "narration": "Creatine supports repeated high intensity efforts.",
         }
         category, panel = build_visual_panel(scene, 2)
-        self.assertEqual(category, "supplements")
-        self.assertIn("SUPPLEMENT EVIDENCE", panel)
+        self.assertEqual(category, "creatine")
+        self.assertIn("CREATINE & ATP RECYCLING", panel)
+        self.assertIn("atp-node", panel)
+
+    def test_smart_lifting_headline_wins_over_supplement_subtitle(self):
+        scene = {
+            "visual_title": "Smart Lifting",
+            "visual_subtitle": "Supplements Aid, Not Replace",
+            "narration": "Use progressive overload to build strength.",
+        }
+        category, panel = build_visual_panel(scene, 7)
+        self.assertEqual(category, "exercise")
+        self.assertIn("MOVEMENT MECHANICS", panel)
 
     def test_muscle_gain_scene_uses_muscle_diagram(self):
         scene = {
