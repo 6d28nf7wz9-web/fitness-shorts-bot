@@ -134,6 +134,15 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn(".scene-bg", renderer)
         self.assertIn(".scene-footage", renderer)
 
+    def test_kinetic_and_camera_motion_use_absolute_scene_clock(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        self.assertIn("scene_start=cursor", renderer)
+        self.assertIn('camera-{motion["camera"]}', renderer)
+        self.assertIn('style="--scene-start:{start}s"', renderer)
+        self.assertIn(".scene-footage.camera-push", renderer)
+        self.assertIn("--scene-start,0s", renderer)
+
     def test_scene_footage_requires_verified_stock_metadata(self):
         from hyperframes_render import prepare_scene_footage
         import json, os, tempfile
