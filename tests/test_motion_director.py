@@ -41,6 +41,13 @@ class MotionDirectorTests(unittest.TestCase):
         self.assertEqual(len({p["layout"] for p in plans}), 2)
         self.assertTrue(all("layout-" in p["class_name"] for p in plans))
 
+    def test_scenes_cycle_through_five_distinct_motion_variants(self):
+        plans = [plan_scene_motion({}, i, 3.0, "muscle") for i in range(1, 6)]
+        self.assertEqual([p["variant"] for p in plans], ["rise", "scale", "slide", "focus", "snap"])
+        css = motion_css()
+        for name in ("rise", "scale", "slide", "focus", "snap"):
+            self.assertIn("variant-" + name, css)
+
     def test_support_scenes_rotate_through_distinct_transitions(self):
         plans = [plan_scene_motion({}, i, 3.0, "muscle") for i in range(2, 6)]
         self.assertEqual([p["transition"] for p in plans], ["wipe", "slide-up", "zoom", "reveal"])
