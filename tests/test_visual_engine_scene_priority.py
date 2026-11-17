@@ -33,6 +33,25 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
         self.assertEqual(category, "exercise")
         self.assertIn("MOVEMENT MECHANICS", panel)
 
+    def test_lift_tracking_uses_progressive_overload_chart(self):
+        scene = {
+            "visual_title": "Track Your Lifts",
+            "visual_subtitle": "Prioritize Overload Over Powders",
+            "narration": "Record your lifts and increase load gradually.",
+        }
+        category, panel = build_visual_panel(scene, 8)
+        self.assertEqual(category, "tracking")
+        self.assertIn("PROGRESSIVE OVERLOAD", panel)
+        self.assertIn("progress-line", panel)
+
+    def test_protein_headline_uses_nutrition_pathway(self):
+        scene = {
+            "visual_title": "Protein Needs Resistance",
+            "visual_subtitle": "Build Muscle With Enough Protein",
+            "narration": "Protein supports muscle repair.",
+        }
+        self.assertEqual(classify_scene(scene), "nutrition")
+
     def test_muscle_gain_scene_uses_muscle_diagram(self):
         scene = {
             "visual_title": "Measured Gain",
