@@ -49,11 +49,12 @@ def ffmpeg_motion_expression(cues, component):
             }
         elif component == "x":
             settings = {
-                "point": "5+2*sin(2*PI*" + phase + "*0.65)",
-                "explain": "2*sin(2*PI*" + phase + "*0.7)",
-                "compare": "7*sin(2*PI*" + phase + "*1.0)",
-                "demonstrate": "3*sin(2*PI*" + phase + "*0.85)",
-                "talk": "1.5*sin(2*PI*" + phase + "*0.55)",
+                # Larger, scene-specific shifts prevent the presenter from feeling pinned.
+                "point": "10+9*sin(2*PI*" + phase + "*0.65)",
+                "explain": "7*sin(2*PI*" + phase + "*0.7)",
+                "compare": "12*sin(2*PI*" + phase + "*1.0)",
+                "demonstrate": "9*sin(2*PI*" + phase + "*0.85)",
+                "talk": "4*sin(2*PI*" + phase + "*0.55)",
             }
         else:
             raise ValueError("component must be 'angle' or 'x'")
