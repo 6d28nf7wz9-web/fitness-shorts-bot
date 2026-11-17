@@ -45,8 +45,23 @@ class ContinuousVisualMotionContractTests(unittest.TestCase):
         self.assertIn("presenter_gesture(", cues)
         self.assertIn("presenter_expression(", cues)
         self.assertIn("apply_expression_mouth_states", avatar)
+        self.assertIn("SHORT_AVATAR_FRAME = 220", avatar)
+        self.assertIn("pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}", avatar)
+        self.assertIn("overlay=x={SHORT_AVATAR_X}", avatar)
+        self.assertNotIn("overlay=x='{cfg['x']}+({x_expr})'", avatar)
         self.assertIn("ff-diagram-label-reveal", renderer)
         self.assertIn("prefers-reduced-motion: reduce", renderer)
+
+    def test_recovery_topic_has_its_own_visual_metaphor(self):
+        from visual_engine import build_visual_panel, classify_scene
+        recovery = {"visual_title": "Why Recovery Days Matter", "narration": "Rest helps muscle recovery."}
+        growth = {"visual_title": "Build Muscle Faster", "narration": "Mechanical tension supports muscle growth."}
+        self.assertEqual(classify_scene(recovery), "recovery")
+        self.assertEqual(classify_scene(growth), "muscle")
+        category, panel = build_visual_panel(recovery, 1)
+        self.assertEqual(category, "recovery")
+        self.assertIn("recovery-clock", panel)
+        self.assertNotIn("fiber-group", panel)
 
 
 
