@@ -134,10 +134,11 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn(".scene-bg", renderer)
         self.assertIn(".scene-footage", renderer)
 
-    def test_kinetic_and_camera_motion_use_absolute_scene_clock(self):
+    def test_kinetic_and_camera_motion_use_clip_local_scene_clock(self):
         with open("hyperframes_render.py", encoding="utf-8") as f:
             renderer = f.read()
-        self.assertIn("scene_start=cursor", renderer)
+        self.assertIn("scene_start=0.0", renderer)
+        self.assertIn(".motion-scene{animation-delay:0s!important}", renderer)
         self.assertIn('camera-{motion["camera"]}', renderer)
         self.assertIn('style="--scene-start:{start}s"', renderer)
         self.assertIn(".scene-footage.camera-push", renderer)
