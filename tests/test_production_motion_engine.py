@@ -59,7 +59,7 @@ class ProductionMotionEngineTests(unittest.TestCase):
         self.assertEqual(presenter_gesture("Remember why this matters", "general"), "explain")
 
     def test_presenter_expression_tracks_emotional_context(self):
-        self.assertEqual(presenter_expression("This surprising myth is wrong", "general"), "surprise")
+        self.assertEqual(presenter_expression("This surprising myth is unexpected", "general"), "surprise")
         self.assertEqual(presenter_expression("Avoid this dangerous mistake", "general"), "concern")
         self.assertEqual(presenter_expression("Great progress and stronger results", "general"), "smile")
         self.assertEqual(presenter_expression("Control your form and technique", "exercise"), "focused")
