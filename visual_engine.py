@@ -12,11 +12,14 @@ CATEGORIES = {
     "exercise": ("MOVEMENT MECHANICS", ["LOAD", "JOINT", "MOTION"]),
     "hormones": ("HORMONE SIGNALING", ["SIGNAL", "RECEPTOR", "RESPONSE"]),
     "supplements": ("SUPPLEMENT EVIDENCE", ["DOSE", "EVIDENCE", "EXPECTATION"]),
+    "tracking": ("PROGRESSIVE OVERLOAD", ["BASELINE", "LOAD", "PROGRESSION"]),
     "creatine": ("CREATINE & ATP RECYCLING", ["CREATINE", "PHOSPHOCREATINE", "ATP RECHARGE"]),
     "general": ("THE SCIENCE", ["INPUT", "PROCESS", "RESULT"]),
 }
 
 RULES = [
+    ("tracking", r"\b(?:track(?:ing)? (?:your )?lifts?|log(?:ging)? (?:your )?lifts?|training log|progressive overload|strength progression|weekly progression|rep progression)\b"),
+    ("nutrition", r"\b(?:protein needs?|protein intake|protein synthesis|amino acids?|whey protein)\b"),
     ("creatine", r"\bcreatine\b"),
     ("recovery", r"\b(?:recovery|recover\w*|rest day\w*|deload\w*|sleep quality|muscle repair)\b"),
     ("supplements", r"\b(?:supplement\w*|caffeine|pre[- ]?workout|protein powder|ergogenic aid)\b"),
@@ -128,6 +131,17 @@ def _diagram(category, labels, uid):
           <path class="lever" d="M260 330 Q380 390 500 330"/><path class="arrow" d="M380 125 V70"/>
           <text x="380" y="375" class="diagram-note">CONTROLLED RANGE OF MOTION</text>
           <text x="380" y="65" class="diagram-label">{a}  •  {b}  •  {c}</text>"""
+    elif category == "tracking":
+        body = f"""
+          <g class="progress-chart">
+            <path class="chart-axis" d="M105 325 V105 H665"/>
+            <path class="chart-grid" d="M105 270 H665 M105 215 H665 M105 160 H665"/>
+            <path class="progress-line" d="M125 285 L245 255 L365 225 L485 165 L625 115"/>
+            <g class="progress-points"><circle cx="125" cy="285" r="12"/><circle cx="245" cy="255" r="12"/><circle cx="365" cy="225" r="12"/><circle cx="485" cy="165" r="12"/><circle cx="625" cy="115" r="12"/></g>
+            <path class="progress-arrow" d="M570 115 L625 115 L625 170"/>
+          </g>
+          <text x="380" y="385" class="diagram-note">RECORD • COMPARE • INCREASE GRADUALLY</text>
+          <text x="380" y="75" class="diagram-label">{a}  •  {b}  •  {c}</text>"""
     elif category == "creatine":
         body = f"""
           <g class="atp-cycle">
@@ -200,6 +214,15 @@ def build_visual_panel(scene, index=1):
 
 def visual_css():
     return """
+.science-tracking .chart-axis,.science-tracking .chart-grid{fill:none;stroke:rgba(234,245,255,.3);stroke-width:4}
+.science-tracking .progress-line{fill:none;stroke:#72e6c2;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:620;stroke-dashoffset:0;animation:tracking-draw 2.4s cubic-bezier(.16,1,.3,1) both}
+.science-tracking .progress-points circle{fill:#65aaff;stroke:#fff;stroke-width:4;animation:progress-point 2.2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.science-tracking .progress-points circle:nth-child(2){animation-delay:.2s}
+.science-tracking .progress-points circle:nth-child(3){animation-delay:.4s}
+.science-tracking .progress-points circle:nth-child(4){animation-delay:.6s}
+.science-tracking .progress-points circle:nth-child(5){animation-delay:.8s}
+@keyframes tracking-draw{from{stroke-dashoffset:620}to{stroke-dashoffset:0}}
+@keyframes progress-point{to{transform:scale(1.35);filter:drop-shadow(0 0 12px #72e6c2)}}
 .science-panel{position:absolute;left:95px;right:95px;top:1010px;height:520px;border:1px solid rgba(114,230,194,.36);border-radius:34px;overflow:hidden;background:linear-gradient(135deg,rgba(7,22,36,.91),rgba(15,42,62,.76));box-shadow:0 28px 90px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.10);transform:perspective(1100px) rotateX(4deg);backdrop-filter:blur(10px)}
 .science-panel:before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle at 30% 40%,rgba(114,230,194,.16),transparent 35%),radial-gradient(circle at 75% 65%,rgba(101,170,255,.17),transparent 38%);animation:panel-drift 8s ease-in-out infinite alternate}
 .science-kicker{position:absolute;top:28px;left:38px;color:#72e6c2;font-size:17px;letter-spacing:5px;font-weight:800}
