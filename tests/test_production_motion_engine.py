@@ -45,6 +45,14 @@ class ProductionMotionEngineTests(unittest.TestCase):
         self.assertIn("kinetic-word", markup)
         self.assertNotIn("<growth>", markup)
 
+    def test_kinetic_words_use_absolute_composition_time(self):
+        markup = kinetic_html(
+            "Protein supports muscle growth", "muscle", 2.0,
+            scene_start=6.25,
+        )
+        self.assertIn("--word-delay:6.250s", markup)
+        self.assertIn("--word-start:6.250s", markup)
+
     def test_presenter_has_reserved_character_and_gesture(self):
         markup = presenter_html()
         self.assertIn('class="presenter"', markup)
