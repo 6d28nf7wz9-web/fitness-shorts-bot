@@ -41,6 +41,10 @@ def sentence_contexts(narration, count):
         groups[target].append(sentence)
         loads[target] += len(sentence.split())
     contexts = [" ".join(group).strip() for group in groups]
+    # If the narration has fewer sentences than cuts, keep the final spoken
+    # idea available for the remaining cuts instead of emitting empty queries.
+    last_context = next((sentence for sentence in reversed(sentences) if sentence), "")
+    contexts = [context if context else last_context for context in contexts]
 
     # A single long sentence still needs distinct visual beats. Split its clauses
     # or, as a final fallback, its words into contiguous slices.
