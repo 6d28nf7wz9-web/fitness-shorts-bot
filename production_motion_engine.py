@@ -69,14 +69,17 @@ def emphasize_words(narration, category, duration, word_timings=None, limit=7):
     return selected
 
 
-def kinetic_html(narration, category, duration, word_timings=None):
+def kinetic_html(narration, category, duration, word_timings=None, scene_start=0.0):
+    """Render key words on the composition clock, not the scene-local clock."""
     spans = []
+    scene_start = max(0.0, float(scene_start))
     for item in emphasize_words(narration, category, duration, word_timings):
         word = html.escape(item["word"])
         start, end = item["start"], item["end"]
+        global_start = scene_start + start
         spans.append(
-            f'<span class="kinetic-word" style="--word-start:{start:.3f}s;'
-            f'--word-duration:{max(.12, end-start):.3f}s;--word-delay:{start:.3f}s">{word}</span>'
+            f'<span class="kinetic-word" style="--word-start:{global_start:.3f}s;'
+            f'--word-duration:{max(.12, end-start):.3f}s;--word-delay:{global_start:.3f}s">{word}</span>'
         )
     if not spans:
         return ""
