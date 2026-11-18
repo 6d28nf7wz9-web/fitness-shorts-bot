@@ -102,9 +102,9 @@ def main():
 .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,10,18,.82) 0%,rgba(5,13,23,.20) 34%,rgba(5,13,23,.30) 58%,rgba(4,10,18,.88) 100%)}
 .grid{position:absolute;inset:0;opacity:.12;background-image:linear-gradient(#6ea4c8 1px,transparent 1px),linear-gradient(90deg,#6ea4c8 1px,transparent 1px);background-size:72px 72px}
 .brand{position:absolute;left:84px;right:84px;top:120px;text-align:center;font-size:25px;letter-spacing:7px;color:#72e6c2;font-weight:800}
-.titlebox{position:absolute;left:90px;right:90px;top:420px;height:300px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center}
+.titlebox{position:absolute;left:90px;right:90px;top:380px;height:260px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center}
 .title{font-weight:900;letter-spacing:-2px;line-height:1.06;color:#fff;text-shadow:0 5px 28px #000;max-width:900px;overflow-wrap:anywhere}
-.subbox{position:absolute;left:130px;right:130px;top:790px;height:150px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center}
+.subbox{position:absolute;left:130px;right:130px;top:690px;height:125px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center}
 .sub{font-weight:700;line-height:1.22;color:#72e6c2;text-shadow:0 3px 18px #000;max-width:820px;overflow-wrap:anywhere}
 
 """
@@ -299,7 +299,7 @@ video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
     (ROOT / "sound_cues.json").write_text(json.dumps(sound_cues, ensure_ascii=False, indent=2), encoding="utf-8")
     # Guard against accidental overlay/caption collision: caption ASS is bottom
     # anchored in assemble.py, visual text is confined to the middle safe zone.
-    print(f"HyperFrames composition: {len(scenes)} scenes, {total:.2f}s; safe title/subtitle zones")
+    print(f"HyperFrames composition: {len(scenes)} scenes, {total:.2f}s; Shorts-safe title/subtitle zones")
     subprocess.run(
         ["hyperframes", "lint", "."],
         cwd=str(ROOT), check=True
