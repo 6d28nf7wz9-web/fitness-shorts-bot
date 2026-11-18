@@ -83,6 +83,17 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
         self.assertEqual(classify_scene(scene), "muscle")
 
 
+    def test_mechanical_tension_uses_muscle_fiber_visual_not_protein_synthesis(self):
+        scene = {
+            "visual_title": "Mechanical Tension",
+            "visual_subtitle": "The Primary Growth Driver",
+            "visual_type": "protein_synthesis",
+        }
+        category, panel = build_visual_panel(scene, 10)
+        self.assertEqual(category, "muscle")
+        self.assertIn("MUSCLE FIBER ADAPTATION", panel)
+        self.assertNotIn("PROTEIN SYNTHESIS", panel)
+
     def test_protein_training_headline_uses_protein_synthesis_visual(self):
         scene = {"visual_title": "Protein + Training", "visual_subtitle": "Build muscle with enough protein",
                  "visual_type": "protein_synthesis", "keyword": "resistance training|gym workout"}
