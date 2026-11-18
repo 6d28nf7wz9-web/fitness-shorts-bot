@@ -6,6 +6,7 @@ CATEGORIES = {
     "muscle": ("MUSCLE FIBER ADAPTATION", ["MECHANICAL TENSION", "REPAIR", "GROWTH"]),
     "recovery": ("RECOVERY & ADAPTATION", ["TRAINING STRESS", "REST", "REBUILD"]),
     "nutrition": ("NUTRIENT PATHWAY", ["FOOD", "ABSORPTION", "FUEL"]),
+    "protein": ("PROTEIN SYNTHESIS", ["PROTEIN", "AMINO ACIDS", "MUSCLE REPAIR"]),
     "heart": ("CARDIOVASCULAR FLOW", ["OXYGEN IN", "PUMP", "DELIVERY"]),
     "fat_loss": ("ENERGY BALANCE", ["ENERGY IN", "STORAGE", "ENERGY OUT"]),
     "hydration": ("HYDRATION & ELECTROLYTES", ["FLUID", "BALANCE", "PERFORMANCE"]),
@@ -18,58 +19,31 @@ CATEGORIES = {
 }
 
 RULES = [
-    ("tracking", r"\b(?:track(?:ing)? (?:your )?(?:lifts?|progress|workouts?)|log(?:ging)? (?:your )?lifts?|training log|progress tracking|progressive overload|strength progression|weekly progression|rep progression)\b"),
-    ("nutrition", r"\b(?:protein needs?|protein intake|protein synthesis|amino acids?|whey protein)\b"),
-    ("creatine", r"\bcreatine\b"),
-    ("recovery", r"\b(?:recovery|recover\w*|rest day\w*|deload\w*|sleep quality|muscle repair)\b"),
-    ("supplements", r"\b(?:supplement\w*|caffeine|pre[- ]?workout|protein powder|ergogenic aid)\b"),
-    ("hydration", r"\b(?:hydration|dehydrat\w*|electrolyte\w*|sodium|potassium|fluid balance)\b"),
-    ("heart", r"\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\b"),
-    ("hormones", r"\b(?:hormone\w*|insulin|cortisol|testosterone|estrogen|ghrelin|leptin|receptor|thyroid)\b"),
-    ("fat_loss", r"\b(?:fat loss|fat gain|calorie\w*|energy balance|burn fat|weight loss|calorie deficit)\b"),
-    ("muscle", r"\b(?:muscle\w*|muscle fiber\w*|hypertrophy|strength|progressive overload|weekly progression|protein synthesis|muscle recovery)\b"),
-    ("nutrition", r"\b(?:food|meal|nutrition|digest\w*|absorption|dietary fiber|carbohydrate\w*|protein intake|nutrient\w*)\b"),
-    ("exercise", r"\b(?:exercise|lift\w*|weight loading|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\b"),
+    ("tracking", r"\\b(?:track(?:ing)? (?:your )?(?:lifts?|progress|workouts?)|log(?:ging)? (?:your )?lifts?|training log|progress tracking|progressive overload|strength progression|weekly progression|rep progression|gradual load increase|increase (?:the )?load|add weight or reps|overload importance)\\b"),
+    ("protein", r"\\b(?:protein synthesis|protein intake|protein needs?|protein powder|whey protein|amino acids?)\\b"),
+    ("nutrition", r"\\b(?:food|meal|nutrition|digest\\w*|absorption|dietary fiber|carbohydrate\\w*|nutrient\\w*)\\b"),
+    ("creatine", r"\\bcreatine\\b"),
+    ("recovery", r"\\b(?:recovery|recover\\w*|rest day\\w*|deload\\w*|sleep quality|muscle repair)\\b"),
+    ("supplements", r"\\b(?:supplement\\w*|caffeine|pre[- ]?workout|ergogenic aid)\\b"),
+    ("hydration", r"\\b(?:hydration|dehydrat\\w*|electrolyte\\w*|sodium|potassium|fluid balance)\\b"),
+    ("heart", r"\\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\\b"),
+    ("hormones", r"\\b(?:hormone\\w*|insulin|cortisol|testosterone|estrogen|ghrelin|leptin|receptor|thyroid)\\b"),
+    ("fat_loss", r"\\b(?:fat loss|fat gain|calorie\\w*|energy balance|burn fat|weight loss|calorie deficit|energy metabolism)\\b"),
+    ("muscle", r"\\b(?:muscle\\w*|muscle fiber\\w*|hypertrophy|strength|muscle recovery)\\b"),
+    ("exercise", r"\\b(?:exercise|lift\\w*|weight loading|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\\b"),
 ]
 
-
-def classify_scene(scene):
-    """Classify by the strongest visible intent, not by the first generic keyword."""
-    # A clear headline is authoritative. If the headline is neutral, compare
-    # keyword and subtitle matches by specificity so "resistance training"
-    # cannot hide a more informative "muscle fibers" teaching point.
-    title_source = str(scene.get("visual_title", "")).lower()
-    for category, pattern in RULES:
-        if re.search(pattern, title_source):
-            return category
-
-    visual_sources = (
-        (str(scene.get("visual_subtitle", "")).lower(), 65),
-        (str(scene.get("keyword", "")).lower(), 45),
-    )
-    scores = {}
-    for source, weight in visual_sources:
-        if not source:
-            continue
-        for order, (category, pattern) in enumerate(RULES):
-            if re.search(pattern, source):
-                # Broad exercise words are useful fallbacks, not stronger than
-                # specific physiology/nutrition language in the same scene.
-                specificity = 0.35 if category == "exercise" else 1.0
-                score = weight * specificity
-                if category not in scores or score > scores[category][0]:
-                    scores[category] = (score, -order)
-    if scores:
-        return max(scores, key=lambda key: scores[key])
-
-    # Only use narration when the visible scene metadata contains no intent.
-    source = str(scene.get("narration", "")).lower()
-    for category, pattern in RULES:
-        if re.search(pattern, source):
-            return category
-    return "general"
-
-
+VISUAL_TYPE_CATEGORIES = {
+    "protein_synthesis": "protein",
+    "muscle_anatomy": "muscle",
+    "exercise_biomechanics": "exercise",
+    "digestion_fiber": "nutrition",
+    "food_nutrition": "nutrition",
+    "energy_metabolism": "fat_loss",
+    "hydration": "hydration",
+    "recovery_sleep": "recovery",
+    "process": "general",
+}
 def _label(value, fallback, limit=22):
     text = re.sub(r"\s+", " ", str(value or "")).strip()
     return html.escape(text[:limit] if text else fallback)
@@ -111,6 +85,20 @@ def _diagram(category, labels, uid):
           <g class="fuel-dots"><circle cx="570" cy="150" r="12"/><circle cx="610" cy="210" r="9"/><circle cx="565" cy="275" r="15"/></g>
           <text x="185" y="370" class="diagram-note">BALANCED PLATE</text><text x="535" y="370" class="diagram-note">AVAILABLE FUEL</text>
           <text x="380" y="65" class="diagram-label">{a}  •  {b}  •  {c}</text>"""
+    elif category == "protein":
+        body = f"""
+          <g class="protein-source">
+            <path d="M95 165 Q145 105 205 165 L190 250 Q145 290 100 250Z"/>
+            <circle cx="145" cy="185" r="18"/><circle cx="180" cy="215" r="13"/>
+          </g>
+          <path class="arrow protein-arrow" d="M235 210 H315"/>
+          <g class="amino-chain"><circle cx="365" cy="165" r="17"/><circle cx="405" cy="205" r="17"/><circle cx="365" cy="245" r="17"/><circle cx="445" cy="165" r="17"/></g>
+          <path class="arrow protein-arrow" d="M475 210 H535"/>
+          <g class="protein-fiber"><path d="M555 150 Q610 125 665 150 M555 190 Q610 165 665 190 M555 230 Q610 205 665 230 M555 270 Q610 245 665 270"/></g>
+          <text x="145" y="335" class="diagram-note">PROTEIN</text>
+          <text x="405" y="335" class="diagram-note">AMINO ACIDS</text>
+          <text x="610" y="335" class="diagram-note">MUSCLE</text>
+          <text x="380" y="75" class="diagram-label">{a}  •  {b}  •  {c}</text>"""
     elif category == "heart":
         body = f"""
           <path class="vessel" d="M90 210 H265 M495 210 H670"/><path class="pulse" d="M90 210 H255 L290 210 L320 145 L355 285 L390 175 L420 210 H670"/>
@@ -228,6 +216,14 @@ def build_visual_panel(scene, index=1):
 
 def visual_css():
     return """
+.science-protein .protein-source path{fill:rgba(246,189,96,.18);stroke:#f6bd60;stroke-width:7}
+.science-protein .protein-source circle{fill:#f6bd60;stroke:#fff;stroke-width:3}
+.science-protein .amino-chain circle{fill:#65aaff;stroke:#eaf5ff;stroke-width:4;animation:protein-amino 1.8s ease-in-out infinite alternate}
+.science-protein .amino-chain circle:nth-child(2){animation-delay:.2s}.science-protein .amino-chain circle:nth-child(3){animation-delay:.4s}.science-protein .amino-chain circle:nth-child(4){animation-delay:.6s}
+.science-protein .protein-fiber path{fill:none;stroke:#72e6c2;stroke-width:12;stroke-linecap:round;stroke-dasharray:20 8;animation:protein-fiber 2.2s linear infinite}
+.science-protein .protein-arrow{stroke-dasharray:100;stroke-dashoffset:100;animation:protein-arrow 1s ease-out both}
+@keyframes protein-amino{to{transform:translateY(-12px);filter:drop-shadow(0 0 10px #65aaff)}}
+@keyframes protein-fiber{to{stroke-dashoffset:-56;opacity:.65}}@keyframes protein-arrow{to{stroke-dashoffset:0}}
 .science-tracking .chart-axis,.science-tracking .chart-grid{fill:none;stroke:rgba(234,245,255,.3);stroke-width:4}
 .science-tracking .progress-line{fill:none;stroke:#72e6c2;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:620;stroke-dashoffset:0;animation:tracking-draw 2.4s cubic-bezier(.16,1,.3,1) both}
 .science-tracking .progress-points circle{fill:#65aaff;stroke:#fff;stroke-width:4;animation:progress-point 2.2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
