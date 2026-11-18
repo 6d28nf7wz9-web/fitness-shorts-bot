@@ -46,6 +46,55 @@ VISUAL_TYPE_CATEGORIES = {
     "recovery_sleep": "recovery",
     "process": "general",
 }
+
+def classify_scene(scene):
+    """Prefer explicit headline intent, then declared visual type, over broad keywords."""
+    title = str(scene.get("visual_title", "")).lower()
+    title_priority = (
+        ("supplements", r"\bsupplement\w*\b"),
+        ("creatine", r"\bcreatine\b"),
+        ("protein", r"\bprotein\b|\bamino acids?\b|\bwhey\b"),
+        ("tracking", r"\b(?:overload|progression|load increase|track(?:ing)?|training log)\b"),
+        ("hydration", r"\b(?:hydration|electrolyte)\b"),
+        ("hormones", r"\b(?:hormone|insulin|cortisol|testosterone|estrogen)\b"),
+        ("fat_loss", r"\b(?:fat loss|calorie|energy balance|weight loss)\b"),
+        ("recovery", r"\b(?:recovery|rest day|deload|sleep)\b"),
+        ("muscle", r"\b(?:muscle|hypertrophy|strength)\b"),
+        ("nutrition", r"\b(?:nutrition|food|meal|digestion)\b"),
+        ("exercise", r"\b(?:exercise|weight loading|lifting|lift|squat|deadlift|curl|press|movement)\b"),
+    )
+    for category, pattern in title_priority:
+        if re.search(pattern, title):
+            return category
+
+    declared_type = str(scene.get("visual_type", "")).strip().lower()
+    if declared_type in VISUAL_TYPE_CATEGORIES:
+        return VISUAL_TYPE_CATEGORIES[declared_type]
+
+    visual_sources = (
+        (str(scene.get("visual_subtitle", "")).lower(), 65),
+        (str(scene.get("keyword", "")).lower(), 45),
+        (str(scene.get("visual_instruction", "")).lower(), 35),
+    )
+    scores = {}
+    for source, weight in visual_sources:
+        if not source:
+            continue
+        for order, (category, pattern) in enumerate(RULES):
+            if re.search(pattern, source):
+                specificity = 0.30 if category == "exercise" else 1.0
+                score = weight * specificity
+                if category not in scores or score > scores[category][0]:
+                    scores[category] = (score, -order)
+    if scores:
+        return max(scores, key=lambda key: scores[key])
+
+    source = str(scene.get("narration", "")).lower()
+    for category, pattern in RULES:
+        if re.search(pattern, source):
+            return category
+    return "general"
+
 def _label(value, fallback, limit=22):
     text = re.sub(r"\s+", " ", str(value or "")).strip()
     return html.escape(text[:limit] if text else fallback)
