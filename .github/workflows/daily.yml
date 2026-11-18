@@ -22,7 +22,7 @@ permissions:
 
 concurrency:
   # Keep the experimental preview lane independent; push events are upload-disabled.
-  group: ${{ github.ref == 'refs/heads/experiment/motion-skills-video-engine' && 'fitness-video-pipelines-motion-v3-preview' || 'fitness-video-pipelines' }}
+  group: ${{ github.ref == 'refs/heads/experiment/motion-skills-video-engine' && 'fitness-video-pipelines-motion-v4-preview' || 'fitness-video-pipelines' }}
   cancel-in-progress: false
 
 jobs:
@@ -64,9 +64,14 @@ jobs:
           cache: pip
 
       - name: Install system packages
+        timeout-minutes: 8
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          if ! command -v ffmpeg >/dev/null 2>&1 || [ ! -f /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf ]; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg fonts-dejavu-core
+          else
+            echo "FFmpeg and DejaVu Sans are already available on the runner."
+          fi
 
       - name: Install Python packages
         run: pip install -r requirements.txt
