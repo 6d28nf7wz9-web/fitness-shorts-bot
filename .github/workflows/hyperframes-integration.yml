@@ -14,6 +14,7 @@ on:
       - 'tests/test_visual_engine_scene_priority.py'
       - 'tests/test_avatar_motion_cues.py'
       - 'assemble.py'
+      - 'blender/**'
       - '.github/workflows/hyperframes-integration.yml'
   pull_request:
     branches: [main, feature/scene-specific-science-visuals]
@@ -28,6 +29,7 @@ on:
       - 'production_motion_engine.py'
       - 'tests/test_visual_engine_scene_priority.py'
       - 'tests/test_avatar_motion_cues.py'
+      - 'blender/**'
   workflow_dispatch:
 
 permissions:
@@ -76,3 +78,48 @@ jobs:
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 output/final.mp4
           ffprobe -v error -show_entries format=duration -of csv=p=0 output/final.mp4
           test -s output/final.mp4
+
+  blender-science-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install headless render libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 ffmpeg
+      - name: Install Blender 5.3
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 \
+            https://download.blender.org/release/Blender5.3/blender-5.3.0-linux-x64.tar.xz \
+            -o /tmp/blender.tar.xz
+          mkdir -p "$HOME/blender-5.3.0"
+          tar -xJf /tmp/blender.tar.xz -C "$HOME/blender-5.3.0" --strip-components=1
+          "$HOME/blender-5.3.0/blender" --version
+      - name: Render 3D muscle-fiber animation
+        run: |
+          mkdir -p output
+          "$HOME/blender-5.3.0/blender" -b --factory-startup --python-exit-code 1 \
+            --python blender/fitfuel_science_preview.py -- \
+            --output-dir output/blender-frames \
+            --frames 72 --width 540 --height 960
+          ffmpeg -y -hide_banner -loglevel error -framerate 24 \
+            -i output/blender-frames/frame_%04d.png \
+            -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
+            output/blender-science-preview.mp4
+      - name: Validate 3D preview
+        run: |
+          ffprobe -v error -select_streams v:0 \
+            -show_entries stream=codec_name,width,height,r_frame_rate \
+            -of json output/blender-science-preview.mp4
+          ffprobe -v error -show_entries format=duration \
+            -of default=noprint_wrappers=1:nokey=1 output/blender-science-preview.mp4
+          test -s output/blender-science-preview.mp4
+      - name: Upload 3D preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-blender-science-preview
+          path: output/blender-science-preview.mp4
+          if-no-files-found: error
+          retention-days: 7
