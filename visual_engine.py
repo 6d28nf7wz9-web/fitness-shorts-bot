@@ -54,6 +54,7 @@ def classify_scene(scene):
         ("supplements", r"\bsupplement\w*\b"),
         ("creatine", r"\bcreatine\b"),
         ("protein", r"\bprotein\b|\bamino acids?\b|\bwhey\b"),
+        ("muscle", r"\bmechanical tension\b|\bmuscle tension\b|\bmuscle fibers?\b"),
         ("tracking", r"\b(?:overload|progression|load increase|track(?:ing)?|training log)\b"),
         ("hydration", r"\b(?:hydration|electrolyte)\b"),
         ("hormones", r"\b(?:hormone|insulin|cortisol|testosterone|estrogen)\b"),
