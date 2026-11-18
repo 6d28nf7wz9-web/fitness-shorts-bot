@@ -72,7 +72,7 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
             "visual_subtitle": "Build Muscle With Enough Protein",
             "narration": "Protein supports muscle repair.",
         }
-        self.assertEqual(classify_scene(scene), "nutrition")
+        self.assertEqual(classify_scene(scene), "protein")
 
     def test_muscle_gain_scene_uses_muscle_diagram(self):
         scene = {
@@ -83,5 +83,27 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
         self.assertEqual(classify_scene(scene), "muscle")
 
 
+    def test_protein_training_headline_uses_protein_synthesis_visual(self):
+        scene = {"visual_title": "Protein + Training", "visual_subtitle": "Build muscle with enough protein",
+                 "visual_type": "protein_synthesis", "keyword": "resistance training|gym workout"}
+        category, panel = build_visual_panel(scene, 9)
+        self.assertEqual(category, "protein")
+        self.assertIn("PROTEIN SYNTHESIS", panel)
+        self.assertIn("amino-chain", panel)
+
+    def test_explicit_protein_type_beats_generic_training_keyword(self):
+        self.assertEqual(classify_scene({"visual_title": "The Missing Piece",
+                         "visual_type": "protein_synthesis", "keyword": "resistance training"}), "protein")
+
+    def test_overload_headline_uses_progression_chart(self):
+        self.assertEqual(classify_scene({"visual_title": "Overload Importance",
+                         "visual_subtitle": "Add weight or reps gradually",
+                         "visual_type": "exercise_biomechanics"}), "tracking")
+        self.assertEqual(classify_scene({"visual_title": "Gradual Load Increase",
+                         "visual_subtitle": "Progress when reps are controlled"}), "tracking")
+
+    def test_supplements_overload_comparison_keeps_supplement_evidence_visual(self):
+        self.assertEqual(classify_scene({"visual_title": "Supplements ≠ Overload",
+                         "visual_subtitle": "Keep loading, do not replace training"}), "supplements")
 if __name__ == "__main__":
     unittest.main()
