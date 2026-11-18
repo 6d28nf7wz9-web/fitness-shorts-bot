@@ -180,6 +180,11 @@ def main():
     args = arguments()
     if args.width < 270 or args.height < 480 or args.frames < 24:
         raise SystemExit("Preview must be at least 270x480 and 24 frames.")
+    # Keep the output path in main's scope as well as in build_scene().
+    # build_scene configures Blender's render filepath, while main verifies
+    # the rendered PNG sequence and reports its location.
+    output_dir = Path(args.output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
     scene = build_scene(args)
     bpy.ops.render.render(animation=True)
     first_frame = output_dir / "frame_0001.png"
