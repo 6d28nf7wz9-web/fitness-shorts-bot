@@ -103,7 +103,7 @@ jobs:
           "$HOME/blender-5.3.0/blender" -b --factory-startup --python-exit-code 1 \
             --python blender/fitfuel_science_preview.py -- \
             --output-dir output/blender-frames \
-            --frames 96 --width 720 --height 1280 --title 'HOW MUSCLE FIBERS CONTRACT' --subtitle 'A closer look inside skeletal muscle'
+            --frames 72 --width 540 --height 960 --title 'HOW MUSCLE FIBERS CONTRACT' --subtitle 'A closer look inside skeletal muscle'
           ffmpeg -y -hide_banner -loglevel error -framerate 24 \
             -i output/blender-frames/frame_%04d.png \
             -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
