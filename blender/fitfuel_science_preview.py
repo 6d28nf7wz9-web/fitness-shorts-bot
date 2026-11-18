@@ -88,9 +88,6 @@ def add_particle(name, z, y, mat, parent, start, end, frames):
     obj.keyframe_insert(data_path="location", frame=1)
     obj.location.x = end
     obj.keyframe_insert(data_path="location", frame=frames)
-    for fc in obj.animation_data.action.fcurves:
-        for key in fc.keyframe_points:
-            key.interpolation = "SINE"
     return obj
 
 
@@ -99,7 +96,7 @@ def build_scene(args):
     bpy.ops.object.delete(use_global=False)
 
     scene = bpy.context.scene
-    scene.render.engine = "BLENDER_EEVEE_NEXT"
+    scene.render.engine = "BLENDER_EEVEE"
     scene.eevee.taa_render_samples = 16
     scene.render.resolution_x = args.width
     scene.render.resolution_y = args.height
@@ -142,10 +139,6 @@ def build_scene(args):
     rig.keyframe_insert(data_path="scale", frame=scene.frame_end // 2)
     rig.scale = (0.92, 1.0, 1.0)
     rig.keyframe_insert(data_path="scale", frame=scene.frame_end)
-    for fc in rig.animation_data.action.fcurves:
-        for key in fc.keyframe_points:
-            key.interpolation = "SINE"
-        fc.modifiers.new("CYCLES")
 
     # Camera and soft studio lighting.
     bpy.ops.object.camera_add(location=(0, -15, 0.1))
