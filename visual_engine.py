@@ -19,18 +19,18 @@ CATEGORIES = {
 }
 
 RULES = [
-    ("tracking", r"\\b(?:track(?:ing)? (?:your )?(?:lifts?|progress|workouts?)|log(?:ging)? (?:your )?lifts?|training log|progress tracking|progressive overload|strength progression|weekly progression|rep progression|gradual load increase|increase (?:the )?load|add weight or reps|overload importance)\\b"),
-    ("protein", r"\\b(?:protein synthesis|protein intake|protein needs?|protein powder|whey protein|amino acids?)\\b"),
-    ("nutrition", r"\\b(?:food|meal|nutrition|digest\\w*|absorption|dietary fiber|carbohydrate\\w*|nutrient\\w*)\\b"),
-    ("creatine", r"\\bcreatine\\b"),
-    ("recovery", r"\\b(?:recovery|recover\\w*|rest day\\w*|deload\\w*|sleep quality|muscle repair)\\b"),
-    ("supplements", r"\\b(?:supplement\\w*|caffeine|pre[- ]?workout|ergogenic aid)\\b"),
-    ("hydration", r"\\b(?:hydration|dehydrat\\w*|electrolyte\\w*|sodium|potassium|fluid balance)\\b"),
-    ("heart", r"\\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\\b"),
-    ("hormones", r"\\b(?:hormone\\w*|insulin|cortisol|testosterone|estrogen|ghrelin|leptin|receptor|thyroid)\\b"),
-    ("fat_loss", r"\\b(?:fat loss|fat gain|calorie\\w*|energy balance|burn fat|weight loss|calorie deficit|energy metabolism)\\b"),
-    ("muscle", r"\\b(?:muscle\\w*|muscle fiber\\w*|hypertrophy|strength|muscle recovery)\\b"),
-    ("exercise", r"\\b(?:exercise|lift\\w*|weight loading|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\\b"),
+    ("tracking", r"\b(?:track(?:ing)? (?:your )?(?:lifts?|progress|workouts?)|log(?:ging)? (?:your )?lifts?|training log|progress tracking|progressive overload|strength progression|weekly progression|rep progression|gradual load increase|increase (?:the )?load|add weight or reps|overload importance)\b"),
+    ("protein", r"\b(?:protein synthesis|protein intake|protein needs?|protein powder|whey protein|amino acids?)\b"),
+    ("nutrition", r"\b(?:food|meal|nutrition|digest\w*|absorption|dietary fiber|carbohydrate\w*|nutrient\w*)\b"),
+    ("creatine", r"\bcreatine\b"),
+    ("recovery", r"\b(?:recovery|recover\w*|rest day\w*|deload\w*|sleep quality|muscle repair)\b"),
+    ("supplements", r"\b(?:supplement\w*|caffeine|pre[- ]?workout|ergogenic aid)\b"),
+    ("hydration", r"\b(?:hydration|dehydrat\w*|electrolyte\w*|sodium|potassium|fluid balance)\b"),
+    ("heart", r"\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\b"),
+    ("hormones", r"\b(?:hormone\w*|insulin|cortisol|testosterone|estrogen|ghrelin|leptin|receptor|thyroid)\b"),
+    ("fat_loss", r"\b(?:fat loss|fat gain|calorie\w*|energy balance|burn fat|weight loss|calorie deficit|energy metabolism)\b"),
+    ("muscle", r"\b(?:muscle\w*|muscle fiber\w*|hypertrophy|strength|muscle recovery)\b"),
+    ("exercise", r"\b(?:exercise|lift\w*|weight loading|squat|deadlift|curl|press|repetition|workout|training|joint|movement mechanics)\b"),
 ]
 
 VISUAL_TYPE_CATEGORIES = {
