@@ -8,7 +8,9 @@ import re
 
 _WORD = re.compile(r"\b[\w'-]+\b", re.UNICODE)
 _IMPORTANT = {
-    "muscle": {"protein", "muscle", "tension", "repair", "growth", "protein", "strength", "hypertrophy", "recovery"},
+    "muscle": {"protein", "muscle", "tension", "repair", "growth", "strength", "hypertrophy", "recovery"},
+    "protein": {"protein", "amino", "acids", "synthesis", "muscle", "repair", "growth"},
+    "tracking": {"overload", "progression", "progress", "load", "weight", "reps", "controlled", "strength"},
     "nutrition": {"protein", "carbohydrate", "fiber", "absorption", "nutrient", "meal", "fuel"},
     "heart": {"heart", "blood", "oxygen", "pulse", "cardio", "circulation"},
     "fat_loss": {"calorie", "deficit", "energy", "fat", "intake", "expenditure"},
@@ -190,10 +192,10 @@ def motion_engine_css():
     return """
 /* Kinetic emphasis is tied to each word's narration window. */
 .kinetic-line{position:absolute;z-index:8;left:100px;right:100px;top:925px;min-height:72px;
- display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;pointer-events:none}
+ display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;pointer-events:none}
 .kinetic-word{display:inline-block;opacity:0;transform:translateY(18px) scale(.92);
  animation:ff-word-hit var(--word-duration) cubic-bezier(.16,1,.3,1) both;
- animation-delay:var(--word-delay);font-size:38px;font-weight:900;padding:5px 12px;border-radius:12px;background:rgba(7,22,36,.84);border:1px solid rgba(114,230,194,.28);letter-spacing:1px;
+ animation-delay:var(--word-delay);font-size:32px;font-weight:900;padding:4px 10px;border-radius:10px;background:rgba(7,22,36,.84);border:1px solid rgba(114,230,194,.28);letter-spacing:1px;
  color:#72e6c2;text-shadow:0 4px 22px #000,0 0 20px rgba(114,230,194,.35)}
 @keyframes ff-word-hit{0%{opacity:0;transform:translateY(18px) scale(.92)}
  18%{opacity:1;transform:translateY(0) scale(1.08)}35%,82%{opacity:1;transform:scale(1)}
