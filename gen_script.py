@@ -785,7 +785,7 @@ def ensure_final_cta(data):
     # Remove an existing trailing follow invitation so captions never end in a
     # clipped fragment such as "MORE? FOLLOW."
     final = re.sub(
-        r"\\s*(?:want\\s+more\\??\\s*)?follow(?:\\s+fitfuel)?(?:\\s+for\\s+more)?[.!?]*\\s*$",
+        r"\s*(?:want\s+more\??\s*)?follow(?:\s+fitfuel)?(?:\s+for\s+more)?[.!?]*\s*$",
         "",
         final,
         flags=re.IGNORECASE,
