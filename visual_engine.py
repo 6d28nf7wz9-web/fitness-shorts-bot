@@ -35,6 +35,8 @@ RULES = [
 
 VISUAL_TYPE_CATEGORIES = {
     "protein_synthesis": "protein",
+    "progressive_overload": "tracking",
+    "supplement_evidence": "supplements",
     "muscle_anatomy": "muscle",
     "exercise_biomechanics": "exercise",
     "digestion_fiber": "nutrition",
