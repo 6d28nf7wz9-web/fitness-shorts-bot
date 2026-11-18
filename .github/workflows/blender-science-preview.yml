@@ -33,7 +33,7 @@ jobs:
       - name: Render 3D muscle-fiber animation
         run: |
           mkdir -p output
-          /opt/blender/blender -b --factory-startup \
+          /opt/blender/blender -b --factory-startup --python-exit-code 1 \
             --python blender/fitfuel_science_preview.py -- \
             --output output/blender-science-preview.mp4 \
             --frames 72 --width 540 --height 960
