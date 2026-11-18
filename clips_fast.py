@@ -370,7 +370,10 @@ def main():
                 "pixabay_ids": [clip["pixabay_id"] for clip in scene_clips],
             })
         except RuntimeError as exc:
-            if "No specific footage match" not in str(exc):
+            if not any(marker in str(exc) for marker in (
+                "No specific footage match",
+                "No unused scene-matched footage remains",
+            )):
                 raise
             print(
                 f"  No verified stock match for scene {scene_index}; "
@@ -389,7 +392,7 @@ def main():
                 "seconds": seconds,
                 "clips": [],
                 "pixabay_ids": [],
-                "fallback_reason": "No semantically verified stock footage",
+                "fallback_reason": str(exc),
             })
 
     with open(
