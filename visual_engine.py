@@ -278,6 +278,7 @@ def visual_css():
 @keyframes protein-fiber{to{stroke-dashoffset:-56;opacity:.65}}@keyframes protein-arrow{to{stroke-dashoffset:0}}
 .science-tracking .chart-axis,.science-tracking .chart-grid{fill:none;stroke:rgba(234,245,255,.3);stroke-width:4}
 .science-tracking .progress-line{fill:none;stroke:#72e6c2;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:620;stroke-dashoffset:0;animation:tracking-draw 2.4s cubic-bezier(.16,1,.3,1) both}
+.science-tracking .progress-arrow{fill:none;stroke:#f6bd60;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;opacity:.95}
 .science-tracking .progress-points circle{fill:#65aaff;stroke:#fff;stroke-width:4;animation:progress-point 2.2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
 .science-tracking .progress-points circle:nth-child(2){animation-delay:.2s}
 .science-tracking .progress-points circle:nth-child(3){animation-delay:.4s}
@@ -285,11 +286,11 @@ def visual_css():
 .science-tracking .progress-points circle:nth-child(5){animation-delay:.8s}
 @keyframes tracking-draw{from{stroke-dashoffset:620}to{stroke-dashoffset:0}}
 @keyframes progress-point{to{transform:scale(1.35);filter:drop-shadow(0 0 12px #72e6c2)}}
-.science-panel{position:absolute;left:95px;right:95px;top:1010px;height:520px;border:1px solid rgba(114,230,194,.36);border-radius:34px;overflow:hidden;background:linear-gradient(135deg,rgba(7,22,36,.91),rgba(15,42,62,.76));box-shadow:0 28px 90px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.10);transform:perspective(1100px) rotateX(4deg);backdrop-filter:blur(10px)}
+.science-panel{position:absolute;left:95px;right:95px;top:940px;height:460px;border:1px solid rgba(114,230,194,.36);border-radius:34px;overflow:hidden;background:linear-gradient(135deg,rgba(7,22,36,.91),rgba(15,42,62,.76));box-shadow:0 28px 90px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.10);transform:perspective(1100px) rotateX(4deg);backdrop-filter:blur(10px)}
 .science-panel:before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle at 30% 40%,rgba(114,230,194,.16),transparent 35%),radial-gradient(circle at 75% 65%,rgba(101,170,255,.17),transparent 38%);animation:panel-drift 8s ease-in-out infinite alternate}
 .science-kicker{position:absolute;top:28px;left:38px;color:#72e6c2;font-size:17px;letter-spacing:5px;font-weight:800}
 .science-heading{position:absolute;top:67px;left:38px;color:#f4f8ff;font-size:25px;letter-spacing:3px;font-weight:900}
-.science-svg{position:absolute;left:0;top:95px;width:100%;height:390px;overflow:visible}
+.science-svg{position:absolute;left:0;top:85px;width:100%;height:350px;overflow:visible}
 .science-svg text{font-family:Arial,sans-serif}
 .diagram-label{fill:#72e6c2;text-anchor:middle;font-size:16px;font-weight:900;letter-spacing:2px}
 .diagram-note{fill:#eaf5ff;text-anchor:middle;font-size:14px;font-weight:800;letter-spacing:2px}
