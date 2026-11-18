@@ -653,6 +653,10 @@ STRICT SCRIPT RULES:
 - Deliver a real answer.
 - No exaggerated claims, fake urgency, unsupported statistics,
   or empty motivational lines.
+- For progressive overload, NEVER prescribe a universal fixed jump such as
+  adding 2 kg every week or promise strength will double weekly. Explain that
+  load/reps increase gradually only when the viewer completes target reps with
+  controlled technique; increments depend on the lift and individual performance.
 - Use numbers only when reliable and useful.
 - Never invent studies or statistics.
 - No long intro, greeting, recap, generic like-and-subscribe,
@@ -792,6 +796,28 @@ def ensure_final_cta(data):
     return data
 
 
+def validate_scientific_claims(data):
+    """Reject universal weekly load jumps and implausible strength promises."""
+    scenes = data.get("scenes", []) if isinstance(data, dict) else []
+    text = " ".join(
+        str(scene.get(key, ""))
+        for scene in scenes if isinstance(scene, dict)
+        for key in ("narration", "visual_title", "visual_subtitle", "visual_instruction")
+    ).lower()
+    fixed_jump = re.compile(
+        r"\b(?:add|increase|raise)\s+(?:(?:the\s+)?(?:weight|load)\s+by\s+)?"
+        r"\d+(?:\.\d+)?\s*(?:kg|kgs|lb|lbs|pounds?)\s+(?:every|each|per)\s+week\b"
+    )
+    weekly_doubling = re.compile(
+        r"\b(?:double|twice)\s+(?:your\s+)?(?:strength|lifting\s+strength|muscle)\s+(?:every|each|per)\s+week\b"
+    )
+    if fixed_jump.search(text):
+        return ("unsafe universal progression claim: never prescribe a fixed kg/lb increase every week; "
+                "progress only when target reps and technique are consistently solid")
+    if weekly_doubling.search(text):
+        return "unsupported strength-doubling promise: remove guaranteed weekly strength claims"
+    return None
+
 def validate(data):
     required = (
         "series",
@@ -894,6 +920,10 @@ def validate(data):
         return "hook starts with a generic greeting/setup; lead with the viewer problem or payoff"
     if hook.endswith("?") and len(hook.split()) < 5:
         return "hook question is too short to establish a specific curiosity"
+
+    science_problem = validate_scientific_claims(data)
+    if science_problem:
+        return science_problem
 
     packaging_problem = validate_packaging(data["title"], data["topic"], data["description"])
     if packaging_problem:
