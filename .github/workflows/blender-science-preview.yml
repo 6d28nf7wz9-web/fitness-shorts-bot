@@ -1,0 +1,56 @@
+name: Blender science visual preview
+
+on:
+  push:
+    branches: [experiment/motion-skills-video-engine]
+    paths:
+      - "blender/**"
+      - ".github/workflows/blender-science-preview.yml"
+  pull_request:
+    branches: [feature/scene-specific-science-visuals]
+    paths:
+      - "blender/**"
+      - ".github/workflows/blender-science-preview.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  render-muscle-fiber-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender 5.3
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 \
+            https://download.blender.org/release/Blender5.3/blender-5.3.0-linux-x64.tar.xz \
+            -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender
+          tar -xJf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+          /opt/blender/blender --version
+      - name: Render 3D muscle-fiber animation
+        run: |
+          mkdir -p output
+          /opt/blender/blender -b --factory-startup \
+            --python blender/fitfuel_science_preview.py -- \
+            --output output/blender-science-preview.mp4 \
+            --frames 72 --width 540 --height 960
+      - name: Validate preview video
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffprobe -v error -select_streams v:0 \
+            -show_entries stream=codec_name,width,height,r_frame_rate \
+            -of json output/blender-science-preview.mp4
+          ffprobe -v error -show_entries format=duration \
+            -of default=noprint_wrappers=1:nokey=1 output/blender-science-preview.mp4
+          test -s output/blender-science-preview.mp4
+      - name: Upload 3D preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-blender-science-preview
+          path: output/blender-science-preview.mp4
+          if-no-files-found: error
+          retention-days: 7
