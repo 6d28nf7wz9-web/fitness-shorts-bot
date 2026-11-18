@@ -639,9 +639,10 @@ End with a short phrase that naturally echoes the opening idea.
 STRICT SCRIPT RULES:
 
 - Create 4 to 5 scenes. Every scene is exactly ONE spoken sentence and its own visual slide.\n- Each sentence must trigger a distinct slide/visual state; never leave one static diagram for multiple sentences.\n- Add visual_title (2-5 words), visual_subtitle (3-6 words), visual_type, and visual_instruction to every scene.
-- visual_type must be one of: digestion_fiber, muscle_anatomy, exercise_biomechanics, protein_synthesis, energy_metabolism, hydration, recovery_sleep, food_nutrition, process.
+- visual_type must be one of: digestion_fiber, muscle_anatomy, exercise_biomechanics, progressive_overload, protein_synthesis, supplement_evidence, energy_metabolism, hydration, recovery_sleep, food_nutrition, process.
 - visual_instruction must describe the actual subject anatomy/process, what moves, where it moves, and the key visual labels; do not describe a generic title card.
-- Match the illustration to the exact spoken sentence. If explaining dietary fiber, show food fiber travelling through the digestive tract and its relevant effect; if explaining an exercise, show the body position, joints, and muscles involved; if explaining a muscle, show that muscle anatomically; if explaining metabolism, show the actual energy pathway.
+- Match the illustration to the exact spoken sentence and use the matching visual_type: protein_synthesis for protein/amino-acid-to-muscle explanations; progressive_overload for load/reps tracking; supplement_evidence for supplement comparisons; exercise_biomechanics only when the spoken point is an actual movement or joint technique. Do not use a movement diagram for a protein or progressive-overload scene.
+- Keep each scene headline and subtitle about the SAME single idea; never mix protein and supplement claims in one slide unless the narration explicitly compares them.
 - Total narration: aim for 50-55 spoken words (hard limit 45-68),
   designed for roughly 18-27 seconds at a natural speaking pace.
 - Count spoken words before returning JSON; stay comfortably inside the limit.
@@ -861,6 +862,22 @@ def validate(data):
         if not narration:
             return "empty narration"
 
+        visual_title = str(scene.get("visual_title", "")).strip()
+        visual_subtitle = str(scene.get("visual_subtitle", "")).strip()
+        visual_type = str(scene.get("visual_type", "")).strip()
+        visual_instruction = str(scene.get("visual_instruction", "")).strip()
+        supported_visual_types = {
+            "digestion_fiber", "muscle_anatomy", "exercise_biomechanics",
+            "progressive_overload", "protein_synthesis", "supplement_evidence",
+            "energy_metabolism", "hydration", "recovery_sleep",
+            "food_nutrition", "process",
+        }
+        if not visual_title or not visual_subtitle or not visual_instruction:
+            return "every scene needs a specific visual title, subtitle, and instruction"
+        if visual_type not in supported_visual_types:
+            return f"unsupported or missing visual_type: {visual_type}"
+        if "protein" in visual_title.lower() and "supplement" in visual_subtitle.lower():
+            return "visual title and subtitle mix protein and supplement topics; keep one scene focused"
         word_counts.append(len(narration.split()))
 
         keywords = [
