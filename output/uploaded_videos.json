@@ -448,5 +448,19 @@
     "uploaded_at": "2026-11-18T06:41:34.318231+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "X6N2aPtpUeY",
+    "title": "Cortisol: Stress Hormone or Workout Ally?",
+    "topic": "Cortisol: stress hormone myth",
+    "series": "Hormone Lab",
+    "episode_number": 4,
+    "episode_topic": "Cortisol: stress hormone or misunderstood villain?",
+    "hook": "Think cortisol only makes you gain belly fat?",
+    "script_word_count": 55,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-18T12:12:59.623940+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
