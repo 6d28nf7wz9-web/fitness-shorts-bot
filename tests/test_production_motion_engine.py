@@ -90,5 +90,10 @@ class ProductionMotionEngineTests(unittest.TestCase):
         self.assertTrue(all(5.0 <= cue["time"] < 8.0 for cue in cues))
 
 
-    def test_presenter_gesture_matches_protein_and_progression_diagrams(self):\n        self.assertEqual(presenter_gesture("Protein supports muscle repair", "protein"), "explain")\n        self.assertEqual(presenter_gesture("Increase load when reps are controlled", "tracking"), "point")\n        self.assertEqual(presenter_gesture("Supplements support but do not replace training", "supplements"), "explain")\nif __name__ == "__main__":
+    def test_presenter_gesture_matches_protein_and_progression_diagrams(self):
+        self.assertEqual(presenter_gesture("Protein supports muscle repair", "protein"), "explain")
+        self.assertEqual(presenter_gesture("Increase load when reps are controlled", "tracking"), "point")
+        self.assertEqual(presenter_gesture("Supplements support but do not replace training", "supplements"), "explain")
+
+if __name__ == "__main__":
     unittest.main()
