@@ -99,7 +99,9 @@ def presenter_gesture(narration, category):
         return "explain"
     if category in ("muscle", "exercise", "heart"):
         return "demonstrate"
-    if category in ("hormones", "creatine", "nutrition"):
+    if category == "tracking":
+        return "point"
+    if category in ("hormones", "creatine", "nutrition", "protein", "supplements"):
         return "explain"
     return "talk"
 
