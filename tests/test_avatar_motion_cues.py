@@ -49,8 +49,8 @@ class AvatarMotionCueTests(unittest.TestCase):
         ]
         angle = ffmpeg_motion_expression(cues, "angle")
         x = ffmpeg_motion_expression(cues, "x")
-        self.assertIn("0.065+0.025*sin", angle)
-        self.assertIn("0.060*sin", angle)
+        self.assertIn("0.090+0.035*sin", angle)
+        self.assertIn("0.080*sin", angle)
         self.assertIn("18+14*sin", x)
         self.assertIn("22*sin", x)
 
