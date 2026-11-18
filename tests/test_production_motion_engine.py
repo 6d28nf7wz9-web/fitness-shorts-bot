@@ -40,6 +40,16 @@ class ProductionMotionEngineTests(unittest.TestCase):
         ))
         self.assertLessEqual(len(items), 7)
 
+    def test_protein_and_tracking_emphasis_use_relevant_terms(self):
+        protein_words = {item["word"].lower() for item in emphasize_words(
+            "Protein breaks into amino acids and supports muscle growth", "protein", 4.0
+        )}
+        tracking_words = {item["word"].lower() for item in emphasize_words(
+            "Increase load when reps are controlled and track progression", "tracking", 4.0
+        )}
+        self.assertTrue({"protein", "amino", "muscle"}.issubset(protein_words))
+        self.assertTrue({"load", "reps", "progression"}.issubset(tracking_words))
+
     def test_kinetic_markup_escapes_untrusted_text(self):
         markup = kinetic_html("Muscle <growth>", "muscle", 2.0)
         self.assertIn("kinetic-word", markup)
