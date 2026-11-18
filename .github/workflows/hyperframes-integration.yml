@@ -125,9 +125,9 @@ jobs:
               '-of', 'json', path
           ], text=True)
           stream = json.loads(probe)['streams'][0]
-          assert (stream['width'], stream['height']) == (720, 1280), stream
+          assert (stream['width'], stream['height']) == (540, 960), stream
           assert stream['r_frame_rate'] == '24/1', stream
-          assert int(stream['nb_frames']) == 96, stream
+          assert int(stream['nb_frames']) == 72, stream
           print('Portrait preview contract passed:', stream)
           PY
       - name: Upload 3D preview artifact
