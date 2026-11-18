@@ -22,13 +22,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Cache Blender 5.3
-        id: blender-cache
+        id: blender_cache
         uses: actions/cache@v4
         with:
           path: ~/blender-5.3.0
           key: blender-5.3.0-linux-x64
       - name: Install Blender 5.3
-        if: steps.blender-cache.outputs.cache-hit != 'true'
+        if: ${{ steps.blender_cache.outputs['cache-hit'] != 'true' }}
         run: |
           set -euo pipefail
           curl -fL --retry 3 --retry-delay 2 \
@@ -36,6 +36,10 @@ jobs:
             -o /tmp/blender.tar.xz
           mkdir -p "$HOME/blender-5.3.0"
           tar -xJf /tmp/blender.tar.xz -C "$HOME/blender-5.3.0" --strip-components=1
+      - name: Install headless rendering libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 ffmpeg
       - name: Confirm Blender
         run: "$HOME/blender-5.3.0/blender" --version
       - name: Render 3D muscle-fiber animation
