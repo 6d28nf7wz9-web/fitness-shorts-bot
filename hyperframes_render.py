@@ -207,6 +207,11 @@ def main():
 """
     # Final overrides come after category base styles so these staged reveals win.
     css += """
+.science-protein .protein-source{opacity:0;animation:ff-anatomy-in .65s .12s ease-out both}
+.science-protein .amino-chain circle{opacity:0;animation:ff-node-arrive .45s .7s cubic-bezier(.16,1,.3,1) both,protein-amino 1.8s 1.15s ease-in-out infinite alternate}
+.science-protein .amino-chain circle:nth-child(2){animation-delay:.88s,1.33s}.science-protein .amino-chain circle:nth-child(3){animation-delay:1.06s,1.51s}.science-protein .amino-chain circle:nth-child(4){animation-delay:1.24s,1.69s}
+.science-protein .protein-arrow{stroke-dasharray:100;stroke-dashoffset:100;animation:ff-path-draw .7s .45s ease-out both}
+.science-protein .protein-fiber path{stroke-dasharray:100;stroke-dashoffset:100;animation:ff-path-draw .8s 1.35s ease-out both,protein-fiber 2.2s 2.15s linear infinite}
 .science-muscle .fiber{stroke-dasharray:900;stroke-dashoffset:900;animation:ff-fiber-draw 1.25s cubic-bezier(.16,1,.3,1) both,ff-fiber-breathe 1.8s 1.25s ease-in-out infinite alternate}
 .science-muscle .fiber-two{animation-delay:.18s,1.43s}.science-muscle .fiber-three{animation-delay:.36s,1.61s}.science-muscle .fiber-four{animation-delay:.54s,1.79s}
 .science-creatine .atp-node,.science-creatine .atp-core{opacity:0;animation:ff-node-arrive .55s .12s cubic-bezier(.16,1,.3,1) both}
@@ -219,7 +224,7 @@ def main():
 .science-exercise .lever{stroke-dasharray:420;stroke-dashoffset:420;animation:ff-path-draw .9s 1.05s ease-out both,ff-lever-flex 2.8s 1.95s ease-in-out infinite alternate}
 .science-supplements .supplement-bottle{opacity:0;animation:ff-anatomy-in .65s .12s ease-out both}
 .science-supplements .capsules{opacity:0;animation:ff-anatomy-in .65s .62s ease-out both}
-.science-supplements>.science-svg .arrow{stroke-dasharray:120;stroke-dashoffset:120;animation:ff-path-draw .75s 1.05s ease-out both}
+.science-supplements .science-svg .arrow{stroke-dasharray:120;stroke-dashoffset:120;animation:ff-path-draw .75s 1.05s ease-out both}
 .science-nutrition .plate{opacity:0;animation:ff-node-arrive .6s .12s ease-out both,ff-plate-turn 7s .72s ease-in-out infinite alternate}
 .science-nutrition .gut{opacity:0;animation:ff-anatomy-in .65s .58s ease-out both}
 .science-nutrition .fuel-dots circle{opacity:0;animation:ff-node-arrive .4s 1s ease-out both,ff-fuel-arrive 2.4s 1.4s ease-in-out infinite alternate}
@@ -229,6 +234,7 @@ def main():
 .science-hormones .cell{opacity:0;animation:ff-node-arrive .65s .8s ease-out both}
 .science-hydration .drop{opacity:0;animation:ff-node-arrive .7s .1s ease-out both,ff-drop-pulse 2.6s .8s ease-in-out infinite alternate}
 @keyframes ff-fiber-draw{to{stroke-dashoffset:0}}
+@keyframes ff-fiber-breathe{from{opacity:1;stroke-width:17}to{opacity:.58;stroke-width:22}}
 @keyframes ff-node-arrive{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
 @keyframes ff-path-draw{to{stroke-dashoffset:0}}
 @keyframes ff-anatomy-in{from{opacity:0;filter:blur(5px);transform:translateY(16px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
