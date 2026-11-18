@@ -777,23 +777,22 @@ def validate_packaging(title, topic, description):
 
 
 def ensure_final_cta(data):
-    """Deterministically repair a missing final-scene question/follow CTA."""
+    """Normalize the final narration to a clear question followed by a branded CTA."""
     scenes = data.get("scenes")
     if not isinstance(scenes, list) or not scenes or not isinstance(scenes[-1], dict):
         return data
     final = str(scenes[-1].get("narration", "")).strip()
-    lower = final.lower()
-    missing_question = "?" not in final
-    missing_follow = not any(word in lower for word in ("follow", "next episode", "next part"))
-    if missing_question or missing_follow:
-        addition = "What would you try? Follow FitFuel for more."
-        if missing_question and missing_follow:
-            final = f"{final} {addition}".strip()
-        elif missing_question:
-            final = f"{final} What would you try?".strip()
-        else:
-            final = f"{final} Follow FitFuel for more.".strip()
-    scenes[-1]["narration"] = final
+    # Remove an existing trailing follow invitation so captions never end in a
+    # clipped fragment such as "MORE? FOLLOW."
+    final = re.sub(
+        r"\\s*(?:want\\s+more\\??\\s*)?follow(?:\\s+fitfuel)?(?:\\s+for\\s+more)?[.!?]*\\s*$",
+        "",
+        final,
+        flags=re.IGNORECASE,
+    ).strip()
+    if not final.endswith("?"):
+        final = final.rstrip(" .!;:") + " — what would you try?"
+    scenes[-1]["narration"] = f"{final} Follow FitFuel for more."
     return data
 
 
