@@ -462,5 +462,19 @@
     "uploaded_at": "2026-11-18T12:12:59.623940+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "5UA0tg_AY34",
+    "title": "How Skipping Sleep Messes Up Your Hormones",
+    "topic": "Sleep loss hormone chaos",
+    "series": "Hormone Lab",
+    "episode_number": 5,
+    "episode_topic": "What sleep loss can do to hormone regulation",
+    "hook": "Sleep loss is sabotaging your hormones.",
+    "script_word_count": 62,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-18T18:18:59.691403+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
