@@ -22,7 +22,7 @@ permissions:
 
 concurrency:
   # Keep the experimental preview lane independent; push events are upload-disabled.
-  group: ${{ github.ref == 'refs/heads/experiment/motion-skills-video-engine' && 'fitness-video-pipelines-motion-v2-preview' || 'fitness-video-pipelines' }}
+  group: ${{ github.ref == 'refs/heads/experiment/motion-skills-video-engine' && 'fitness-video-pipelines-motion-v3-preview' || 'fitness-video-pipelines' }}
   cancel-in-progress: false
 
 jobs:
@@ -112,7 +112,7 @@ jobs:
           if-no-files-found: error
 
       - name: Save learning data
-        if: always()
+        if: always() && github.event_name != 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
