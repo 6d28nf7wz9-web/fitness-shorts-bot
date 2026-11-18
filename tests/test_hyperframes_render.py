@@ -197,5 +197,12 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn("science-supplements .capsules", renderer)
         self.assertIn("science-hormones .signal-wave", renderer)
         self.assertIn("science-nutrition .fuel-dots", renderer)
+    def test_protein_synthesis_has_staged_visual_animation(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        self.assertIn(".science-protein .protein-source", renderer)
+        self.assertIn(".science-protein .amino-chain", renderer)
+        self.assertIn(".science-protein .protein-fiber", renderer)
+        self.assertIn("ff-fiber-breathe", renderer)
 if __name__ == "__main__":
     unittest.main()
