@@ -142,6 +142,41 @@ def main():
 @keyframes ff-diagram-label-reveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes ff-diagram-note-hold{from{opacity:1}to{opacity:.78}}
 """
+    # Scene-specific diagrams build in meaningful stages: anatomy/pathway first,
+    # then the moving mechanism, then the explanatory takeaway.
+    css += """
+/* Muscle fibers draw in sequence before their subtle contraction loop. */
+.science-muscle .fiber{stroke-dasharray:900;stroke-dashoffset:900;animation:ff-fiber-draw 1.25s cubic-bezier(.16,1,.3,1) both,ff-fiber-breathe 1.8s 1.25s ease-in-out infinite alternate}
+.science-muscle .fiber-two{animation-delay:.18s,1.43s}.science-muscle .fiber-three{animation-delay:.36s,1.61s}.science-muscle .fiber-four{animation-delay:.54s,1.79s}
+@keyframes ff-fiber-draw{to{stroke-dashoffset:0}}
+/* Creatine: ATP/ADP appear first, followed by the phosphate recycling path. */
+.science-creatine .atp-node,.science-creatine .atp-core{opacity:0;animation:ff-node-arrive .55s .12s cubic-bezier(.16,1,.3,1) both}
+.science-creatine .adp-node{opacity:0;animation:ff-node-arrive .55s .55s cubic-bezier(.16,1,.3,1) both}
+.science-creatine .atp-cycle>.arrow{stroke-dasharray:180;stroke-dashoffset:180;animation:ff-path-draw .7s .82s ease-out both}
+.science-creatine .recycle-arrow{stroke-dasharray:420;stroke-dashoffset:420;animation:ff-path-draw 1.15s 1.15s ease-out both,flow 2.4s 2.3s linear infinite}
+.science-creatine .creatine-dot{opacity:0;animation:ff-node-arrive .4s 1.35s ease-out both,ff-phosphate-transfer 2s 1.8s ease-in-out infinite}
+@keyframes ff-node-arrive{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+@keyframes ff-path-draw{to{stroke-dashoffset:0}}
+/* Exercise mechanics: anatomy enters first, joint and lever action follow. */
+.science-exercise .bone{opacity:0;animation:ff-anatomy-in .65s .12s ease-out both}.science-exercise .bone-two{animation-delay:.35s}
+.science-exercise .joint{opacity:0;animation:ff-joint-in .6s .72s cubic-bezier(.16,1,.3,1) both,ff-joint-rotate 2.8s 1.35s ease-in-out infinite alternate}
+.science-exercise .lever{stroke-dasharray:420;stroke-dashoffset:420;animation:ff-path-draw .9s 1.05s ease-out both,ff-lever-flex 2.8s 1.95s ease-in-out infinite alternate}
+@keyframes ff-anatomy-in{from{opacity:0;filter:blur(5px);transform:translateY(16px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
+@keyframes ff-joint-in{from{opacity:0;transform:scale(.45)}to{opacity:1;transform:scale(1)}}
+/* Supplements: bottle, capsules, then the evidence connection. */
+.science-supplements .supplement-bottle{opacity:0;animation:ff-anatomy-in .65s .12s ease-out both}
+.science-supplements .capsules{opacity:0;animation:ff-anatomy-in .65s .62s ease-out both}
+.science-supplements>.science-svg .arrow{stroke-dasharray:120;stroke-dashoffset:120;animation:ff-path-draw .75s 1.05s ease-out both}
+/* Nutrition, energy balance, hormones and hydration reveal their components progressively. */
+.science-nutrition .plate{opacity:0;animation:ff-node-arrive .6s .12s ease-out both,ff-plate-turn 7s .72s ease-in-out infinite alternate}
+.science-nutrition .gut{opacity:0;animation:ff-anatomy-in .65s .58s ease-out both}
+.science-nutrition .fuel-dots circle{opacity:0;animation:ff-node-arrive .4s 1s ease-out both,ff-fuel-arrive 2.4s 1.4s ease-in-out infinite alternate}
+.science-fat_loss .balance-beam,.science-fat_loss .balance-pan,.science-fat_loss .balance-stand{opacity:0;animation:ff-anatomy-in .65s .12s ease-out both}
+.science-fat_loss .energy-in,.science-fat_loss .energy-out{opacity:0;animation:ff-node-arrive .55s .72s ease-out both}
+.science-hormones .signal-wave{stroke-dasharray:700;stroke-dashoffset:700;animation:ff-path-draw 1.1s .1s ease-out both,flow 2s 1.2s linear infinite}
+.science-hormones .cell{opacity:0;animation:ff-node-arrive .65s .8s ease-out both}
+.science-hydration .drop{opacity:0;animation:ff-node-arrive .7s .1s ease-out both,ff-drop-pulse 2.6s .8s ease-in-out infinite alternate}
+"""
     css += """
 @media (prefers-reduced-motion: reduce) {
   .motion-scene *, .science-panel:before {
