@@ -106,6 +106,7 @@ def build_scene(args):
     bpy.ops.object.delete(use_global=False)
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE"
+    scene.eevee.taa_render_samples = 8
     scene.render.resolution_x = args.width
     scene.render.resolution_y = args.height
     scene.render.resolution_percentage = 100
