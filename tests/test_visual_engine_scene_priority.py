@@ -105,5 +105,8 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
     def test_supplements_overload_comparison_keeps_supplement_evidence_visual(self):
         self.assertEqual(classify_scene({"visual_title": "Supplements ≠ Overload",
                          "visual_subtitle": "Keep loading, do not replace training"}), "supplements")
+    def test_explicit_visual_types_map_to_the_right_diagram(self):
+        self.assertEqual(classify_scene({"visual_type": "progressive_overload", "visual_title": "The Method"}), "tracking")
+        self.assertEqual(classify_scene({"visual_type": "supplement_evidence", "visual_title": "The Method"}), "supplements")
 if __name__ == "__main__":
     unittest.main()
