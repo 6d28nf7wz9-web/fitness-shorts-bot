@@ -41,11 +41,11 @@ def ffmpeg_motion_expression(cues, component):
         phase = f"(t-{start:.3f})"
         if component == "angle":
             settings = {
-                "point": "0.065+0.025*sin(2*PI*" + phase + "*0.65)",
-                "explain": "0.045*sin(2*PI*" + phase + "*0.7)",
-                "compare": "0.060*sin(2*PI*" + phase + "*1.0)",
-                "demonstrate": "0.055*sin(2*PI*" + phase + "*0.85)",
-                "talk": "0.030*sin(2*PI*" + phase + "*0.55)",
+                "point": "0.090+0.035*sin(2*PI*" + phase + "*0.65)",
+                "explain": "0.070*sin(2*PI*" + phase + "*0.7)",
+                "compare": "0.080*sin(2*PI*" + phase + "*1.0)",
+                "demonstrate": "0.075*sin(2*PI*" + phase + "*0.85)",
+                "talk": "0.050*sin(2*PI*" + phase + "*0.55)",
             }
         elif component == "x":
             settings = {
