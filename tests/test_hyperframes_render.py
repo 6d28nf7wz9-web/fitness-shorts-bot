@@ -187,5 +187,15 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
                 os.chdir(old)
 
 
+    def test_progressive_diagrams_animate_the_scientific_mechanism(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        self.assertIn("ff-fiber-draw", renderer)
+        self.assertIn("science-creatine .recycle-arrow", renderer)
+        self.assertIn("ff-phosphate-transfer", renderer)
+        self.assertIn("science-exercise .joint", renderer)
+        self.assertIn("science-supplements .capsules", renderer)
+        self.assertIn("science-hormones .signal-wave", renderer)
+        self.assertIn("science-nutrition .fuel-dots", renderer)
 if __name__ == "__main__":
     unittest.main()
