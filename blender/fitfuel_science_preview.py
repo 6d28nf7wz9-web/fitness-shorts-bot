@@ -17,7 +17,7 @@ from mathutils import Vector
 def arguments():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default="output/blender-science-preview.mp4")
+    parser.add_argument("--output-dir", default="output/blender-frames")
     parser.add_argument("--frames", type=int, default=72)
     parser.add_argument("--width", type=int, default=540)
     parser.add_argument("--height", type=int, default=960)
@@ -104,11 +104,9 @@ def build_scene(args):
     scene.render.fps = 24
     scene.frame_start = 1
     scene.frame_end = max(24, args.frames)
-    scene.render.image_settings.file_format = "FFMPEG"
-    scene.render.ffmpeg.format = "MPEG4"
-    scene.render.ffmpeg.codec = "H264"
-    scene.render.ffmpeg.constant_rate_factor = "MEDIUM"
-    scene.render.ffmpeg.ffmpeg_preset = "GOOD"
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.image_settings.color_mode = "RGB"
+    scene.render.image_settings.color_depth = "8"
     scene.render.film_transparent = False
     scene.view_settings.view_transform = "AgX"
 
@@ -171,8 +169,9 @@ def build_scene(args):
     floor.name = "Midnight studio floor"
     floor.data.materials.append(floor_mat)
 
-    scene.render.filepath = str(Path(args.output).resolve())
-    Path(args.output).resolve().parent.mkdir(parents=True, exist_ok=True)
+    output_dir = Path(args.output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    scene.render.filepath = str(output_dir / "frame_")
     scene.frame_set(1)
     return scene
 
@@ -183,10 +182,11 @@ def main():
         raise SystemExit("Preview must be at least 270x480 and 24 frames.")
     scene = build_scene(args)
     bpy.ops.render.render(animation=True)
-    output = Path(args.output)
-    if not output.exists() or output.stat().st_size < 10_000:
-        raise SystemExit(f"Blender did not produce a valid preview: {output}")
-    print(f"FITFUEL_BLENDER_PREVIEW={output} frames={scene.frame_end} size={output.stat().st_size}")
+    first_frame = output_dir / "frame_0001.png"
+    last_frame = output_dir / f"frame_{scene.frame_end:04d}.png"
+    if not first_frame.is_file() or not last_frame.is_file():
+        raise SystemExit(f"Blender did not produce the expected PNG sequence in {output_dir}")
+    print(f"FITFUEL_BLENDER_FRAMES={output_dir} frames={scene.frame_end}")
 
 
 if __name__ == "__main__":
