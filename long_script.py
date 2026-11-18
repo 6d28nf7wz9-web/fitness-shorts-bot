@@ -7,7 +7,7 @@ from google import genai
 from google.genai import types
 
 from gen_script import BANNED, DISCLAIMER, get_model_candidates, parse_json
-from topics import all_used, too_similar
+from topics import STOP, all_used, similarity, too_similar
 
 USED_FILE = "used_long_topics.json"
 QUEUE_DIR = "queue"
@@ -24,6 +24,78 @@ def load_json(path, default):
 def load_trends():
     data = load_json("output/trends.json", [])
     return [t for t in data if isinstance(t, dict) and t.get("topic")]
+
+
+def load_previous_scripts():
+    """Load published and queued long scripts for content-level duplicate checks."""
+    scripts = []
+    if not os.path.isdir(QUEUE_DIR):
+        return scripts
+    for filename in sorted(os.listdir(QUEUE_DIR)):
+        if not filename.startswith("L") or not filename.endswith(".json"):
+            continue
+        item = load_json(os.path.join(QUEUE_DIR, filename), None)
+        if isinstance(item, dict):
+            scripts.append(item)
+    return scripts
+
+
+def _meaningful_words(value):
+    words = set()
+    for word in re.findall(r"[a-z0-9]+", str(value).lower()):
+        if word in STOP or len(word) < 3:
+            continue
+        if len(word) > 3 and word.endswith("s"):
+            word = word[:-1]
+        words.add(word)
+    return words
+
+
+def _previous_script_overlap(data, previous_scripts):
+    """Catch repeated long-video ideas even when the short topic label changes."""
+    title = str(data.get("title", "")).strip()
+    title_words = _meaningful_words(title)
+    headings = [
+        str(section.get("heading", "")).strip()
+        for section in data.get("sections", [])
+        if isinstance(section, dict) and str(section.get("heading", "")).strip()
+    ]
+
+    for previous in previous_scripts or []:
+        if not isinstance(previous, dict):
+            continue
+        previous_title = str(previous.get("title", "")).strip()
+        previous_id = str(previous.get("id", "previous video"))
+        previous_words = _meaningful_words(previous_title)
+        if (
+            title
+            and previous_title
+            and len(title_words & previous_words) >= 3
+            and similarity(title, previous_title) >= 0.45
+        ):
+            return (
+                f"script overlaps previous long video {previous_id}: "
+                f"{previous_title}"
+            )
+
+        previous_headings = [
+            str(section.get("heading", "")).strip()
+            for section in previous.get("sections", [])
+            if isinstance(section, dict)
+            and str(section.get("heading", "")).strip()
+        ]
+        for heading in headings:
+            heading_words = _meaningful_words(heading)
+            for old_heading in previous_headings:
+                if (
+                    len(heading_words & _meaningful_words(old_heading)) >= 3
+                    and similarity(heading, old_heading) >= 0.85
+                ):
+                    return (
+                        f"script repeats a previous long-video section "
+                        f"from {previous_id}: {old_heading}"
+                    )
+    return None
 
 
 FALLBACK_TOPIC_ANGLES = [
@@ -45,8 +117,22 @@ FALLBACK_TOPIC_ANGLES = [
 ]
 
 
-def build_prompt(used, trends, suggested_angle):
+def build_prompt(used, trends, suggested_angle, previous_scripts=None):
     recent = ", ".join(used[-60:]) if used else "none yet"
+    previous_titles = []
+    for item in (previous_scripts or [])[-20:]:
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("title", "")).strip()
+        topic = str(item.get("topic", "")).strip()
+        label = " — ".join(value for value in (title, topic) if value)
+        if label:
+            previous_titles.append(f"- {label}")
+    previous_long_block = (
+        "\nPreviously produced long-video titles/topics (avoid the same central lesson, even with different wording):\n"
+        + "\n".join(previous_titles)
+        if previous_titles else ""
+    )
     trend_block = ""
     if trends:
         lines = "\n".join(
@@ -65,6 +151,7 @@ A real person will read this script aloud as a voiceover, so write exactly how p
 PREFERRED FRESH ANGLE FOR THIS GENERATION: {suggested_angle}
 Treat this as a starting direction, not wording to copy. Make a distinct, useful topic.
 Topics already used (do NOT repeat or closely overlap): {recent}
+{previous_long_block}
 Do not reuse any topic rejected in the latest generation attempts. Choose a genuinely different angle.
 
 Return ONLY valid JSON, no markdown, with exactly these keys:
@@ -97,7 +184,7 @@ Rules:
 - No emojis.
 """
 
-def validate(data, used):
+def validate(data, used, previous_scripts=None):
     if not isinstance(data, dict):
         return "response is not a JSON object"
     for key in ("topic", "title", "description", "hashtags", "sections"):
@@ -140,16 +227,35 @@ def validate(data, used):
             return f"contains banned phrase in viewer-facing text: {bad}"
     if too_similar(data["topic"], used):
         return "topic already used or too similar to a previous topic"
+    overlap = _previous_script_overlap(data, previous_scripts or [])
+    if overlap:
+        return f"topic already used or too similar to a previous topic: {overlap}"
     return None
 
-def _is_temporary_gemini_error(exc):
+def _is_hard_quota_error(exc):
     message = str(exc).lower()
-    status = getattr(exc, 'code', None) or getattr(exc, 'status_code', None)
+    return any(
+        marker in message for marker in (
+            "resource_exhausted",
+            "exceeded your current quota",
+            "quota exceeded",
+            "insufficient quota",
+            "billing details",
+            "daily quota",
+        )
+    )
+
+
+def _is_temporary_gemini_error(exc):
+    if _is_hard_quota_error(exc):
+        return False
+    message = str(exc).lower()
+    status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
     return status in (429, 500, 502, 503, 504) or any(
         marker in message for marker in (
-            '503', 'unavailable', 'high demand', '429', 'resource_exhausted',
-            'rate limit', '500', '502', '504', 'internal error',
-            'deadline exceeded', 'temporarily',
+            "503", "unavailable", "high demand", "429", "rate limit",
+            "too many requests", "500", "502", "504", "internal error",
+            "deadline exceeded", "temporarily",
         )
     )
 
@@ -188,6 +294,13 @@ def generate(used, trends):
         if str(item).strip() and str(item) not in history:
             history.append(str(item))
 
+    previous_scripts = load_previous_scripts()
+    for item in previous_scripts:
+        for value in (item.get("topic"), item.get("title")):
+            value = str(value or "").strip()
+            if value and value not in history:
+                history.append(value)
+
     model_candidates = get_model_candidates()
     if not model_candidates:
         raise RuntimeError("No Gemini models configured")
@@ -216,6 +329,7 @@ def generate(used, trends):
             history + rejected_topics,
             trends,
             suggested_angle,
+            previous_scripts,
         )
         if rejected_topics:
             prompt += (
@@ -242,7 +356,9 @@ def generate(used, trends):
                     continue
                 had_api_response = True
                 data = parse_json(response.text)
-                problem = validate(data, history + rejected_topics)
+                problem = validate(
+                    data, history + rejected_topics, previous_scripts
+                )
                 if problem:
                     last_problem = problem
                     if problem.startswith("topic already used"):
@@ -260,6 +376,12 @@ def generate(used, trends):
             except Exception as exc:
                 last_problem = str(exc)
                 print(f"{model} failed: {last_problem[:220]}")
+                if _is_hard_quota_error(exc):
+                    raise RuntimeError(
+                        "Gemini quota exhausted; stopping generation without "
+                        "retrying other models. Check API quota and billing "
+                        "before the next scheduled run."
+                    ) from exc
                 continue
 
         if round_no < max_rounds:
