@@ -20,6 +20,16 @@ W, H, FPS = 1080, 1920, 30
 SAFE_TITLE_WIDTH = 880
 SAFE_SUB_WIDTH = 820
 
+def prepare_scene_3d(scene_index, assets_dir):
+    """Prefer a verified Blender anatomy plate over SVG/stock for anatomy scenes."""
+    source = Path("output/science_3d") / f"scene_{scene_index}.mp4"
+    if not source.is_file() or source.stat().st_size < 20_000:
+        return None
+    destination = assets_dir / f"scene_{scene_index}_3d_anatomy.mp4"
+    shutil.copy2(source, destination)
+    return destination.name
+
+
 def prepare_scene_footage(scene_index, assets_dir):
     """Copy only footage that passed the semantic stock matcher into the render."""
     info_path = Path("output/clips_info.json")
@@ -255,12 +265,12 @@ def main():
         enddur = f"{dur:.3f}"
         category, science_panel = build_visual_panel(scene, i)
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
-        # Only use scene footage that clips_fast.py selected with an exact
-        # semantic match. Science fallback scenes keep the designed motion canvas.
-        footage_name = prepare_scene_footage(i, assets)
+        # Blender anatomy plates take priority for explicit muscle-anatomy scenes.
+        # Otherwise, use only footage that passed the semantic stock matcher.
+        footage_name = prepare_scene_3d(i, assets) or prepare_scene_footage(i, assets)
         if footage_name:
             blocks.append(
-                f'<video id="broll{i}" class="scene-footage camera-{motion["camera"]}" style="--scene-start:{start}s" muted playsinline '
+                f'<video id="scenevisual{i}" class="scene-footage camera-{motion["camera"]}" style="--scene-start:{start}s" muted playsinline '
                 f'data-start="{start}" data-duration="{enddur}" data-track-index="0" '
                 f'src="assets/{html.escape(footage_name, quote=True)}"></video>'
             )
