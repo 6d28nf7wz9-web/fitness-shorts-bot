@@ -55,7 +55,7 @@ def classify_scene(scene):
     if declared_visual_type == "muscle_anatomy":
         return "anatomy"
     title_priority = (
-        ("anatomy", r"\b(?:anatomy|pectorals?|deltoids?|biceps?|triceps?|quadriceps?|hamstrings?|glutes?|lats?|latissimus|muscle activation)\b"),
+        ("anatomy", r"\b(?:anatomy|pectorals?|chest muscles?|deltoids?|shoulder muscles?|biceps?|triceps?|quadriceps?|hamstrings?|glutes?|lats?|latissimus|trapezius|traps?|calves|back muscles?|abdominal muscles?|abs|muscle activation)\b"),
         ("supplements", r"\bsupplement\w*\b"),
         ("creatine", r"\bcreatine\b"),
         ("protein", r"\bprotein\b|\bamino acids?\b|\bwhey\b"),
