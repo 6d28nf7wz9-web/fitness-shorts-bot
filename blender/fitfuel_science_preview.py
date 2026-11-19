@@ -23,6 +23,7 @@ def arguments():
     parser.add_argument("--blend-file", default="output/fitfuel-science-preview.blend")
     parser.add_argument("--subtitle", default="Layered 3D muscle groups in motion")
     parser.add_argument("--view", choices=("anterior", "posterior"), default="anterior")
+    parser.add_argument("--topic", choices=("anatomy", "muscle", "protein", "heart", "fat_loss", "hydration", "exercise", "nutrition", "hormones", "creatine", "supplements", "tracking", "recovery"), default="anatomy")
     parser.add_argument("--clean", action="store_true", help="Render a clean visual plate for the production timeline")
     return parser.parse_args(argv)
 
@@ -156,6 +157,167 @@ def add_body_core(name, location, scale, material):
     for polygon in obj.data.polygons:
         polygon.use_smooth = True
     return obj
+
+
+def add_cylinder(name, location, radius, depth, material, rotation=(0, 0, 0)):
+    bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=radius, depth=depth, location=location, rotation=rotation)
+    obj = bpy.context.object
+    obj.name = name
+    obj.data.materials.append(material)
+    bevel = obj.modifiers.new("Rounded edges", "BEVEL")
+    bevel.width = min(radius * 0.18, 0.08)
+    bevel.segments = 3
+    for polygon in obj.data.polygons:
+        polygon.use_smooth = True
+    return obj
+
+
+def add_tube(name, points, material, thickness=0.08):
+    curve = bpy.data.curves.new(name, "CURVE")
+    curve.dimensions = "3D"
+    curve.resolution_u = 20
+    curve.bevel_depth = thickness
+    curve.bevel_resolution = 4
+    spline = curve.splines.new("BEZIER")
+    spline.bezier_points.add(len(points) - 1)
+    for point, coordinate in zip(spline.bezier_points, points):
+        point.co = coordinate
+        point.handle_left_type = "AUTO"
+        point.handle_right_type = "AUTO"
+    obj = bpy.data.objects.new(name, curve)
+    bpy.context.collection.objects.link(obj)
+    obj.data.materials.append(material)
+    return obj
+
+
+def add_science_topic(topic, args, teal, mint, blue, white, muted, signal):
+    """Build a distinct 3D science metaphor for each supported scene category."""
+    center_y = -0.15
+    label = topic.upper().replace("_", " ")
+    if topic == "muscle":
+        for index, x in enumerate((-1.15, -0.38, 0.38, 1.15)):
+            add_muscle_belly(f"Muscle fiber bundle {index + 1}", (x, 0, 0),
+                             4.7, 0.34, 0.28, teal if index % 2 else mint,
+                             args.frames, 1.0, 0.45)
+            for row in range(7):
+                band = add_bar(f"Fiber striation {index}-{row}",
+                               (x, -0.31, -2.0 + row * 0.66),
+                               (0.48, 0.08, 0.07), signal, 0.025)
+                band.keyframe_insert(data_path="location", frame=1)
+                band.location.z += 0.12
+                band.keyframe_insert(data_path="location", frame=args.frames // 2)
+                band.location.z -= 0.12
+                band.keyframe_insert(data_path="location", frame=args.frames)
+        view_label = "3D MUSCLE FIBERS  /  CONTRACTION"
+    elif topic == "protein":
+        coords = [(-2.2, 0, 1.4), (-1.45, 0, 0.6), (-0.7, 0, 1.2),
+                  (0.05, 0, 0.25), (0.8, 0, 0.9), (1.55, 0, -0.1), (2.2, 0, 0.55)]
+        for i, point in enumerate(coords):
+            node = add_body_core(f"Amino acid {i + 1}", point, (0.34, 0.34, 0.34),
+                                 mint if i % 2 else blue)
+            node.keyframe_insert(data_path="location", frame=1)
+            node.location.z += 0.22
+            node.keyframe_insert(data_path="location", frame=args.frames // 2)
+            node.location.z -= 0.22
+            node.keyframe_insert(data_path="location", frame=args.frames)
+        add_tube("Peptide backbone", coords, teal, 0.095)
+        add_muscle_belly("New protein strand", (0, 0.15, -1.5), 2.7, 0.22, 0.22,
+                         signal, args.frames, 0.8, 0.4)
+        view_label = "AMINO ACIDS  /  PROTEIN SYNTHESIS"
+    elif topic == "heart":
+        heart = add_body_core("Heart | left ventricle", (-0.42, 0, 0), (0.72, 0.38, 1.15), signal)
+        heart2 = add_body_core("Heart | right ventricle", (0.42, 0, 0), (0.72, 0.38, 1.15), teal)
+        for obj in (heart, heart2):
+            for frame, scale in ((1, 1.0), (args.frames // 4, 1.09), (args.frames // 2, 1.0),
+                                 (3 * args.frames // 4, 1.09), (args.frames, 1.0)):
+                obj.scale = (0.72 * scale, 0.38 * scale, 1.15 * scale)
+                obj.keyframe_insert(data_path="scale", frame=frame)
+        add_tube("Aorta", [(0, 0, 0.7), (0, 0, 1.65), (0.5, 0, 2.15)], mint, 0.22)
+        add_tube("Pulmonary artery", [(-0.25, 0, 0.55), (-0.9, 0, 1.25), (-1.3, 0, 1.75)], blue, 0.17)
+        view_label = "CARDIAC CYCLE  /  BLOOD FLOW"
+    elif topic == "hydration":
+        drop = add_body_core("Water droplet", (0, 0, 0), (1.05, 0.42, 1.65), blue)
+        drop.rotation_euler[1] = 0.12
+        for i, (x, z) in enumerate(((-1.6, 1.4), (1.55, 1.1), (-1.5, -1.2), (1.5, -1.45))):
+            ion = add_body_core(f"Electrolyte ion {i + 1}", (x, -0.1, z), (0.23, 0.23, 0.23),
+                                mint if i % 2 else signal)
+            for frame, offset in ((1, 0), (args.frames // 2, 0.35), (args.frames, 0)):
+                ion.location.x = x + offset
+                ion.keyframe_insert(data_path="location", frame=frame)
+        view_label = "WATER  /  ELECTROLYTE BALANCE"
+    elif topic == "exercise":
+        # A 3D hinge joint with bone segments and a moving lever arm.
+        joint = add_body_core("Joint articulation", (0, 0, 0), (0.55, 0.42, 0.55), signal)
+        upper = add_cylinder("Upper bone", (-0.15, 0, 1.55), 0.24, 2.7, white,
+                             (0, 0.12, 0))
+        lower = add_cylinder("Lower bone", (1.1, 0, -1.15), 0.22, 2.7, white,
+                             (0, 0, -0.42))
+        for frame, angle in ((1, -0.1), (args.frames // 2, 0.48), (args.frames, -0.1)):
+            lower.rotation_euler[1] = angle
+            lower.keyframe_insert(data_path="rotation_euler", frame=frame)
+        add_body_core("Joint head", (-0.12, -0.3, 0.02), (0.32, 0.22, 0.32), mint)
+        view_label = "JOINT MECHANICS  /  RANGE OF MOTION"
+    elif topic == "nutrition":
+        add_cylinder("Nutrition plate", (0, 0.1, 0), 2.05, 0.18, blue, (math.pi / 2, 0, 0))
+        for i, (x, z, mat) in enumerate(((-0.9, 0.4, mint), (0.7, 0.55, signal),
+                                         (0.65, -0.75, teal), (-0.85, -0.75, white))):
+            food = add_body_core(f"Food group {i + 1}", (x, -0.12, z), (0.58, 0.24, 0.52), mat)
+            food.rotation_euler[1] = i * 0.2
+        view_label = "3D NUTRIENT PLATE  /  FUEL"
+    elif topic == "fat_loss":
+        add_bar("Energy balance beam", (0, 0, 0.8), (3.7, 0.22, 0.18), mint, 0.08)
+        add_cylinder("Energy balance pivot", (0, 0, 0.15), 0.28, 1.15, white)
+        for side in (-1, 1):
+            x = side * 1.55
+            add_tube(f"Balance cable {side}", [(x, 0, 0.75), (x, 0, -0.6)], signal, 0.045)
+            add_bar(f"Balance pan {side}", (x, 0, -0.72), (1.0, 0.16, 0.12), blue, 0.05)
+            for i in range(3):
+                add_body_core(f"Energy token {side}-{i}", (x + (i - 1) * 0.22, -0.15, -0.42),
+                              (0.13, 0.13, 0.13), mint if side < 0 else signal)
+        view_label = "ENERGY IN  /  ENERGY OUT"
+    elif topic == "hormones":
+        cell = add_body_core("Cell membrane", (0, 0.2, 0), (1.55, 0.45, 1.55), blue)
+        receptor = add_cylinder("Cell receptor", (0, -0.52, 1.25), 0.18, 1.1, mint)
+        ligand = add_body_core("Hormone signal", (-1.8, -0.2, 1.8), (0.28, 0.28, 0.28), signal)
+        for frame, x in ((1, -1.8), (args.frames // 2, -0.35), (args.frames, -1.8)):
+            ligand.location.x = x
+            ligand.keyframe_insert(data_path="location", frame=frame)
+        view_label = "HORMONE SIGNAL  /  CELL RECEPTOR"
+    elif topic == "creatine":
+        atp = add_body_core("ATP molecule", (-1.1, 0, 0.3), (0.75, 0.42, 0.75), mint)
+        adp = add_body_core("ADP molecule", (1.1, 0, 0.3), (0.68, 0.42, 0.68), blue)
+        phosphate = add_body_core("Phosphate group", (0, -0.2, 1.65), (0.3, 0.3, 0.3), signal)
+        for frame, x in ((1, 0), (args.frames // 2, 0.9), (args.frames, 0)):
+            phosphate.location.x = x
+            phosphate.keyframe_insert(data_path="location", frame=frame)
+        add_tube("ATP ADP reaction path", [(-0.25, -0.2, 0.3), (0, -0.2, 0.3), (0.25, -0.2, 0.3)], white, 0.08)
+        view_label = "ATP  /  ADP  /  PHOSPHOCREATINE"
+    elif topic == "supplements":
+        add_cylinder("Supplement container", (0, 0, 0), 0.85, 2.7, blue)
+        add_cylinder("Bottle cap", (0, 0, 1.48), 0.88, 0.35, mint)
+        add_bar("Bottle label", (0, -0.88, 0), (1.1, 0.08, 0.95), white, 0.06)
+        for i in range(3):
+            capsule = add_body_core(f"Supplement capsule {i + 1}", (1.35, -0.15, 0.8 - i * 0.8),
+                                    (0.18, 0.18, 0.42), signal if i % 2 else mint)
+            capsule.rotation_euler[1] = 0.55
+        view_label = "SUPPLEMENT FORM  /  DOSE"
+    elif topic == "tracking":
+        for i, height in enumerate((0.8, 1.35, 2.0, 2.8, 3.5)):
+            bar = add_bar(f"Progress bar {i + 1}", (-1.8 + i * 0.9, 0, -0.5 + height / 2),
+                          (0.5, 0.28, height), mint if i % 2 else blue, 0.06)
+            bar.keyframe_insert(data_path="scale", frame=1)
+            bar.scale.z *= 1.12
+            bar.keyframe_insert(data_path="scale", frame=args.frames)
+        view_label = "PROGRESSIVE OVERLOAD  /  TRACKING"
+    else:  # recovery
+        add_cylinder("Recovery clock face", (0, 0.1, 0), 1.6, 0.18, blue, (math.pi / 2, 0, 0))
+        add_bar("Clock hand minute", (0, -0.18, 0.55), (0.09, 0.08, 1.1), mint, 0.03)
+        add_bar("Clock hand hour", (0.42, -0.2, 0), (0.85, 0.08, 0.09), signal, 0.03)
+        add_body_core("Recovery moon", (1.8, 0.1, 1.6), (0.45, 0.25, 0.45), mint)
+        view_label = "REST  /  RECOVERY  /  ADAPTATION"
+    activation_name = f"{label} 3D motion signal"
+    activation_y = -0.7
+    return view_label, activation_name, activation_y
 
 
 def build_scene(args):
