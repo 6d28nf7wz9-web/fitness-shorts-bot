@@ -39,7 +39,7 @@ jobs:
         run: python -m unittest discover -s tests -p "test_hyperframes_render.py" -v
       - name: Test Blender 3D anatomy preview contract
         run: python -m unittest discover -s tests -p "test_blender_preview_contract.py" -v
-      - name: Test scene-to-3D anatomy routing
+      - name: Test scene-to-3D science routing
         run: python -m unittest discover -s tests -p "test_scene_3d_assets.py" -v
       - name: Test Motion Skills scene direction
         run: python -m unittest discover -s tests -p "test_motion_director.py" -v
