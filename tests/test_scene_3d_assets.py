@@ -35,6 +35,7 @@ class Scene3DAssetTests(unittest.TestCase):
             "Hormone signaling": "hormones",
             "Supplement evidence": "supplements",
             "Recovery and sleep": "recovery",
+            "General fitness science": "general",
         }
         for title, expected in cases.items():
             with self.subTest(title=title):
