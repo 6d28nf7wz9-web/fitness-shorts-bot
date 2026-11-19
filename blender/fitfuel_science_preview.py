@@ -19,7 +19,8 @@ def arguments():
     parser.add_argument("--frames", type=int, default=96)
     parser.add_argument("--width", type=int, default=720)
     parser.add_argument("--height", type=int, default=1280)
-    parser.add_argument("--title", default="HOW MUSCLE FIBERS CONTRACT")
+    parser.add_argument("--title", default="HUMAN MUSCLE ANATOMY")
+    parser.add_argument("--blend-file", default="output/fitfuel-science-preview.blend")
     parser.add_argument("--subtitle", default="Layered 3D muscle groups in motion")
     parser.add_argument("--view", choices=("anterior", "posterior"), default="anterior")
     return parser.parse_args(argv)
@@ -213,6 +214,16 @@ def build_scene(args):
     add_body_core("Pelvis | base", (0, 0.10, -2.55), (0.92, 0.43, 0.48), tendon)
     add_body_core("Neck", (0, 0.02, 2.38), (0.34, 0.34, 0.62), tendon)
     add_body_core("Head | silhouette", (0, 0.04, 3.28), (0.52, 0.48, 0.66), tendon)
+    # Limb masses sit behind the independently modeled muscle bellies.
+    for side in (-1, 1):
+        add_body_core(f"Upper arm | core {side}", (side * 1.40, 0.12, 0.58),
+                      (0.29, 0.30, 1.03), tendon)
+        add_body_core(f"Forearm | core {side}", (side * 1.62, 0.14, -0.48),
+                      (0.23, 0.25, 0.83), tendon)
+        add_body_core(f"Thigh | core {side}", (side * 0.52, 0.16, -3.48),
+                      (0.43, 0.42, 1.18), muscle_base)
+        add_body_core(f"Lower leg | core {side}", (side * 0.54, 0.17, -4.76),
+                      (0.29, 0.30, 0.91), tendon)
 
     if args.view == "anterior":
         # Pectorals, individually modeled left and right.
@@ -263,7 +274,7 @@ def build_scene(args):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=20, radius=0.13,
                                          location=(-0.55, activation_y, 0.75))
     pulse = bpy.context.object
-    pulse.name = "Traveling activation signal"
+    pulse.name = activation_name
     pulse.data.materials.append(signal)
     for frame, x in ((1, -0.55), (args.frames // 2, 0.55), (args.frames, -0.55)):
         pulse.location.x = x
@@ -313,7 +324,7 @@ def main():
     output_dir = Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     scene = build_scene(args)
-    bpy.ops.wm.save_as_mainfile(filepath=str(output_dir / "../fitfuel-science-preview.blend"))
+    bpy.ops.wm.save_as_mainfile(filepath=str(Path(args.blend_file).resolve()))
     bpy.ops.render.render(animation=True)
     first_frame = output_dir / "frame_0001.png"
     last_frame = output_dir / f"frame_{scene.frame_end:04d}.png"
