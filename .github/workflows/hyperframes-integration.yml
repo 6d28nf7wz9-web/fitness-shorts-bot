@@ -90,6 +90,13 @@ jobs:
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 output/final.mp4
           ffprobe -v error -show_entries format=duration -of csv=p=0 output/final.mp4
           test -s output/final.mp4
+      - name: Upload assembled 3D HyperFrames fixture
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-hyperframes-3d-final-preview
+          path: output/final.mp4
+          if-no-files-found: error
+          retention-days: 7
 
   blender-science-preview:
     runs-on: ubuntu-24.04
