@@ -20,7 +20,8 @@ def arguments():
     parser.add_argument("--width", type=int, default=720)
     parser.add_argument("--height", type=int, default=1280)
     parser.add_argument("--title", default="HOW MUSCLE FIBERS CONTRACT")
-    parser.add_argument("--subtitle", default="A closer look inside skeletal muscle")
+    parser.add_argument("--subtitle", default="Layered 3D muscle groups in motion")
+    parser.add_argument("--view", choices=("anterior", "posterior"), default="anterior")
     return parser.parse_args(argv)
 
 
@@ -72,7 +73,7 @@ def add_bar(name, location, scale, mat, bevel=0.04):
         mod = obj.modifiers.new("Soft rounded edges", "BEVEL")
         mod.width = bevel
         mod.segments = 3
-        obj.modifiers.new("Weighted corner normals", "WEIGHTED_NORMAL")
+        # Avoid Weighted Normal: it has caused instability on headless runners.
     return obj
 
 
@@ -213,33 +214,54 @@ def build_scene(args):
     add_body_core("Neck", (0, 0.02, 2.38), (0.34, 0.34, 0.62), tendon)
     add_body_core("Head | silhouette", (0, 0.04, 3.28), (0.52, 0.48, 0.66), tendon)
 
-    # Pectorals, individually modeled left and right.
-    for side, label in ((-1, "L"), (1, "R")):
-        add_muscle_belly(f"Pectoralis major {label}", (side * 0.62, -0.40, 1.12),
-                         0.92, 0.58, 0.23, muscle_target, args.frames, 1.0, 0.58)
-        add_muscle_belly(f"Deltoid {label}", (side * 1.20, -0.23, 1.62),
-                         0.86, 0.38, 0.34, muscle_light, args.frames, 0.9, 0.62)
-        add_muscle_belly(f"Biceps brachii {label}", (side * 1.48, -0.25, 0.55),
-                         1.18, 0.30, 0.27, muscle_target, args.frames, 0.85, 0.52)
-        add_muscle_belly(f"Forearm flexors {label}", (side * 1.62, -0.12, -0.43),
-                         1.05, 0.25, 0.23, muscle_base, args.frames, 0.5, 0.48)
-        add_muscle_belly(f"External oblique {label}", (side * 0.67, -0.34, -1.18),
-                         1.05, 0.25, 0.18, muscle_light, args.frames, 0.7, 0.50)
-        add_muscle_belly(f"Rectus abdominis {label}", (side * 0.22, -0.39, -1.45),
-                         1.35, 0.19, 0.13, muscle_target, args.frames, 0.75, 0.40)
-        add_muscle_belly(f"Quadriceps {label}", (side * 0.52, -0.17, -3.45),
-                         1.55, 0.39, 0.32, muscle_light, args.frames, 0.8, 0.58)
-
-    # Clavicles and sternum provide clear landmarks without cluttering the muscle map.
-    add_bar("Sternum landmark", (0, -0.43, 1.12), (0.09, 0.08, 1.12), bone, 0.035)
-    for side in (-1, 1):
-        clavicle = add_bar(f"Clavicle landmark {side}", (side * 0.48, -0.42, 1.82),
-                           (0.92, 0.075, 0.075), bone, 0.035)
-        clavicle.rotation_euler[1] = side * -0.12
+    if args.view == "anterior":
+        # Pectorals, individually modeled left and right.
+        for side, label in ((-1, "L"), (1, "R")):
+            add_muscle_belly(f"Pectoralis major {label}", (side * 0.62, -0.40, 1.12),
+                             0.92, 0.58, 0.23, muscle_target, args.frames, 1.0, 0.58)
+            add_muscle_belly(f"Deltoid {label}", (side * 1.20, -0.23, 1.62),
+                             0.86, 0.38, 0.34, muscle_light, args.frames, 0.9, 0.62)
+            add_muscle_belly(f"Biceps brachii {label}", (side * 1.48, -0.25, 0.55),
+                             1.18, 0.30, 0.27, muscle_target, args.frames, 0.85, 0.52)
+            add_muscle_belly(f"Forearm flexors {label}", (side * 1.62, -0.12, -0.43),
+                             1.05, 0.25, 0.23, muscle_base, args.frames, 0.5, 0.48)
+            add_muscle_belly(f"External oblique {label}", (side * 0.67, -0.34, -1.18),
+                             1.05, 0.25, 0.18, muscle_light, args.frames, 0.7, 0.50)
+            add_muscle_belly(f"Rectus abdominis {label}", (side * 0.22, -0.39, -1.45),
+                             1.35, 0.19, 0.13, muscle_target, args.frames, 0.75, 0.40)
+            add_muscle_belly(f"Quadriceps {label}", (side * 0.52, -0.17, -3.45),
+                             1.55, 0.39, 0.32, muscle_light, args.frames, 0.8, 0.58)
+        add_bar("Sternum landmark", (0, -0.43, 1.12), (0.09, 0.08, 1.12), bone, 0.035)
+        for side in (-1, 1):
+            clavicle = add_bar(f"Clavicle landmark {side}", (side * 0.48, -0.42, 1.82),
+                               (0.92, 0.075, 0.075), bone, 0.035)
+            clavicle.rotation_euler[1] = side * -0.12
+        view_label = "ANTERIOR VIEW  /  FRONT MUSCLE GROUPS"
+        activation_name = "Pectoral activation signal"
+        activation_y = -0.72
+    else:
+        # Posterior muscle map: trapezius, latissimus, triceps, gluteals,
+        # hamstrings and calves are separate animated 3D muscle meshes.
+        add_muscle_belly("Trapezius upper", (0, -0.43, 1.78), 1.18, 0.62, 0.22,
+                         muscle_target, args.frames, 0.9, 0.50)
+        for side, label in ((-1, "L"), (1, "R")):
+            add_muscle_belly(f"Latissimus dorsi {label}", (side * 0.68, -0.40, 0.25),
+                             1.95, 0.48, 0.22, muscle_target, args.frames, 1.0, 0.58)
+            add_muscle_belly(f"Triceps brachii {label}", (side * 1.46, -0.25, 0.48),
+                             1.18, 0.30, 0.27, muscle_light, args.frames, 0.85, 0.52)
+            add_muscle_belly(f"Gluteus maximus {label}", (side * 0.48, -0.36, -2.55),
+                             0.95, 0.46, 0.24, muscle_target, args.frames, 0.9, 0.60)
+            add_muscle_belly(f"Hamstrings {label}", (side * 0.53, -0.20, -3.55),
+                             1.55, 0.37, 0.29, muscle_light, args.frames, 0.8, 0.56)
+            add_muscle_belly(f"Gastrocnemius {label}", (side * 0.55, -0.12, -4.75),
+                             0.95, 0.28, 0.25, muscle_target, args.frames, 0.7, 0.52)
+        view_label = "POSTERIOR VIEW  /  BACK MUSCLE GROUPS"
+        activation_name = "Latissimus activation signal"
+        activation_y = -0.70
 
     # A moving activation pulse travels along the selected pectoral group.
     bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=20, radius=0.13,
-                                         location=(-0.55, -0.72, 0.75))
+                                         location=(-0.55, activation_y, 0.75))
     pulse = bpy.context.object
     pulse.name = "Traveling activation signal"
     pulse.data.materials.append(signal)
@@ -251,11 +273,11 @@ def build_scene(args):
     add_text("Brand label", "FITFUEL  /  3D ANATOMY", (0, -0.8, 5.00), 0.22, muted, camera)
     title = add_text("Main title", args.title, (0, -0.8, 4.48), 0.31, white, camera)
     title.data.space_character = 1.05
-    add_text("Subtitle", "Layered muscle groups • animated contraction", (0, -0.8, 4.05), 0.17, muted, camera)
+    add_text("Subtitle", view_label, (0, -0.8, 4.05), 0.16, muted, camera)
     add_bar("Callout rule left", (-2.12, -0.48, 1.35), (0.54, 0.05, 0.03), mint, 0.015)
-    add_text("Callout label left", "PECTORAL", (-2.03, -0.82, 1.08), 0.14, white, camera)
+    add_text("Callout label left", "MUSCLE GROUP", (-2.03, -0.82, 1.08), 0.12, white, camera)
     add_bar("Callout rule right", (2.08, -0.48, -1.38), (0.54, 0.05, 0.03), signal, 0.015)
-    add_text("Callout label right", "ABDOMINAL", (1.98, -0.82, -1.65), 0.14, white, camera)
+    add_text("Callout label right", "3D ACTIVATION", (1.98, -0.82, -1.65), 0.12, white, camera)
     add_bar("Bottom accent", (0, -0.4, -4.55), (2.8, 0.08, 0.035), mint, 0.015)
     add_text("Footer", "CONTRACT  •  RELEASE  •  REPEAT", (0, -0.8, -4.92), 0.18, white, camera)
     add_text("Scientific note", "Stylized 3D educational anatomy", (0, -0.8, -5.25), 0.12, muted, camera)
