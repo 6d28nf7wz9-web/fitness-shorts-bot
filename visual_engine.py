@@ -4,6 +4,7 @@ import re
 
 CATEGORIES = {
     "muscle": ("MUSCLE FIBER ADAPTATION", ["MECHANICAL TENSION", "REPAIR", "GROWTH"]),
+    "anatomy": ("TARGET MUSCLE ANATOMY", ["MUSCLE GROUP", "CONTRACTION", "FUNCTION"]),
     "recovery": ("RECOVERY & ADAPTATION", ["TRAINING STRESS", "REST", "REBUILD"]),
     "nutrition": ("NUTRIENT PATHWAY", ["FOOD", "ABSORPTION", "FUEL"]),
     "protein": ("PROTEIN SYNTHESIS", ["PROTEIN", "AMINO ACIDS", "MUSCLE REPAIR"]),
@@ -37,7 +38,7 @@ VISUAL_TYPE_CATEGORIES = {
     "protein_synthesis": "protein",
     "progressive_overload": "tracking",
     "supplement_evidence": "supplements",
-    "muscle_anatomy": "muscle",
+    "muscle_anatomy": "anatomy",
     "exercise_biomechanics": "exercise",
     "digestion_fiber": "nutrition",
     "food_nutrition": "nutrition",
@@ -104,7 +105,21 @@ def _label(value, fallback, limit=22):
 def _diagram(category, labels, uid):
     a, b, c = labels
     # Each topic has its own visual metaphor and geometry, not just recolored nodes.
-    if category == "recovery":
+    if category == "anatomy":
+        body = f"""
+          <path class="anatomy-silhouette" d="M330 38 Q380 10 430 38 L448 92 Q500 102 535 145 L565 280 L535 295 L495 190 L485 320 L465 350 L295 350 L275 320 L265 190 L225 295 L195 280 L225 145 Q260 102 312 92Z"/>
+          <path class="anatomy-neck" d="M350 34 L350 90 Q380 110 410 90 L410 34Z"/>
+          <path class="anatomy-pec" d="M365 112 Q325 88 285 126 Q290 169 365 176Z M395 112 Q435 88 475 126 Q470 169 395 176Z"/>
+          <path class="anatomy-delt" d="M285 110 Q245 105 235 150 Q245 180 280 174 L305 132Z M475 110 Q515 105 525 150 Q515 180 480 174 L455 132Z"/>
+          <path class="anatomy-bicep" d="M246 166 Q220 190 232 240 Q250 257 267 230 L274 177Z M514 166 Q540 190 528 240 Q510 257 493 230 L486 177Z"/>
+          <path class="anatomy-abs" d="M365 181 Q380 174 395 181 L397 315 Q380 328 363 315Z"/>
+          <path class="anatomy-oblique" d="M350 184 Q326 190 315 225 L300 300 Q325 315 360 315Z M410 184 Q434 190 445 225 L460 300 Q435 315 400 315Z"/>
+          <path class="anatomy-quad" d="M310 345 Q340 330 370 345 L365 420 L320 420Z M390 345 Q420 330 450 345 L440 420 L395 420Z"/>
+          <path class="anatomy-midline" d="M380 178 V318"/>
+          <g class="anatomy-labels"><path d="M295 140 L150 105 H82"/><text x="82" y="94">DELTOID</text><path d="M315 145 L180 190 H82"/><text x="82" y="180">PECTORAL</text><path d="M250 205 L150 255 H82"/><text x="82" y="245">BICEPS</text><path d="M365 245 L255 310 H82"/><text x="82" y="300">CORE</text><path d="M430 375 L535 400 H680"/><text x="680" y="390" text-anchor="end">QUADRICEPS</text></g>
+          <text x="380" y="425" class="diagram-note">ANTERIOR VIEW • MAJOR SUPERFICIAL MUSCLE GROUPS</text>
+          <text x="380" y="65" class="diagram-label">{a} • {b} • {c}</text>"""
+    elif category == "recovery":
         body = f"""
           <g class="recovery-cycle">
             <circle class="recovery-clock" cx="190" cy="205" r="92"/>
@@ -268,6 +283,15 @@ def build_visual_panel(scene, index=1):
 
 def visual_css():
     return """
+.science-anatomy .anatomy-silhouette{fill:rgba(191,133,113,.28);stroke:#efc4a9;stroke-width:4}
+.science-anatomy .anatomy-neck{fill:#c58d78;stroke:#efc4a9;stroke-width:3}
+.science-anatomy .anatomy-pec,.science-anatomy .anatomy-delt,.science-anatomy .anatomy-bicep,.science-anatomy .anatomy-abs,.science-anatomy .anatomy-oblique,.science-anatomy .anatomy-quad{stroke:#ffd0c3;stroke-width:3;animation:ff-anatomy-highlight 2.8s ease-in-out infinite alternate}
+.science-anatomy .anatomy-pec{fill:#c64d62}.science-anatomy .anatomy-delt{fill:#e36d75}.science-anatomy .anatomy-bicep{fill:#bd465b}.science-anatomy .anatomy-abs{fill:#dc6671}.science-anatomy .anatomy-oblique{fill:#a83d55}.science-anatomy .anatomy-quad{fill:#c44b60}
+.science-anatomy .anatomy-midline{stroke:rgba(255,224,215,.65);stroke-width:2;stroke-dasharray:5 5;fill:none}
+.science-anatomy .anatomy-labels path{stroke:#72e6c2;stroke-width:2;fill:none}.science-anatomy .anatomy-labels text{fill:#f4f8ff;font-size:13px;font-weight:900;letter-spacing:1.5px}
+.science-anatomy .anatomy-body{transform-origin:380px 220px;animation:ff-anatomy-breathe 3.4s ease-in-out infinite}
+@keyframes ff-anatomy-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+@keyframes ff-anatomy-highlight{from{filter:brightness(.86)}to{filter:brightness(1.22) drop-shadow(0 0 10px rgba(255,110,120,.4))}}
 .science-protein .protein-source path{fill:rgba(246,189,96,.18);stroke:#f6bd60;stroke-width:7}
 .science-protein .protein-source circle{fill:#f6bd60;stroke:#fff;stroke-width:3}
 .science-protein .amino-chain circle{fill:#65aaff;stroke:#eaf5ff;stroke-width:4;animation:protein-amino 1.8s ease-in-out infinite alternate}
