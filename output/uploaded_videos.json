@@ -476,5 +476,19 @@
     "uploaded_at": "2026-11-18T18:18:59.691403+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "MiIe9ejTaU8",
+    "title": "Why Guessing Your Hormones Fails",
+    "topic": "Testing Hormone Symptoms Not Guessing",
+    "series": "Hormone Lab",
+    "episode_number": 6,
+    "episode_topic": "Why hormone symptoms need medical testing—not guesses",
+    "hook": "Guessing your hormones based on fatigue usually fails.",
+    "script_word_count": 56,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-19T06:23:59.028160+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
