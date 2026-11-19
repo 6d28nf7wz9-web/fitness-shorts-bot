@@ -10,6 +10,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from visual_engine import classify_scene
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -19,7 +21,7 @@ def anatomy_view(scene):
     visual_type = str(scene.get("visual_type", "")).lower().replace("-", "_")
     text = " ".join(str(scene.get(key, "")) for key in
                     ("visual_title", "visual_subtitle", "narration")).lower()
-    if visual_type in {"muscle_anatomy", "anatomy", "muscle_groups"}:
+    if visual_type in {"muscle_anatomy", "anatomy", "muscle_groups"} or classify_scene(scene) == "anatomy":
         explicit = True
     else:
         explicit = bool(re.search(
