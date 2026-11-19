@@ -91,7 +91,7 @@ jobs:
 
   blender-science-preview:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - name: Install headless render libraries
@@ -126,35 +126,60 @@ jobs:
               -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
               "output/blender-science-$view-preview.mp4"
           done
-      - name: Run upstream Blender asset QA on both anatomy views
+      - name: Render 3D science topic showcase
         run: |
           set -euo pipefail
-          for view in anterior posterior; do
-            blender -b "output/fitfuel-$view.blend" --python-exit-code 1 \
+          for topic in muscle protein heart fat_loss hydration exercise nutrition hormones creatine supplements tracking recovery; do
+            blender -b --factory-startup --python-exit-code 1 \
+              --python blender/fitfuel_science_preview.py -- \
+              --topic "$topic" --clean \
+              --output-dir "output/blender-topic-frames-$topic" \
+              --blend-file "output/fitfuel-topic-$topic.blend" \
+              --frames 48 --width 360 --height 640 \
+              --title 'FITFUEL 3D SCIENCE'
+            ffmpeg -y -hide_banner -loglevel error -framerate 24 \
+              -i "output/blender-topic-frames-$topic/frame_%04d.png" \
+              -r 30 -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
+              "output/blender-science-topic-$topic-preview.mp4"
+          done
+      - name: Run upstream Blender asset QA on all 3D topics
+        run: |
+          set -euo pipefail
+          for topic in anterior posterior muscle protein heart fat_loss hydration exercise nutrition hormones creatine supplements tracking recovery; do
+            if [ "$topic" = anterior ] || [ "$topic" = posterior ]; then
+              blend="output/fitfuel-$topic.blend"
+            else
+              blend="output/fitfuel-topic-$topic.blend"
+            fi
+            blender -b "$blend" --python-exit-code 1 \
               -P /tmp/blender-skills/skills/blender-asset-qa/scripts/qa_check.py -- \
               --profile render
           done
-      - name: Validate both 3D previews
+      - name: Validate all 3D previews
         run: |
           python - <<'PY'
           import json, subprocess
-          for view in ("anterior", "posterior"):
-              path = f"output/blender-science-{view}-preview.mp4"
+          checks = [
+              (f"output/blender-science-{view}-preview.mp4", 540, 960, 24, 72)
+              for view in ("anterior", "posterior")
+          ]
+          checks += [
+              (f"output/blender-science-topic-{topic}-preview.mp4", 360, 640, 30, 60)
+              for topic in ("muscle", "protein", "heart", "fat_loss", "hydration",
+                            "exercise", "nutrition", "hormones", "creatine",
+                            "supplements", "tracking", "recovery")
+          ]
+          for path, width, height, fps, frames in checks:
               probe = subprocess.check_output([
                   "ffprobe", "-v", "error", "-select_streams", "v:0",
                   "-show_entries", "stream=codec_name,width,height,r_frame_rate,nb_frames",
                   "-of", "json", path
               ], text=True)
               stream = json.loads(probe)["streams"][0]
-              assert (stream["width"], stream["height"]) == (540, 960), stream
-              assert stream["r_frame_rate"] == "24/1", stream
-              assert int(stream["nb_frames"]) == 72, stream
-              duration = float(subprocess.check_output([
-                  "ffprobe", "-v", "error", "-show_entries", "format=duration",
-                  "-of", "default=noprint_wrappers=1:nokey=1", path
-              ], text=True))
-              assert 2.9 <= duration <= 3.1, duration
-              print(f"{view} 3D preview passed:", stream, "duration=", duration)
+              assert (stream["width"], stream["height"]) == (width, height), (path, stream)
+              assert stream["r_frame_rate"] == f"{fps}/1", (path, stream)
+              assert int(stream["nb_frames"]) == frames, (path, stream)
+              print("3D preview passed:", path, stream)
           PY
       - name: Upload 3D preview artifact
         uses: actions/upload-artifact@v4
