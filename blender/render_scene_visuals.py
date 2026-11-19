@@ -1,8 +1,8 @@
 """Render scene-matched 3D science plates for the production video timeline.
 
-Only explicit anatomy scenes are rendered. The resulting MP4s are consumed by
-HyperFrames as visual layers; the ordinary SVG diagrams remain a fallback for
-non-anatomy topics. This script never uploads or publishes a video.
+Supported scientific categories are rendered as topic-specific 3D scenes. The
+resulting MP4s are consumed by HyperFrames as visual layers; SVG remains only a
+fallback for unsupported or general-purpose topics. This script never uploads or publishes a video.
 """
 import json
 import re
@@ -66,7 +66,7 @@ def render_scene(index, scene, duration, topic, blender="blender"):
         "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(mp4),
     ], check=True)
     if not mp4.is_file() or mp4.stat().st_size < 20_000:
-        raise RuntimeError(f"3D anatomy render missing or too small: {mp4}")
+        raise RuntimeError(f"3D science render missing or too small: {mp4}")
     print(f"3D science scene {index}: {topic}, {frames} frames -> {mp4}")
 
 
@@ -82,7 +82,7 @@ def main():
         raise SystemExit("3D science renderer: scene/audio count mismatch")
     blender = shutil.which("blender")
     if not blender:
-        print("3D anatomy: Blender is not installed; keeping existing visual fallback.")
+        print("3D science: Blender is not installed; keeping existing visual fallback.")
         return
     rendered = 0
     for index, (scene, timing) in enumerate(zip(scenes, audio), 1):
