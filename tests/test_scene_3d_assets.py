@@ -1,7 +1,11 @@
 """Tests for scene-aware Blender anatomy selection and HyperFrames routing."""
+import os
+import tempfile
 import unittest
+from pathlib import Path
 
 from blender.render_scene_visuals import anatomy_view
+from hyperframes_render import prepare_scene_3d
 
 
 class Scene3DAssetTests(unittest.TestCase):
@@ -34,6 +38,23 @@ class Scene3DAssetTests(unittest.TestCase):
             "visual_title": "Protein synthesis",
             "narration": "Amino acids support muscle protein synthesis.",
         }))
+
+    def test_hyperframes_can_load_a_rendered_3d_anatomy_plate(self):
+        with tempfile.TemporaryDirectory() as temp:
+            previous = os.getcwd()
+            try:
+                os.chdir(temp)
+                source = Path("output/science_3d/scene_2.mp4")
+                source.parent.mkdir(parents=True)
+                source.write_bytes(b"3d-preview" * 3000)
+                assets = Path("assets")
+                assets.mkdir()
+                result = prepare_scene_3d(2, assets)
+                self.assertEqual(result, "scene_2_3d_anatomy.mp4")
+                self.assertTrue((assets / result).is_file())
+            finally:
+                os.chdir(previous)
+
 
 
 if __name__ == "__main__":
