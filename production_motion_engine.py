@@ -229,11 +229,26 @@ def motion_engine_css():
 
 
 def sound_cue_events(narration, category, duration, word_timings=None, scene_start=0.0):
-    """Describe sparse SFX cue points for the final audio muxer."""
-    cues = []
-    for item in emphasize_words(narration, category, duration, word_timings):
-        cues.append({"time": round(float(scene_start) + item["start"], 3), "kind": "soft_tick", "word": item["word"]})
-    cues.append({"time": round(float(scene_start), 3), "kind": "scene_whoosh", "word": ""})
+    """Create a restrained, topic-aware sound map aligned to scene and spoken words.
+
+    Each scene gets one transition and one science-reveal accent. Key spoken
+    terms receive at most four short ticks so effects never become a metronome.
+    """
+    start = max(0.0, float(scene_start))
+    duration = max(0.0, float(duration))
+    cues = [
+        {"time": round(start, 3), "kind": "scene_whoosh", "word": ""},
+        {"time": round(start + min(0.18, duration * 0.08), 3),
+         "kind": "science_" + (category if category in _IMPORTANT else "general"),
+         "word": ""},
+    ]
+    emphasized = emphasize_words(narration, category, duration, word_timings, limit=4)
+    for item in emphasized:
+        cues.append({
+            "time": round(start + item["start"], 3),
+            "kind": "soft_tick",
+            "word": item["word"],
+        })
     return cues
 
 
