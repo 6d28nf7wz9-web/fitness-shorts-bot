@@ -101,12 +101,69 @@ def add_fiber(name, x, y, material, parent, frames):
     return obj
 
 
+def add_muscle_belly(name, center, length, radius_x, radius_y, material, frames,
+                      activation=1.0, taper=0.42):
+    """Build an organic, tapered 3D muscle belly with a softly curved profile."""
+    rings, sides = 12, 24
+    verts, faces = [], []
+    cx, cy, cz = center
+    for ring in range(rings + 1):
+        u = ring / rings
+        z = (u - 0.5) * length
+        profile = (math.sin(math.pi * (0.08 + 0.84 * u)) ** taper)
+        profile = max(0.10, profile)
+        curve = math.sin((u - 0.5) * math.pi) * radius_x * 0.10
+        for side in range(sides):
+            angle = 2 * math.pi * side / sides
+            x = cx + curve + math.cos(angle) * radius_x * profile
+            y = cy + math.sin(angle) * radius_y * profile
+            verts.append((x, y, cz + z))
+    for ring in range(rings):
+        for side in range(sides):
+            a = ring * sides + side
+            b = ring * sides + (side + 1) % sides
+            faces.append((a, b, b + sides, a + sides))
+    faces.append(tuple(range(sides - 1, -1, -1)))
+    faces.append(tuple(rings * sides + i for i in range(sides)))
+    mesh = bpy.data.meshes.new(name + " | anatomical surface")
+    mesh.from_pydata(verts, [], faces)
+    mesh.materials.append(material)
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    for polygon in mesh.polygons:
+        polygon.use_smooth = True
+    sub = obj.modifiers.new("Muscle surface refinement", "SUBSURF")
+    sub.levels = 1
+    # Gentle contraction is visible but never distorts the anatomical silhouette.
+    for frame, factor in ((1, 1.0), (frames // 4, 1.0 + 0.045 * activation),
+                          (frames // 2, 1.0), (3 * frames // 4, 1.0 + 0.045 * activation),
+                          (frames, 1.0)):
+        obj.scale = (factor, 1.0 - (factor - 1.0) * 0.35, 1.0)
+        obj.keyframe_insert(data_path="scale", frame=frame)
+    return obj
+
+
+def add_body_core(name, location, scale, material):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=32, location=location)
+    obj = bpy.context.object
+    obj.name = name
+    obj.scale = scale
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    obj.data.materials.append(material)
+    for polygon in obj.data.polygons:
+        polygon.use_smooth = True
+    return obj
+
+
 def build_scene(args):
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
     scene = bpy.context.scene
-    scene.render.engine = "BLENDER_EEVEE"
-    scene.eevee.taa_render_samples = 8
+    # Blender 4.x renamed Eevee; retain compatibility with older runners.
+    engines = {item.identifier for item in scene.render.bl_rna.properties["engine"].enum_items}
+    scene.render.engine = "BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in engines else "BLENDER_EEVEE"
+    if hasattr(scene, "eevee"):
+        scene.eevee.taa_render_samples = 16
     scene.render.resolution_x = args.width
     scene.render.resolution_y = args.height
     scene.render.resolution_percentage = 100
@@ -138,52 +195,70 @@ def build_scene(args):
     camera.name = "Portrait science camera"
     aim(camera, (0, 0, 0))
     camera.data.type = "ORTHO"
-    camera.data.ortho_scale = 10.8
+    camera.data.ortho_scale = 11.6
     scene.camera = camera
 
-    # A centered, vertical bundle is designed for the 9:16 frame, not a landscape crop.
-    rig = bpy.data.objects.new("Muscle fiber bundle rig", None)
-    bpy.context.collection.objects.link(rig)
-    fiber_x = (-1.25, -0.62, 0.0, 0.62, 1.25)
-    for index, x in enumerate(fiber_x):
-        add_fiber(f"Muscle fiber {index + 1}", x, 0.0, teal if index % 2 == 0 else blue, rig, args.frames)
+    # A complete stylized 3D anterior upper-body anatomy model. Muscle bellies
+    # are independent meshes, so later scenes can highlight the exact target group.
+    muscle_base = make_material("Anatomy | deep muscle", (0.30, 0.075, 0.085), 0.05, 0.42)
+    muscle_light = make_material("Anatomy | muscle highlights", (0.62, 0.16, 0.18), 0.04, 0.36)
+    muscle_target = make_material("Anatomy | active muscle teal", (0.035, 0.72, 0.62), 0.18, 0.25, 0.22)
+    tendon = make_material("Anatomy | tendons", (0.72, 0.48, 0.39), 0.0, 0.48)
+    bone = make_material("Anatomy | bone landmarks", (0.78, 0.72, 0.61), 0.0, 0.48)
 
-    # Repeating transverse bands communicate the sarcomere striation pattern.
-    for row, z in enumerate((-2.05, -1.35, -0.65, 0.05, 0.75, 1.45, 2.15)):
-        for col, x in enumerate(fiber_x):
-            band = add_bar(f"Striation {row + 1}-{col + 1}", (x, -0.22, z),
-                           (0.39, 0.11, 0.075), mint if row % 2 == 0 else signal, 0.025)
-            band.parent = rig
-            band.keyframe_insert(data_path="location", frame=1)
-            band.location.z = z + 0.10
-            band.keyframe_insert(data_path="location", frame=args.frames // 2)
-            band.location.z = z
-            band.keyframe_insert(data_path="location", frame=args.frames)
+    # Torso silhouette, neck, pelvis and head establish anatomical proportions.
+    add_body_core("Thorax | 3D anatomical base", (0, 0.12, 0.25), (1.28, 0.48, 2.00), muscle_base)
+    add_body_core("Abdominal wall | base", (0, -0.01, -1.55), (0.82, 0.39, 1.05), muscle_base)
+    add_body_core("Pelvis | base", (0, 0.10, -2.55), (0.92, 0.43, 0.48), tendon)
+    add_body_core("Neck", (0, 0.02, 2.38), (0.34, 0.34, 0.62), tendon)
+    add_body_core("Head | silhouette", (0, 0.04, 3.28), (0.52, 0.48, 0.66), tendon)
 
-    # A traveling activation pulse moves through the bundle.
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=16, radius=0.16, location=(0, -0.48, -2.35))
+    # Pectorals, individually modeled left and right.
+    for side, label in ((-1, "L"), (1, "R")):
+        add_muscle_belly(f"Pectoralis major {label}", (side * 0.62, -0.40, 1.12),
+                         0.92, 0.58, 0.23, muscle_target, args.frames, 1.0, 0.58)
+        add_muscle_belly(f"Deltoid {label}", (side * 1.20, -0.23, 1.62),
+                         0.86, 0.38, 0.34, muscle_light, args.frames, 0.9, 0.62)
+        add_muscle_belly(f"Biceps brachii {label}", (side * 1.48, -0.25, 0.55),
+                         1.18, 0.30, 0.27, muscle_target, args.frames, 0.85, 0.52)
+        add_muscle_belly(f"Forearm flexors {label}", (side * 1.62, -0.12, -0.43),
+                         1.05, 0.25, 0.23, muscle_base, args.frames, 0.5, 0.48)
+        add_muscle_belly(f"External oblique {label}", (side * 0.67, -0.34, -1.18),
+                         1.05, 0.25, 0.18, muscle_light, args.frames, 0.7, 0.50)
+        add_muscle_belly(f"Rectus abdominis {label}", (side * 0.22, -0.39, -1.45),
+                         1.35, 0.19, 0.13, muscle_target, args.frames, 0.75, 0.40)
+        add_muscle_belly(f"Quadriceps {label}", (side * 0.52, -0.17, -3.45),
+                         1.55, 0.39, 0.32, muscle_light, args.frames, 0.8, 0.58)
+
+    # Clavicles and sternum provide clear landmarks without cluttering the muscle map.
+    add_bar("Sternum landmark", (0, -0.43, 1.12), (0.09, 0.08, 1.12), bone, 0.035)
+    for side in (-1, 1):
+        clavicle = add_bar(f"Clavicle landmark {side}", (side * 0.48, -0.42, 1.82),
+                           (0.92, 0.075, 0.075), bone, 0.035)
+        clavicle.rotation_euler[1] = side * -0.12
+
+    # A moving activation pulse travels along the selected pectoral group.
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=20, radius=0.13,
+                                         location=(-0.55, -0.72, 0.75))
     pulse = bpy.context.object
     pulse.name = "Traveling activation signal"
     pulse.data.materials.append(signal)
-    for frame, z in ((1, -2.35), (args.frames // 2, 2.35), (args.frames, -2.35)):
-        pulse.location.z = z
+    for frame, x in ((1, -0.55), (args.frames // 2, 0.55), (args.frames, -0.55)):
+        pulse.location.x = x
         pulse.keyframe_insert(data_path="location", frame=frame)
 
-    # Labels, hierarchy and generous safe margins make the graphic legible on a phone.
-    add_text("Brand label", "FITFUEL  /  SCIENCE", (0, -0.8, 4.65), 0.22, muted, camera)
-    title = add_text("Main title", args.title, (0, -0.8, 4.05), 0.34, white, camera)
+    # Small labels frame the anatomy; the model remains the visual focal point.
+    add_text("Brand label", "FITFUEL  /  3D ANATOMY", (0, -0.8, 5.00), 0.22, muted, camera)
+    title = add_text("Main title", args.title, (0, -0.8, 4.48), 0.31, white, camera)
     title.data.space_character = 1.05
-    add_text("Subtitle", args.subtitle, (0, -0.8, 3.55), 0.19, muted, camera)
-
-    # Explanatory callouts are placed beside the anatomy without covering it.
-    add_bar("Callout rule left", (-2.05, -0.35, 1.55), (0.62, 0.06, 0.035), mint, 0.015)
-    add_text("Callout label left", "MUSCLE FIBERS", (-1.95, -0.82, 1.25), 0.16, white, camera)
-    add_bar("Callout rule right", (2.05, -0.35, -1.45), (0.62, 0.06, 0.035), signal, 0.015)
-    add_text("Callout label right", "ACTIVATION SIGNAL", (1.82, -0.82, -1.76), 0.14, white, camera)
-
-    add_bar("Bottom accent", (0, -0.4, -3.55), (2.8, 0.08, 0.035), mint, 0.015)
-    add_text("Footer", "CONTRACT  •  RELEASE  •  REPEAT", (0, -0.8, -4.05), 0.19, white, camera)
-    add_text("Scientific note", "Illustrative anatomy — simplified for education", (0, -0.8, -4.48), 0.12, muted, camera)
+    add_text("Subtitle", "Layered muscle groups • animated contraction", (0, -0.8, 4.05), 0.17, muted, camera)
+    add_bar("Callout rule left", (-2.12, -0.48, 1.35), (0.54, 0.05, 0.03), mint, 0.015)
+    add_text("Callout label left", "PECTORAL", (-2.03, -0.82, 1.08), 0.14, white, camera)
+    add_bar("Callout rule right", (2.08, -0.48, -1.38), (0.54, 0.05, 0.03), signal, 0.015)
+    add_text("Callout label right", "ABDOMINAL", (1.98, -0.82, -1.65), 0.14, white, camera)
+    add_bar("Bottom accent", (0, -0.4, -4.55), (2.8, 0.08, 0.035), mint, 0.015)
+    add_text("Footer", "CONTRACT  •  RELEASE  •  REPEAT", (0, -0.8, -4.92), 0.18, white, camera)
+    add_text("Scientific note", "Stylized 3D educational anatomy", (0, -0.8, -5.25), 0.12, muted, camera)
 
     # Soft studio lighting; no detached floor strip or horizon line.
     for name, location, energy, size, color in (
