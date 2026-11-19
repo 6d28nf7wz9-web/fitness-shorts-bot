@@ -1203,10 +1203,51 @@ def generate_script():
             print(f"All providers exhausted this attempt; retrying once in {delay}s", flush=True)
             time.sleep(delay)
 
-    raise RuntimeError(
-        f"No provider produced a valid FitFuel script after {max_attempts} attempts. "
-        f"Last error: {last_problem[:500]}"
-    )
+    # Never lose a scheduled preview because free-tier model APIs are overloaded
+    # or return malformed scene counts. The deterministic fallback still passes
+    # the same validator and keeps publishing disabled in preview mode.
+    fallback = ensure_final_cta(build_emergency_script(series, episode_number, episode_topic, research))
+    fallback = repair_keywords(fallback)
+    fallback_problem = validate(fallback)
+    if fallback_problem:
+        raise RuntimeError(
+            f"AI providers failed ({last_problem[:300]}) and fallback failed validation: {fallback_problem}"
+        )
+    print("All AI providers unavailable/invalid; using validated deterministic fallback.", flush=True)
+    return fallback
+
+
+
+def build_emergency_script(series, episode_number, episode_topic, research):
+    """Deterministic, evidence-aware last resort when all free AI APIs fail."""
+    topic = str(episode_topic or "progressive overload").strip()
+    topic_lower = topic.lower()
+    if "supplement" in topic_lower or "overload" in topic_lower:
+        title = "Can Supplements Replace Progressive Overload?"
+        scenes = [
+            {"narration":"Supplements cannot replace a missing training stimulus.","visual_title":"SUPPLEMENTS ARE NOT THE STIMULUS","visual_subtitle":"Support is not the same as adaptation","visual_type":"supplement_evidence","visual_instruction":"Show supplement support beside a separate training stimulus; clearly distinguish the two.","keyword":"sports supplements | resistance training"},
+            {"narration":"Protein and creatine can support training, but they do not progressively challenge your muscles.","visual_title":"SUPPORT THE WORK","visual_subtitle":"Protein • Creatine • Consistent training","visual_type":"supplement_evidence","visual_instruction":"Animate protein and creatine support icons feeding into a training session, not replacing it.","keyword":"protein nutrition | creatine supplement"},
+            {"narration":"Muscles adapt when resistance, repetitions, or control gradually become more challenging.","visual_title":"THE ADAPTATION SIGNAL","visual_subtitle":"A measurable training challenge","visual_type":"progressive_overload","visual_instruction":"Show a progression timeline with reps, load, and control as separate measurable levers.","keyword":"progressive overload | muscle adaptation"},
+            {"narration":"Track your lifts, keep technique consistent, and progress only when your target reps feel solid.","visual_title":"MAKE PROGRESS MEASURABLE","visual_subtitle":"Log it • Repeat it • Progress safely","visual_type":"exercise_biomechanics","visual_instruction":"Show a workout log beside a clean controlled lift, emphasizing repeatable technique.","keyword":"strength training | exercise technique"},
+            {"narration":"What will you improve in your next session? Follow FitFuel for more.","visual_title":"YOUR NEXT SESSION","visual_subtitle":"Choose one clear progression target","visual_type":"process","visual_instruction":"Animate one selected training metric moving forward on a simple progress tracker.","keyword":"gym workout | strength training"}
+        ]
+    else:
+        title = (topic[:48].strip().rstrip(" ?.!") + ": What Actually Works?")[:60]
+        scenes = [
+            {"narration":"Stop guessing; this one detail changes your results.","visual_title":"THE DETAIL THAT MATTERS","visual_subtitle":"A practical evidence-based breakdown","visual_type":"process","visual_instruction":"Open with one bold claim and a clear visual question.","keyword":"fitness education | gym workout"},
+            {"narration":"Start with a consistent routine and measure what you actually do each week.","visual_title":"BUILD A BASELINE","visual_subtitle":"Consistency before complexity","visual_type":"process","visual_instruction":"Show a weekly habit tracker filling in steadily.","keyword":"fitness routine | training plan"},
+            {"narration":"Use sound technique, manageable effort, and enough recovery to repeat quality sessions.","visual_title":"QUALITY REPEATS","visual_subtitle":"Technique • Effort • Recovery","visual_type":"exercise_biomechanics","visual_instruction":"Show controlled exercise repetitions with technique markers.","keyword":"exercise technique | strength training"},
+            {"narration":"Change one variable at a time, then review how your performance responds.","visual_title":"TRACK ONE CHANGE","visual_subtitle":"Measure before you adjust","visual_type":"progressive_overload","visual_instruction":"Animate one metric changing on a simple progress chart.","keyword":"workout tracking | training progress"},
+            {"narration":"Which small change will you test this week? Follow FitFuel for more.","visual_title":"TEST IT THIS WEEK","visual_subtitle":"One change. Better feedback.","visual_type":"process","visual_instruction":"Finish on a clear one-week action card.","keyword":"fitness tips | gym workout"}
+        ]
+    return {
+        "series": series, "sources": [str(p.get("pmid")) for p in research[:3] if p.get("pmid")],
+        "topic": topic, "title": title,
+        "description": f"A practical, evidence-aware guide to {topic}. Learn what supports progress and what to measure.",
+        "hashtags": ["Fitness", "StrengthTraining", "FitFuel", "Science"],
+        "scenes": scenes, "episode_number": episode_number, "episode_topic": topic,
+        "ai_provider": "Built-in safe fallback", "ai_model": "deterministic-template"
+    }
 
 
 def finalize(data):
