@@ -287,8 +287,9 @@ def main():
             )
         kinetic = kinetic_html(scene.get('narration', ''), category, dur, meta.get('word_timings'), scene_start=0.0)
         sound_cues.extend(sound_cue_events(scene.get('narration', ''), category, dur, meta.get('word_timings'), cursor))
+        science_overlay_class = "has-3d-science" if use_3d else ""
         blocks.append(f"""
-<div id="overlay{i}" class="clip motion-scene science-{category} motion-scene-{i} {motion['class_name']}" data-motion-style="{motion['style']}" style="--scene-start:{start}s" data-start="{start}" data-duration="{enddur}" data-track-index="2">
+<div id="overlay{i}" class="clip motion-scene science-{category} motion-scene-{i} {science_overlay_class} {motion['class_name']}" data-motion-style="{motion['style']}" style="--scene-start:{start}s" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
@@ -306,6 +307,8 @@ video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
 /* 3D science is staged as a dedicated lower-frame visual plate, clear of the
    headline and subtitle safe zones; stock B-roll remains full-frame. */
 .science-3d-footage{{inset:auto!important;left:120px!important;top:820px!important;width:840px!important;height:980px!important;object-fit:contain!important;transform:none!important;animation:none!important;filter:none!important;border:1px solid rgba(114,230,194,.34);border-radius:34px;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.28),rgba(7,17,29,.96) 72%);}}
+.motion-scene.has-3d-science .shade{{background:linear-gradient(180deg,rgba(4,10,18,.84) 0%,rgba(4,10,18,.76) 36%,rgba(4,10,18,.08) 44%,rgba(4,10,18,.08) 88%,rgba(4,10,18,.48) 100%);}}
+.motion-scene.has-3d-science .grid{{opacity:.025}}
 .scene-bg{{position:absolute;z-index:0;inset:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.32),transparent 58%),linear-gradient(155deg,#07111d 0%,#10263a 48%,#07111d 100%);}}
 .scene-footage{{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.72) saturate(1.08) contrast(1.04);transform:scale(1.045);animation:ff-camera-drift 7s ease-in-out both;}}
 .scene-bg:after{{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 71px,rgba(114,230,194,.055) 72px),repeating-linear-gradient(90deg,transparent 0 71px,rgba(114,230,194,.055) 72px);}}
