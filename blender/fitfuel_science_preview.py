@@ -23,6 +23,7 @@ def arguments():
     parser.add_argument("--blend-file", default="output/fitfuel-science-preview.blend")
     parser.add_argument("--subtitle", default="Layered 3D muscle groups in motion")
     parser.add_argument("--view", choices=("anterior", "posterior"), default="anterior")
+    parser.add_argument("--clean", action="store_true", help="Render a clean visual plate for the production timeline")
     return parser.parse_args(argv)
 
 
@@ -280,18 +281,20 @@ def build_scene(args):
         pulse.location.x = x
         pulse.keyframe_insert(data_path="location", frame=frame)
 
-    # Small labels frame the anatomy; the model remains the visual focal point.
-    add_text("Brand label", "FITFUEL  /  3D ANATOMY", (0, -0.8, 5.00), 0.22, muted, camera)
-    title = add_text("Main title", args.title, (0, -0.8, 4.48), 0.31, white, camera)
-    title.data.space_character = 1.05
-    add_text("Subtitle", view_label, (0, -0.8, 4.05), 0.16, muted, camera)
-    add_bar("Callout rule left", (-2.12, -0.48, 1.35), (0.54, 0.05, 0.03), mint, 0.015)
-    add_text("Callout label left", "MUSCLE GROUP", (-2.03, -0.82, 1.08), 0.12, white, camera)
-    add_bar("Callout rule right", (2.08, -0.48, -1.38), (0.54, 0.05, 0.03), signal, 0.015)
-    add_text("Callout label right", "3D ACTIVATION", (1.98, -0.82, -1.65), 0.12, white, camera)
-    add_bar("Bottom accent", (0, -0.4, -4.55), (2.8, 0.08, 0.035), mint, 0.015)
-    add_text("Footer", "CONTRACT  •  RELEASE  •  REPEAT", (0, -0.8, -4.92), 0.18, white, camera)
-    add_text("Scientific note", "Stylized 3D educational anatomy", (0, -0.8, -5.25), 0.12, muted, camera)
+    # Standalone previews include typography. Production plates stay clean so
+    # HyperFrames can own the title, subtitles and word-timed kinetic type.
+    if not args.clean:
+        add_text("Brand label", "FITFUEL  /  3D ANATOMY", (0, -0.8, 5.00), 0.22, muted, camera)
+        title = add_text("Main title", args.title, (0, -0.8, 4.48), 0.31, white, camera)
+        title.data.space_character = 1.05
+        add_text("Subtitle", view_label, (0, -0.8, 4.05), 0.16, muted, camera)
+        add_bar("Callout rule left", (-2.12, -0.48, 1.35), (0.54, 0.05, 0.03), mint, 0.015)
+        add_text("Callout label left", "MUSCLE GROUP", (-2.03, -0.82, 1.08), 0.12, white, camera)
+        add_bar("Callout rule right", (2.08, -0.48, -1.38), (0.54, 0.05, 0.03), signal, 0.015)
+        add_text("Callout label right", "3D ACTIVATION", (1.98, -0.82, -1.65), 0.12, white, camera)
+        add_bar("Bottom accent", (0, -0.4, -4.55), (2.8, 0.08, 0.035), mint, 0.015)
+        add_text("Footer", "CONTRACT  •  RELEASE  •  REPEAT", (0, -0.8, -4.92), 0.18, white, camera)
+        add_text("Scientific note", "Stylized 3D educational anatomy", (0, -0.8, -5.25), 0.12, muted, camera)
 
     # Soft studio lighting; no detached floor strip or horizon line.
     for name, location, energy, size, color in (
