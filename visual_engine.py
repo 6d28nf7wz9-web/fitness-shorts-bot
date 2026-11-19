@@ -110,7 +110,7 @@ def _diagram(category, labels, uid):
     a, b, c = labels
     # Each topic has its own visual metaphor and geometry, not just recolored nodes.
     if category == "anatomy":
-        posterior = bool(re.search(r"\\b(?:back|posterior|lats?|latissimus|traps?|trapezius|glutes?|hamstrings?|calves)\\b", " ".join(map(str, labels)).lower()))
+        posterior = bool(re.search(r"\b(?:back|posterior|lats?|latissimus|traps?|trapezius|glutes?|hamstrings?|calves)\b", " ".join(map(str, labels)).lower()))
         if posterior:
             body = f"""
           <g class="anatomy-body">
