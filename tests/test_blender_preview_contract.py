@@ -16,7 +16,7 @@ class BlenderPreviewContractTests(unittest.TestCase):
         cls.source = SOURCE.read_text(encoding="utf-8")
 
     def test_portrait_composition_is_enforced(self):
-        self.assertIn('camera.data.ortho_scale = 10.8', self.source)
+        self.assertIn('camera.data.ortho_scale = 11.6', self.source)
         self.assertIn('args.width / args.height > 0.75', self.source)
 
     def test_phone_readable_hierarchy_is_present(self):
@@ -27,6 +27,17 @@ class BlenderPreviewContractTests(unittest.TestCase):
     def test_scientific_visual_has_moving_activation_signal(self):
         self.assertIn('Traveling activation signal', self.source)
         self.assertIn('pulse.keyframe_insert(data_path="location"', self.source)
+
+    def test_preview_uses_independent_3d_anatomical_muscle_meshes(self):
+        self.assertIn('def add_muscle_belly(', self.source)
+        for group in ('Pectoralis major', 'Deltoid', 'Biceps brachii',
+                      'External oblique', 'Rectus abdominis', 'Quadriceps'):
+            self.assertIn(group, self.source)
+        self.assertIn('Muscle surface refinement', self.source)
+        self.assertIn('Stylized 3D educational anatomy', self.source)
+
+    def test_blender_4_eevee_engine_is_supported(self):
+        self.assertIn('BLENDER_EEVEE_NEXT', self.source)
 
     def test_output_path_is_defined_in_main_scope(self):
         self.assertIn('output_dir = Path(args.output_dir).resolve()', self.source)
