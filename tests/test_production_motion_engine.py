@@ -97,7 +97,14 @@ class ProductionMotionEngineTests(unittest.TestCase):
     def test_sound_cues_are_sparse_and_scene_relative(self):
         cues = sound_cue_events("Protein supports muscle growth", "muscle", 3.0, scene_start=5.0)
         self.assertTrue(any(cue["kind"] == "scene_whoosh" and cue["time"] == 5.0 for cue in cues))
+        self.assertTrue(any(cue["kind"] == "science_muscle" and cue["time"] == 5.18 for cue in cues))
         self.assertTrue(all(5.0 <= cue["time"] < 8.0 for cue in cues))
+        self.assertLessEqual(sum(cue["kind"] == "soft_tick" for cue in cues), 4)
+
+    def test_sound_reveal_is_specific_to_science_category(self):
+        cues = sound_cue_events("Water restores fluid balance", "hydration", 2.0)
+        self.assertIn("science_hydration", {cue["kind"] for cue in cues})
+        self.assertEqual(cues[0]["kind"], "scene_whoosh")
 
 
     def test_presenter_gesture_matches_protein_and_progression_diagrams(self):
