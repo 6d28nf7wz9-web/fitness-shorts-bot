@@ -266,8 +266,12 @@ def main():
         category, science_panel = build_visual_panel(scene, i)
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         # Blender anatomy plates take priority for explicit muscle-anatomy scenes.
+        # Their 3D model replaces (rather than sits behind) the 2D SVG diagram.
+        three_d_name = prepare_scene_3d(i, assets)
+        if three_d_name:
+            science_panel = ""
         # Otherwise, use only footage that passed the semantic stock matcher.
-        footage_name = prepare_scene_3d(i, assets) or prepare_scene_footage(i, assets)
+        footage_name = three_d_name or prepare_scene_footage(i, assets)
         if footage_name:
             blocks.append(
                 f'<video id="scenevisual{i}" class="scene-footage camera-{motion["camera"]}" style="--scene-start:{start}s" muted playsinline '
