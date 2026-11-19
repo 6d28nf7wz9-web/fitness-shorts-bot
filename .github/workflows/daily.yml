@@ -46,6 +46,9 @@ jobs:
       UPLOAD_PRIVACY: public
       SKIP_UPLOAD: ${{ (github.event_name == 'push' || inputs.preview_only) && '1' || '' }}
       HYPERFRAMES_RENDER: "1"
+      GEMINI_REQUEST_TIMEOUT_MS: "20000"
+      GEMINI_MAX_MODELS: "1"
+      GEMINI_MAX_GENERATION_ATTEMPTS: "1"
     steps:
       - uses: actions/checkout@v4
 
