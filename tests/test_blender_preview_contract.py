@@ -48,8 +48,9 @@ class BlenderPreviewContractTests(unittest.TestCase):
         self.assertIn('def add_science_topic(', self.source)
         for topic in ('protein', 'heart', 'hydration', 'exercise', 'nutrition',
                       'fat_loss', 'hormones', 'creatine', 'supplements',
-                      'tracking', 'recovery', 'muscle'):
+                      'tracking', 'muscle'):
             self.assertIn(f'topic == "{topic}"', self.source)
+        self.assertIn('else:  # recovery', self.source)
 
     def test_output_path_is_defined_in_main_scope(self):
         self.assertIn('output_dir = Path(args.output_dir).resolve()', self.source)
