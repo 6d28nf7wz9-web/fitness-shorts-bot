@@ -51,6 +51,8 @@ class BlenderPreviewContractTests(unittest.TestCase):
                       'tracking', 'muscle'):
             self.assertIn(f'topic == "{topic}"', self.source)
         self.assertIn('else:  # recovery', self.source)
+        self.assertIn('else:  # general 3D science process', self.source)
+        self.assertIn('"general"), default="anatomy"', self.source)
 
     def test_output_path_is_defined_in_main_scope(self):
         self.assertIn('output_dir = Path(args.output_dir).resolve()', self.source)
