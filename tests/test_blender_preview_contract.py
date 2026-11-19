@@ -44,6 +44,13 @@ class BlenderPreviewContractTests(unittest.TestCase):
     def test_blender_4_eevee_engine_is_supported(self):
         self.assertIn('BLENDER_EEVEE_NEXT', self.source)
 
+    def test_topic_specific_3d_science_visuals_are_available(self):
+        self.assertIn('def add_science_topic(', self.source)
+        for topic in ('protein', 'heart', 'hydration', 'exercise', 'nutrition',
+                      'fat_loss', 'hormones', 'creatine', 'supplements',
+                      'tracking', 'recovery', 'muscle'):
+            self.assertIn(f'topic == "{topic}"', self.source)
+
     def test_output_path_is_defined_in_main_scope(self):
         self.assertIn('output_dir = Path(args.output_dir).resolve()', self.source)
         self.assertIn('first_frame = output_dir / "frame_0001.png"', self.source)
