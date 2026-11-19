@@ -119,9 +119,9 @@ def add_muscle_belly(name, center, length, radius_x, radius_y, material, frames,
         curve = math.sin((u - 0.5) * math.pi) * radius_x * 0.10
         for side in range(sides):
             angle = 2 * math.pi * side / sides
-            x = cx + curve + math.cos(angle) * radius_x * profile
-            y = cy + math.sin(angle) * radius_y * profile
-            verts.append((x, y, cz + z))
+            x = curve + math.cos(angle) * radius_x * profile
+            y = math.sin(angle) * radius_y * profile
+            verts.append((x, y, z))
     for ring in range(rings):
         for side in range(sides):
             a = ring * sides + side
@@ -134,6 +134,7 @@ def add_muscle_belly(name, center, length, radius_x, radius_y, material, frames,
     mesh.materials.append(material)
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.collection.objects.link(obj)
+    obj.location = center
     for polygon in mesh.polygons:
         polygon.use_smooth = True
     sub = obj.modifiers.new("Muscle surface refinement", "SUBSURF")
@@ -230,7 +231,7 @@ def add_science_topic(topic, args, teal, mint, blue, white, muted, signal):
         for obj in (heart, heart2):
             for frame, scale in ((1, 1.0), (args.frames // 4, 1.09), (args.frames // 2, 1.0),
                                  (3 * args.frames // 4, 1.09), (args.frames, 1.0)):
-                obj.scale = (0.72 * scale, 0.38 * scale, 1.15 * scale)
+                obj.scale = (scale, scale, scale)
                 obj.keyframe_insert(data_path="scale", frame=frame)
         add_tube("Aorta", [(0, 0, 0.7), (0, 0, 1.65), (0.5, 0, 2.15)], mint, 0.22)
         add_tube("Pulmonary artery", [(-0.25, 0, 0.55), (-0.9, 0, 1.25), (-1.3, 0, 1.75)], blue, 0.17)
