@@ -110,7 +110,26 @@ def _diagram(category, labels, uid):
     a, b, c = labels
     # Each topic has its own visual metaphor and geometry, not just recolored nodes.
     if category == "anatomy":
-        body = f"""
+        posterior = bool(re.search(r"\\b(?:back|posterior|lats?|latissimus|traps?|trapezius|glutes?|hamstrings?|calves)\\b", " ".join(map(str, labels)).lower()))
+        if posterior:
+            body = f"""
+          <g class="anatomy-body">
+            <path class="anatomy-silhouette" d="M330 38 Q380 10 430 38 L448 92 Q500 102 535 145 L565 280 L535 295 L495 190 L485 320 L465 350 L295 350 L275 320 L265 190 L225 295 L195 280 L225 145 Q260 102 312 92Z"/>
+            <path class="anatomy-neck" d="M350 34 L350 90 Q380 110 410 90 L410 34Z"/>
+            <path class="anatomy-trap" d="M345 92 L380 120 L415 92 L455 120 L420 178 L380 150 L340 178 L305 120Z"/>
+            <path class="anatomy-lat" d="M340 145 Q300 145 290 205 L315 280 Q350 295 370 260 L375 160Z M420 145 Q460 145 470 205 L445 280 Q410 295 390 260 L385 160Z"/>
+            <path class="anatomy-tricep" d="M260 155 Q225 190 240 245 Q260 265 278 230 L286 165Z M500 155 Q535 190 520 245 Q500 265 482 230 L474 165Z"/>
+            <path class="anatomy-glute" d="M310 280 Q345 260 378 292 L375 345 L300 345Z M390 292 Q425 260 460 280 L470 345 L385 345Z"/>
+            <path class="anatomy-ham" d="M315 345 Q345 330 375 350 L365 420 L320 420Z M385 350 Q415 330 445 345 L440 420 L395 420Z"/>
+            <path class="anatomy-calf" d="M320 420 Q345 405 365 420 L355 430 H315Z M395 420 Q415 405 440 420 L445 430 H405Z"/>
+            <path class="anatomy-midline" d="M380 178 V345"/>
+          </g>
+          <g class="anatomy-labels"><path d="M315 150 L160 105 H82"/><text x="82" y="94">TRAPEZIUS</text><path d="M310 215 L165 245 H82"/><text x="82" y="235">LATISSIMUS</text><path d="M430 310 L550 350 H680"/><text x="680" y="340" text-anchor="end">GLUTES</text><path d="M430 380 L550 410 H680"/><text x="680" y="400" text-anchor="end">HAMSTRINGS</text></g>
+          <text x="380" y="425" class="diagram-note">POSTERIOR VIEW • MAJOR SUPERFICIAL MUSCLE GROUPS</text>
+          <text x="380" y="65" class="diagram-label">{a} • {b} • {c}</text>"""
+        else:
+            body = f"""
+          <g class="anatomy-body">
           <path class="anatomy-silhouette" d="M330 38 Q380 10 430 38 L448 92 Q500 102 535 145 L565 280 L535 295 L495 190 L485 320 L465 350 L295 350 L275 320 L265 190 L225 295 L195 280 L225 145 Q260 102 312 92Z"/>
           <path class="anatomy-neck" d="M350 34 L350 90 Q380 110 410 90 L410 34Z"/>
           <path class="anatomy-pec" d="M365 112 Q325 88 285 126 Q290 169 365 176Z M395 112 Q435 88 475 126 Q470 169 395 176Z"/>
@@ -120,6 +139,7 @@ def _diagram(category, labels, uid):
           <path class="anatomy-oblique" d="M350 184 Q326 190 315 225 L300 300 Q325 315 360 315Z M410 184 Q434 190 445 225 L460 300 Q435 315 400 315Z"/>
           <path class="anatomy-quad" d="M310 345 Q340 330 370 345 L365 420 L320 420Z M390 345 Q420 330 450 345 L440 420 L395 420Z"/>
           <path class="anatomy-midline" d="M380 178 V318"/>
+          </g>
           <g class="anatomy-labels"><path d="M295 140 L150 105 H82"/><text x="82" y="94">DELTOID</text><path d="M315 145 L180 190 H82"/><text x="82" y="180">PECTORAL</text><path d="M250 205 L150 255 H82"/><text x="82" y="245">BICEPS</text><path d="M365 245 L255 310 H82"/><text x="82" y="300">CORE</text><path d="M430 375 L535 400 H680"/><text x="680" y="390" text-anchor="end">QUADRICEPS</text></g>
           <text x="380" y="425" class="diagram-note">ANTERIOR VIEW • MAJOR SUPERFICIAL MUSCLE GROUPS</text>
           <text x="380" y="65" class="diagram-label">{a} • {b} • {c}</text>"""
@@ -289,8 +309,8 @@ def visual_css():
     return """
 .science-anatomy .anatomy-silhouette{fill:rgba(191,133,113,.28);stroke:#efc4a9;stroke-width:4}
 .science-anatomy .anatomy-neck{fill:#c58d78;stroke:#efc4a9;stroke-width:3}
-.science-anatomy .anatomy-pec,.science-anatomy .anatomy-delt,.science-anatomy .anatomy-bicep,.science-anatomy .anatomy-abs,.science-anatomy .anatomy-oblique,.science-anatomy .anatomy-quad{stroke:#ffd0c3;stroke-width:3;animation:ff-anatomy-highlight 2.8s ease-in-out infinite alternate}
-.science-anatomy .anatomy-pec{fill:#c64d62}.science-anatomy .anatomy-delt{fill:#e36d75}.science-anatomy .anatomy-bicep{fill:#bd465b}.science-anatomy .anatomy-abs{fill:#dc6671}.science-anatomy .anatomy-oblique{fill:#a83d55}.science-anatomy .anatomy-quad{fill:#c44b60}
+.science-anatomy .anatomy-pec,.science-anatomy .anatomy-delt,.science-anatomy .anatomy-bicep,.science-anatomy .anatomy-abs,.science-anatomy .anatomy-oblique,.science-anatomy .anatomy-quad,.science-anatomy .anatomy-trap,.science-anatomy .anatomy-lat,.science-anatomy .anatomy-tricep,.science-anatomy .anatomy-glute,.science-anatomy .anatomy-ham,.science-anatomy .anatomy-calf{stroke:#ffd0c3;stroke-width:3;animation:ff-anatomy-highlight 2.8s ease-in-out infinite alternate}
+.science-anatomy .anatomy-pec{fill:#c64d62}.science-anatomy .anatomy-delt{fill:#e36d75}.science-anatomy .anatomy-bicep{fill:#bd465b}.science-anatomy .anatomy-abs{fill:#dc6671}.science-anatomy .anatomy-oblique{fill:#a83d55}.science-anatomy .anatomy-quad{fill:#c44b60}.science-anatomy .anatomy-trap{fill:#e36d75}.science-anatomy .anatomy-lat{fill:#bd465b}.science-anatomy .anatomy-tricep{fill:#c64d62}.science-anatomy .anatomy-glute{fill:#dc6671}.science-anatomy .anatomy-ham{fill:#a83d55}.science-anatomy .anatomy-calf{fill:#c44b60}
 .science-anatomy .anatomy-midline{stroke:rgba(255,224,215,.65);stroke-width:2;stroke-dasharray:5 5;fill:none}
 .science-anatomy .anatomy-labels path{stroke:#72e6c2;stroke-width:2;fill:none}.science-anatomy .anatomy-labels text{fill:#f4f8ff;font-size:13px;font-weight:900;letter-spacing:1.5px}
 .science-anatomy .anatomy-body{transform-origin:380px 220px;animation:ff-anatomy-breathe 3.4s ease-in-out infinite}
