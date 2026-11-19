@@ -50,7 +50,7 @@ class BlenderPreviewContractTests(unittest.TestCase):
                       'fat_loss', 'hormones', 'creatine', 'supplements',
                       'tracking', 'muscle'):
             self.assertIn(f'topic == "{topic}"', self.source)
-        self.assertIn('else:  # recovery', self.source)
+        self.assertIn('elif topic == "recovery"', self.source)
         self.assertIn('else:  # general 3D science process', self.source)
         self.assertIn('"general"), default="anatomy"', self.source)
 
