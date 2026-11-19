@@ -94,6 +94,9 @@ def main():
     if not blender:
         print("3D science: Blender is not installed; keeping existing visual fallback.")
         return
+    generated_dir = ROOT / "output" / "science_3d"
+    if generated_dir.exists():
+        shutil.rmtree(generated_dir)
     rendered = 0
     for index, (scene, timing) in enumerate(zip(scenes, audio), 1):
         topic = scene_topic(scene)
