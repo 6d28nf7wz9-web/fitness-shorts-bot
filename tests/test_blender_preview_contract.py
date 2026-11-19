@@ -37,7 +37,8 @@ class BlenderPreviewContractTests(unittest.TestCase):
         self.assertIn('Muscle surface refinement', self.source)
         self.assertIn('Stylized 3D educational anatomy', self.source)
         for group in ('Trapezius upper', 'Latissimus dorsi', 'Triceps brachii',
-                      'Gluteus maximus', 'Hamstrings', 'Gastrocnemius'):
+                      'Gluteus maximus', 'Biceps femoris', 'Semitendinosus',
+                      'Gastrocnemius', 'Soleus'):
             self.assertIn(group, self.source)
         self.assertIn('choices=("anterior", "posterior")', self.source)
 
