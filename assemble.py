@@ -175,11 +175,35 @@ def main():
             sfx_cmd = ["ffmpeg", "-y", "-loglevel", "error"]
             sfx_filters, sfx_labels = [], []
             for idx, cue in enumerate(cues):
-                kind = cue.get("kind")
-                freq, dur, gain = (360, .16, .045) if kind == "scene_whoosh" else (1320, .065, .075)
+                kind = str(cue.get("kind", "soft_tick"))
+                # Distinct, restrained pitches identify scene transitions and
+                # topic reveals without competing with the spoken narration.
+                sound_palette = {
+                    "scene_whoosh": (360, .16, .035),
+                    "science_muscle": (110, .18, .022),
+                    "science_protein": (880, .13, .028),
+                    "science_tracking": (660, .11, .026),
+                    "science_nutrition": (740, .13, .024),
+                    "science_heart": (92, .20, .022),
+                    "science_fat_loss": (520, .12, .024),
+                    "science_hydration": (1040, .14, .022),
+                    "science_exercise": (440, .12, .026),
+                    "science_hormones": (784, .15, .022),
+                    "science_supplements": (590, .12, .022),
+                    "science_creatine": (980, .13, .024),
+                    "science_general": (520, .12, .020),
+                    "soft_tick": (1320, .055, .038),
+                }
+                freq, dur, gain = sound_palette.get(kind, sound_palette["soft_tick"])
                 sfx_cmd += ["-f", "lavfi", "-i", f"sine=frequency={freq}:duration={dur}:sample_rate=44100"]
                 delay = max(0, int(float(cue["time"]) * 1000))
-                sfx_filters.append(f"[{idx}:a]volume={gain},adelay={delay}|{delay}[s{idx}]")
+                fade_in = min(.008, dur / 4)
+                fade_out = max(fade_in, dur - min(.025, dur / 3))
+                sfx_filters.append(
+                    f"[{idx}:a]volume={gain},afade=t=in:d={fade_in:.3f},"
+                    f"afade=t=out:st={fade_out:.3f}:d={dur-fade_out:.3f},"
+                    f"adelay={delay}|{delay}[s{idx}]"
+                )
                 sfx_labels.append(f"[s{idx}]")
             sfx_filters.append("".join(sfx_labels) + f"amix=inputs={len(cues)}:duration=longest:normalize=0,apad,atrim=0:{total}[sfx]")
             sfx_cmd += ["-filter_complex", ";".join(sfx_filters), "-map", "[sfx]", "-c:a", "pcm_s16le", sfx_path]
