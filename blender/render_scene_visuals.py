@@ -40,7 +40,7 @@ def render_scene(index, scene, duration, view, blender="blender"):
     out = ROOT / "output" / "science_3d"
     frame_dir = out / f"frames_{index}"
     frame_dir.mkdir(parents=True, exist_ok=True)
-    frames = max(48, min(240, int(round(max(2.0, duration) * 24))))
+    frames = max(48, min(600, int(round(max(2.0, duration) * 24))))
     blend_file = out / f"scene_{index}.blend"
     mp4 = out / f"scene_{index}.mp4"
     title = str(scene.get("visual_title") or "MUSCLE ANATOMY").strip()[:64]
