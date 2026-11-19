@@ -23,6 +23,16 @@ class AnatomyVisualEngineTests(unittest.TestCase):
                      "PECTORAL", "DELTOID", "BICEPS", "QUADRICEPS"):
             self.assertIn(term, panel)
 
+    def test_back_anatomy_selects_posterior_muscle_groups(self):
+        category, panel = build_visual_panel(
+            {"visual_type": "muscle_anatomy", "visual_title": "Back muscles: lats and traps"}
+        )
+        self.assertEqual(category, "anatomy")
+        for term in ("POSTERIOR VIEW", "anatomy-trap", "anatomy-lat",
+                     "anatomy-tricep", "anatomy-glute", "anatomy-ham",
+                     "TRAPEZIUS", "LATISSIMUS", "GLUTES", "HAMSTRINGS"):
+            self.assertIn(term, panel)
+
     def test_category_specific_css_is_connected_to_svg_class(self):
         category, panel = build_visual_panel(
             {"visual_type": "muscle_anatomy", "visual_title": "Muscle anatomy"}
