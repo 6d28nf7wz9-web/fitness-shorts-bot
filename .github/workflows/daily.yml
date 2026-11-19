@@ -109,7 +109,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends blender libegl1 libgl1
 
-      - name: Render scene-matched 3D anatomy plates
+      - name: Render scene-matched 3D science plates
         run: python blender/render_scene_visuals.py
 
       - name: Assemble video
