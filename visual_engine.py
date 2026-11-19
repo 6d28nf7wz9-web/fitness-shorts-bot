@@ -52,6 +52,7 @@ def classify_scene(scene):
     """Prefer explicit headline intent, then declared visual type, over broad keywords."""
     title = str(scene.get("visual_title", "")).lower()
     title_priority = (
+        ("anatomy", r"\b(?:anatomy|pectorals?|deltoids?|biceps?|triceps?|quadriceps?|hamstrings?|glutes?|lats?|latissimus|muscle activation)\b"),
         ("supplements", r"\bsupplement\w*\b"),
         ("creatine", r"\bcreatine\b"),
         ("protein", r"\bprotein\b|\bamino acids?\b|\bwhey\b"),
