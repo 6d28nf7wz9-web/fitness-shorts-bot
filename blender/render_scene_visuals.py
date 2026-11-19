@@ -26,6 +26,16 @@ SUPPORTED_3D_TOPICS = {
 def scene_topic(scene):
     """Map the shared visual classifier to a supported Blender 3D scene."""
     category = classify_scene(scene)
+    if category == "exercise":
+        visual_type = str(scene.get("visual_type", "")).lower().replace("-", "_")
+        intent = " ".join(str(scene.get(key, "")) for key in
+                          ("visual_title", "visual_subtitle", "visual_instruction")).lower()
+        is_biomechanics = visual_type == "exercise_biomechanics" or bool(re.search(
+            r"\b(biomechanics|joint mechanics|range of motion|joint angle|lever arm|movement mechanics)\b",
+            intent,
+        ))
+        if not is_biomechanics:
+            return None  # preserve verified real-exercise B-roll
     return category if category in SUPPORTED_3D_TOPICS else None
 
 
