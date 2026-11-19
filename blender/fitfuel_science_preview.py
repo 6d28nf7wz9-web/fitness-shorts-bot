@@ -23,7 +23,7 @@ def arguments():
     parser.add_argument("--blend-file", default="output/fitfuel-science-preview.blend")
     parser.add_argument("--subtitle", default="Layered 3D muscle groups in motion")
     parser.add_argument("--view", choices=("anterior", "posterior"), default="anterior")
-    parser.add_argument("--topic", choices=("anatomy", "muscle", "protein", "heart", "fat_loss", "hydration", "exercise", "nutrition", "hormones", "creatine", "supplements", "tracking", "recovery"), default="anatomy")
+    parser.add_argument("--topic", choices=("anatomy", "muscle", "protein", "heart", "fat_loss", "hydration", "exercise", "nutrition", "hormones", "creatine", "supplements", "tracking", "recovery", "general"), default="anatomy")
     parser.add_argument("--clean", action="store_true", help="Render a clean visual plate for the production timeline")
     return parser.parse_args(argv)
 
@@ -324,12 +324,26 @@ def add_science_topic(topic, args, teal, mint, blue, white, muted, signal):
             bar.scale.z *= 1.12
             bar.keyframe_insert(data_path="scale", frame=args.frames)
         view_label = "PROGRESSIVE OVERLOAD  /  TRACKING"
-    else:  # recovery
+    elif topic == "recovery":
         add_cylinder("Recovery clock face", (0, 0.1, 0), 1.6, 0.18, blue, (math.pi / 2, 0, 0))
-        add_bar("Clock hand minute", (0, -0.18, 0.55), (0.09, 0.08, 1.1), mint, 0.03)
+        minute = add_bar("Clock hand minute", (0, -0.18, 0.55), (0.09, 0.08, 1.1), mint, 0.03)
         add_bar("Clock hand hour", (0.42, -0.2, 0), (0.85, 0.08, 0.09), signal, 0.03)
+        for frame, angle in ((1, 0), (args.frames // 2, 0.8), (args.frames, 0)):
+            minute.rotation_euler[1] = angle
+            minute.keyframe_insert(data_path="rotation_euler", frame=frame)
         add_body_core("Recovery moon", (1.8, 0.1, 1.6), (0.45, 0.25, 0.45), mint)
         view_label = "REST  /  RECOVERY  /  ADAPTATION"
+    else:  # general 3D science process
+        nodes = [(-1.65, 0, 0), (0, 0, 0), (1.65, 0, 0)]
+        for index, point in enumerate(nodes):
+            node = add_body_core(f"Science process node {index + 1}", point,
+                                 (0.58, 0.38, 0.58), (blue, mint, signal)[index])
+            for frame, offset in ((1, 0), (args.frames // 2, 0.22), (args.frames, 0)):
+                node.location.z = offset
+                node.keyframe_insert(data_path="location", frame=frame)
+        add_tube("Science process connector 1", [nodes[0], (-0.8, 0, 0), nodes[1]], white, 0.08)
+        add_tube("Science process connector 2", [nodes[1], (0.8, 0, 0), nodes[2]], white, 0.08)
+        view_label = "INPUT  /  PROCESS  /  RESULT"
     activation_name = f"{label} 3D motion signal"
     activation_y = -0.7
     return view_label, activation_name, activation_y
