@@ -60,7 +60,7 @@ jobs:
       - name: Install FFmpeg and HyperFrames
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          sudo apt-get install -y ffmpeg fonts-dejavu-core blender libegl1 libgl1
           npm install --global hyperframes@0.9.31
           hyperframes doctor
       - name: Create safe synthetic fixture (no YouTube upload)
@@ -79,6 +79,8 @@ jobs:
           json.dump({"title":"HyperFrames fixture","scenes":scenes},open("output/script.json","w"))
           json.dump(audio,open("output/audio_info.json","w"))
           PY
+      - name: Render scene-matched 3D science plates
+        run: python blender/render_scene_visuals.py
       - name: Render HyperFrames composition
         run: python hyperframes_render.py
       - name: Assemble final fixture with captions and audio
