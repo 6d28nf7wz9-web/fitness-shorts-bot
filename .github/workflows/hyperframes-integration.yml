@@ -15,6 +15,8 @@ on:
       - 'tests/test_avatar_motion_cues.py'
       - 'assemble.py'
       - 'blender/**'
+      - 'tests/test_blender_preview_contract.py'
+      - 'tests/test_production_motion_engine.py'
       - 'clips.py'
       - 'clips_fast.py'
       - '.github/workflows/hyperframes-integration.yml'
@@ -32,6 +34,8 @@ on:
       - 'tests/test_visual_engine_scene_priority.py'
       - 'tests/test_avatar_motion_cues.py'
       - 'blender/**'
+      - 'tests/test_blender_preview_contract.py'
+      - 'tests/test_production_motion_engine.py'
   workflow_dispatch:
 
 permissions:
@@ -90,19 +94,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libegl1 libgl1 ffmpeg
-      - name: Install Blender 5.3
+      - name: Install Blender from Ubuntu packages
         run: |
           set -euo pipefail
-          curl -fL --retry 3 --retry-delay 2 \
-            https://download.blender.org/release/Blender5.3/blender-5.3.0-linux-x64.tar.xz \
-            -o /tmp/blender.tar.xz
-          mkdir -p "$HOME/blender-5.3.0"
-          tar -xJf /tmp/blender.tar.xz -C "$HOME/blender-5.3.0" --strip-components=1
-          "$HOME/blender-5.3.0/blender" --version
+          sudo apt-get install -y blender
+          command -v blender
+          blender --version
+          blender -b --factory-startup --python-expr "import bpy; print('BLENDER_PYTHON_READY=' + bpy.app.version_string)"
       - name: Render 3D muscle-fiber animation
         run: |
           mkdir -p output
-          "$HOME/blender-5.3.0/blender" -b --factory-startup --python-exit-code 1 \
+          "blender" -b --factory-startup --python-exit-code 1 \
             --python blender/fitfuel_science_preview.py -- \
             --output-dir output/blender-frames \
             --frames 72 --width 540 --height 960 --title 'HOW MUSCLE FIBERS CONTRACT' --subtitle 'A closer look inside skeletal muscle'
