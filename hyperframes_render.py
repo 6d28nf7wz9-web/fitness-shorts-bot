@@ -269,7 +269,7 @@ def main():
         # scenes prefer a verified stock shot, then fall back to a 3D process plate.
         three_d_name = prepare_scene_3d(i, assets)
         stock_name = prepare_scene_footage(i, assets)
-        use_3d = bool(three_d_name and (category != "general" or not stock_name))
+        use_3d = bool(three_d_name and (category not in {"general", "exercise"} or not stock_name))
         if use_3d:
             science_panel = ""
         footage_name = three_d_name if use_3d else stock_name or three_d_name
