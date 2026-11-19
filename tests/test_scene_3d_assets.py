@@ -29,6 +29,12 @@ class Scene3DAssetTests(unittest.TestCase):
             "Creatine and ATP": "creatine",
             "Energy balance": "fat_loss",
             "Progressive overload": "tracking",
+            "Build muscle faster": "muscle",
+            "Exercise biomechanics": "exercise",
+            "Nutrition and digestion": "nutrition",
+            "Hormone signaling": "hormones",
+            "Supplement evidence": "supplements",
+            "Recovery and sleep": "recovery",
         }
         for title, expected in cases.items():
             with self.subTest(title=title):
