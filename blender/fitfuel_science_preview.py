@@ -421,20 +421,38 @@ def build_scene(args):
         if args.view == "anterior":
             # Pectorals, individually modeled left and right.
             for side, label in ((-1, "L"), (1, "R")):
-                add_muscle_belly(f"Pectoralis major {label}", (side * 0.62, -0.40, 1.12),
-                                 0.92, 0.58, 0.23, muscle_target, args.frames, 1.0, 0.58)
-                add_muscle_belly(f"Deltoid {label}", (side * 1.20, -0.23, 1.62),
-                                 0.86, 0.38, 0.34, muscle_light, args.frames, 0.9, 0.62)
-                add_muscle_belly(f"Biceps brachii {label}", (side * 1.48, -0.25, 0.55),
-                                 1.18, 0.30, 0.27, muscle_target, args.frames, 0.85, 0.52)
+                add_muscle_belly(f"Pectoralis major upper head {label}", (side * 0.60, -0.40, 1.43),
+                                 0.56, 0.52, 0.21, muscle_target, args.frames, 1.0, 0.58)
+                add_muscle_belly(f"Pectoralis major lower head {label}", (side * 0.64, -0.42, 0.88),
+                                 0.56, 0.50, 0.21, muscle_target, args.frames, 1.0, 0.58)
+                add_muscle_belly(f"Deltoid anterior head {label}", (side * 1.20, -0.26, 1.82),
+                                 0.58, 0.31, 0.27, muscle_light, args.frames, 0.9, 0.62)
+                add_muscle_belly(f"Deltoid lateral head {label}", (side * 1.32, -0.22, 1.48),
+                                 0.68, 0.29, 0.30, muscle_target, args.frames, 0.9, 0.62)
+                add_muscle_belly(f"Deltoid posterior head {label}", (side * 1.18, -0.06, 1.25),
+                                 0.56, 0.25, 0.26, muscle_light, args.frames, 0.7, 0.62)
+                add_muscle_belly(f"Biceps brachii long head {label}", (side * 1.46, -0.27, 0.73),
+                                 0.88, 0.22, 0.20, muscle_target, args.frames, 0.85, 0.52)
+                add_muscle_belly(f"Biceps brachii short head {label}", (side * 1.51, -0.30, 0.45),
+                                 0.78, 0.21, 0.19, muscle_light, args.frames, 0.8, 0.52)
+                add_muscle_belly(f"Brachialis {label}", (side * 1.52, -0.28, 0.10),
+                                 0.58, 0.18, 0.16, muscle_base, args.frames, 0.65, 0.5)
                 add_muscle_belly(f"Forearm flexors {label}", (side * 1.62, -0.12, -0.43),
                                  1.05, 0.25, 0.23, muscle_base, args.frames, 0.5, 0.48)
                 add_muscle_belly(f"External oblique {label}", (side * 0.67, -0.34, -1.18),
                                  1.05, 0.25, 0.18, muscle_light, args.frames, 0.7, 0.50)
-                add_muscle_belly(f"Rectus abdominis {label}", (side * 0.22, -0.39, -1.45),
-                                 1.35, 0.19, 0.13, muscle_target, args.frames, 0.75, 0.40)
-                add_muscle_belly(f"Quadriceps {label}", (side * 0.52, -0.17, -3.45),
-                                 1.55, 0.39, 0.32, muscle_light, args.frames, 0.8, 0.58)
+                add_muscle_belly(f"Internal oblique {label}", (side * 0.54, -0.38, -1.48),
+                                 0.78, 0.20, 0.14, muscle_base, args.frames, 0.6, 0.48)
+                for segment, z in enumerate((-0.95, -1.43, -1.91), 1):
+                    add_muscle_belly(f"Rectus abdominis segment {segment} {label}",
+                                     (side * 0.20, -0.42, z), 0.39, 0.18, 0.12,
+                                     muscle_target, args.frames, 0.75, 0.42)
+                add_muscle_belly(f"Quadriceps rectus femoris {label}", (side * 0.48, -0.20, -3.42),
+                                 1.40, 0.24, 0.22, muscle_target, args.frames, 0.8, 0.58)
+                add_muscle_belly(f"Quadriceps vastus lateralis {label}", (side * 0.78, -0.17, -3.48),
+                                 1.46, 0.25, 0.24, muscle_light, args.frames, 0.8, 0.58)
+                add_muscle_belly(f"Quadriceps vastus medialis {label}", (side * 0.30, -0.18, -3.95),
+                                 0.72, 0.22, 0.21, muscle_light, args.frames, 0.75, 0.58)
             add_bar("Sternum landmark", (0, -0.43, 1.12), (0.09, 0.08, 1.12), bone, 0.035)
             for side in (-1, 1):
                 clavicle = add_bar(f"Clavicle landmark {side}", (side * 0.48, -0.42, 1.82),
@@ -448,17 +466,33 @@ def build_scene(args):
             # hamstrings and calves are separate animated 3D muscle meshes.
             add_muscle_belly("Trapezius upper", (0, 0.43, 1.78), 1.18, 0.62, 0.22,
                              muscle_target, args.frames, 0.9, 0.50)
+            add_muscle_belly("Trapezius middle", (0, 0.44, 0.92), 0.82, 0.48, 0.19,
+                             muscle_light, args.frames, 0.75, 0.50)
+            add_muscle_belly("Trapezius lower", (0, 0.40, 0.25), 0.95, 0.34, 0.18,
+                             muscle_base, args.frames, 0.65, 0.50)
             for side, label in ((-1, "L"), (1, "R")):
                 add_muscle_belly(f"Latissimus dorsi {label}", (side * 0.68, 0.40, 0.25),
                                  1.95, 0.48, 0.22, muscle_target, args.frames, 1.0, 0.58)
-                add_muscle_belly(f"Triceps brachii {label}", (side * 1.46, 0.25, 0.48),
-                                 1.18, 0.30, 0.27, muscle_light, args.frames, 0.85, 0.52)
+                add_muscle_belly(f"Rhomboid {label}", (side * 0.38, 0.46, 1.05),
+                                 0.78, 0.25, 0.16, muscle_light, args.frames, 0.7, 0.52)
+                add_muscle_belly(f"Triceps brachii long head {label}", (side * 1.45, 0.28, 0.75),
+                                 0.92, 0.23, 0.21, muscle_target, args.frames, 0.85, 0.52)
+                add_muscle_belly(f"Triceps brachii lateral head {label}", (side * 1.50, 0.30, 0.38),
+                                 0.80, 0.22, 0.20, muscle_light, args.frames, 0.8, 0.52)
+                add_muscle_belly(f"Triceps brachii medial head {label}", (side * 1.43, 0.28, 0.05),
+                                 0.68, 0.19, 0.17, muscle_base, args.frames, 0.7, 0.5)
                 add_muscle_belly(f"Gluteus maximus {label}", (side * 0.48, 0.36, -2.55),
                                  0.95, 0.46, 0.24, muscle_target, args.frames, 0.9, 0.60)
-                add_muscle_belly(f"Hamstrings {label}", (side * 0.53, 0.20, -3.55),
-                                 1.55, 0.37, 0.29, muscle_light, args.frames, 0.8, 0.56)
+                add_muscle_belly(f"Gluteus medius {label}", (side * 0.78, 0.38, -2.25),
+                                 0.58, 0.30, 0.19, muscle_light, args.frames, 0.7, 0.55)
+                add_muscle_belly(f"Biceps femoris {label}", (side * 0.70, 0.22, -3.55),
+                                 1.45, 0.23, 0.21, muscle_target, args.frames, 0.8, 0.56)
+                add_muscle_belly(f"Semitendinosus {label}", (side * 0.38, 0.22, -3.55),
+                                 1.45, 0.21, 0.18, muscle_light, args.frames, 0.7, 0.56)
                 add_muscle_belly(f"Gastrocnemius {label}", (side * 0.55, 0.12, -4.75),
                                  0.95, 0.28, 0.25, muscle_target, args.frames, 0.7, 0.52)
+                add_muscle_belly(f"Soleus {label}", (side * 0.55, 0.15, -5.15),
+                                 0.68, 0.23, 0.18, muscle_light, args.frames, 0.65, 0.52)
             view_label = "POSTERIOR VIEW  /  BACK MUSCLE GROUPS"
             activation_name = "Latissimus activation signal"
             activation_y = 0.70
