@@ -260,7 +260,7 @@ def _diagram(category, labels, uid):
           <circle class="process-pulse" cx="150" cy="210" r="25"/><circle class="process-pulse pulse-two" cx="380" cy="210" r="25"/><circle class="process-pulse pulse-three" cx="610" cy="210" r="25"/>
           <text x="380" y="355" class="diagram-note">A SIMPLE CAUSE-AND-EFFECT MODEL</text>
           <text x="380" y="65" class="diagram-label">{a}  •  {b}  •  {c}</text>"""
-    return f"""<svg class="science-svg" viewBox="0 0 760 430" role="img" aria-label="{html.escape(CATEGORIES[category][0])}">
+    return f"""<svg class="science-svg science-{category}" viewBox="0 0 760 430" role="img" aria-label="{html.escape(CATEGORIES[category][0])}">
       <defs><linearGradient id="panelGlow{uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#72e6c2"/><stop offset="1" stop-color="#65aaff"/></linearGradient>
       <filter id="softGlow{uid}"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
       {body}
