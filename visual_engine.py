@@ -51,6 +51,9 @@ VISUAL_TYPE_CATEGORIES = {
 def classify_scene(scene):
     """Prefer explicit headline intent, then declared visual type, over broad keywords."""
     title = str(scene.get("visual_title", "")).lower()
+    declared_visual_type = str(scene.get("visual_type", "")).strip().lower()
+    if declared_visual_type == "muscle_anatomy":
+        return "anatomy"
     title_priority = (
         ("anatomy", r"\b(?:anatomy|pectorals?|deltoids?|biceps?|triceps?|quadriceps?|hamstrings?|glutes?|lats?|latissimus|muscle activation)\b"),
         ("supplements", r"\bsupplement\w*\b"),
