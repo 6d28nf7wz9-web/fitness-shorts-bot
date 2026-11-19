@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from blender.render_scene_visuals import anatomy_view
+from blender.render_scene_visuals import anatomy_view, scene_topic
 from hyperframes_render import prepare_scene_3d
 
 
@@ -20,6 +20,19 @@ class Scene3DAssetTests(unittest.TestCase):
             "visual_title": "Latissimus and trapezius",
             "narration": "The lats and traps stabilize the back.",
         }), "posterior")
+
+    def test_science_topics_map_to_distinct_3d_scenes(self):
+        cases = {
+            "Protein synthesis": "protein",
+            "Cardiovascular flow": "heart",
+            "Hydration and electrolytes": "hydration",
+            "Creatine and ATP": "creatine",
+            "Energy balance": "fat_loss",
+            "Progressive overload": "tracking",
+        }
+        for title, expected in cases.items():
+            with self.subTest(title=title):
+                self.assertEqual(scene_topic({"visual_title": title}), expected)
 
     def test_front_muscle_groups_select_anterior_view(self):
         self.assertEqual(anatomy_view({
