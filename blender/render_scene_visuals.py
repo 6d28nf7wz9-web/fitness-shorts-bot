@@ -67,7 +67,17 @@ def render_scene(index, scene, duration, topic, blender="blender"):
     ], check=True)
     if not mp4.is_file() or mp4.stat().st_size < 20_000:
         raise RuntimeError(f"3D science render missing or too small: {mp4}")
-    print(f"3D science scene {index}: {topic}, {frames} frames -> {mp4}")
+    probe = subprocess.check_output([
+        "ffprobe", "-v", "error", "-select_streams", "v:0",
+        "-show_entries", "stream=width,height,r_frame_rate",
+        "-of", "json", str(mp4),
+    ], text=True)
+    stream = json.loads(probe)["streams"][0]
+    if (stream.get("width"), stream.get("height")) != (720, 1280):
+        raise RuntimeError(f"Unexpected 3D plate dimensions: {stream}")
+    if stream.get("r_frame_rate") != "30/1":
+        raise RuntimeError(f"Unexpected 3D plate frame rate: {stream}")
+    print(f"3D science scene {index}: {topic}, {frames} source frames -> {mp4}")
 
 
 def main():
