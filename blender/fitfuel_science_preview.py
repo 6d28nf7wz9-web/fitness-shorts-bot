@@ -370,7 +370,7 @@ def build_scene(args):
     muted = make_material("Type | muted", (0.30, 0.60, 0.70), 0.0, 0.4, 0.8)
     signal = make_material("Signal | cyan", (0.12, 0.65, 1.0), 0.1, 0.2, 1.8)
 
-    bpy.ops.object.camera_add(location=(0, -18, 0))
+    bpy.ops.object.camera_add(location=(0, 18 if args.view == "posterior" else -18, 0))
     camera = bpy.context.object
     camera.name = "Portrait science camera"
     aim(camera, (0, 0, 0))
@@ -435,19 +435,19 @@ def build_scene(args):
             add_muscle_belly("Trapezius upper", (0, -0.43, 1.78), 1.18, 0.62, 0.22,
                              muscle_target, args.frames, 0.9, 0.50)
             for side, label in ((-1, "L"), (1, "R")):
-                add_muscle_belly(f"Latissimus dorsi {label}", (side * 0.68, -0.40, 0.25),
+                add_muscle_belly(f"Latissimus dorsi {label}", (side * 0.68, 0.40, 0.25),
                                  1.95, 0.48, 0.22, muscle_target, args.frames, 1.0, 0.58)
-                add_muscle_belly(f"Triceps brachii {label}", (side * 1.46, -0.25, 0.48),
+                add_muscle_belly(f"Triceps brachii {label}", (side * 1.46, 0.25, 0.48),
                                  1.18, 0.30, 0.27, muscle_light, args.frames, 0.85, 0.52)
-                add_muscle_belly(f"Gluteus maximus {label}", (side * 0.48, -0.36, -2.55),
+                add_muscle_belly(f"Gluteus maximus {label}", (side * 0.48, 0.36, -2.55),
                                  0.95, 0.46, 0.24, muscle_target, args.frames, 0.9, 0.60)
-                add_muscle_belly(f"Hamstrings {label}", (side * 0.53, -0.20, -3.55),
+                add_muscle_belly(f"Hamstrings {label}", (side * 0.53, 0.20, -3.55),
                                  1.55, 0.37, 0.29, muscle_light, args.frames, 0.8, 0.56)
-                add_muscle_belly(f"Gastrocnemius {label}", (side * 0.55, -0.12, -4.75),
+                add_muscle_belly(f"Gastrocnemius {label}", (side * 0.55, 0.12, -4.75),
                                  0.95, 0.28, 0.25, muscle_target, args.frames, 0.7, 0.52)
             view_label = "POSTERIOR VIEW  /  BACK MUSCLE GROUPS"
             activation_name = "Latissimus activation signal"
-            activation_y = -0.70
+            activation_y = 0.70
 
     else:
         view_label, activation_name, activation_y = add_science_topic(
@@ -467,17 +467,19 @@ def build_scene(args):
     # Standalone previews include typography. Production plates stay clean so
     # HyperFrames can own the title, subtitles and word-timed kinetic type.
     if not args.clean:
-        add_text("Brand label", "FITFUEL  /  3D ANATOMY", (0, -0.8, 5.00), 0.22, muted, camera)
-        title = add_text("Main title", args.title, (0, -0.8, 4.48), 0.31, white, camera)
+        text_y = 0.8 if args.view == "posterior" else -0.8
+        rule_y = 0.48 if args.view == "posterior" else -0.48
+        add_text("Brand label", "FITFUEL  /  3D ANATOMY", (0, text_y, 5.00), 0.22, muted, camera)
+        title = add_text("Main title", args.title, (0, text_y, 4.48), 0.31, white, camera)
         title.data.space_character = 1.05
-        add_text("Subtitle", view_label, (0, -0.8, 4.05), 0.16, muted, camera)
-        add_bar("Callout rule left", (-2.12, -0.48, 1.35), (0.54, 0.05, 0.03), mint, 0.015)
-        add_text("Callout label left", "MUSCLE GROUP", (-2.03, -0.82, 1.08), 0.12, white, camera)
-        add_bar("Callout rule right", (2.08, -0.48, -1.38), (0.54, 0.05, 0.03), signal, 0.015)
-        add_text("Callout label right", "3D ACTIVATION", (1.98, -0.82, -1.65), 0.12, white, camera)
-        add_bar("Bottom accent", (0, -0.4, -4.55), (2.8, 0.08, 0.035), mint, 0.015)
-        add_text("Footer", "CONTRACT  •  RELEASE  •  REPEAT", (0, -0.8, -4.92), 0.18, white, camera)
-        add_text("Scientific note", "Stylized 3D educational anatomy", (0, -0.8, -5.25), 0.12, muted, camera)
+        add_text("Subtitle", view_label, (0, text_y, 4.05), 0.16, muted, camera)
+        add_bar("Callout rule left", (-2.12, rule_y, 1.35), (0.54, 0.05, 0.03), mint, 0.015)
+        add_text("Callout label left", "MUSCLE GROUP", (-2.03, text_y, 1.08), 0.12, white, camera)
+        add_bar("Callout rule right", (2.08, rule_y, -1.38), (0.54, 0.05, 0.03), signal, 0.015)
+        add_text("Callout label right", "3D ACTIVATION", (1.98, text_y, -1.65), 0.12, white, camera)
+        add_bar("Bottom accent", (0, rule_y, -4.55), (2.8, 0.08, 0.035), mint, 0.015)
+        add_text("Footer", "CONTRACT  •  RELEASE  •  REPEAT", (0, text_y, -4.92), 0.18, white, camera)
+        add_text("Scientific note", "Stylized 3D educational anatomy", (0, text_y, -5.25), 0.12, muted, camera)
 
     # Soft studio lighting; no detached floor strip or horizon line.
     for name, location, energy, size, color in (
