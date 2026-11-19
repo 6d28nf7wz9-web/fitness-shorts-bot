@@ -432,7 +432,7 @@ def build_scene(args):
         else:
             # Posterior muscle map: trapezius, latissimus, triceps, gluteals,
             # hamstrings and calves are separate animated 3D muscle meshes.
-            add_muscle_belly("Trapezius upper", (0, -0.43, 1.78), 1.18, 0.62, 0.22,
+            add_muscle_belly("Trapezius upper", (0, 0.43, 1.78), 1.18, 0.62, 0.22,
                              muscle_target, args.frames, 0.9, 0.50)
             for side, label in ((-1, "L"), (1, "R")):
                 add_muscle_belly(f"Latissimus dorsi {label}", (side * 0.68, 0.40, 0.25),
