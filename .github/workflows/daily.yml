@@ -104,6 +104,14 @@ jobs:
       - name: Validate script and footage
         run: python quality_check.py
 
+      - name: Install Blender 3D renderer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends blender libegl1 libgl1
+
+      - name: Render scene-matched 3D anatomy plates
+        run: python blender/render_scene_visuals.py
+
       - name: Assemble video
         run: |
           python assemble.py
