@@ -38,6 +38,10 @@ on:
       - 'tests/test_production_motion_engine.py'
   workflow_dispatch:
 
+concurrency:
+  group: hyperframes-integration-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
