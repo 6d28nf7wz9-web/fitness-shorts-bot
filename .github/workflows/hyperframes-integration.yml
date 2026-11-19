@@ -105,6 +105,10 @@ jobs:
           command -v blender
           blender --version
           blender -b --factory-startup --python-expr "import bpy; print('BLENDER_PYTHON_READY=' + bpy.app.version_string)"
+      - name: Fetch Blender Agent Skills (pinned, MIT)
+        run: |
+          git clone --depth 1 --branch v1.3.2 https://github.com/EL4CTEO/blender-skills.git /tmp/blender-skills
+          python /tmp/blender-skills/tools/validate_skills.py
       - name: Render 3D muscle-fiber animation
         run: |
           mkdir -p output
@@ -116,6 +120,11 @@ jobs:
             -i output/blender-frames/frame_%04d.png \
             -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
             output/blender-science-preview.mp4
+      - name: Run upstream Blender asset QA on rendered scene
+        run: |
+          blender -b output/fitfuel-science-preview.blend --python-exit-code 1 \\
+            -P /tmp/blender-skills/skills/blender-asset-qa/scripts/qa_check.py -- \\
+            --profile render
       - name: Validate 3D preview
         run: |
           ffprobe -v error -select_streams v:0 \
