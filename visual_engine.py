@@ -62,6 +62,7 @@ def classify_scene(scene):
         ("muscle", r"\bmechanical tension\b|\bmuscle tension\b|\bmuscle fibers?\b"),
         ("tracking", r"\b(?:overload|progression|load increase|track(?:ing)?|training log)\b"),
         ("hydration", r"\b(?:hydration|electrolyte)\b"),
+        ("heart", r"\b(?:heart|blood|circulation|cardiovascular|oxygen delivery|pulse|blood pressure)\b"),
         ("hormones", r"\b(?:hormone|insulin|cortisol|testosterone|estrogen)\b"),
         ("fat_loss", r"\b(?:fat loss|calorie|energy balance|weight loss)\b"),
         ("recovery", r"\b(?:recovery|rest day|deload|sleep)\b"),
