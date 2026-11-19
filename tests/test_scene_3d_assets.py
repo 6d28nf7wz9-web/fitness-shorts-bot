@@ -41,6 +41,18 @@ class Scene3DAssetTests(unittest.TestCase):
             with self.subTest(title=title):
                 self.assertEqual(scene_topic({"visual_title": title}), expected)
 
+    def test_real_exercise_demonstrations_keep_stock_broll(self):
+        self.assertIsNone(scene_topic({
+            "visual_title": "How to perform a squat",
+            "narration": "Keep your chest up and drive through the floor.",
+        }))
+
+    def test_explicit_joint_mechanics_uses_3d_biomechanics(self):
+        self.assertEqual(scene_topic({
+            "visual_type": "exercise_biomechanics",
+            "visual_title": "Knee joint mechanics",
+        }), "exercise")
+
     def test_front_muscle_groups_select_anterior_view(self):
         self.assertEqual(anatomy_view({
             "visual_title": "Biceps and pectorals",
