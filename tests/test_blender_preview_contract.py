@@ -16,7 +16,7 @@ class BlenderPreviewContractTests(unittest.TestCase):
         cls.source = SOURCE.read_text(encoding="utf-8")
 
     def test_portrait_composition_is_enforced(self):
-        self.assertIn('camera.data.ortho_scale = 11.6', self.source)
+        self.assertIn('camera.data.ortho_scale = 11.6 if args.topic == "anatomy" else 7.2', self.source)
         self.assertIn('args.width / args.height > 0.75', self.source)
 
     def test_phone_readable_hierarchy_is_present(self):
