@@ -490,5 +490,19 @@
     "uploaded_at": "2026-11-19T06:23:59.028160+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "eRmwjwlL2EM",
+    "title": "Is Training to Failure Actually Building Muscle?",
+    "topic": "The Failure Fatigue Trap",
+    "series": "Gym Myth Court",
+    "episode_number": 7,
+    "episode_topic": "Does training to failure build more muscle every time?",
+    "hook": "Stop chasing failure on every single set.",
+    "script_word_count": 50,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-19T12:15:21.701448+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
