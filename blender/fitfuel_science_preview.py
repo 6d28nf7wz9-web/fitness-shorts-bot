@@ -216,6 +216,7 @@ def main():
     output_dir = Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     scene = build_scene(args)
+    bpy.ops.wm.save_as_mainfile(filepath=str(output_dir / "../fitfuel-science-preview.blend"))
     bpy.ops.render.render(animation=True)
     first_frame = output_dir / "frame_0001.png"
     last_frame = output_dir / f"frame_{scene.frame_end:04d}.png"
