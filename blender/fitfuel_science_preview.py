@@ -253,9 +253,14 @@ def add_science_topic(topic, args, teal, mint, blue, white, muted, signal):
                              (0, 0.12, 0))
         lower = add_cylinder("Lower bone", (1.1, 0, -1.15), 0.22, 2.7, white,
                              (0, 0, -0.42))
+        bpy.ops.object.empty_add(type="PLAIN_AXES", location=(0, 0, 0))
+        hinge = bpy.context.object
+        hinge.name = "Biomechanical hinge pivot"
+        lower.parent = hinge
+        lower.matrix_parent_inverse = hinge.matrix_world.inverted()
         for frame, angle in ((1, -0.1), (args.frames // 2, 0.48), (args.frames, -0.1)):
-            lower.rotation_euler[1] = angle
-            lower.keyframe_insert(data_path="rotation_euler", frame=frame)
+            hinge.rotation_euler[1] = angle
+            hinge.keyframe_insert(data_path="rotation_euler", frame=frame)
         add_body_core("Joint head", (-0.12, -0.3, 0.02), (0.32, 0.22, 0.32), mint)
         view_label = "JOINT MECHANICS  /  RANGE OF MOTION"
     elif topic == "nutrition":
@@ -264,9 +269,15 @@ def add_science_topic(topic, args, teal, mint, blue, white, muted, signal):
                                          (0.65, -0.75, teal), (-0.85, -0.75, white))):
             food = add_body_core(f"Food group {i + 1}", (x, -0.12, z), (0.58, 0.24, 0.52), mat)
             food.rotation_euler[1] = i * 0.2
+            for frame, offset in ((1, 0), (args.frames // 2, 0.12), (args.frames, 0)):
+                food.location.z = z + offset
+                food.keyframe_insert(data_path="location", frame=frame)
         view_label = "3D NUTRIENT PLATE  /  FUEL"
     elif topic == "fat_loss":
-        add_bar("Energy balance beam", (0, 0, 0.8), (3.7, 0.22, 0.18), mint, 0.08)
+        beam = add_bar("Energy balance beam", (0, 0, 0.8), (3.7, 0.22, 0.18), mint, 0.08)
+        for frame, angle in ((1, -0.08), (args.frames // 2, 0.08), (args.frames, -0.08)):
+            beam.rotation_euler[1] = angle
+            beam.keyframe_insert(data_path="rotation_euler", frame=frame)
         add_cylinder("Energy balance pivot", (0, 0, 0.15), 0.28, 1.15, white)
         for side in (-1, 1):
             x = side * 1.55
@@ -301,6 +312,9 @@ def add_science_topic(topic, args, teal, mint, blue, white, muted, signal):
             capsule = add_body_core(f"Supplement capsule {i + 1}", (1.35, -0.15, 0.8 - i * 0.8),
                                     (0.18, 0.18, 0.42), signal if i % 2 else mint)
             capsule.rotation_euler[1] = 0.55
+            for frame, offset in ((1, 0), (args.frames // 2, 0.16), (args.frames, 0)):
+                capsule.location.z = 0.8 - i * 0.8 + offset
+                capsule.keyframe_insert(data_path="location", frame=frame)
         view_label = "SUPPLEMENT FORM  /  DOSE"
     elif topic == "tracking":
         for i, height in enumerate((0.8, 1.35, 2.0, 2.8, 3.5)):
