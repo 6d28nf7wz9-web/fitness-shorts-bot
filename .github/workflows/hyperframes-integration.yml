@@ -129,7 +129,7 @@ jobs:
       - name: Render 3D science topic showcase
         run: |
           set -euo pipefail
-          for topic in muscle protein heart fat_loss hydration exercise nutrition hormones creatine supplements tracking recovery; do
+          for topic in muscle protein heart fat_loss hydration exercise nutrition hormones creatine supplements tracking recovery general; do
             blender -b --factory-startup --python-exit-code 1 \
               --python blender/fitfuel_science_preview.py -- \
               --topic "$topic" --clean \
@@ -167,7 +167,7 @@ jobs:
               (f"output/blender-science-topic-{topic}-preview.mp4", 360, 640, 30, 60)
               for topic in ("muscle", "protein", "heart", "fat_loss", "hydration",
                             "exercise", "nutrition", "hormones", "creatine",
-                            "supplements", "tracking", "recovery")
+                            "supplements", "tracking", "recovery", "general")
           ]
           for path, width, height, fps, frames in checks:
               probe = subprocess.check_output([
