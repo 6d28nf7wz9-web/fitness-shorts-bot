@@ -25,6 +25,11 @@ class MotionDirectorTests(unittest.TestCase):
         plan = plan_scene_motion({}, 2, 2.0, "general")
         self.assertEqual(plan["focus"], "headline")
 
+    def test_opening_hook_is_not_fully_transparent_on_first_frame(self):
+        css = motion_css()
+        self.assertIn("@keyframes ff-transition-hook { from { opacity:.72;", css)
+        self.assertNotIn("@keyframes ff-transition-hook { from { opacity:0;", css)
+
     def test_motion_css_uses_eased_frame_visual_language(self):
         css = motion_css()
         self.assertIn("cubic-bezier(.16,1,.3,1)", css)
