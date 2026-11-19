@@ -1,4 +1,4 @@
-"""Render scene-matched 3D anatomy plates for the production video timeline.
+"""Render scene-matched 3D science plates for the production video timeline.
 
 Only explicit anatomy scenes are rendered. The resulting MP4s are consumed by
 HyperFrames as visual layers; the ordinary SVG diagrams remain a fallback for
@@ -67,19 +67,19 @@ def render_scene(index, scene, duration, topic, blender="blender"):
     ], check=True)
     if not mp4.is_file() or mp4.stat().st_size < 20_000:
         raise RuntimeError(f"3D anatomy render missing or too small: {mp4}")
-    print(f"3D anatomy scene {index}: {view}, {frames} frames -> {mp4}")
+    print(f"3D science scene {index}: {topic}, {frames} frames -> {mp4}")
 
 
 def main():
     script_path = ROOT / "output" / "script.json"
     audio_path = ROOT / "output" / "audio_info.json"
     if not script_path.exists() or not audio_path.exists():
-        print("3D anatomy: script/audio metadata unavailable; keeping existing visual fallback.")
+        print("3D science: script/audio metadata unavailable; keeping existing visual fallback.")
         return
     scenes = json.loads(script_path.read_text(encoding="utf-8")).get("scenes", [])
     audio = json.loads(audio_path.read_text(encoding="utf-8"))
     if len(scenes) != len(audio):
-        raise SystemExit("3D anatomy renderer: scene/audio count mismatch")
+        raise SystemExit("3D science renderer: scene/audio count mismatch")
     blender = shutil.which("blender")
     if not blender:
         print("3D anatomy: Blender is not installed; keeping existing visual fallback.")
