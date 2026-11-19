@@ -124,6 +124,7 @@ def build_external_providers(env=None):
                 groq_key,
                 "https://api.groq.com/openai/v1/chat/completions",
                 model,
+                timeout=int(env.get("AI_PROVIDER_TIMEOUT_SECONDS", REQUEST_TIMEOUT_SECONDS)),
             )
         )
 
