@@ -109,48 +109,57 @@ jobs:
         run: |
           git clone --depth 1 --branch v1.3.2 https://github.com/EL4CTEO/blender-skills.git /tmp/blender-skills
           python /tmp/blender-skills/tools/validate_skills.py
-      - name: Render 3D muscle-fiber animation
+      - name: Render anterior and posterior 3D anatomy previews
         run: |
+          set -euo pipefail
           mkdir -p output
-          "blender" -b --factory-startup --python-exit-code 1 \
-            --python blender/fitfuel_science_preview.py -- \
-            --output-dir output/blender-frames \
-            --frames 72 --width 540 --height 960 --title 'HOW MUSCLE FIBERS CONTRACT' --subtitle 'A closer look inside skeletal muscle'
-          ffmpeg -y -hide_banner -loglevel error -framerate 24 \
-            -i output/blender-frames/frame_%04d.png \
-            -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
-            output/blender-science-preview.mp4
-      - name: Run upstream Blender asset QA on rendered scene
+          for view in anterior posterior; do
+            blender -b --factory-startup --python-exit-code 1 \
+              --python blender/fitfuel_science_preview.py -- \
+              --view "$view" \
+              --output-dir "output/blender-frames-$view" \
+              --blend-file "output/fitfuel-$view.blend" \
+              --frames 72 --width 540 --height 960 \
+              --title 'HUMAN MUSCLE ANATOMY'
+            ffmpeg -y -hide_banner -loglevel error -framerate 24 \
+              -i "output/blender-frames-$view/frame_%04d.png" \
+              -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
+              "output/blender-science-$view-preview.mp4"
+          done
+      - name: Run upstream Blender asset QA on both anatomy views
         run: |
-          blender -b output/fitfuel-science-preview.blend --python-exit-code 1 \\
-            -P /tmp/blender-skills/skills/blender-asset-qa/scripts/qa_check.py -- \\
-            --profile render
-      - name: Validate 3D preview
+          set -euo pipefail
+          for view in anterior posterior; do
+            blender -b "output/fitfuel-$view.blend" --python-exit-code 1 \
+              -P /tmp/blender-skills/skills/blender-asset-qa/scripts/qa_check.py -- \
+              --profile render
+          done
+      - name: Validate both 3D previews
         run: |
-          ffprobe -v error -select_streams v:0 \
-            -show_entries stream=codec_name,width,height,r_frame_rate,nb_frames \
-            -of json output/blender-science-preview.mp4
-          ffprobe -v error -show_entries format=duration \
-            -of default=noprint_wrappers=1:nokey=1 output/blender-science-preview.mp4
-          test -s output/blender-science-preview.mp4
           python - <<'PY'
           import json, subprocess
-          path = 'output/blender-science-preview.mp4'
-          probe = subprocess.check_output([
-              'ffprobe', '-v', 'error', '-select_streams', 'v:0',
-              '-show_entries', 'stream=width,height,r_frame_rate,nb_frames',
-              '-of', 'json', path
-          ], text=True)
-          stream = json.loads(probe)['streams'][0]
-          assert (stream['width'], stream['height']) == (540, 960), stream
-          assert stream['r_frame_rate'] == '24/1', stream
-          assert int(stream['nb_frames']) == 72, stream
-          print('Portrait preview contract passed:', stream)
+          for view in ("anterior", "posterior"):
+              path = f"output/blender-science-{view}-preview.mp4"
+              probe = subprocess.check_output([
+                  "ffprobe", "-v", "error", "-select_streams", "v:0",
+                  "-show_entries", "stream=codec_name,width,height,r_frame_rate,nb_frames",
+                  "-of", "json", path
+              ], text=True)
+              stream = json.loads(probe)["streams"][0]
+              assert (stream["width"], stream["height"]) == (540, 960), stream
+              assert stream["r_frame_rate"] == "24/1", stream
+              assert int(stream["nb_frames"]) == 72, stream
+              duration = float(subprocess.check_output([
+                  "ffprobe", "-v", "error", "-show_entries", "format=duration",
+                  "-of", "default=noprint_wrappers=1:nokey=1", path
+              ], text=True))
+              assert 2.9 <= duration <= 3.1, duration
+              print(f"{view} 3D preview passed:", stream, "duration=", duration)
           PY
       - name: Upload 3D preview artifact
         uses: actions/upload-artifact@v4
         with:
           name: fitfuel-blender-science-preview
-          path: output/blender-science-preview.mp4
+          path: output/blender-science-*-preview.mp4
           if-no-files-found: error
           retention-days: 7
