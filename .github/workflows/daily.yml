@@ -49,6 +49,8 @@ jobs:
       GEMINI_REQUEST_TIMEOUT_MS: "20000"
       GEMINI_MAX_MODELS: "1"
       GEMINI_MAX_GENERATION_ATTEMPTS: "1"
+      AI_PROVIDER_TIMEOUT_SECONDS: "20"
+      AI_PROVIDER_MAX_TRANSIENT_RETRIES: "0"
     steps:
       - uses: actions/checkout@v4
 
