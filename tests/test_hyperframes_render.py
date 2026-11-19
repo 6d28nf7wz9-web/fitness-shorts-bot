@@ -197,6 +197,39 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn("science-supplements .capsules", renderer)
         self.assertIn("science-hormones .signal-wave", renderer)
         self.assertIn("science-nutrition .fuel-dots", renderer)
+    def test_explicit_muscle_anatomy_uses_dedicated_diagram(self):
+        scene = {
+            "visual_type": "muscle_anatomy",
+            "visual_title": "Muscle anatomy",
+            "narration": "Chest and shoulders contract during this movement.",
+        }
+        category, panel = build_visual_panel(scene, 2)
+        self.assertEqual(category, "anatomy")
+        self.assertIn('class="science-svg science-anatomy"', panel)
+        for term in ("anatomy-pec", "anatomy-delt", "anatomy-bicep",
+                     "anatomy-abs", "anatomy-oblique", "anatomy-quad",
+                     "PECTORAL", "DELTOID", "BICEPS", "QUADRICEPS"):
+            self.assertIn(term, panel)
+
+    def test_back_muscle_anatomy_selects_posterior_view(self):
+        category, panel = build_visual_panel({
+            "visual_type": "muscle_anatomy",
+            "visual_title": "Back muscles: lats and traps",
+        }, 3)
+        self.assertEqual(category, "anatomy")
+        for term in ("POSTERIOR VIEW", "anatomy-trap", "anatomy-lat",
+                     "anatomy-tricep", "anatomy-glute", "anatomy-ham",
+                     "TRAPEZIUS", "LATISSIMUS", "GLUTES", "HAMSTRINGS"):
+            self.assertIn(term, panel)
+
+    def test_anatomy_motion_css_is_scoped_to_anatomy_svg(self):
+        _, panel = build_visual_panel({
+            "visual_type": "muscle_anatomy", "visual_title": "Muscle anatomy"
+        })
+        self.assertIn(".science-anatomy .anatomy-pec", visual_css())
+        self.assertIn("anatomy-body", panel)
+        self.assertIn("ff-anatomy-breathe", visual_css())
+
     def test_protein_synthesis_has_staged_visual_animation(self):
         with open("hyperframes_render.py", encoding="utf-8") as f:
             renderer = f.read()
