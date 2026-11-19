@@ -75,6 +75,13 @@ class Scene3DAssetTests(unittest.TestCase):
             finally:
                 os.chdir(previous)
 
+    def test_hyperframes_stages_3d_assets_instead_of_overlaying_2d_svg(self):
+        source = Path(__file__).resolve().parents[1] / "hyperframes_render.py"
+        renderer = source.read_text(encoding="utf-8")
+        self.assertIn('science_panel = ""', renderer)
+        self.assertIn('science-3d-footage', renderer)
+        self.assertIn('top:820px!important', renderer)
+
 
 
 if __name__ == "__main__":
