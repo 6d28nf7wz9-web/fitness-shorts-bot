@@ -74,7 +74,7 @@ def motion_css():
 .transition-wipe { animation: ff-transition-wipe 560ms cubic-bezier(.16,1,.3,1) both; }
 .transition-zoom { animation: ff-transition-zoom 520ms cubic-bezier(.16,1,.3,1) both; }
 .transition-reveal { animation: ff-transition-reveal 540ms cubic-bezier(.16,1,.3,1) both; }
-@keyframes ff-transition-hook { from { opacity:0; clip-path:inset(8% 0 8% 0); transform:scale(1.035); } to { opacity:1; clip-path:inset(0); transform:scale(1); } }
+@keyframes ff-transition-hook { from { opacity:.72; clip-path:inset(2% 0 2% 0); transform:scale(1.012); } to { opacity:1; clip-path:inset(0); transform:scale(1); } }
 @keyframes ff-transition-support { from { opacity:0; transform:translateX(34px); filter:blur(4px); } to { opacity:1; transform:translateX(0); filter:blur(0); } }
 @keyframes ff-transition-payoff { from { opacity:0; clip-path:circle(12% at 50% 50%); transform:scale(.97); } to { opacity:1; clip-path:circle(100% at 50% 50%); transform:scale(1); } }
 @keyframes ff-transition-slide-up { from { opacity:0; transform:translateY(54px); filter:blur(5px); } to { opacity:1; transform:translateY(0); filter:blur(0); } }
