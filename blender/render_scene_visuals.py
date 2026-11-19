@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SUPPORTED_3D_TOPICS = {
     "anatomy", "muscle", "protein", "heart", "fat_loss", "hydration",
     "exercise", "nutrition", "hormones", "creatine", "supplements",
-    "tracking", "recovery",
+    "tracking", "recovery", "general",
 }
 
 
