@@ -41,11 +41,11 @@ class Scene3DAssetTests(unittest.TestCase):
             with self.subTest(title=title):
                 self.assertEqual(scene_topic({"visual_title": title}), expected)
 
-    def test_real_exercise_demonstrations_keep_stock_broll(self):
-        self.assertIsNone(scene_topic({
+    def test_real_exercise_demonstrations_have_a_3d_fallback(self):
+        self.assertEqual(scene_topic({
             "visual_title": "How to perform a squat",
             "narration": "Keep your chest up and drive through the floor.",
-        }))
+        }), "exercise")
 
     def test_explicit_joint_mechanics_uses_3d_biomechanics(self):
         self.assertEqual(scene_topic({
