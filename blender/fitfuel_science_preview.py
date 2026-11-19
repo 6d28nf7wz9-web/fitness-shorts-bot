@@ -389,7 +389,7 @@ def build_scene(args):
     camera.name = "Portrait science camera"
     aim(camera, (0, 0, 0))
     camera.data.type = "ORTHO"
-    camera.data.ortho_scale = 11.6
+    camera.data.ortho_scale = 11.6 if args.topic == "anatomy" else 7.2
     scene.camera = camera
 
     muscle_base = make_material("Anatomy | deep muscle", (0.30, 0.075, 0.085), 0.05, 0.42)
