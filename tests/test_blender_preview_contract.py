@@ -25,7 +25,8 @@ class BlenderPreviewContractTests(unittest.TestCase):
             self.assertIn(required, self.source)
 
     def test_scientific_visual_has_moving_activation_signal(self):
-        self.assertIn('Traveling activation signal', self.source)
+        self.assertIn('activation_name = "Pectoral activation signal"', self.source)
+        self.assertIn('activation_name = "Latissimus activation signal"', self.source)
         self.assertIn('pulse.keyframe_insert(data_path="location"', self.source)
 
     def test_preview_uses_independent_3d_anatomical_muscle_meshes(self):
@@ -35,6 +36,10 @@ class BlenderPreviewContractTests(unittest.TestCase):
             self.assertIn(group, self.source)
         self.assertIn('Muscle surface refinement', self.source)
         self.assertIn('Stylized 3D educational anatomy', self.source)
+        for group in ('Trapezius upper', 'Latissimus dorsi', 'Triceps brachii',
+                      'Gluteus maximus', 'Hamstrings', 'Gastrocnemius'):
+            self.assertIn(group, self.source)
+        self.assertIn('choices=("anterior", "posterior")', self.source)
 
     def test_blender_4_eevee_engine_is_supported(self):
         self.assertIn('BLENDER_EEVEE_NEXT', self.source)
