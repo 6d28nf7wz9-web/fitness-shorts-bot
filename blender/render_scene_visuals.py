@@ -16,29 +16,30 @@ from visual_engine import classify_scene
 ROOT = Path(__file__).resolve().parents[1]
 
 
+SUPPORTED_3D_TOPICS = {
+    "anatomy", "muscle", "protein", "heart", "fat_loss", "hydration",
+    "exercise", "nutrition", "hormones", "creatine", "supplements",
+    "tracking", "recovery",
+}
+
+
+def scene_topic(scene):
+    """Map the shared visual classifier to a supported Blender 3D scene."""
+    category = classify_scene(scene)
+    return category if category in SUPPORTED_3D_TOPICS else None
+
+
 def anatomy_view(scene):
-    """Return anterior/posterior for an explicit anatomical scene, else None."""
-    visual_type = str(scene.get("visual_type", "")).lower().replace("-", "_")
+    """Return anterior/posterior for anatomy scenes, else None."""
+    if scene_topic(scene) != "anatomy":
+        return None
     text = " ".join(str(scene.get(key, "")) for key in
                     ("visual_title", "visual_subtitle", "narration")).lower()
-    if visual_type in {"muscle_anatomy", "anatomy", "muscle_groups"} or classify_scene(scene) == "anatomy":
-        explicit = True
-    else:
-        explicit = bool(re.search(
-            r"\b(pectoralis|pectorals|deltoid|biceps|triceps|latissimus|lats|"
-            r"trapezius|traps|quadriceps|hamstrings|glutes|gastrocnemius|"
-            r"muscle anatomy|muscle groups|anterior muscles|posterior muscles)\b",
-            text,
-        ))
-    if not explicit:
-        return None
-    if re.search(r"\b(back|posterior|lats|latissimus|traps|trapezius|triceps|"
-                 r"glutes|hamstrings|calves|gastrocnemius)\b", text):
+    if re.search(r"\b(back|posterior|lats|latissimus|traps|trapezius|triceps|glutes|hamstrings|calves|gastrocnemius)\b", text):
         return "posterior"
     return "anterior"
 
-
-def render_scene(index, scene, duration, view, blender="blender"):
+def render_scene(index, scene, duration, topic, blender="blender"):
     out = ROOT / "output" / "science_3d"
     frame_dir = out / f"frames_{index}"
     frame_dir.mkdir(parents=True, exist_ok=True)
@@ -49,12 +50,14 @@ def render_scene(index, scene, duration, view, blender="blender"):
     command = [
         blender, "-b", "--factory-startup", "--python-exit-code", "1",
         "--python", str(ROOT / "blender" / "fitfuel_science_preview.py"), "--",
-        "--view", view, "--clean",
+        "--topic", topic, "--clean",
         "--output-dir", str(frame_dir),
         "--blend-file", str(blend_file),
         "--frames", str(frames), "--width", "720", "--height", "1280",
         "--title", title,
     ]
+    if topic == "anatomy":
+        command.extend(["--view", anatomy_view(scene) or "anterior"])
     subprocess.run(command, check=True)
     subprocess.run([
         "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
@@ -83,12 +86,12 @@ def main():
         return
     rendered = 0
     for index, (scene, timing) in enumerate(zip(scenes, audio), 1):
-        view = anatomy_view(scene)
-        if not view:
+        topic = scene_topic(scene)
+        if not topic:
             continue
-        render_scene(index, scene, float(timing.get("seconds", 0)), view, blender)
+        render_scene(index, scene, float(timing.get("seconds", 0)), topic, blender)
         rendered += 1
-    print(f"3D anatomy production plates rendered: {rendered}/{len(scenes)} scenes")
+    print(f"3D science production plates rendered: {rendered}/{len(scenes)} scenes")
 
 
 if __name__ == "__main__":
