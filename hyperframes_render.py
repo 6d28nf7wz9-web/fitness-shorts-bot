@@ -273,8 +273,9 @@ def main():
         # Otherwise, use only footage that passed the semantic stock matcher.
         footage_name = three_d_name or prepare_scene_footage(i, assets)
         if footage_name:
+            science_class = "science-3d-footage " if three_d_name else ""
             blocks.append(
-                f'<video id="scenevisual{i}" class="scene-footage camera-{motion["camera"]}" style="--scene-start:{start}s" muted playsinline '
+                f'<video id="scenevisual{i}" class="scene-footage {science_class}camera-{motion["camera"]}" style="--scene-start:{start}s" muted playsinline '
                 f'data-start="{start}" data-duration="{enddur}" data-track-index="0" '
                 f'src="assets/{html.escape(footage_name, quote=True)}"></video>'
             )
@@ -301,6 +302,9 @@ video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
 .scene-footage.camera-push{{animation:ff-camera-push 7s ease-in-out both}}
 .scene-footage.camera-drift{{animation:ff-camera-drift 7s ease-in-out both}}
 .scene-footage.camera-pull{{animation:ff-camera-pull 7s ease-in-out both}}
+/* 3D science is staged as a dedicated lower-frame visual plate, clear of the
+   headline and subtitle safe zones; stock B-roll remains full-frame. */
+.science-3d-footage{{inset:auto!important;left:120px!important;top:820px!important;width:840px!important;height:980px!important;object-fit:contain!important;transform:none!important;animation:none!important;filter:none!important;border:1px solid rgba(114,230,194,.34);border-radius:34px;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.28),rgba(7,17,29,.96) 72%);}}
 .scene-bg{{position:absolute;z-index:0;inset:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.32),transparent 58%),linear-gradient(155deg,#07111d 0%,#10263a 48%,#07111d 100%);}}
 .scene-footage{{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.72) saturate(1.08) contrast(1.04);transform:scale(1.045);animation:ff-camera-drift 7s ease-in-out both;}}
 .scene-bg:after{{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 71px,rgba(114,230,194,.055) 72px),repeating-linear-gradient(90deg,transparent 0 71px,rgba(114,230,194,.055) 72px);}}
