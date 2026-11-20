@@ -85,16 +85,14 @@ def main():
     script_path = ROOT / "output" / "script.json"
     audio_path = ROOT / "output" / "audio_info.json"
     if not script_path.exists() or not audio_path.exists():
-        print("3D science: script/audio metadata unavailable; keeping existing visual fallback.")
-        return
+        raise SystemExit("3D science renderer: script.json and audio_info.json are required; refusing silent 2D fallback.")
     scenes = json.loads(script_path.read_text(encoding="utf-8")).get("scenes", [])
     audio = json.loads(audio_path.read_text(encoding="utf-8"))
-    if len(scenes) != len(audio):
-        raise SystemExit("3D science renderer: scene/audio count mismatch")
+    if not scenes or len(scenes) != len(audio):
+        raise SystemExit("3D science renderer: non-empty scene/audio lists with matching counts are required.")
     blender = shutil.which("blender")
     if not blender:
-        print("3D science: Blender is not installed; keeping existing visual fallback.")
-        return
+        raise SystemExit("3D science renderer: Blender is required for the approved 3D production pipeline.")
     generated_dir = ROOT / "output" / "science_3d"
     if generated_dir.exists():
         shutil.rmtree(generated_dir)
@@ -102,10 +100,12 @@ def main():
     for index, (scene, timing) in enumerate(zip(scenes, audio), 1):
         topic = scene_topic(scene)
         if not topic:
-            continue
+            raise SystemExit(f"3D science renderer: scene {index} has no supported 3D topic; refusing a silent fallback.")
         render_scene(index, scene, float(timing.get("seconds", 0)), topic, blender)
         rendered += 1
-    print(f"3D science production plates rendered: {rendered}/{len(scenes)} scenes")
+    if rendered != len(scenes):
+        raise SystemExit(f"3D science renderer: rendered {rendered}/{len(scenes)} scenes; all scenes must have verified 3D plates.")
+    print(f"3D science production plates rendered and validated: {rendered}/{len(scenes)} scenes")
 
 
 if __name__ == "__main__":
