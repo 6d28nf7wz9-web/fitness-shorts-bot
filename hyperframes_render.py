@@ -306,7 +306,7 @@ video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}
 .scene-footage.camera-pull{{animation:ff-camera-pull 7s ease-in-out both}}
 /* 3D science is staged as a dedicated lower-frame visual plate, clear of the
    headline and subtitle safe zones; stock B-roll remains full-frame. */
-.science-3d-footage{{inset:auto!important;left:120px!important;top:820px!important;width:840px!important;height:720px!important;object-fit:contain!important;transform:none!important;animation:none!important;filter:none!important;border:1px solid rgba(114,230,194,.34);border-radius:34px;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.28),rgba(7,17,29,.96) 72%);}}
+.science-3d-footage{{inset:auto!important;left:60px!important;top:810px!important;width:960px!important;height:980px!important;object-fit:contain!important;transform:none!important;animation:none!important;filter:drop-shadow(0 24px 48px rgba(0,0,0,.48))!important;border:1px solid rgba(114,230,194,.42);border-radius:42px;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.38),rgba(7,17,29,.97) 74%);}}
 .motion-scene.has-3d-science .shade{{background:linear-gradient(180deg,rgba(4,10,18,.84) 0%,rgba(4,10,18,.76) 36%,rgba(4,10,18,.08) 44%,rgba(4,10,18,.08) 88%,rgba(4,10,18,.48) 100%);}}
 .motion-scene.has-3d-science .grid{{opacity:.025}}
 .scene-bg{{position:absolute;z-index:0;inset:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 42%,rgba(35,105,135,.32),transparent 58%),linear-gradient(155deg,#07111d 0%,#10263a 48%,#07111d 100%);}}
