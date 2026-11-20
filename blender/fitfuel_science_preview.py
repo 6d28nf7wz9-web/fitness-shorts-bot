@@ -191,6 +191,82 @@ def add_tube(name, points, material, thickness=0.08):
     return obj
 
 
+
+def add_heart_surface(name, location, scale, material):
+    """Create a recognizable, softly beveled 3D heart silhouette, not paired blobs."""
+    count = 96
+    outline = []
+    for index in range(count):
+        t = 2.0 * math.pi * index / count
+        x = 16 * math.sin(t) ** 3 / 16
+        z = (13 * math.cos(t) - 5 * math.cos(2*t) - 2 * math.cos(3*t) - math.cos(4*t)) / 16
+        outline.append((x * 1.55, z * 1.55))
+    verts = [(0, -0.34, 0), (0, 0.34, 0)]
+    verts += [(x, -0.34, z) for x, z in outline]
+    verts += [(x, 0.34, z) for x, z in outline]
+    front, back = 2, 2 + count
+    faces = []
+    for i in range(count):
+        nxt = (i + 1) % count
+        faces.append((0, front + i, front + nxt))
+        faces.append((1, back + nxt, back + i))
+        faces.append((front + i, back + i, back + nxt, front + nxt))
+    mesh = bpy.data.meshes.new(name + " | sculpted mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.materials.append(material)
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    obj.location = location
+    obj.scale = scale
+    bevel = obj.modifiers.new("Soft anatomical contour", "BEVEL")
+    bevel.width = 0.12
+    bevel.segments = 4
+    for polygon in mesh.polygons:
+        polygon.use_smooth = True
+    return obj
+
+
+def add_teardrop(name, location, material):
+    """Lathed, tapered water-drop mesh with a pointed crown and rounded body."""
+    rings, sides = 28, 48
+    verts, faces = [], []
+    for ring in range(rings + 1):
+        u = ring / rings
+        z = -1.35 + 2.85 * u
+        radius = 1.18 * (math.sin(math.pi * u) ** 0.72) * (1.18 - 0.62 * u)
+        for side in range(sides):
+            angle = 2 * math.pi * side / sides
+            verts.append((math.cos(angle) * radius, math.sin(angle) * radius * 0.62, z))
+    for ring in range(rings):
+        for side in range(sides):
+            a = ring * sides + side
+            b = ring * sides + (side + 1) % sides
+            faces.append((a, b, b + sides, a + sides))
+    mesh = bpy.data.meshes.new(name + " | lathed surface")
+    mesh.from_pydata(verts, [], faces)
+    mesh.materials.append(material)
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    obj.location = location
+    for polygon in mesh.polygons:
+        polygon.use_smooth = True
+    sub = obj.modifiers.new("Liquid surface refinement", "SUBSURF")
+    sub.levels = 2
+    return obj
+
+
+def add_torus_detail(name, location, major_radius, minor_radius, material):
+    bpy.ops.mesh.primitive_torus_add(major_segments=48, minor_segments=12,
+                                     location=location, major_radius=major_radius,
+                                     minor_radius=minor_radius)
+    obj = bpy.context.object
+    obj.name = name
+    obj.data.materials.append(material)
+    for polygon in obj.data.polygons:
+        polygon.use_smooth = True
+    return obj
+
+
 def add_science_topic(topic, args, teal, mint, blue, white, muted, signal):
     """Build a distinct 3D science metaphor for each supported scene category."""
     center_y = -0.15
@@ -226,19 +302,26 @@ def add_science_topic(topic, args, teal, mint, blue, white, muted, signal):
                          signal, args.frames, 0.8, 0.4)
         view_label = "AMINO ACIDS  /  PROTEIN SYNTHESIS"
     elif topic == "heart":
-        heart = add_body_core("Heart | left ventricle", (-0.42, 0, 0), (0.72, 0.38, 1.15), signal)
-        heart2 = add_body_core("Heart | right ventricle", (0.42, 0, 0), (0.72, 0.38, 1.15), teal)
-        for obj in (heart, heart2):
-            for frame, scale in ((1, 1.0), (args.frames // 4, 1.09), (args.frames // 2, 1.0),
-                                 (3 * args.frames // 4, 1.09), (args.frames, 1.0)):
-                obj.scale = (scale, scale, scale)
-                obj.keyframe_insert(data_path="scale", frame=frame)
-        add_tube("Aorta", [(0, 0, 0.7), (0, 0, 1.65), (0.5, 0, 2.15)], mint, 0.22)
-        add_tube("Pulmonary artery", [(-0.25, 0, 0.55), (-0.9, 0, 1.25), (-1.3, 0, 1.75)], blue, 0.17)
-        view_label = "CARDIAC CYCLE  /  BLOOD FLOW"
+        heart = add_heart_surface("Anatomical heart | myocardium", (0, 0, 0), (1.0, 1.0, 1.0), signal)
+        for frame, scale in ((1, 1.0), (args.frames // 4, 1.055), (args.frames // 2, 1.0),
+                             (3 * args.frames // 4, 1.055), (args.frames, 1.0)):
+            heart.scale = (scale, scale, scale)
+            heart.keyframe_insert(data_path="scale", frame=frame)
+        add_tube("Ascending aorta", [(0.12, -0.08, 0.72), (0.18, -0.08, 1.45),
+                                      (0.62, -0.08, 1.75), (0.95, -0.08, 1.52)], mint, 0.19)
+        add_tube("Pulmonary artery", [(-0.25, -0.16, 0.62), (-0.82, -0.16, 1.12),
+                                      (-1.20, -0.16, 1.04)], blue, 0.15)
+        add_tube("Coronary artery", [(-1.0, -0.39, 0.05), (-0.62, -0.43, 0.48),
+                                     (-0.08, -0.43, 0.28), (0.48, -0.43, -0.10)], mint, 0.055)
+        add_tube("Coronary branch", [(0.0, -0.43, 0.25), (0.34, -0.43, 0.60),
+                                     (0.72, -0.43, 0.66)], blue, 0.045)
+        view_label = "CARDIAC CYCLE  /  MYOCARDIUM & BLOOD FLOW"
     elif topic == "hydration":
-        drop = add_body_core("Water droplet", (0, 0, 0), (1.05, 0.42, 1.65), blue)
+        drop = add_teardrop("Water droplet | sculpted liquid", (0, 0, 0), blue)
         drop.rotation_euler[1] = 0.12
+        for ring in range(3):
+            add_torus_detail(f"Hydration ripple {ring + 1}", (0, 0.42 + ring * 0.16, -1.10),
+                             0.42 + ring * 0.24, 0.025, mint if ring % 2 == 0 else signal)
         for i, (x, z) in enumerate(((-1.6, 1.4), (1.55, 1.1), (-1.5, -1.2), (1.5, -1.45))):
             ion = add_body_core(f"Electrolyte ion {i + 1}", (x, -0.1, z), (0.23, 0.23, 0.23),
                                 mint if i % 2 else signal)
@@ -305,9 +388,17 @@ def add_science_topic(topic, args, teal, mint, blue, white, muted, signal):
         add_tube("ATP ADP reaction path", [(-0.25, -0.2, 0.3), (0, -0.2, 0.3), (0.25, -0.2, 0.3)], white, 0.08)
         view_label = "ATP  /  ADP  /  PHOSPHOCREATINE"
     elif topic == "supplements":
-        add_cylinder("Supplement container", (0, 0, 0), 0.85, 2.7, blue)
-        add_cylinder("Bottle cap", (0, 0, 1.48), 0.88, 0.35, mint)
-        add_bar("Bottle label", (0, -0.88, 0), (1.1, 0.08, 0.95), white, 0.06)
+        add_cylinder("Supplement container | body", (0, 0, 0), 0.82, 2.55, blue)
+        add_cylinder("Bottle shoulder", (0, 0, 1.22), 0.66, 0.34, blue)
+        add_cylinder("Bottle neck", (0, 0, 1.48), 0.39, 0.34, blue)
+        add_cylinder("Bottle cap", (0, 0, 1.73), 0.46, 0.30, mint)
+        add_torus_detail("Bottle neck seal", (0, 0, 1.52), 0.40, 0.055, signal)
+        for groove in range(8):
+            angle = 2 * math.pi * groove / 8
+            add_bar(f"Cap grip {groove + 1}", (0.43 * math.cos(angle), 0.43 * math.sin(angle), 1.73),
+                    (0.07, 0.07, 0.23), white, 0.025)
+        add_bar("Bottle label", (0, -0.84, 0), (1.08, 0.08, 0.95), white, 0.06)
+        add_torus_detail("Bottle base rim", (0, 0, -1.23), 0.72, 0.045, mint)
         for i in range(3):
             capsule = add_body_core(f"Supplement capsule {i + 1}", (1.35, -0.15, 0.8 - i * 0.8),
                                     (0.18, 0.18, 0.42), signal if i % 2 else mint)
