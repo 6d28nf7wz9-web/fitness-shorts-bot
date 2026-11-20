@@ -4,6 +4,7 @@ import re
 import subprocess
 
 from wan_stock_assist import try_animate_stock
+from relevance import relevance as footage_relevance
 
 from clips import (
     CLIPS_DIR,
@@ -117,6 +118,16 @@ def _cut_keywords(scene, sentence_context, base_keywords=None):
         str(scene.get("keyword", "")),
     ]))
     return _dedupe(slice_targets + scene_targets + base) or ["gym workout"]
+
+
+def _require_exact_footage_match(hit, keyword, context=""):
+    """Fail closed unless the chosen stock clip matches this exact spoken beat."""
+    score = footage_relevance(hit, keyword, context)
+    if score != 2:
+        raise RuntimeError(
+            f"Selected B-roll failed exact semantic match (score={score}): {keyword}"
+        )
+    return score
 
 
 def _validate_rendered_video(path, expected_seconds):
@@ -306,6 +317,7 @@ def main():
                 query, hit, url, portrait = choose_clip(
                     keyword, each, used_ids, context=sentence_context
                 )
+                match_score = _require_exact_footage_match(hit, keyword, sentence_context)
                 clip_id = hit.get("id")
                 raw_file = os.path.join(
                     RAW_DIR, f"s{scene_index}_{part_index}.mp4"
@@ -344,6 +356,8 @@ def main():
                     "query": query,
                     "keyword": keyword,
                     "sentence_context": sentence_context,
+                    "relevance_score": match_score,
+                    "match_status": "exact",
                     "pixabay_id": clip_id,
                     "page": hit.get("pageURL"),
                     "author": hit.get("user"),
