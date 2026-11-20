@@ -45,6 +45,24 @@ class BlenderPreviewContractTests(unittest.TestCase):
             self.assertIn(group, self.source)
         self.assertIn('choices=("anterior", "posterior")', self.source)
 
+    def test_heart_model_uses_sculpted_anatomical_surface_and_vessels(self):
+        self.assertIn("def add_heart_surface(", self.source)
+        self.assertIn('Anatomical heart | myocardium', self.source)
+        self.assertIn('Ascending aorta', self.source)
+        self.assertIn('Coronary artery', self.source)
+        self.assertNotIn('Heart | left ventricle', self.source)
+
+    def test_hydration_model_uses_a_tapered_liquid_mesh(self):
+        self.assertIn("def add_teardrop(", self.source)
+        self.assertIn('Water droplet | sculpted liquid', self.source)
+        self.assertIn('Hydration ripple', self.source)
+
+    def test_supplement_model_has_packaging_details(self):
+        self.assertIn('Bottle shoulder', self.source)
+        self.assertIn('Bottle neck seal', self.source)
+        self.assertIn('Cap grip', self.source)
+        self.assertIn('Bottle base rim', self.source)
+
     def test_blender_4_eevee_engine_is_supported(self):
         self.assertIn('BLENDER_EEVEE_NEXT', self.source)
 
