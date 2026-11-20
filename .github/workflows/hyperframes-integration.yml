@@ -106,7 +106,7 @@ jobs:
       - name: Install headless render libraries
         run: |
           sudo apt-get update
-          sudo apt-get install -y libegl1 libgl1 ffmpeg
+          sudo apt-get install -y libegl1 libgl1 ffmpeg python3-numpy
       - name: Install Blender from Ubuntu packages
         run: |
           set -euo pipefail
@@ -154,7 +154,8 @@ jobs:
       - name: Run upstream Blender asset QA on all 3D topics
         run: |
           set -euo pipefail
-          for topic in anterior posterior muscle protein heart fat_loss hydration exercise nutrition hormones creatine supplements tracking recovery; do
+          export PYTHONPATH="/usr/lib/python3/dist-packages:${PYTHONPATH:-}"
+          for topic in anterior posterior muscle protein heart fat_loss hydration exercise nutrition hormones creatine supplements tracking recovery general; do
             if [ "$topic" = anterior ] || [ "$topic" = posterior ]; then
               blend="output/fitfuel-$topic.blend"
             else
