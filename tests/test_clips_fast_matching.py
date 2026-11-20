@@ -1,6 +1,6 @@
 import unittest
 
-from clips_fast import sentence_contexts
+from clips_fast import sentence_contexts, _require_exact_footage_match
 
 
 class SentenceContextTests(unittest.TestCase):
@@ -20,6 +20,24 @@ class SentenceContextTests(unittest.TestCase):
         )
         self.assertEqual(len(contexts), 4)
         self.assertTrue(all(contexts))
+
+    def test_exact_training_clip_passes_cut_level_gate(self):
+        hit = {"tags": "barbell weight plates gym strength training", "pageURL": ""}
+        score = _require_exact_footage_match(
+            hit,
+            "barbell loading plates | athlete adding weight | gym close-up",
+            "The lifter adds plates to the barbell.",
+        )
+        self.assertEqual(score, 2)
+
+    def test_food_clip_cannot_pass_training_cut_gate(self):
+        hit = {"tags": "scrambled eggs plate breakfast nutrition", "pageURL": ""}
+        with self.assertRaisesRegex(RuntimeError, "failed exact semantic match"):
+            _require_exact_footage_match(
+                hit,
+                "barbell loading plates | athlete adding weight | gym close-up",
+                "The lifter adds plates to the barbell.",
+            )
 
     def test_empty_narration_is_safe(self):
         self.assertEqual(sentence_contexts("", 2), ["", ""])
