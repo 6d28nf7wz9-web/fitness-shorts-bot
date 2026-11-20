@@ -389,7 +389,7 @@ def build_scene(args):
     camera.name = "Portrait science camera"
     aim(camera, (0, 0, 0))
     camera.data.type = "ORTHO"
-    camera.data.ortho_scale = 9.6 if args.topic == "anatomy" else 5.8
+    camera.data.ortho_scale = 7.0
     scene.camera = camera
 
     muscle_base = make_material("Anatomy | deep muscle", (0.30, 0.075, 0.085), 0.05, 0.42)
@@ -528,6 +528,41 @@ def build_scene(args):
         add_bar("Bottom accent", (0, rule_y, -4.55), (2.8, 0.08, 0.035), mint, 0.015)
         add_text("Footer", "CONTRACT  •  RELEASE  •  REPEAT", (0, text_y, -4.92), 0.18, white, camera)
         add_text("Scientific note", "Stylized 3D educational anatomy", (0, text_y, -5.25), 0.12, muted, camera)
+
+    # Auto-frame each topic from its actual 3D geometry. Ortho scale is the
+    # camera's horizontal span; convert the vertical bounds using portrait aspect.
+    # This prevents narrow topics being tiny and wide/tall topics being clipped.
+    bpy.context.view_layer.update()
+    visual_points = []
+    for obj in scene.objects:
+        if obj.type not in {"MESH", "CURVE", "SURFACE"}:
+            continue
+        if obj.name.startswith(("Key softbox", "Blue rim", "Lower fill")):
+            continue
+        try:
+            visual_points.extend(obj.matrix_world @ Vector(corner) for corner in obj.bound_box)
+        except (AttributeError, TypeError):
+            continue
+    if not visual_points:
+        raise RuntimeError(f"No renderable 3D geometry found for topic: {args.topic}")
+    min_x = min(point.x for point in visual_points)
+    max_x = max(point.x for point in visual_points)
+    min_z = min(point.z for point in visual_points)
+    max_z = max(point.z for point in visual_points)
+    center_x = (min_x + max_x) / 2
+    center_z = (min_z + max_z) / 2
+    aspect = args.width / args.height
+    horizontal_span = max_x - min_x
+    vertical_span_as_width = (max_z - min_z) * aspect
+    camera.data.ortho_scale = max(horizontal_span, vertical_span_as_width, 3.2) * 1.20
+    camera.location.x = center_x
+    camera.location.z = center_z
+    aim(camera, (center_x, 0, center_z))
+    print(
+        f"FITFUEL_AUTO_FRAME topic={args.topic} "
+        f"bounds=({horizontal_span:.2f}x{max_z-min_z:.2f}) "
+        f"ortho={camera.data.ortho_scale:.2f}"
+    )
 
     # Soft studio lighting; no detached floor strip or horizon line.
     for name, location, energy, size, color in (
