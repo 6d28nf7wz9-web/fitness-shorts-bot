@@ -99,7 +99,10 @@ class Scene3DAssetTests(unittest.TestCase):
         renderer = source.read_text(encoding="utf-8")
         self.assertIn('science_panel = ""', renderer)
         self.assertIn('science-3d-footage', renderer)
-        self.assertIn('top:820px!important', renderer)
+        self.assertIn('left:60px!important', renderer)
+        self.assertIn('top:810px!important', renderer)
+        self.assertIn('width:960px!important', renderer)
+        self.assertIn('height:980px!important', renderer)
 
 
 
