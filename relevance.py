@@ -192,20 +192,27 @@ def relevance(hit, keyword, context=""):
     ambiguous = {"bench", "press", "row", "lat", "water", "bottle", "weight"}
     query_specific = query_words - _GENERIC - _WEAK - ambiguous - _LOW_SIGNAL
 
-    # Require multiple distinct target terms so incidental homonyms/settings
+    # Enforce the dominant visual domain before scoring individual words.
+    # A food clip tagged "plate" must never satisfy a lifting query such as
+    # "barbell loading plates", even if the shared word overlaps.
+    target_category = category(keyword)
+    hit_category = category(" ".join(str(hit.get(key, "")) for key in ("tags", "pageURL")))
+    if target_category == "training" and hit_category == "food":
+        return 0
+    if target_category == "food" and hit_category == "training":
+        return 0
+
+    # Exact scene matching must be supported by the authored search target,
+    # not by broad narration/context terms that can accidentally match metadata.
     # (e.g. "apple" on a bear clip or "night" on a castle) cannot pass as exact.
     direct_matches = hw & query_specific
     if len(direct_matches) >= 2 or direct_matches & _HIGH_CONFIDENCE_SINGLE:
         return 2
 
-    # Use narration as supporting evidence, not as a replacement for the search query.
-    context_specific = scene_terms(keyword, context) - _GENERIC - _WEAK - ambiguous - _LOW_SIGNAL
-    if len(hw & context_specific) >= 2:
-        return 2
-
-    target_category = category(keyword)
-    if target_category not in ("food", "training"):
-        target_category = category(context)
+    # Narration may establish a broad category, but it cannot upgrade a
+    # weak/ambiguous stock tag into an exact scene match.
+    context_category = target_category if target_category in ("food", "training") else category(context)
+    target_category = context_category
 
     # Generic category footage is never an exact scene match. It may be
     # used only when the caller explicitly enables category-only fallback;
