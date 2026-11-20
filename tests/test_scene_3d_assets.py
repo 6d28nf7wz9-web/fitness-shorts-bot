@@ -87,6 +87,13 @@ class Scene3DAssetTests(unittest.TestCase):
             finally:
                 os.chdir(previous)
 
+    def test_missing_blender_or_unsupported_scene_fails_instead_of_silent_fallback(self):
+        source = Path(__file__).resolve().parents[1] / "blender" / "render_scene_visuals.py"
+        renderer = source.read_text(encoding="utf-8")
+        self.assertIn("Blender is required for the approved 3D production pipeline", renderer)
+        self.assertIn("refusing a silent fallback", renderer)
+        self.assertIn("all scenes must have verified 3D plates", renderer)
+
     def test_hyperframes_stages_3d_assets_instead_of_overlaying_2d_svg(self):
         source = Path(__file__).resolve().parents[1] / "hyperframes_render.py"
         renderer = source.read_text(encoding="utf-8")
