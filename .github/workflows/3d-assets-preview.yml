@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-3d-preview:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,25 +25,39 @@ jobs:
           sudo apt-get install -y blender ffmpeg python3-numpy libegl1 libgl1
       - name: Test asset catalog and safe routing
         run: python -m unittest discover -s tests -p "test_asset_pipeline.py" -v
-      - name: Render 3D scene and reusable GLB assets
+      - name: Render animated anatomy scene
         run: PYTHONPATH=/usr/lib/python3/dist-packages LIBGL_ALWAYS_SOFTWARE=1 blender -b --python blender_asset_preview.py
-      - name: Validate preview and exported assets
+      - name: Validate portrait preview and exports
+        shell: bash
         run: |
+          set -euo pipefail
           test -s output/3d_preview/preview.mp4
           test -s output/3d_preview/preview.blend
           test -s output/3d_preview/scene_asset_plan.json
-          test -s assets_3d/generated/muscle_fiber_bundle_preview.glb
-          test -s assets_3d/generated/dumbbell_prop.glb
-          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/3d_preview/preview.mp4
-          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate -of default=noprint_wrappers=1 output/3d_preview/preview.mp4
-      - name: Upload preview and asset pack
+          test -s output/3d_preview/narration_sync.json
+          test -s assets_3d/generated/biceps_anatomy_preview.glb
+          duration="$(ffprobe -v error -show_entries format=duration -of csv=p=0 output/3d_preview/preview.mp4)"
+          dimensions="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 output/3d_preview/preview.mp4)"
+          fps="$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 output/3d_preview/preview.mp4)"
+          echo "Preview duration: $duration seconds"
+          echo "Preview dimensions: $dimensions"
+          echo "Preview frame rate: $fps"
+          test "$dimensions" = "1080x1920"
+          test "$fps" = "24/1"
+          python - "$duration" <<'PY'
+          import sys
+          duration=float(sys.argv[1])
+          assert 7.5 <= duration <= 8.5, f"Unexpected preview duration: {duration}"
+          PY
+      - name: Upload preview, sync map and asset pack
         uses: actions/upload-artifact@v4
         with:
-          name: fitfuel-3d-preview-and-assets
+          name: fitfuel-anatomy-1080x1920-preview
           path: |
             output/3d_preview/preview.mp4
             output/3d_preview/preview.blend
             output/3d_preview/scene_asset_plan.json
+            output/3d_preview/narration_sync.json
             assets_3d/catalog.json
             assets_3d/generated/*.glb
           retention-days: 14
