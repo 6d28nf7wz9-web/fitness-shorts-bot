@@ -546,5 +546,19 @@
     "uploaded_at": "2026-11-21T06:10:22.905938+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "OaAnfJ6cKrg",
+    "title": "Soreness Is Not Proof Your Workout Worked",
+    "topic": "Soreness Is Not Proof",
+    "series": "Gym Myth Court",
+    "episode_number": 8,
+    "episode_topic": "Is soreness proof that a workout worked?",
+    "hook": "Soreness doesn’t prove your workout worked.",
+    "script_word_count": 52,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-21T12:01:24.939767+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
