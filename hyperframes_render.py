@@ -40,10 +40,10 @@ def prepare_scene_footage(scene_index, assets_dir):
     except (OSError, ValueError):
         return None
     record = next((item for item in records if int(item.get("scene", 0)) == scene_index), None)
-    if not record or record.get("source") != "stock":
+    if not record or record.get("source") not in ("stock", "mixed", "artcraft"):
         return None
     clips = record.get("clips") or []
-    if not clips or any(item.get("source") not in ("stock", "stock+wan") for item in clips):
+    if not clips or any(item.get("source") not in ("stock", "stock+wan", "artcraft") for item in clips):
         return None
     source = Path(record.get("file", f"output/clips/scene_{scene_index}.mp4"))
     if not source.is_file() or source.stat().st_size < 10_000:
