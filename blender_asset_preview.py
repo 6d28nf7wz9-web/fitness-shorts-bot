@@ -62,7 +62,6 @@ def main():
   scene.render.engine="BLENDER_EEVEE_NEXT"
  except Exception:
   scene.render.engine="BLENDER_EEVEE"
- except Exception: scene.render.engine="BLENDER_EEVEE"
  if hasattr(scene,"eevee"): scene.eevee.taa_render_samples=24
  scene.render.resolution_x=W;scene.render.resolution_y=H;scene.render.resolution_percentage=100;scene.render.fps=FPS;scene.frame_start=1;scene.frame_end=FRAMES;scene.world.color=(.025,.035,.055)
  scene.view_settings.view_transform="Standard";scene.render.image_settings.file_format="FFMPEG";scene.render.ffmpeg.format="MPEG4";scene.render.ffmpeg.codec="H264";scene.render.ffmpeg.constant_rate_factor="MEDIUM";scene.render.ffmpeg.ffmpeg_preset="GOOD";scene.render.filepath=str(OUT/"preview.mp4")
