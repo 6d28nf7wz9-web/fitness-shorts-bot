@@ -20,7 +20,9 @@ jobs:
           python-version: "3.12"
       - name: Test dependency-free 3D scene intelligence and safe fallback routing
         run: python -m unittest discover -s tests -p "test_three_d_intelligence.py" -v
-      - name: Test 3D asset catalog and render routing\n        run: python -m unittest discover -s tests -p "test_asset_pipeline.py" -v\n      - name: Compile all Python files
+      - name: Test 3D asset catalog and render routing
+        run: python -m unittest discover -s tests -p "test_asset_pipeline.py" -v
+      - name: Compile all Python files
         run: python -m compileall -q .
       - name: Validate schedules and YouTube upload quota
         run: python check_setup.py
