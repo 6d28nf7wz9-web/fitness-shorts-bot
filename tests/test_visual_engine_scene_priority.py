@@ -12,15 +12,67 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
         }
         self.assertEqual(classify_scene(scene), "exercise")
 
-    def test_creatine_scene_uses_supplement_diagram(self):
+    def test_creatine_scene_uses_atp_recycling_diagram(self):
         scene = {
             "visual_title": "Creatine Effect",
             "visual_subtitle": "Supports Training Output",
             "narration": "Creatine supports repeated high intensity efforts.",
         }
         category, panel = build_visual_panel(scene, 2)
-        self.assertEqual(category, "supplements")
-        self.assertIn("SUPPLEMENT EVIDENCE", panel)
+        self.assertEqual(category, "creatine")
+        self.assertIn("CREATINE &amp; ATP RECYCLING", panel)
+        self.assertIn("atp-node", panel)
+
+    def test_smart_lifting_headline_wins_over_supplement_subtitle(self):
+        scene = {
+            "visual_title": "Smart Lifting",
+            "visual_subtitle": "Supplements Aid, Not Replace",
+            "narration": "Use progressive overload to build strength.",
+        }
+        category, panel = build_visual_panel(scene, 7)
+        self.assertEqual(category, "exercise")
+        self.assertIn("MOVEMENT MECHANICS", panel)
+
+    def test_lift_tracking_uses_progressive_overload_chart(self):
+        scene = {
+            "visual_title": "Track Your Lifts",
+            "visual_subtitle": "Prioritize Overload Over Powders",
+            "narration": "Record your lifts and increase load gradually.",
+        }
+        category, panel = build_visual_panel(scene, 8)
+        self.assertEqual(category, "tracking")
+        self.assertIn("PROGRESSIVE OVERLOAD", panel)
+        self.assertIn("progress-line", panel)
+
+    def test_specific_subtitle_beats_generic_training_keyword(self):
+        scene = {
+            "visual_title": "The Primary Signal",
+            "keyword": "Resistance Training",
+            "visual_subtitle": "Tension Activates Muscle Fibers",
+            "narration": "Resistance training creates a signal for adaptation.",
+        }
+        category, panel = build_visual_panel(scene, 3)
+        self.assertEqual(category, "muscle")
+        self.assertIn("MUSCLE FIBER ADAPTATION", panel)
+        self.assertIn("fiber-group", panel)
+
+    def test_track_your_progress_uses_progression_chart(self):
+        scene = {
+            "visual_title": "Track Your Progress",
+            "visual_subtitle": "Record Each Session",
+            "narration": "Measure your weekly progress.",
+        }
+        category, panel = build_visual_panel(scene, 4)
+        self.assertEqual(category, "tracking")
+        self.assertIn("progress-line", panel)
+
+    def test_protein_headline_uses_nutrition_pathway(self):
+        scene = {
+            "visual_title": "Protein Needs Resistance",
+            "visual_subtitle": "Build Muscle With Enough Protein",
+            "narration": "Protein supports muscle repair.",
+        }
+        self.assertEqual(classify_scene(scene), "protein")
 
     def test_muscle_gain_scene_uses_muscle_diagram(self):
         scene = {
@@ -31,5 +83,41 @@ class VisualEngineScenePriorityTests(unittest.TestCase):
         self.assertEqual(classify_scene(scene), "muscle")
 
 
+    def test_mechanical_tension_uses_muscle_fiber_visual_not_protein_synthesis(self):
+        scene = {
+            "visual_title": "Mechanical Tension",
+            "visual_subtitle": "The Primary Growth Driver",
+            "visual_type": "protein_synthesis",
+        }
+        category, panel = build_visual_panel(scene, 10)
+        self.assertEqual(category, "muscle")
+        self.assertIn("MUSCLE FIBER ADAPTATION", panel)
+        self.assertNotIn("PROTEIN SYNTHESIS", panel)
+
+    def test_protein_training_headline_uses_protein_synthesis_visual(self):
+        scene = {"visual_title": "Protein + Training", "visual_subtitle": "Build muscle with enough protein",
+                 "visual_type": "protein_synthesis", "keyword": "resistance training|gym workout"}
+        category, panel = build_visual_panel(scene, 9)
+        self.assertEqual(category, "protein")
+        self.assertIn("PROTEIN SYNTHESIS", panel)
+        self.assertIn("amino-chain", panel)
+
+    def test_explicit_protein_type_beats_generic_training_keyword(self):
+        self.assertEqual(classify_scene({"visual_title": "The Missing Piece",
+                         "visual_type": "protein_synthesis", "keyword": "resistance training"}), "protein")
+
+    def test_overload_headline_uses_progression_chart(self):
+        self.assertEqual(classify_scene({"visual_title": "Overload Importance",
+                         "visual_subtitle": "Add weight or reps gradually",
+                         "visual_type": "exercise_biomechanics"}), "tracking")
+        self.assertEqual(classify_scene({"visual_title": "Gradual Load Increase",
+                         "visual_subtitle": "Progress when reps are controlled"}), "tracking")
+
+    def test_supplements_overload_comparison_keeps_supplement_evidence_visual(self):
+        self.assertEqual(classify_scene({"visual_title": "Supplements ≠ Overload",
+                         "visual_subtitle": "Keep loading, do not replace training"}), "supplements")
+    def test_explicit_visual_types_map_to_the_right_diagram(self):
+        self.assertEqual(classify_scene({"visual_type": "progressive_overload", "visual_title": "The Method"}), "tracking")
+        self.assertEqual(classify_scene({"visual_type": "supplement_evidence", "visual_title": "The Method"}), "supplements")
 if __name__ == "__main__":
     unittest.main()

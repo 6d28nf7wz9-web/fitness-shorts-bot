@@ -1,8 +1,12 @@
 import json
 import os
+import re
 import subprocess
 
 from wan_stock_assist import try_animate_stock
+from relevance import relevance as footage_relevance
+from artcraft_scene_provider import generate_fallback as generate_artcraft_fallback
+from scene_intelligence import route_scene
 
 from clips import (
     CLIPS_DIR,
@@ -17,28 +21,151 @@ MAX_PARTS = 4
 MIN_PARTS = 1
 
 
-def _ordered_keywords(scene):
-    """Return scene search keywords in their original priority order."""
-    raw = str(scene.get("keyword", "")).strip()
-
-    keywords = [
-        item.strip()
-        for item in raw.split("|")
+def sentence_contexts(narration, count):
+    """Distribute sentence-sized narration context across B-roll cuts."""
+    sentences = [
+        re.sub(r"\s+", " ", item).strip()
+        for item in re.split(r"(?<=[.!?])\s+", str(narration or ""))
         if item.strip()
     ]
+    count = max(1, int(count))
+    if not sentences:
+        words = str(narration or "").split()
+        if not words:
+            return [""] * count
+        return [" ".join(words[round(i * len(words) / count):round((i + 1) * len(words) / count)]) for i in range(count)]
 
-    if not keywords:
-        keywords = ["gym workout", "healthy food"]
+    # Group adjacent sentences by word count; never repeat the last sentence
+    # simply because a scene needs more cuts than it has punctuation marks.
+    groups = [[] for _ in range(count)]
+    loads = [0] * count
+    for sentence in sentences:
+        target = min(range(count), key=lambda idx: (loads[idx], idx))
+        groups[target].append(sentence)
+        loads[target] += len(sentence.split())
+    contexts = [" ".join(group).strip() for group in groups]
+    # If the narration has fewer sentences than cuts, keep the final spoken
+    # idea available for the remaining cuts instead of emitting empty queries.
+    last_context = next((sentence for sentence in reversed(sentences) if sentence), "")
+    contexts = [context if context else last_context for context in contexts]
 
-    return keywords
+    # A single long sentence still needs distinct visual beats. Split its clauses
+    # or, as a final fallback, its words into contiguous slices.
+    if len(sentences) == 1 and count > 1:
+        clauses = [part.strip() for part in re.split(r",|;|\\b(?:and|but|while|because|then)\\b", sentences[0], flags=re.I) if part.strip()]
+        if len(clauses) >= count:
+            contexts = [" ".join(clauses[round(i * len(clauses) / count):round((i + 1) * len(clauses) / count)]) for i in range(count)]
+        else:
+            words = sentences[0].split()
+            contexts = [" ".join(words[round(i * len(words) / count):round((i + 1) * len(words) / count)]) for i in range(count)]
+    return contexts
+
+
+EXERCISE_TARGETS = (
+    (r"\bromanian deadlift\b|\brdl\b", ["romanian deadlift", "dumbbell romanian deadlift", "barbell hip hinge"]),
+    (r"\bdeadlift\b", ["barbell deadlift", "deadlift exercise", "hip hinge lifting"]),
+    (r"\bsquat\b", ["barbell squat", "person performing squat", "squat exercise"]),
+    (r"\blunge\b|\bsplit squat\b", ["dumbbell lunge", "walking lunge exercise", "split squat"]),
+    (r"\bbench press\b|\bpress the bar\b|\bchest press\b", ["barbell bench press", "bench press exercise", "chest pressing"]),
+    (r"\bpush[- ]?up\b", ["push up exercise", "person doing pushups", "pushup form"]),
+    (r"\bpull[- ]?up\b", ["pull up exercise", "person doing pullups", "hanging pullup"]),
+    (r"\blat pulldown\b", ["lat pulldown machine", "cable lat pulldown", "back pulldown exercise"]),
+    (r"\bbicep curl\b|\bcurl\b", ["dumbbell bicep curl", "barbell curl exercise", "biceps training"]),
+    (r"\bshoulder press\b|\boverhead press\b|\bpress overhead\b", ["dumbbell shoulder press", "barbell overhead press", "shoulder press exercise"]),
+    (r"\bplank\b", ["forearm plank exercise", "person holding plank", "plank form"]),
+    (r"\bhip thrust\b", ["barbell hip thrust", "hip thrust exercise", "glute bridge movement"]),
+    (r"\browing\b|\bseated row\b|\bbent[- ]over row\b", ["seated cable row", "bent over barbell row", "rowing exercise"]),
+    (r"\bcalf raise\b", ["standing calf raise", "seated calf raise", "calf raise exercise"]),
+)
+
+
+def _exercise_variants(text):
+    """Return only exercise-specific queries actually named in this narration slice."""
+    text = str(text or "").lower()
+    for pattern, variants in EXERCISE_TARGETS:
+        if re.search(pattern, text):
+            return list(variants)
+    return []
+
+
+def _dedupe(items):
+    seen, result = set(), []
+    for item in items:
+        item = str(item or "").strip()
+        key = item.lower()
+        if item and key not in seen:
+            seen.add(key)
+            result.append(item)
+    return result
+
+
+def _ordered_keywords(scene):
+    """Prioritize exact movement named by the full scene before broad authored terms."""
+    raw = str(scene.get("keyword", "")).strip()
+    authored = [item.strip() for item in raw.split("|") if item.strip()]
+    context = " ".join([raw] + [
+        str(scene.get(key, "")) for key in
+        ("visual_title", "visual_subtitle", "narration", "description")
+    ])
+    return _dedupe(_exercise_variants(context) + authored) or ["gym workout"]
+
+
+def _cut_keywords(scene, sentence_context, base_keywords=None):
+    """Re-rank B-roll searches per spoken sentence so each cut depicts its own action."""
+    base = list(base_keywords or _ordered_keywords(scene))
+    slice_targets = _exercise_variants(sentence_context)
+    scene_targets = _exercise_variants(" ".join([
+        str(scene.get("visual_title", "")),
+        str(scene.get("visual_subtitle", "")),
+        str(scene.get("keyword", "")),
+    ]))
+    return _dedupe(slice_targets + scene_targets + base) or ["gym workout"]
+
+
+def _require_exact_footage_match(hit, keyword, context=""):
+    """Fail closed unless the chosen stock clip matches this exact spoken beat."""
+    score = footage_relevance(hit, keyword, context)
+    if score != 2:
+        raise RuntimeError(
+            f"Selected B-roll failed exact semantic match (score={score}): {keyword}"
+        )
+    return score
+
+
+def _validate_rendered_video(path, expected_seconds):
+    """Validate the actual MP4 streams; file size alone is not a validity test."""
+    if not os.path.isfile(path) or os.path.getsize(path) <= 0:
+        raise RuntimeError("FFmpeg did not create a non-empty science fallback")
+
+    probe = subprocess.run(
+        [
+            "ffprobe", "-v", "error", "-show_entries",
+            "format=duration:stream=codec_type,width,height",
+            "-of", "json", path,
+        ],
+        check=True, capture_output=True, text=True,
+    )
+    try:
+        metadata = json.loads(probe.stdout or "{}")
+        streams = metadata.get("streams", [])
+        video = next(
+            (stream for stream in streams if stream.get("codec_type") == "video"),
+            None,
+        )
+        duration = float(metadata.get("format", {}).get("duration", 0))
+    except (TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise RuntimeError("FFprobe returned invalid science fallback metadata") from exc
+
+    if not video or not video.get("width") or not video.get("height"):
+        raise RuntimeError("Science fallback has no valid video stream")
+    if duration <= 0 or abs(duration - float(expected_seconds)) > max(1.0, expected_seconds * 0.15):
+        raise RuntimeError(
+            f"Science fallback duration mismatch: expected {expected_seconds}s, got {duration}s"
+        )
 
 
 def _render_science_fallback(output_file, seconds):
-    """Create a clean branded-safe canvas when no genuinely relevant stock exists.
-
-    HyperFrames supplies the scene-specific diagram and typography later; this
-    clip is deliberately neutral rather than substituting unrelated footage.
-    """
+    """Render a neutral vertical bridge; HyperFrames adds scene-specific graphics."""
     os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
     temp_file = output_file + ".tmp.mp4"
     try:
@@ -52,13 +179,16 @@ def _render_science_fallback(output_file, seconds):
                 "drawbox=x=70:y=90:w=940:h=1740:color=0x72e6c2@0.10:t=3,"
                 "format=yuv420p",
                 "-an", "-c:v", "libx264", "-preset", "veryfast",
-                "-crf", "22", "-movflags", "+faststart", temp_file,
+                "-crf", "22", "-pix_fmt", "yuv420p",
+                "-movflags", "+faststart", temp_file,
             ],
             check=True,
         )
-        if not os.path.isfile(temp_file) or os.path.getsize(temp_file) < 10000:
-            raise RuntimeError("FFmpeg did not create a valid science fallback")
+        _validate_rendered_video(temp_file, seconds)
         os.replace(temp_file, output_file)
+    except subprocess.CalledProcessError as exc:
+        detail = (exc.stderr or b"") if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+        raise RuntimeError(f"Science fallback FFmpeg/FFprobe failed: {str(detail)[:500]}") from exc
     finally:
         if os.path.exists(temp_file):
             os.remove(temp_file)
@@ -135,6 +265,7 @@ def main():
 
     used_ids = set()
     info = []
+    artcraft_state = {"generated": 0}
 
     for scene_index, scene in enumerate(scenes, 1):
         seconds = float(
@@ -152,6 +283,7 @@ def main():
         ).strip()
 
         keywords = _ordered_keywords(scene)
+        route = route_scene(scene)
         output_file = os.path.join(
             CLIPS_DIR,
             f"scene_{scene_index}.mp4"
@@ -162,6 +294,26 @@ def main():
             f"({seconds:.2f}s)"
         )
         print(f"  narration: {narration}")
+        print(f"  visual route: {route['source']} ({route['reason']})")
+
+        # Mechanistic science is rendered by Blender downstream. Do not waste
+        # stock searches or invoke ArtCraft for a scene that needs a controlled
+        # scientific explanation.
+        if route["source"] == "blender":
+            _render_science_fallback(output_file, seconds)
+            info.append({
+                "scene": scene_index,
+                "source": "science_visual",
+                "route": route,
+                "narration": narration,
+                "keywords": keywords,
+                "file": output_file,
+                "seconds": seconds,
+                "clips": [],
+                "pixabay_ids": [],
+                "fallback_reason": "Routed to Blender scientific visual",
+            })
+            continue
 
         parts = max(
             MIN_PARTS,
@@ -172,6 +324,7 @@ def main():
         )
 
         each = seconds / parts
+        cut_contexts = sentence_contexts(narration, parts)
         print(f"  stock fallback: {parts} cuts")
         print(
             f"  search priority: {', '.join(keywords)}"
@@ -182,16 +335,49 @@ def main():
 
         try:
             for part_index in range(parts):
-                keyword = "|".join(keywords)
-                query, hit, url, portrait = choose_clip(
-                    keyword, each, used_ids, context=narration
+                sentence_context = cut_contexts[part_index]
+                cut_keywords = _cut_keywords(scene, sentence_context, keywords)
+                keyword = "|".join(cut_keywords)
+                part_file = os.path.join(
+                    CLIPS_DIR, f"s{scene_index}_{part_index}.mp4"
                 )
+                try:
+                    query, hit, url, portrait = choose_clip(
+                        keyword, each, used_ids, context=sentence_context
+                    )
+                    match_score = _require_exact_footage_match(hit, keyword, sentence_context)
+                except RuntimeError as match_error:
+                    message = str(match_error)
+                    if not any(marker in message for marker in (
+                        "No specific footage match",
+                        "No unused scene-matched footage remains",
+                        "Selected B-roll failed exact semantic match",
+                    )):
+                        raise
+                    generated = generate_artcraft_fallback(
+                        scene, sentence_context, each,
+                        os.path.join(RAW_DIR, f"artcraft_s{scene_index}_{part_index}.mp4"),
+                        artcraft_state,
+                    )
+                    if not generated:
+                        raise
+                    process(generated, part_file, each, True)
+                    part_files.append(part_file)
+                    scene_clips.append({
+                        "source": "artcraft",
+                        "query": "ArtCraft generated scene-specific B-roll",
+                        "keyword": keyword,
+                        "sentence_context": sentence_context,
+                        "relevance_score": 2,
+                        "match_status": "prompted_generation",
+                        "seconds": round(each, 2),
+                    })
+                    print(f"  cut {part_index + 1}: ArtCraft generated vertical B-roll")
+                    continue
+
                 clip_id = hit.get("id")
                 raw_file = os.path.join(
                     RAW_DIR, f"s{scene_index}_{part_index}.mp4"
-                )
-                part_file = os.path.join(
-                    CLIPS_DIR, f"s{scene_index}_{part_index}.mp4"
                 )
 
                 try:
@@ -223,6 +409,9 @@ def main():
                     "source": clip_source,
                     "query": query,
                     "keyword": keyword,
+                    "sentence_context": sentence_context,
+                    "relevance_score": match_score,
+                    "match_status": "exact",
                     "pixabay_id": clip_id,
                     "page": hit.get("pageURL"),
                     "author": hit.get("user"),
@@ -240,7 +429,7 @@ def main():
             _concat_parts(part_files, output_file, scene_index)
             info.append({
                 "scene": scene_index,
-                "source": "stock",
+                "source": "mixed" if any(item.get("source") == "artcraft" for item in scene_clips) else "stock",
                 "narration": narration,
                 "keywords": keywords,
                 "file": output_file,
@@ -249,7 +438,10 @@ def main():
                 "pixabay_ids": [clip["pixabay_id"] for clip in scene_clips],
             })
         except RuntimeError as exc:
-            if "No specific footage match" not in str(exc):
+            if not any(marker in str(exc) for marker in (
+                "No specific footage match",
+                "No unused scene-matched footage remains",
+            )):
                 raise
             print(
                 f"  No verified stock match for scene {scene_index}; "
@@ -268,7 +460,7 @@ def main():
                 "seconds": seconds,
                 "clips": [],
                 "pixabay_ids": [],
-                "fallback_reason": "No semantically verified stock footage",
+                "fallback_reason": str(exc),
             })
 
     with open(

@@ -2,19 +2,45 @@ name: HyperFrames production integration test
 
 on:
   push:
-    branches: [main]
+    branches: [main, experiment/motion-skills-video-engine]
     paths:
       - 'hyperframes_render.py'
+      - 'motion_director.py'
+      - 'visual_engine.py'
+      - 'avatar.py'
+      - 'avatar_motion.py'
+      - 'production_motion_engine.py'
+      - 'tests/test_motion_director.py'
+      - 'tests/test_visual_engine_scene_priority.py'
+      - 'tests/test_avatar_motion_cues.py'
       - 'assemble.py'
+      - 'blender/**'
+      - 'tests/test_blender_preview_contract.py'
+      - 'tests/test_production_motion_engine.py'
+      - 'clips.py'
+      - 'clips_fast.py'
       - '.github/workflows/hyperframes-integration.yml'
   pull_request:
-    branches: [main]
+    branches: [main, feature/scene-specific-science-visuals]
     paths:
       - 'hyperframes_render.py'
       - 'assemble.py'
       - '.github/workflows/hyperframes-integration.yml'
       - 'tests/test_hyperframes_render.py'
+      - 'visual_engine.py'
+      - 'avatar.py'
+      - 'avatar_motion.py'
+      - 'production_motion_engine.py'
+      - 'tests/test_visual_engine_scene_priority.py'
+      - 'tests/test_avatar_motion_cues.py'
+      - 'blender/**'
+      - 'tests/test_blender_preview_contract.py'
+      - 'tests/test_production_motion_engine.py'
   workflow_dispatch:
+
+concurrency:
+  group: hyperframes-integration-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -34,7 +60,7 @@ jobs:
       - name: Install FFmpeg and HyperFrames
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          sudo apt-get install -y ffmpeg fonts-dejavu-core blender libegl1 libgl1
           npm install --global hyperframes@0.9.31
           hyperframes doctor
       - name: Create safe synthetic fixture (no YouTube upload)
@@ -53,6 +79,8 @@ jobs:
           json.dump({"title":"HyperFrames fixture","scenes":scenes},open("output/script.json","w"))
           json.dump(audio,open("output/audio_info.json","w"))
           PY
+      - name: Render scene-matched 3D science plates
+        run: python blender/render_scene_visuals.py
       - name: Render HyperFrames composition
         run: python hyperframes_render.py
       - name: Assemble final fixture with captions and audio
@@ -62,3 +90,111 @@ jobs:
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 output/final.mp4
           ffprobe -v error -show_entries format=duration -of csv=p=0 output/final.mp4
           test -s output/final.mp4
+      - name: Upload assembled 3D HyperFrames fixture
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-hyperframes-3d-final-preview
+          path: output/final.mp4
+          if-no-files-found: error
+          retention-days: 7
+
+  blender-science-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install headless render libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 ffmpeg python3-numpy
+      - name: Install Blender from Ubuntu packages
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y blender
+          command -v blender
+          blender --version
+          blender -b --factory-startup --python-expr "import bpy; print('BLENDER_PYTHON_READY=' + bpy.app.version_string)"
+      - name: Fetch Blender Agent Skills (pinned, MIT)
+        run: |
+          git clone --depth 1 --branch v1.3.2 https://github.com/EL4CTEO/blender-skills.git /tmp/blender-skills
+          python /tmp/blender-skills/tools/validate_skills.py
+      - name: Render anterior and posterior 3D anatomy previews
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          for view in anterior posterior; do
+            blender -b --factory-startup --python-exit-code 1 \
+              --python blender/fitfuel_science_preview.py -- \
+              --view "$view" \
+              --output-dir "output/blender-frames-$view" \
+              --blend-file "output/fitfuel-$view.blend" \
+              --frames 72 --width 540 --height 960 \
+              --title 'HUMAN MUSCLE ANATOMY'
+            ffmpeg -y -hide_banner -loglevel error -framerate 24 \
+              -i "output/blender-frames-$view/frame_%04d.png" \
+              -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
+              "output/blender-science-$view-preview.mp4"
+          done
+      - name: Render 3D science topic showcase
+        run: |
+          set -euo pipefail
+          for topic in muscle protein heart fat_loss hydration exercise nutrition hormones creatine supplements tracking recovery general; do
+            blender -b --factory-startup --python-exit-code 1 \
+              --python blender/fitfuel_science_preview.py -- \
+              --topic "$topic" --clean \
+              --output-dir "output/blender-topic-frames-$topic" \
+              --blend-file "output/fitfuel-topic-$topic.blend" \
+              --frames 48 --width 360 --height 640 \
+              --title 'FITFUEL 3D SCIENCE'
+            ffmpeg -y -hide_banner -loglevel error -framerate 24 \
+              -i "output/blender-topic-frames-$topic/frame_%04d.png" \
+              -r 30 -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
+              "output/blender-science-topic-$topic-preview.mp4"
+          done
+      - name: Run upstream Blender asset QA on all 3D topics
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="/usr/lib/python3/dist-packages:${PYTHONPATH:-}"
+          for topic in anterior posterior muscle protein heart fat_loss hydration exercise nutrition hormones creatine supplements tracking recovery general; do
+            if [ "$topic" = anterior ] || [ "$topic" = posterior ]; then
+              blend="output/fitfuel-$topic.blend"
+            else
+              blend="output/fitfuel-topic-$topic.blend"
+            fi
+            blender -b "$blend" --python-exit-code 1 \
+              -P /tmp/blender-skills/skills/blender-asset-qa/scripts/qa_check.py -- \
+              --profile render
+          done
+      - name: Validate all 3D previews
+        run: |
+          python - <<'PY'
+          import json, subprocess
+          checks = [
+              (f"output/blender-science-{view}-preview.mp4", 540, 960, 24, 72)
+              for view in ("anterior", "posterior")
+          ]
+          checks += [
+              (f"output/blender-science-topic-{topic}-preview.mp4", 360, 640, 30, 60)
+              for topic in ("muscle", "protein", "heart", "fat_loss", "hydration",
+                            "exercise", "nutrition", "hormones", "creatine",
+                            "supplements", "tracking", "recovery", "general")
+          ]
+          for path, width, height, fps, frames in checks:
+              probe = subprocess.check_output([
+                  "ffprobe", "-v", "error", "-select_streams", "v:0",
+                  "-show_entries", "stream=codec_name,width,height,r_frame_rate,nb_frames",
+                  "-of", "json", path
+              ], text=True)
+              stream = json.loads(probe)["streams"][0]
+              assert (stream["width"], stream["height"]) == (width, height), (path, stream)
+              assert stream["r_frame_rate"] == f"{fps}/1", (path, stream)
+              assert int(stream["nb_frames"]) == frames, (path, stream)
+              print("3D preview passed:", path, stream)
+          PY
+      - name: Upload 3D preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-blender-science-preview
+          path: output/blender-science-*-preview.mp4
+          if-no-files-found: error
+          retention-days: 7

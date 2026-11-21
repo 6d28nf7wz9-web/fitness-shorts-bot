@@ -52,9 +52,24 @@ async def try_voice(text, path, voice):
             rate=RATE,
         )
 
-        await asyncio.wait_for(
-            communicate.save(temp_path),
-            timeout=REQUEST_TIMEOUT,
+        async def stream_to_file():
+            boundaries = []
+            with open(temp_path, "wb") as audio_file:
+                async for chunk in communicate.stream():
+                    if chunk.get("type") == "audio":
+                        audio_file.write(chunk.get("data", b""))
+                    elif chunk.get("type") == "WordBoundary":
+                        # Edge TTS timestamps are 100-nanosecond ticks.
+                        boundaries.append({
+                            "text": str(chunk.get("text", "")),
+                            "start": float(chunk.get("offset", 0)) / 10_000_000,
+                            "end": (float(chunk.get("offset", 0)) +
+                                    float(chunk.get("duration", 0))) / 10_000_000,
+                        })
+            return boundaries
+
+        word_timings = await asyncio.wait_for(
+            stream_to_file(), timeout=REQUEST_TIMEOUT
         )
 
         if not os.path.exists(temp_path):
@@ -69,7 +84,7 @@ async def try_voice(text, path, voice):
         # Replace the final file only after validation
         os.replace(temp_path, path)
 
-        return True
+        return word_timings
 
     finally:
         if os.path.exists(temp_path):
@@ -92,10 +107,10 @@ async def make_audio(text, path):
                     f"(attempt {attempt}/{MAX_RETRIES})"
                 )
 
-                await try_voice(text, path, voice)
+                word_timings = await try_voice(text, path, voice)
 
                 print(f"Audio created successfully using {voice}")
-                return voice
+                return voice, word_timings
 
             except Exception as e:
                 last_error = e
@@ -132,7 +147,7 @@ async def main():
 
         path = f"{OUT_DIR}/scene_{i}.mp3"
 
-        used_voice = await make_audio(narration, path)
+        used_voice, word_timings = await make_audio(narration, path)
 
         seconds = round(get_duration(path), 2)
 
@@ -141,6 +156,7 @@ async def main():
             "file": path,
             "seconds": seconds,
             "voice": used_voice,
+            "word_timings": word_timings,
         })
 
         print(f"Scene {i}: {seconds}s")

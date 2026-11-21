@@ -109,6 +109,33 @@ _GENERIC = {norm(w) for w in GENERIC}
 _LOW_SIGNAL = {norm(w) for w in LOW_SIGNAL}
 _HIGH_CONFIDENCE_SINGLE = {norm(w) for w in HIGH_CONFIDENCE_SINGLE}
 
+# Reject visually unrelated scenery even when stock metadata contains a stray
+# fitness keyword (e.g. "training load" returning a harbor or beach aerial).
+OFF_TOPIC_SCENERY = {
+    "beach", "ocean", "sea", "coast", "coastal", "coastline", "shore",
+    "port", "harbor", "harbour", "ship", "ships", "boat", "boats",
+    "cargo", "shipping", "forklift", "warehouse", "airport", "airplane",
+    "highway", "motorway", "roadway", "landscape", "aerial", "drone",
+    "skyline", "cityscape", "construction", "crane", "industrial", "factory",
+    # Nature/water scenery often carries incidental fitness tags but is not
+    # usable footage for a specific lifting or nutrition narration.
+    "forest", "woods", "woodland", "waterfall", "river", "stream", "lake",
+    "waterway", "trees", "leaves", "grass", "meadow", "mountain", "wildlife",
+    "bird", "birds", "animal", "animals", "jungle", "garden", "parkland",
+}
+_OFF_TOPIC_SCENERY = {norm(w) for w in OFF_TOPIC_SCENERY}
+
+# Workplace footage is a frequent false-positive for abstract supplement/energy
+# searches (e.g. a person at a laptop tagged "health" or "training"). Reject it
+# unless the narration explicitly asks for an office/work setting.
+OFF_TOPIC_WORKPLACE = {
+    "office", "desk", "desktop", "laptop", "computer", "keyboard",
+    "corporate", "business", "workplace", "coworking", "meeting",
+    "conference", "boardroom", "cubicle", "paperwork", "businessman",
+    "businesswoman", "suit", "spreadsheet",
+}
+_OFF_TOPIC_WORKPLACE = {norm(w) for w in OFF_TOPIC_WORKPLACE}
+
 
 def hit_words(hit):
     slug = str(hit.get("pageURL", "")).rstrip("/").split("/")[-1]
@@ -152,24 +179,40 @@ def relevance(hit, keyword, context=""):
     """0=off-topic, 1=category match, 2=specific keyword match."""
 
     hw = hit_words(hit)
+    explicit_scene_words = words_of(f"{keyword} {context}") - _FILLER
+    unrelated_scenery = hw & _OFF_TOPIC_SCENERY
+    if unrelated_scenery and not (unrelated_scenery & explicit_scene_words):
+        return 0
+
+    unrelated_workplace = hw & _OFF_TOPIC_WORKPLACE
+    if unrelated_workplace and not (unrelated_workplace & explicit_scene_words):
+        return 0
+
     query_words = keyword_words(keyword)
     ambiguous = {"bench", "press", "row", "lat", "water", "bottle", "weight"}
     query_specific = query_words - _GENERIC - _WEAK - ambiguous - _LOW_SIGNAL
 
-    # Require multiple distinct target terms so incidental homonyms/settings
+    # Enforce the dominant visual domain before scoring individual words.
+    # A food clip tagged "plate" must never satisfy a lifting query such as
+    # "barbell loading plates", even if the shared word overlaps.
+    target_category = category(keyword)
+    hit_category = category(" ".join(str(hit.get(key, "")) for key in ("tags", "pageURL")))
+    if target_category == "training" and hit_category == "food":
+        return 0
+    if target_category == "food" and hit_category == "training":
+        return 0
+
+    # Exact scene matching must be supported by the authored search target,
+    # not by broad narration/context terms that can accidentally match metadata.
     # (e.g. "apple" on a bear clip or "night" on a castle) cannot pass as exact.
     direct_matches = hw & query_specific
     if len(direct_matches) >= 2 or direct_matches & _HIGH_CONFIDENCE_SINGLE:
         return 2
 
-    # Use narration as supporting evidence, not as a replacement for the search query.
-    context_specific = scene_terms(keyword, context) - _GENERIC - _WEAK - ambiguous - _LOW_SIGNAL
-    if len(hw & context_specific) >= 2:
-        return 2
-
-    target_category = category(keyword)
-    if target_category not in ("food", "training"):
-        target_category = category(context)
+    # Narration may establish a broad category, but it cannot upgrade a
+    # weak/ambiguous stock tag into an exact scene match.
+    context_category = target_category if target_category in ("food", "training") else category(context)
+    target_category = context_category
 
     # Generic category footage is never an exact scene match. It may be
     # used only when the caller explicitly enables category-only fallback;

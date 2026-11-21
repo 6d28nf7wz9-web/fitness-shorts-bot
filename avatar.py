@@ -8,18 +8,22 @@ import numpy as np
 from PIL import Image
 
 from ffaudio import load_audio
+from avatar_motion import apply_expression_mouth_states, ffmpeg_motion_expression, scene_motion_cues
 
 SR = 16000
 STATE_FPS = 30
 OUT_FPS = 30
 AVATAR_DIR = os.getenv("AVATAR_DIR", "avatar")
 CACHE_DIR = "output/avatar_cache"
-BOB = 6  # pixels of gentle up and down movement
+BOB = 2  # subtle movement stays inside the fixed presenter frame
+SHORT_AVATAR_FRAME = 250
+SHORT_AVATAR_X = 34
+SHORT_AVATAR_Y = 110
 
 # h = presenter height; x and bottom keep it outside the Shorts title/caption safe zones.
 # The Shorts presenter sits in the upper-left corner, below the brand line and above titles.
 LAYOUTS = {
-    "short": {"h": 190, "x": "50", "bottom": 1520},
+    "short": {"h": 184, "x": "50", "bottom": 1520},
     "long": {"h": 280, "x": "W-w-40", "bottom": 24},
 }
 
@@ -146,9 +150,10 @@ def analyze(samples):
     return np.array(out, dtype=int)
 
 
-def frame_states(codes, can_blink):
+def frame_states(codes, can_blink, expression_events=None):
     states = [NAMES[int(c)] for c in codes]
     n = len(states)
+    states = apply_expression_mouth_states(states, expression_events, STATE_FPS)
     if can_blink:
         i = random.randint(50, 100)
         while i < n:
@@ -194,7 +199,10 @@ def render(video, samples, layout):
 
     paths = load_states(cfg["h"])
     codes = analyze(samples)
-    states = frame_states(codes, True)
+    cues = scene_motion_cues(layout)
+    states = frame_states(codes, True, cues)
+    angle_expr = ffmpeg_motion_expression(cues, "angle")
+    x_expr = ffmpeg_motion_expression(cues, "x")  # retained for the long-video layout
     total = max(len(states), 1)
     shares = ", ".join(f"{k} {states.count(k) * 100 // total}%" for k in NAMES + ["blink"])
     print("Mouth shapes used:", shares)
@@ -207,17 +215,24 @@ def render(video, samples, layout):
     if layout == "short":
         # A restrained branded backing makes the presenter feel anchored to the
         # frame instead of appearing as a floating cutout in the corner.
+        # Render the avatar inside a transparent 220x220 canvas first. The
+        # canvas is composited at the exact same coordinates as the backing box,
+        # so gestures can never make the presenter drift outside its frame.
         fc = (
-            "[0:v]drawbox=x=28:y=188:w=220:h=220:color=0x071624@0.78:t=fill,"
-            "drawbox=x=28:y=188:w=220:h=220:color=0x72e6c2@0.72:t=3[base];"
-            f"[1:v]fps={OUT_FPS},format=rgba[av];"
-            f"[base][av]overlay=x={cfg['x']}:y='H-h-{cfg['bottom']}+{BOB}*sin(2*PI*t*0.9)'"
+            f"[0:v]drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x071624@0.78:t=fill,"
+            f"drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x72e6c2@0.72:t=3[base];"
+            f"[1:v]fps={OUT_FPS},scale={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:force_original_aspect_ratio=decrease,format=rgba,"
+            f"rotate='{angle_expr}':c=none:ow=iw:oh=ih,"
+            f"pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:(ow-iw)/2:(oh-ih)/2:color=black@0[av];"
+            # Keep the presenter anchored to the fixed upper-left frame. Scene gestures
+            # are expressed as a small in-place tilt, never as horizontal drift.
+            f"[base][av]overlay=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}"
             ":eof_action=repeat:format=auto[v]"
         )
     else:
         fc = (
-            f"[1:v]fps={OUT_FPS},format=rgba[av];"
-            f"[0:v][av]overlay=x={cfg['x']}:y='H-h-{cfg['bottom']}+{BOB}*sin(2*PI*t*0.9)'"
+            f"[1:v]fps={OUT_FPS},format=rgba,rotate='{angle_expr}':c=none:ow=iw:oh=ih[av];"
+            f"[0:v][av]overlay=x='{cfg['x']}+({x_expr})':y='H-h-{cfg['bottom']}+{BOB}*sin(2*PI*t*0.9)'"
             ":eof_action=repeat:format=auto[v]"
         )
     cmd = [
@@ -229,7 +244,45 @@ def render(video, samples, layout):
         "-c:a", "copy", "-movflags", "+faststart",
         "-t", f"{dur:.3f}", tmp,
     ]
-    subprocess.run(cmd, check=True)
+    # Keep the presenter pipeline resilient: FFmpeg builds differ across hosted
+    # runners, and some filter builds reject a scene-motion expression even when
+    # the same expression is valid locally. Retry with a simple, deterministic
+    # compositor while preserving the audio-driven mouth frames.
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as first_error:
+        detail = (first_error.stderr or first_error.stdout or str(first_error)).strip()
+        print("Avatar motion render failed; retrying with safe lip-sync compositor.")
+        if detail:
+            print("FFmpeg motion-render diagnostic:", detail[-4000:])
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+        if layout == "short":
+            safe_fc = (
+                f"[0:v]drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x071624@0.78:t=fill,"
+                f"drawbox=x={SHORT_AVATAR_X}:y={SHORT_AVATAR_Y}:w={SHORT_AVATAR_FRAME}:h={SHORT_AVATAR_FRAME}:color=0x72e6c2@0.72:t=3[base];"
+                f"[1:v]fps={OUT_FPS},scale={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:force_original_aspect_ratio=decrease,format=rgba,"
+                f"pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}:(ow-iw)/2:(oh-ih)/2:color=black@0[av];"
+                f"[base][av]overlay=x={SHORT_AVATAR_X}:y='{SHORT_AVATAR_Y}+2*sin(2*PI*t*0.9)':eof_action=repeat:format=auto[v]"
+            )
+        else:
+            safe_fc = (
+                f"[1:v]fps={OUT_FPS},format=rgba[av];"
+                f"[0:v][av]overlay=x={cfg['x']}:y='H-h-{cfg['bottom']}'"
+                ":eof_action=repeat:format=auto[v]"
+            )
+        safe_cmd = list(cmd)
+        safe_cmd[safe_cmd.index("-filter_complex") + 1] = safe_fc
+        try:
+            subprocess.run(safe_cmd, check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as fallback_error:
+            fallback_detail = (fallback_error.stderr or fallback_error.stdout or str(fallback_error)).strip()
+            raise RuntimeError(
+                "Avatar rendering failed in both motion and safe compositor modes. "
+                + fallback_detail[-4000:]
+            ) from fallback_error
+
     os.replace(tmp, video)
     os.remove(list_path)
     with open(marker, "w") as f:

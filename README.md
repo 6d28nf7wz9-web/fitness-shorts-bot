@@ -73,3 +73,36 @@ Coverr API setup:
 - After a Coverr clip is actually downloaded, the pipeline calls Coverr's `PATCH /videos/:id/stats/downloads` tracking endpoint.
 - Free Demo API usage requires crediting Coverr and the creator when listed. The upload description adds those credits and links. Coverr's current license allows commercial use, but does not allow redistributing raw stock files, bulk library downloads, or using API content to train AI.
 - Sponsored partner assets and watermarked premium previews are excluded by the adapter.
+
+
+## Optional ArtCraft scene-specific B-roll (additive fallback)
+
+ArtCraft is an optional fourth visual path, not a replacement for Pixabay,
+Coverr, Pexels, or the local licensed stock library.
+
+Production order:
+1. Search free stock providers for the exact spoken beat.
+2. Accept stock only when the existing semantic matcher confirms an exact
+   topic match; unrelated clips are rejected.
+3. If no exact stock match exists, ArtCraft may generate a vertical,
+   scene-specific B-roll cut, subject to an explicit per-run generation budget.
+4. If ArtCraft is disabled, unavailable, or fails, retain the existing
+   science-visual fallback. HyperFrames can compose verified stock and
+   ArtCraft clips in the same scene.
+
+ArtCraft generation is **off by default**. It requires all three settings:
+- GitHub Actions secret `ARTCRAFT_API_KEY` (API access is gated by ArtCraft;
+  an account may need the provider to enable API keys).
+- Repository variable `ARTCRAFT_ENABLED=1`.
+- Repository variable `ARTCRAFT_MAX_GENERATIONS` set to a deliberate positive
+  integer. This is a hard maximum per Short; default is zero.
+
+Optional settings: `ARTCRAFT_VIDEO_MODEL` (default `seedance_2p0`),
+`ARTCRAFT_VIDEO_RESOLUTION` (default `seven_twenty_p`), and
+`ARTCRAFT_MAX_WAIT_SECONDS` (default 240). ArtCraft generation can consume
+credits and is not assumed to be free. Do not enable it until the account's
+API access, model availability, and credit pricing are confirmed.
+
+The provider uses ArtCraft's documented Omni API and downloads the completed
+MP4 before passing it through the same FFmpeg normalization and HyperFrames
+composition path. It does not upload or publish anything to YouTube.

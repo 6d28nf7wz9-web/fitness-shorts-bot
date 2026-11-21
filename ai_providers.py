@@ -34,6 +34,10 @@ class OpenAICompatibleProvider:
         self.endpoint = endpoint
         self.model = model
         self.timeout = timeout
+        try:
+            self.max_retries = max(0, int(os.getenv("AI_PROVIDER_MAX_TRANSIENT_RETRIES", str(MAX_TRANSIENT_RETRIES))))
+        except ValueError:
+            self.max_retries = MAX_TRANSIENT_RETRIES
 
     def generate(self, prompt):
         headers = {
@@ -61,7 +65,7 @@ class OpenAICompatibleProvider:
             "response_format": {"type": "json_object"},
         }
 
-        for attempt in range(MAX_TRANSIENT_RETRIES + 1):
+        for attempt in range(self.max_retries + 1):
             try:
                 response = requests.post(
                     self.endpoint,
@@ -70,12 +74,12 @@ class OpenAICompatibleProvider:
                     timeout=self.timeout,
                 )
             except (requests.Timeout, requests.ConnectionError) as exc:
-                if attempt >= MAX_TRANSIENT_RETRIES:
+                if attempt >= self.max_retries:
                     raise ProviderError(f"{self.name} network failure: {exc}") from exc
                 time.sleep(2)
                 continue
 
-            if response.status_code in (500, 502, 503, 504) and attempt < MAX_TRANSIENT_RETRIES:
+            if response.status_code in (500, 502, 503, 504) and attempt < self.max_retries:
                 time.sleep(2)
                 continue
 
@@ -120,6 +124,7 @@ def build_external_providers(env=None):
                 groq_key,
                 "https://api.groq.com/openai/v1/chat/completions",
                 model,
+                timeout=int(env.get("AI_PROVIDER_TIMEOUT_SECONDS", REQUEST_TIMEOUT_SECONDS)),
             )
         )
 

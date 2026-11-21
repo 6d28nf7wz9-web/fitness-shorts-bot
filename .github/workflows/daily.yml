@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/scene-specific-science-visuals
+      - experiment/motion-skills-video-engine
   schedule:
     - cron: "17 5 * * *"
     - cron: "17 11 * * *"
@@ -20,7 +21,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: fitness-video-pipelines
+  # Keep the experimental preview lane independent; push events are upload-disabled.
+  group: ${{ github.ref == 'refs/heads/experiment/motion-skills-video-engine' && 'fitness-video-pipelines-motion-v4-preview' || 'fitness-video-pipelines' }}
   cancel-in-progress: false
 
 jobs:
@@ -37,6 +39,9 @@ jobs:
       PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
       COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
       PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      ARTCRAFT_API_KEY: ${{ secrets.ARTCRAFT_API_KEY }}
+      ARTCRAFT_ENABLED: ${{ vars.ARTCRAFT_ENABLED || '0' }}
+      ARTCRAFT_MAX_GENERATIONS: ${{ vars.ARTCRAFT_MAX_GENERATIONS || '0' }}
       NASA_VIDEO_SEARCH: "1"
       YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
@@ -44,6 +49,11 @@ jobs:
       UPLOAD_PRIVACY: public
       SKIP_UPLOAD: ${{ (github.event_name == 'push' || inputs.preview_only) && '1' || '' }}
       HYPERFRAMES_RENDER: "1"
+      GEMINI_REQUEST_TIMEOUT_MS: "20000"
+      GEMINI_MAX_MODELS: "1"
+      GEMINI_MAX_GENERATION_ATTEMPTS: "1"
+      AI_PROVIDER_TIMEOUT_SECONDS: "20"
+      AI_PROVIDER_MAX_TRANSIENT_RETRIES: "0"
     steps:
       - uses: actions/checkout@v4
 
@@ -62,9 +72,14 @@ jobs:
           cache: pip
 
       - name: Install system packages
+        timeout-minutes: 20
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          if ! command -v ffmpeg >/dev/null 2>&1 || [ ! -f /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf ]; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+          else
+            echo "FFmpeg and DejaVu Sans are already available on the runner."
+          fi
 
       - name: Install Python packages
         run: pip install -r requirements.txt
@@ -92,6 +107,14 @@ jobs:
       - name: Validate script and footage
         run: python quality_check.py
 
+      - name: Install Blender 3D renderer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends blender libegl1 libgl1
+
+      - name: Render scene-matched 3D science plates
+        run: python blender/render_scene_visuals.py
+
       - name: Assemble video
         run: |
           python assemble.py
@@ -110,7 +133,7 @@ jobs:
           if-no-files-found: error
 
       - name: Save learning data
-        if: always()
+        if: always() && github.event_name != 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

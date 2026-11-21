@@ -57,6 +57,22 @@ def main():
                 continue
             weak = []
             for part in parts:
+                if part.get("source") == "artcraft":
+                    if not os.path.isfile(info.get("file", "")):
+                        errors.append(f"Scene {i}: ArtCraft-generated visual file is missing")
+                    elif part.get("match_status") != "prompted_generation":
+                        errors.append(f"Scene {i}: ArtCraft visual lacks generation provenance")
+                    elif os.getenv("SKIP_UPLOAD", "0") not in ("1", "true", "yes") and os.getenv("ALLOW_ARTCRAFT_UPLOAD", "0") != "1":
+                        errors.append(
+                            f"Scene {i}: ArtCraft-generated footage requires manual visual review "
+                            "before public upload (set ALLOW_ARTCRAFT_UPLOAD=1 only after review)"
+                        )
+                    else:
+                        warnings.append(
+                            f"Scene {i}: ArtCraft-generated cut passed provenance checks; "
+                            "manual review is still recommended."
+                        )
+                    continue
                 clip_id = part.get("pixabay_id")
                 if clip_id is not None:
                     previous_scene = used_clip_ids.get(str(clip_id))

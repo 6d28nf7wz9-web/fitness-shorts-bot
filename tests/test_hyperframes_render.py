@@ -88,7 +88,8 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
             "hydration": "Water and electrolyte balance",
             "exercise": "Squat exercise and joint movement",
             "hormones": "Insulin hormone receptor signaling",
-            "supplements": "Supplement dose and creatine evidence",
+            "supplements": "Supplement dose and caffeine evidence",
+            "creatine": "Creatine supports ATP recycling during hard efforts",
         }
         panels = {}
         for expected, narration in cases.items():
@@ -102,6 +103,7 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn("heart-shape", panels["heart"])
         self.assertIn("electrolytes", panels["hydration"])
         self.assertIn("receptor", panels["hormones"])
+        self.assertIn("atp-node", panels["creatine"])
 
     def test_dynamic_scene_labels_are_escaped(self):
         _, panel = build_visual_panel({
@@ -121,14 +123,122 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn("@keyframes heartbeat", visual_css())
 
 
-if __name__ == "__main__":
-    unittest.main()
 
-
-    def test_science_scene_background_never_uses_unmatched_stock_clip(self):
+    def test_scene_background_uses_verified_broll_or_science_canvas(self):
         with open("hyperframes_render.py", encoding="utf-8") as f:
             renderer = f.read()
-        self.assertIn('class="scene-bg clip"', renderer)
+        self.assertIn("prepare_scene_footage(i, assets)", renderer)
+        self.assertIn('class="scene-footage {science_class}camera-', renderer)
+        self.assertIn('three_d_name = prepare_scene_3d(i, assets)', renderer)
+        self.assertIn('science_panel = ""', renderer)
+        self.assertIn('science-3d-footage', renderer)
+        self.assertIn('data-track-index="0"', renderer)
         self.assertIn('category, science_panel = build_visual_panel(scene, i)', renderer)
-        self.assertNotIn('src="assets/scene_{i}.mp4"', renderer)
         self.assertIn(".scene-bg", renderer)
+        self.assertIn(".scene-footage", renderer)
+
+    def test_kinetic_and_camera_motion_use_clip_local_scene_clock(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        self.assertIn("scene_start=0.0", renderer)
+        self.assertIn(".motion-scene{animation-delay:0s!important}", renderer)
+        self.assertIn('camera-{motion["camera"]}', renderer)
+        self.assertIn('style="--scene-start:{start}s"', renderer)
+        self.assertIn(".scene-footage.camera-push", renderer)
+        self.assertIn("--scene-start,0s", renderer)
+
+    def test_scene_footage_requires_verified_stock_metadata(self):
+        from hyperframes_render import prepare_scene_footage
+        import json, os, tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "output").mkdir()
+            assets = root / "assets"
+            assets.mkdir()
+            clip = root / "output" / "scene.mp4"
+            clip.write_bytes(b"x" * 12000)
+            metadata = [{"scene": 1, "source": "stock", "file": str(clip),
+                         "clips": [{"source": "stock", "pixabay_id": 123}]}]
+            (root / "output" / "clips_info.json").write_text(json.dumps(metadata), encoding="utf-8")
+            old = os.getcwd()
+            try:
+                os.chdir(root)
+                self.assertEqual(prepare_scene_footage(1, assets), "scene_1_broll.mp4")
+                self.assertTrue((assets / "scene_1_broll.mp4").is_file())
+            finally:
+                os.chdir(old)
+
+    def test_science_fallback_rejects_unverified_footage(self):
+        from hyperframes_render import prepare_scene_footage
+        import json, os, tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "output").mkdir()
+            assets = root / "assets"
+            assets.mkdir()
+            clip = root / "output" / "scene.mp4"
+            clip.write_bytes(b"x" * 12000)
+            metadata = [{"scene": 1, "source": "science_visual", "file": str(clip), "clips": []}]
+            (root / "output" / "clips_info.json").write_text(json.dumps(metadata), encoding="utf-8")
+            old = os.getcwd()
+            try:
+                os.chdir(root)
+                self.assertIsNone(prepare_scene_footage(1, assets))
+            finally:
+                os.chdir(old)
+
+
+    def test_progressive_diagrams_animate_the_scientific_mechanism(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        self.assertIn("ff-fiber-draw", renderer)
+        self.assertIn("science-creatine .recycle-arrow", renderer)
+        self.assertIn("ff-phosphate-transfer", renderer)
+        self.assertIn("science-exercise .joint", renderer)
+        self.assertIn("science-supplements .capsules", renderer)
+        self.assertIn("science-hormones .signal-wave", renderer)
+        self.assertIn("science-nutrition .fuel-dots", renderer)
+    def test_explicit_muscle_anatomy_uses_dedicated_diagram(self):
+        scene = {
+            "visual_type": "muscle_anatomy",
+            "visual_title": "Muscle anatomy",
+            "narration": "Chest and shoulders contract during this movement.",
+        }
+        category, panel = build_visual_panel(scene, 2)
+        self.assertEqual(category, "anatomy")
+        self.assertIn('class="science-svg science-anatomy"', panel)
+        for term in ("anatomy-pec", "anatomy-delt", "anatomy-bicep",
+                     "anatomy-abs", "anatomy-oblique", "anatomy-quad",
+                     "PECTORAL", "DELTOID", "BICEPS", "QUADRICEPS"):
+            self.assertIn(term, panel)
+
+    def test_back_muscle_anatomy_selects_posterior_view(self):
+        category, panel = build_visual_panel({
+            "visual_type": "muscle_anatomy",
+            "visual_title": "Back muscles: lats and traps",
+        }, 3)
+        self.assertEqual(category, "anatomy")
+        for term in ("POSTERIOR VIEW", "anatomy-trap", "anatomy-lat",
+                     "anatomy-tricep", "anatomy-glute", "anatomy-ham",
+                     "TRAPEZIUS", "LATISSIMUS", "GLUTES", "HAMSTRINGS"):
+            self.assertIn(term, panel)
+
+    def test_anatomy_motion_css_is_scoped_to_anatomy_svg(self):
+        _, panel = build_visual_panel({
+            "visual_type": "muscle_anatomy", "visual_title": "Muscle anatomy"
+        })
+        self.assertIn(".science-anatomy .anatomy-pec", visual_css())
+        self.assertIn("anatomy-body", panel)
+        self.assertIn("ff-anatomy-breathe", visual_css())
+
+    def test_protein_synthesis_has_staged_visual_animation(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        self.assertIn(".science-protein .protein-source", renderer)
+        self.assertIn(".science-protein .amino-chain", renderer)
+        self.assertIn(".science-protein .protein-fiber", renderer)
+        self.assertIn("ff-fiber-breathe", renderer)
+if __name__ == "__main__":
+    unittest.main()

@@ -23,7 +23,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,{FONT},{BASE_SIZE},&H00FFFFFF,&H000000FF,&H00101828,&H90101828,-1,0,0,0,100,100,0,0,3,2,1,2,90,90,300,1
+Style: Cap,{FONT},{BASE_SIZE},&H00FFFFFF,&H000000FF,&H00101828,&H90101828,-1,0,0,0,100,100,0,0,3,2,1,2,90,90,450,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -87,23 +87,42 @@ def build_captions(script, audio):
     return "\n".join(lines) + "\n"
 
 
+def validate_preflight(scenes, audio, hyperframes_enabled=True, root="."):
+    """Validate required inputs for the selected renderer.
+
+    HyperFrames builds scene-specific motion graphics itself, so it must not
+    require legacy FFmpeg scene clip files. The legacy concat renderer does.
+    """
+    if not scenes or len(scenes) != len(audio):
+        raise SystemExit(
+            f"Preflight failed: {len(scenes)} script scenes but {len(audio)} audio files"
+        )
+
+    for i, item in enumerate(audio, 1):
+        voice = item.get("file", "")
+        voice_path = os.path.join(root, voice) if voice and not os.path.isabs(voice) else voice
+        if not voice_path or not os.path.isfile(voice_path) or os.path.getsize(voice_path) < 10000:
+            raise SystemExit(f"Preflight failed: missing or invalid audio file: {voice}")
+        if item.get("scene") != i or float(item.get("seconds", 0)) <= 0:
+            raise SystemExit(f"Preflight failed: invalid audio metadata for scene {i}")
+
+        if not hyperframes_enabled:
+            clip = os.path.join(root, "output", "clips", f"scene_{i}.mp4")
+            if not os.path.isfile(clip) or os.path.getsize(clip) < 10000:
+                raise SystemExit(f"Preflight failed: missing or invalid file: {clip}")
+
+    mode = "audio assets (HyperFrames renders visuals)" if hyperframes_enabled else "legacy scene clips and audio"
+    print(f"Preflight passed: {len(scenes)} scenes, verified {mode}.")
+
+
 def main():
     with open("output/script.json", encoding="utf-8") as f:
         script = json.load(f)
     with open("output/audio_info.json", encoding="utf-8") as f:
         audio = json.load(f)
     scenes = script.get("scenes", [])
-    if not scenes or len(scenes) != len(audio):
-        raise SystemExit(f"Preflight failed: {len(scenes)} script scenes but {len(audio)} audio files")
-    for i, item in enumerate(audio, 1):
-        clip = f"output/clips/scene_{i}.mp4"
-        voice = item.get("file", "")
-        for path in (clip, voice):
-            if not path or not os.path.isfile(path) or os.path.getsize(path) < 10000:
-                raise SystemExit(f"Preflight failed: missing or invalid file: {path}")
-        if item.get("scene") != i or item.get("seconds", 0) <= 0:
-            raise SystemExit(f"Preflight failed: invalid audio metadata for scene {i}")
-    print(f"Preflight passed: {len(scenes)} scenes, all clips and audio files verified.")
+    hyperframes_enabled = os.getenv("HYPERFRAMES_RENDER", "1").lower() not in ("0", "false", "no", "off")
+    validate_preflight(scenes, audio, hyperframes_enabled=hyperframes_enabled)
 
     n = len(audio)
     secs = [float(a["seconds"]) for a in audio]
@@ -141,6 +160,57 @@ def main():
         cmd += ["-i", item["file"]]
     cmd += ["-stream_loop", "-1", "-i", music]
 
+    # Sparse, narration-aligned tactile cues; never compete with the voice.
+    cue_path = "output/hyperframes/sound_cues.json"
+    sfx_path = "output/motion_sfx.wav"
+    sfx_ready = False
+    if visual and os.path.isfile(cue_path):
+        try:
+            with open(cue_path, encoding="utf-8") as f:
+                cues = json.load(f)
+        except (OSError, ValueError):
+            cues = []
+        cues = [x for x in cues if 0 <= float(x.get("time", -1)) < total]
+        if cues:
+            sfx_cmd = ["ffmpeg", "-y", "-loglevel", "error"]
+            sfx_filters, sfx_labels = [], []
+            for idx, cue in enumerate(cues):
+                kind = str(cue.get("kind", "soft_tick"))
+                # Distinct, restrained pitches identify scene transitions and
+                # topic reveals without competing with the spoken narration.
+                sound_palette = {
+                    "scene_whoosh": (360, .16, .035),
+                    "science_muscle": (110, .18, .022),
+                    "science_protein": (880, .13, .028),
+                    "science_tracking": (660, .11, .026),
+                    "science_nutrition": (740, .13, .024),
+                    "science_heart": (92, .20, .022),
+                    "science_fat_loss": (520, .12, .024),
+                    "science_hydration": (1040, .14, .022),
+                    "science_exercise": (440, .12, .026),
+                    "science_hormones": (784, .15, .022),
+                    "science_supplements": (590, .12, .022),
+                    "science_creatine": (980, .13, .024),
+                    "science_general": (520, .12, .020),
+                    "soft_tick": (1320, .055, .038),
+                }
+                freq, dur, gain = sound_palette.get(kind, sound_palette["soft_tick"])
+                sfx_cmd += ["-f", "lavfi", "-i", f"sine=frequency={freq}:duration={dur}:sample_rate=44100"]
+                delay = max(0, int(float(cue["time"]) * 1000))
+                fade_in = min(.008, dur / 4)
+                fade_out = max(fade_in, dur - min(.025, dur / 3))
+                sfx_filters.append(
+                    f"[{idx}:a]volume={gain},afade=t=in:d={fade_in:.3f},"
+                    f"afade=t=out:st={fade_out:.3f}:d={dur-fade_out:.3f},"
+                    f"adelay={delay}|{delay}[s{idx}]"
+                )
+                sfx_labels.append(f"[s{idx}]")
+            sfx_filters.append("".join(sfx_labels) + f"amix=inputs={len(cues)}:duration=longest:normalize=0,apad,atrim=0:{total}[sfx]")
+            sfx_cmd += ["-filter_complex", ";".join(sfx_filters), "-map", "[sfx]", "-c:a", "pcm_s16le", sfx_path]
+            subprocess.run(sfx_cmd, check=True)
+            cmd += ["-i", sfx_path]
+            sfx_ready = True
+
     parts = []
     if visual:
         parts.append(f"[0:v]ass={ASS_FILE}[v]")
@@ -156,7 +226,12 @@ def main():
     parts.append("".join(f"[a{i}]" for i in range(n)) + f"concat=n={n}:v=0:a=1[voice]")
     fade_start = max(total - 1.2, 0)
     parts.append(f"[{music_index}:a]atrim=0:{total},asetpts=PTS-STARTPTS,aresample=44100,aformat=channel_layouts=stereo,volume={MUSIC_VOLUME},afade=t=in:d=0.5,afade=t=out:st={fade_start}:d=1.2[mus]")
-    parts.append("[voice][mus]amix=inputs=2:duration=first:dropout_transition=0,volume=2,alimiter=limit=0.95[aout]")
+    if sfx_ready:
+        sfx_index = music_index + 1
+        parts.append(f"[{sfx_index}:a]volume=0.7[sfx]")
+        parts.append("[voice][mus][sfx]amix=inputs=3:duration=first:dropout_transition=0,volume=2,alimiter=limit=0.95[aout]")
+    else:
+        parts.append("[voice][mus]amix=inputs=2:duration=first:dropout_transition=0,volume=2,alimiter=limit=0.95[aout]")
     cmd += ["-filter_complex", ";".join(parts), "-map", "[v]", "-map", "[aout]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", str(total), FINAL]
     print("Final mux: HyperFrames visuals + scene-timed voice + safe word captions + music")
     subprocess.run(cmd, check=True)
@@ -166,4 +241,5 @@ def main():
         print("Warning: longer than 58 seconds. Shorts must be under 60.")
 
 
-main()
+if __name__ == "__main__":
+    main()

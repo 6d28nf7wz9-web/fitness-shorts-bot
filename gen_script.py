@@ -639,9 +639,10 @@ End with a short phrase that naturally echoes the opening idea.
 STRICT SCRIPT RULES:
 
 - Create 4 to 5 scenes. Every scene is exactly ONE spoken sentence and its own visual slide.\n- Each sentence must trigger a distinct slide/visual state; never leave one static diagram for multiple sentences.\n- Add visual_title (2-5 words), visual_subtitle (3-6 words), visual_type, and visual_instruction to every scene.
-- visual_type must be one of: digestion_fiber, muscle_anatomy, exercise_biomechanics, protein_synthesis, energy_metabolism, hydration, recovery_sleep, food_nutrition, process.
+- visual_type must be one of: digestion_fiber, muscle_anatomy, exercise_biomechanics, progressive_overload, protein_synthesis, supplement_evidence, energy_metabolism, hydration, recovery_sleep, food_nutrition, process.
 - visual_instruction must describe the actual subject anatomy/process, what moves, where it moves, and the key visual labels; do not describe a generic title card.
-- Match the illustration to the exact spoken sentence. If explaining dietary fiber, show food fiber travelling through the digestive tract and its relevant effect; if explaining an exercise, show the body position, joints, and muscles involved; if explaining a muscle, show that muscle anatomically; if explaining metabolism, show the actual energy pathway.
+- Match the illustration to the exact spoken sentence and use the matching visual_type: protein_synthesis for protein/amino-acid-to-muscle explanations; progressive_overload for load/reps tracking; supplement_evidence for supplement comparisons; exercise_biomechanics only when the spoken point is an actual movement or joint technique. Do not use a movement diagram for a protein or progressive-overload scene.
+- Keep each scene headline and subtitle about the SAME single idea; never mix protein and supplement claims in one slide unless the narration explicitly compares them.
 - Total narration: aim for 50-55 spoken words (hard limit 45-68),
   designed for roughly 18-27 seconds at a natural speaking pace.
 - Count spoken words before returning JSON; stay comfortably inside the limit.
@@ -653,6 +654,10 @@ STRICT SCRIPT RULES:
 - Deliver a real answer.
 - No exaggerated claims, fake urgency, unsupported statistics,
   or empty motivational lines.
+- For progressive overload, NEVER prescribe a universal fixed jump such as
+  adding 2 kg every week or promise strength will double weekly. Explain that
+  load/reps increase gradually only when the viewer completes target reps with
+  controlled technique; increments depend on the lift and individual performance.
 - Use numbers only when reliable and useful.
 - Never invent studies or statistics.
 - No long intro, greeting, recap, generic like-and-subscribe,
@@ -772,25 +777,46 @@ def validate_packaging(title, topic, description):
 
 
 def ensure_final_cta(data):
-    """Deterministically repair a missing final-scene question/follow CTA."""
+    """Normalize the final narration to a clear question followed by a branded CTA."""
     scenes = data.get("scenes")
     if not isinstance(scenes, list) or not scenes or not isinstance(scenes[-1], dict):
         return data
     final = str(scenes[-1].get("narration", "")).strip()
-    lower = final.lower()
-    missing_question = "?" not in final
-    missing_follow = not any(word in lower for word in ("follow", "next episode", "next part"))
-    if missing_question or missing_follow:
-        addition = "What would you try? Follow FitFuel for more."
-        if missing_question and missing_follow:
-            final = f"{final} {addition}".strip()
-        elif missing_question:
-            final = f"{final} What would you try?".strip()
-        else:
-            final = f"{final} Follow FitFuel for more.".strip()
-    scenes[-1]["narration"] = final
+    # Remove an existing trailing follow invitation so captions never end in a
+    # clipped fragment such as "MORE? FOLLOW."
+    final = re.sub(
+        r"\s*(?:want\s+more\??\s*)?follow(?:\s+fitfuel)?(?:\s+for\s+more)?[.!?]*\s*$",
+        "",
+        final,
+        flags=re.IGNORECASE,
+    ).strip()
+    if not final.endswith("?"):
+        final = final.rstrip(" .!;:") + " — what would you try?"
+    scenes[-1]["narration"] = f"{final} Follow FitFuel for more."
     return data
 
+
+def validate_scientific_claims(data):
+    """Reject universal weekly load jumps and implausible strength promises."""
+    scenes = data.get("scenes", []) if isinstance(data, dict) else []
+    text = " ".join(
+        str(scene.get(key, ""))
+        for scene in scenes if isinstance(scene, dict)
+        for key in ("narration", "visual_title", "visual_subtitle", "visual_instruction")
+    ).lower()
+    fixed_jump = re.compile(
+        r"\b(?:add|increase|raise)\s+(?:(?:the\s+)?(?:weight|load)\s+by\s+)?"
+        r"\d+(?:\.\d+)?\s*(?:kg|kgs|lb|lbs|pounds?)\s+(?:every|each|per)\s+week\b"
+    )
+    weekly_doubling = re.compile(
+        r"\b(?:double|twice)\s+(?:your\s+)?(?:strength|lifting\s+strength|muscle)\s+(?:every|each|per)\s+week\b"
+    )
+    if fixed_jump.search(text):
+        return ("unsafe universal progression claim: never prescribe a fixed kg/lb increase every week; "
+                "progress only when target reps and technique are consistently solid")
+    if weekly_doubling.search(text):
+        return "unsupported strength-doubling promise: remove guaranteed weekly strength claims"
+    return None
 
 def validate(data):
     required = (
@@ -835,6 +861,22 @@ def validate(data):
         if not narration:
             return "empty narration"
 
+        visual_title = str(scene.get("visual_title", "")).strip()
+        visual_subtitle = str(scene.get("visual_subtitle", "")).strip()
+        visual_type = str(scene.get("visual_type", "")).strip()
+        visual_instruction = str(scene.get("visual_instruction", "")).strip()
+        supported_visual_types = {
+            "digestion_fiber", "muscle_anatomy", "exercise_biomechanics",
+            "progressive_overload", "protein_synthesis", "supplement_evidence",
+            "energy_metabolism", "hydration", "recovery_sleep",
+            "food_nutrition", "process",
+        }
+        if not visual_title or not visual_subtitle or not visual_instruction:
+            return "every scene needs a specific visual title, subtitle, and instruction"
+        if visual_type not in supported_visual_types:
+            return f"unsupported or missing visual_type: {visual_type}"
+        if "protein" in visual_title.lower() and "supplement" in visual_subtitle.lower():
+            return "visual title and subtitle mix protein and supplement topics; keep one scene focused"
         word_counts.append(len(narration.split()))
 
         keywords = [
@@ -894,6 +936,10 @@ def validate(data):
         return "hook starts with a generic greeting/setup; lead with the viewer problem or payoff"
     if hook.endswith("?") and len(hook.split()) < 5:
         return "hook question is too short to establish a specific curiosity"
+
+    science_problem = validate_scientific_claims(data)
+    if science_problem:
+        return science_problem
 
     packaging_problem = validate_packaging(data["title"], data["topic"], data["description"])
     if packaging_problem:
@@ -1157,10 +1203,51 @@ def generate_script():
             print(f"All providers exhausted this attempt; retrying once in {delay}s", flush=True)
             time.sleep(delay)
 
-    raise RuntimeError(
-        f"No provider produced a valid FitFuel script after {max_attempts} attempts. "
-        f"Last error: {last_problem[:500]}"
-    )
+    # Never lose a scheduled preview because free-tier model APIs are overloaded
+    # or return malformed scene counts. The deterministic fallback still passes
+    # the same validator and keeps publishing disabled in preview mode.
+    fallback = ensure_final_cta(build_emergency_script(series, episode_number, episode_topic, research))
+    fallback = repair_keywords(fallback)
+    fallback_problem = validate(fallback)
+    if fallback_problem:
+        raise RuntimeError(
+            f"AI providers failed ({last_problem[:300]}) and fallback failed validation: {fallback_problem}"
+        )
+    print("All AI providers unavailable/invalid; using validated deterministic fallback.", flush=True)
+    return fallback
+
+
+
+def build_emergency_script(series, episode_number, episode_topic, research):
+    """Deterministic, evidence-aware last resort when all free AI APIs fail."""
+    topic = str(episode_topic or "progressive overload").strip()
+    topic_lower = topic.lower()
+    if "supplement" in topic_lower or "overload" in topic_lower:
+        title = "Can Supplements Replace Progressive Overload?"
+        scenes = [
+            {"narration":"Supplements cannot replace a missing training stimulus.","visual_title":"SUPPLEMENTS ARE NOT THE STIMULUS","visual_subtitle":"Support is not the same as adaptation","visual_type":"supplement_evidence","visual_instruction":"Show supplement support beside a separate training stimulus; clearly distinguish the two.","keyword":"sports supplements | resistance training"},
+            {"narration":"Protein and creatine can support training, but they do not progressively challenge your muscles.","visual_title":"SUPPORT THE WORK","visual_subtitle":"Protein • Creatine • Consistent training","visual_type":"supplement_evidence","visual_instruction":"Animate protein and creatine support icons feeding into a training session, not replacing it.","keyword":"protein nutrition | creatine supplement"},
+            {"narration":"Muscles adapt when resistance, repetitions, or control gradually become more challenging.","visual_title":"THE ADAPTATION SIGNAL","visual_subtitle":"A measurable training challenge","visual_type":"progressive_overload","visual_instruction":"Show a progression timeline with reps, load, and control as separate measurable levers.","keyword":"progressive overload | muscle adaptation"},
+            {"narration":"Track your lifts, keep technique consistent, and progress only when your target reps feel solid.","visual_title":"MAKE PROGRESS MEASURABLE","visual_subtitle":"Log it • Repeat it • Progress safely","visual_type":"exercise_biomechanics","visual_instruction":"Show a workout log beside a clean controlled lift, emphasizing repeatable technique.","keyword":"strength training | exercise technique"},
+            {"narration":"What will you improve in your next session? Follow FitFuel for more.","visual_title":"YOUR NEXT SESSION","visual_subtitle":"Choose one clear progression target","visual_type":"process","visual_instruction":"Animate one selected training metric moving forward on a simple progress tracker.","keyword":"gym workout | strength training"}
+        ]
+    else:
+        title = (topic[:48].strip().rstrip(" ?.!") + ": What Actually Works?")[:60]
+        scenes = [
+            {"narration":"Stop guessing; this one detail changes your results.","visual_title":"THE DETAIL THAT MATTERS","visual_subtitle":"A practical evidence-based breakdown","visual_type":"process","visual_instruction":"Open with one bold claim and a clear visual question.","keyword":"fitness education | gym workout"},
+            {"narration":"Start with a consistent routine and measure what you actually do each week.","visual_title":"BUILD A BASELINE","visual_subtitle":"Consistency before complexity","visual_type":"process","visual_instruction":"Show a weekly habit tracker filling in steadily.","keyword":"fitness routine | training plan"},
+            {"narration":"Use sound technique, manageable effort, and enough recovery to repeat quality sessions.","visual_title":"QUALITY REPEATS","visual_subtitle":"Technique • Effort • Recovery","visual_type":"exercise_biomechanics","visual_instruction":"Show controlled exercise repetitions with technique markers.","keyword":"exercise technique | strength training"},
+            {"narration":"Change one variable at a time, then review how your performance responds.","visual_title":"TRACK ONE CHANGE","visual_subtitle":"Measure before you adjust","visual_type":"progressive_overload","visual_instruction":"Animate one metric changing on a simple progress chart.","keyword":"workout tracking | training progress"},
+            {"narration":"Which small change will you test this week? Follow FitFuel for more.","visual_title":"TEST IT THIS WEEK","visual_subtitle":"One change. Better feedback.","visual_type":"process","visual_instruction":"Finish on a clear one-week action card.","keyword":"fitness tips | gym workout"}
+        ]
+    return {
+        "series": series, "sources": [str(p.get("pmid")) for p in research[:3] if p.get("pmid")],
+        "topic": topic, "title": title,
+        "description": f"A practical, evidence-aware guide to {topic}. Learn what supports progress and what to measure.",
+        "hashtags": ["Fitness", "StrengthTraining", "FitFuel", "Science"],
+        "scenes": scenes, "episode_number": episode_number, "episode_topic": topic,
+        "ai_provider": "Built-in safe fallback", "ai_model": "deterministic-template"
+    }
 
 
 def finalize(data):

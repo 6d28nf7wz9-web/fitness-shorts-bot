@@ -1,6 +1,6 @@
 """Tests for FitFuel upload title and description packaging checks."""
 import unittest
-from gen_script import validate_packaging, ensure_final_cta
+from gen_script import validate_packaging, ensure_final_cta, validate_scientific_claims
 
 
 class PackagingValidationTests(unittest.TestCase):
@@ -41,5 +41,16 @@ class PackagingValidationTests(unittest.TestCase):
         ))
 
 
+    def test_rejects_universal_fixed_weekly_weight_jump(self):
+        data = {"scenes": [{"narration": "Increase the weight by 2 kg every week."}]}
+        self.assertIn("universal progression", validate_scientific_claims(data))
+
+    def test_rejects_weekly_strength_doubling_claim(self):
+        data = {"scenes": [{"narration": "You can double your strength every week."}]}
+        self.assertIn("strength-doubling", validate_scientific_claims(data))
+
+    def test_accepts_performance_based_progression(self):
+        data = {"scenes": [{"narration": "Add a small amount when all target reps feel controlled."}]}
+        self.assertIsNone(validate_scientific_claims(data))
 if __name__ == "__main__":
     unittest.main()
