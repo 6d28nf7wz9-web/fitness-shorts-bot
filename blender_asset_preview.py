@@ -74,6 +74,6 @@ def main():
  Path("assets_3d/catalog.json").write_text(json.dumps(catalog,indent=2)+"\n",encoding="utf-8")
  scenes=[{"narration":"Stylized muscle fibers contract under resistance training.","visual_title":"Muscle Fiber Model"},{"narration":"A reusable dumbbell is an exercise prop.","visual_title":"Reusable Dumbbell"}]
  manifest=build_render_manifest(scenes,catalog=catalog)
- (OUT/"scene_asset_plan.json").write_text(json.dumps(manifest,indent=2)+"\\n",encoding="utf-8")
+ (OUT/"scene_asset_plan.json").write_text(json.dumps(manifest,indent=2)+"\n",encoding="utf-8")
  print("3D preview rendered:",OUT/"preview.mp4")
 if __name__=="__main__":main()
