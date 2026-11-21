@@ -2,6 +2,7 @@
 Run: blender -b --python blender_asset_preview.py
 """
 import bpy, json, math, os
+from asset_pipeline import build_render_manifest
 from pathlib import Path
 from mathutils import Vector
 OUT=Path(os.getenv("FITFUEL_3D_OUT","output/3d_preview")); ASSET_DIR=Path("assets_3d/generated")
@@ -18,6 +19,8 @@ def label(body,loc,size,m):
  bpy.ops.object.text_add(location=loc,rotation=(math.radians(90),0,0));o=bpy.context.object;o.name="Label_"+body.replace(" ","_");o.data.body=body;o.data.size=size;o.data.extrude=.002;o.data.materials.append(m);return o
 def point(cam,target):cam.rotation_euler=(Vector(target)-cam.location).to_track_quat("-Z","Y").to_euler()
 def export(objects,path):
+ try: bpy.ops.preferences.addon_enable(module="io_scene_gltf2")
+ except Exception: pass
  bpy.ops.object.select_all(action="DESELECT")
  for o in objects:o.select_set(True)
  bpy.context.view_layer.objects.active=objects[0];bpy.ops.export_scene.gltf(filepath=str(path),export_format="GLB",use_selection=True)
@@ -54,7 +57,9 @@ def main():
   cam.location=(9.5*math.sin(a),-8.8*math.cos(a),3.1+.25*math.sin(a*2));point(cam,(0,.3,1.25));cam.keyframe_insert(data_path="location",frame=f);cam.keyframe_insert(data_path="rotation_euler",frame=f)
  for typ,loc,power,size in (("AREA",(-3.5,-4.5,7),1250,6),("AREA",(4,2,5),950,5),("AREA",(0,-1,2.8),320,4)):
   bpy.ops.object.light_add(type=typ,location=loc);l=bpy.context.object;l.data.energy=power;l.data.shape="DISK";l.data.size=size
- scene=bpy.context.scene;scene.render.engine="BLENDER_EEVEE_NEXT";scene.eevee.taa_render_samples=24
+ scene=bpy.context.scene;try: scene.render.engine="BLENDER_EEVEE_NEXT"
+ except Exception: scene.render.engine="BLENDER_EEVEE"
+ if hasattr(scene,"eevee"): scene.eevee.taa_render_samples=24
  scene.render.resolution_x=W;scene.render.resolution_y=H;scene.render.resolution_percentage=100;scene.render.fps=FPS;scene.frame_start=1;scene.frame_end=FRAMES;scene.world.color=(.025,.035,.055)
  scene.view_settings.view_transform="Standard";scene.render.image_settings.file_format="FFMPEG";scene.render.ffmpeg.format="MPEG4";scene.render.ffmpeg.codec="H264";scene.render.ffmpeg.constant_rate_factor="MEDIUM";scene.render.ffmpeg.ffmpeg_preset="GOOD";scene.render.filepath=str(OUT/"preview.mp4")
  bpy.ops.wm.save_as_mainfile(filepath=str(OUT/"preview.blend"));bpy.ops.render.render(animation=True)
