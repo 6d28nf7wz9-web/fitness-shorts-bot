@@ -14,6 +14,7 @@ from pathlib import Path
 from visual_engine import build_visual_panel, visual_css
 from motion_director import motion_css, plan_scene_motion
 from production_motion_engine import kinetic_html, motion_engine_css, sound_cue_events
+from scene_intelligence import route_scene
 
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
@@ -267,9 +268,16 @@ def main():
         motion = plan_scene_motion(scene, i, dur, category, is_last=(i == len(scenes)))
         # Topic-specific 3D science replaces the SVG diagram. General-purpose
         # scenes prefer a verified stock shot, then fall back to a 3D process plate.
+        route = route_scene(scene)
         three_d_name = prepare_scene_3d(i, assets)
         stock_name = prepare_scene_footage(i, assets)
-        use_3d = bool(three_d_name and (category not in {"general", "exercise"} or not stock_name))
+        # Respect the same deterministic source decision used by clip selection:
+        # Blender for mechanisms; verified stock for observable actions. ArtCraft
+        # is only represented as footage after the stock fallback created it.
+        use_3d = bool(three_d_name and (
+            route["source"] == "blender" or
+            (route["source"] == "stock_then_artcraft" and not stock_name)
+        ))
         if use_3d:
             science_panel = ""
         footage_name = three_d_name if use_3d else stock_name or three_d_name
