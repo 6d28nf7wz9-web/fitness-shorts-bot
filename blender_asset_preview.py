@@ -7,7 +7,7 @@ from asset_pipeline import build_render_manifest
 from pathlib import Path
 from mathutils import Vector
 OUT=Path(os.getenv("FITFUEL_3D_OUT","output/3d_preview")); ASSET_DIR=Path("assets_3d/generated")
-FPS=24; FRAMES=96; W,H=720,1280
+FPS=15; FRAMES=60; W,H=540,960
 def mat(name,color,metallic=0,roughness=.42):
  m=bpy.data.materials.new(name);m.diffuse_color=(*color,1);m.use_nodes=True
  b=m.node_tree.nodes.get("Principled BSDF");b.inputs["Base Color"].default_value=(*color,1);b.inputs["Metallic"].default_value=metallic;b.inputs["Roughness"].default_value=roughness;return m
@@ -63,7 +63,7 @@ def main():
   scene.render.engine="BLENDER_EEVEE_NEXT"
  except Exception:
   scene.render.engine="BLENDER_EEVEE"
- if hasattr(scene,"eevee"): scene.eevee.taa_render_samples=24
+ if hasattr(scene,"eevee"): scene.eevee.taa_render_samples=8
  scene.render.resolution_x=W;scene.render.resolution_y=H;scene.render.resolution_percentage=100;scene.render.fps=FPS;scene.frame_start=1;scene.frame_end=FRAMES;scene.world.color=(.025,.035,.055)
  scene.view_settings.view_transform="Standard";scene.render.image_settings.file_format="FFMPEG";scene.render.ffmpeg.format="MPEG4";scene.render.ffmpeg.codec="H264";scene.render.ffmpeg.constant_rate_factor="MEDIUM";scene.render.ffmpeg.ffmpeg_preset="GOOD";scene.render.filepath=str(OUT/"preview.mp4")
  bpy.ops.wm.save_as_mainfile(filepath=str(OUT/"preview.blend"));bpy.ops.render.render(animation=True)
