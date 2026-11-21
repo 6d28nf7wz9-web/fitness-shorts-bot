@@ -1,7 +1,8 @@
 """Build a procedural 3D asset pack and animated Blender preview.
 Run: blender -b --python blender_asset_preview.py
 """
-import bpy, json, math, os
+import bpy, json, math, os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from asset_pipeline import build_render_manifest
 from pathlib import Path
 from mathutils import Vector
