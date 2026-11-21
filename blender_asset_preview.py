@@ -1,7 +1,7 @@
 """1080x1920 anatomical 3D explainer preview with voice-timeline cues.
 Run: blender -b --python blender_asset_preview.py
 """
-import bpy, json, math, os, sys
+import bpy, json, math, os, sys, subprocess
 from pathlib import Path
 from mathutils import Vector
 
@@ -12,7 +12,14 @@ OUT=Path(os.getenv("FITFUEL_3D_OUT","output/3d_preview"))
 ASSET_DIR=Path("assets_3d/generated")
 W,H=1080,1920
 FPS=24
-DURATION=8.0
+AUDIO_INFO=Path("output/audio_info.json")
+try:
+    AUDIO_ITEMS=json.loads(AUDIO_INFO.read_text(encoding="utf-8"))
+    if not isinstance(AUDIO_ITEMS,list): AUDIO_ITEMS=[]
+except Exception:
+    AUDIO_ITEMS=[]
+VOICE_TOTAL=sum(max(0.0,float(x.get("seconds",0))) for x in AUDIO_ITEMS)
+DURATION=max(8.0,VOICE_TOTAL) if VOICE_TOTAL else 8.0
 FRAMES=int(FPS*DURATION)
 
 def mat(name,color,metallic=0,roughness=.42, subsurface=0):
@@ -70,11 +77,7 @@ def export(objects,path):
 def narration_timeline():
     """Map four visual beats to actual voice duration, with a safe demo fallback."""
     cues=[]
-    audio_path=Path("output/audio_info.json")
-    audio=[]
-    if audio_path.exists():
-        try: audio=json.loads(audio_path.read_text(encoding="utf-8"))
-        except Exception: audio=[]
+    audio=AUDIO_ITEMS
     total=0.0
     if isinstance(audio,list) and audio:
         for item in audio:
@@ -82,18 +85,14 @@ def narration_timeline():
             except Exception: pass
     if total <= 0: total=DURATION
     names=["ANATOMY OVERVIEW","TENDON & JOINT","FORCE DIRECTION","MUSCLE CONTRACTION"]
-    # When the source has 4+ scene clips, retain their relative narration timing.
-    if isinstance(audio,list) and len(audio)>=4:
-        raw=[]
-        for i,item in enumerate(audio[:4]):
-            try: seconds=max(.1,float(item.get("seconds",0)))
-            except Exception: seconds=total/4
-            raw.append(seconds)
-        denom=sum(raw) or total
+    if isinstance(audio,list) and audio:
         cursor=0.0
-        for name,seconds in zip(names,raw):
-            span=DURATION*seconds/denom
-            cues.append({"cue":name,"start":round(cursor,3),"end":round(cursor+span,3)})
+        for i,item in enumerate(audio):
+            span=max(.1,float(item.get("seconds",0)))
+            name=names[min(i,len(names)-1)] if len(audio)<=4 else f"NARRATION SCENE {i+1}"
+            cues.append({"cue":name,"scene":item.get("scene",i+1),
+                         "audio_file":item.get("file"),"start":round(cursor,3),
+                         "end":round(cursor+span,3)})
             cursor+=span
     else:
         span=DURATION/4
@@ -235,8 +234,10 @@ def main():
     scene.render.resolution_percentage=100
 
     cues=narration_timeline()
-    # Subtitle/cue timing metadata is exported for the main compositor to align with TTS.
-    (OUT/"narration_sync.json").write_text(json.dumps({"fps":FPS,"duration":DURATION,"cues":cues},indent=2)+"\n",encoding="utf-8")
+    # Export exact source audio timing; missing TTS is explicitly marked as silent.
+    sync={"fps":FPS,"duration":DURATION,"audio_attached":False,
+          "audio_files":[],"timing_source":"silent_demo_fallback","cues":cues}
+    (OUT/"narration_sync.json").write_text(json.dumps(sync,indent=2)+"\n",encoding="utf-8")
     # Render markers are aligned to voice segment boundaries.
     for cue in cues:
         frame=max(1,min(FRAMES,int(cue["start"]*FPS)+1))
@@ -255,6 +256,20 @@ def main():
     (OUT/"scene_asset_plan.json").write_text(json.dumps(manifest,indent=2)+"\n",encoding="utf-8")
     bpy.ops.wm.save_as_mainfile(filepath=str(OUT/"preview.blend"))
     bpy.ops.render.render(animation=True)
+    # Mux real TTS clips in their declared scene order when supplied by voice.py.
+    if AUDIO_ITEMS:
+        audio_paths=[Path(x.get("file","")) for x in AUDIO_ITEMS]
+        if any(not p.is_file() or p.stat().st_size<1000 for p in audio_paths):
+            raise RuntimeError("audio_info.json exists but one or more real narration MP3s are missing")
+        concat=OUT/"voice_concat.txt"
+        concat.write_text("".join("file '"+str(p.resolve())+"'\\n" for p in audio_paths),encoding="utf-8")
+        voice=OUT/"voice_track.m4a"
+        subprocess.run(["ffmpeg","-y","-v","error","-f","concat","-safe","0","-i",str(concat),"-c:a","aac","-b:a","192k",str(voice)],check=True)
+        silent=OUT/"preview_silent.mp4"
+        os.replace(OUT/"preview.mp4",silent)
+        subprocess.run(["ffmpeg","-y","-v","error","-i",str(silent),"-i",str(voice),"-map","0:v:0","-map","1:a:0","-c:v","copy","-c:a","aac","-t",str(DURATION),"-movflags","+faststart",str(OUT/"preview.mp4")],check=True)
+        sync.update({"audio_attached":True,"audio_files":[str(p) for p in audio_paths],"timing_source":"real_scene_tts"})
+        (OUT/"narration_sync.json").write_text(json.dumps(sync,indent=2)+"\n",encoding="utf-8")
     print("Rendered 1080x1920 anatomy preview:",OUT/"preview.mp4")
 
 if __name__=="__main__": main()
