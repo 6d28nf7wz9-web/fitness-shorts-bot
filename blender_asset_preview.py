@@ -136,9 +136,10 @@ def main():
     bpy.context.collection.objects.link(elbow_pivot)
     elbow_pivot.location=(0,0,1.35)
     for part in forearm:
+        world=part.matrix_world.copy()
         part.parent=elbow_pivot
-        part.matrix_parent_inverse=elbow_pivot.matrix_world.inverted()
-    for frame,angle in ((1,0.0),(FPS*2,-.18),(FPS*4,-.42),(FPS*6,-.2),(FRAMES,0.0)):
+        part.matrix_world=world
+    for frame,angle in ((1,0.0),(int(FRAMES*.25),-.38),(int(FRAMES*.5),-.92),(int(FRAMES*.75),-.55),(FRAMES,0.0)):
         elbow_pivot.rotation_euler[1]=angle
         elbow_pivot.keyframe_insert(data_path="rotation_euler",frame=frame)
     anatomy.extend(forearm)
@@ -153,44 +154,65 @@ def main():
     upper_t=tapered_tendon("Proximal tendon",(0,-.16,5.05),(0,-.12,5.73),.12,.2,tendon)
     lower_t=tapered_tendon("Distal tendon",(0,-.16,2.15),(0,-.12,1.55),.095,.18,tendon)
     anatomy += [upper_t,lower_t]
+    world=lower_t.matrix_world.copy()
+    lower_t.parent=elbow_pivot
+    lower_t.matrix_world=world
     # Joint cartilage rings.
     for z in (6.0,1.35):
         ring=smooth_sphere("Joint cartilage",(0,-.22,z),(.39,.19,.32),cyan); anatomy.append(ring)
 
     # Force vector arrow to the upper-right of the muscle; animated pulse/rotation.
-    shaft=cylinder_between("Force vector shaft",(.95,-.45,2.5),(1.5,-.45,4.25),.055,cyan)
-    tip=tapered_tendon("Force vector arrowhead",(1.5,-.45,4.25),(1.68,-.45,4.65),.17,.005,cyan)
+    shaft=cylinder_between("Force vector shaft",(.48,-.48,2.25),(.48,-.48,1.65),.052,cyan)
+    tip=tapered_tendon("Force vector arrowhead",(.48,-.48,1.65),(.48,-.48,1.35),.14,.004,cyan)
     force=[shaft,tip]
     for o in force:
-        o.keyframe_insert(data_path="location",frame=1)
-        o.location.z+=.18; o.keyframe_insert(data_path="location",frame=FRAMES//2)
-        o.location.z-=.18; o.keyframe_insert(data_path="location",frame=FRAMES)
+        world=o.matrix_world.copy()
+        o.parent=elbow_pivot
+        o.matrix_world=world
+        for frame,scale in ((1,.85),(FRAMES//2,1.12),(FRAMES,.85)):
+            o.scale=(scale,scale,scale)
+            o.keyframe_insert(data_path="scale",frame=frame)
 
-    # Animation: small contraction pulses and true 3D turn around the long axis.
+    # Muscle belly shortens and bulges independently; elbow pivot drives forearm.
+    for frame,zs,xs in ((1,1.0,1.0),(FRAMES//4,.92,1.07),(FRAMES//2,.86,1.13),(3*FRAMES//4,.93,1.06),(FRAMES,1.0,1.0)):
+        belly.scale=(xs,1.0,zs)
+        belly.keyframe_insert(data_path="scale",frame=frame)
     root=bpy.data.objects.new("Anatomy_Animation_Root",None); bpy.context.collection.objects.link(root)
-    for o in anatomy: o.parent=root
+    for o in anatomy:
+        world=o.matrix_world.copy()
+        o.parent=root
+        o.matrix_world=world
     root.rotation_mode="XYZ"
-    for frame,angle,stretch in ((1,-.16,1.0),(FPS*2,-.04,1.045),(FPS*4,.16,1.0),(FPS*6,.04,1.035),(FRAMES,-.16,1.0)):
-        root.rotation_euler=(0,angle,math.sin(frame/FRAMES*math.pi*2)*.08)
-        root.scale=(1,1,stretch); root.keyframe_insert(data_path="rotation_euler",frame=frame)
-        root.keyframe_insert(data_path="scale",frame=frame)
+    for frame,angle in ((1,-.035),(FRAMES//2,.035),(FRAMES,-.035)):
+        root.rotation_euler=(0,angle,0)
+        root.keyframe_insert(data_path="rotation_euler",frame=frame)
 
-    # Layout: title, diagram, callout rails and captions occupy separate safe zones.
-    # Keep the headline inside the portrait safe width (1080x1920).
+    # Compact portrait-safe labels; callouts reveal in their narration beat.
     label("MUSCLE FORCE",(0,-1.25,8.18),.27,white)
-    label("BICEPS  /  ANATOMY STUDY",(0,-1.25,7.68),.19,muted)
-    label("SHOULDER JOINT",(1.25,-.9,6.2),.19,white,"LEFT")
-    label("PROXIMAL TENDON",(1.25,-.9,5.45),.17,muted,"LEFT")
-    label("MUSCLE BELLY",(-1.55,-.9,3.65),.2,white,"RIGHT")
-    label("DISTAL TENDON",(1.15,-.9,2.05),.17,muted,"LEFT")
-    label("ELBOW JOINT",(1.1,-.9,1.1),.19,white,"LEFT")
-    label("FORCE / TENSION", (1.2,-.9,4.75),.17,cyan,"LEFT")
-    label("CONTRACT  •  TRANSFER FORCE  •  MOVE",(0,-1.25,-.05),.19,cyan)
-
-    # Leader lines connect labels to the correct structures.
-    curve_line("Shoulder callout",[(.25,-.78,6.0),(.92,-.78,6.0),(1.18,-.78,6.18)],.012,muted)
-    curve_line("Muscle callout",[(-.2,-.78,3.65),(-.9,-.78,3.65),(-1.42,-.78,3.65)],.012,muted)
-    curve_line("Elbow callout",[(.25,-.78,1.35),(.8,-.78,1.35),(1.02,-.78,1.15)],.012,muted)
+    label("BICEPS / ANATOMY STUDY",(0,-1.25,7.68),.16,muted)
+    cue_ranges=[(c["start"],c["end"]) for c in cues]
+    callouts=[
+      ("SHOULDER JOINT",(-2.12,-1.0,6.15),.135,"LEFT",0),
+      ("PROXIMAL TENDON",(2.12,-1.0,5.42),.125,"RIGHT",0),
+      ("MUSCLE BELLY",(-2.12,-1.0,3.72),.14,"LEFT",3),
+      ("DISTAL TENDON",(2.12,-1.0,2.0),.125,"RIGHT",1),
+      ("ELBOW JOINT",(-2.12,-1.0,1.22),.135,"LEFT",1),
+      ("FORCE / TENSION",(2.12,-1.0,4.35),.125,"RIGHT",2)]
+    for body,loc,size,align,idx in callouts:
+        obj=label(body,loc,size,cyan if "FORCE" in body else white,align)
+        if cues:
+            st,en=cue_ranges[min(idx,len(cue_ranges)-1)]
+            for frame,hidden in ((1,True),(max(1,int(st*FPS)+1),False),
+                                 (max(1,int(en*FPS)),False),(min(FRAMES,int(en*FPS)+1),True)):
+                obj.hide_render=hidden
+                obj.keyframe_insert(data_path="hide_render",frame=frame)
+            if obj.animation_data and obj.animation_data.action:
+                for fc in obj.animation_data.action.fcurves:
+                    for key in fc.keyframe_points: key.interpolation="CONSTANT"
+    label("CONTRACTION > TENSION > MOVEMENT",(0,-1.25,-.05),.13,cyan)
+    curve_line("Shoulder callout",[(.25,-.78,6.0),(.82,-.78,6.0),(1.08,-.78,6.15)],.01,muted)
+    curve_line("Muscle callout",[(-.2,-.78,3.65),(-.82,-.78,3.65),(-1.08,-.78,3.72)],.01,muted)
+    curve_line("Elbow callout",[(.25,-.78,1.35),(.82,-.78,1.35),(1.08,-.78,1.22)],.01,muted)
 
     # Camera: portrait orthographic framing with all content inside the safe area.
     bpy.ops.object.camera_add(location=(0,-15,4.05))
