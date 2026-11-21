@@ -25,6 +25,21 @@ jobs:
           sudo apt-get install -y blender ffmpeg python3-numpy libegl1 libgl1
       - name: Test asset catalog and safe routing
         run: python -m unittest discover -s tests -p "test_asset_pipeline.py" -v
+      - name: Generate free real narration for the anatomy preview
+        run: |
+          python -m pip install --disable-pip-version-check edge-tts
+          mkdir -p output
+          cat > output/script.json <<'JSON'
+          {
+            "scenes": [
+              {"narration": "The biceps is a muscle on the front of your upper arm. It crosses the shoulder and elbow and helps bend your elbow."},
+              {"narration": "At the elbow, the distal biceps tendon attaches to the radius bone. The tendon transfers the pull from the muscle to the forearm."},
+              {"narration": "When the biceps contracts, it creates tension through the tendon. That pulling force rotates the forearm around the elbow joint."},
+              {"narration": "As the muscle shortens and thickens, the forearm flexes. The movement is produced by muscle tension acting through the tendon."}
+            ]
+          }
+          JSON
+          python voice.py
       - name: Render animated anatomy scene
         run: PYTHONPATH=/usr/lib/python3/dist-packages LIBGL_ALWAYS_SOFTWARE=1 blender -b --python blender_asset_preview.py
       - name: Validate portrait preview and exports
