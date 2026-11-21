@@ -43,18 +43,18 @@ def main():
    b=o.modifiers.new("Rounded ends","BEVEL");b.width=.09;b.segments=4;o.modifiers.new("Weighted normals","WEIGHTED_NORMAL");fibers.append(o)
  root=bpy.data.objects.new("Muscle_Bundle_Animated",None);bpy.context.collection.objects.link(root)
  for o in fibers:o.parent=root
- root.location=(-1.15,0,0)
+ root.location=(-0.85,0,0)
  for f,s in ((1,1),(24,1),(48,1.08),(72,1),(96,1.04)):
   root.scale=(s,1,1+(s-1)*.5);root.keyframe_insert(data_path="scale",frame=f)
- bpy.ops.mesh.primitive_cylinder_add(vertices=48,radius=.18,depth=1.25,location=(1.3,0,.75),rotation=(0,math.radians(90),0))
+ bpy.ops.mesh.primitive_cylinder_add(vertices=48,radius=.18,depth=1.25,location=(.9,0,.75),rotation=(0,math.radians(90),0))
  grip=bpy.context.object;grip.name="Dumbbell_Grip";grip.data.materials.append(rubber);weights=[grip]
- for x in (.48,2.12):
+ for x in (.08,1.72):
   bpy.ops.mesh.primitive_cylinder_add(vertices=64,radius=.48,depth=.28,location=(x,0,.75),rotation=(0,math.radians(90),0))
   p=bpy.context.object;p.name="Dumbbell_Weight";p.data.materials.append(steel);b=p.modifiers.new("Plate bevel","BEVEL");b.width=.045;b.segments=4;p.modifiers.new("Weighted normals","WEIGHTED_NORMAL");weights.append(p)
- label("MUSCLE FIBER MODEL",(-2.4,1.1,3.25),.28,white);label("REUSABLE 3D PROP",(.55,1.1,2.3),.23,cyan)
+ label("MUSCLE FIBER MODEL",(-1.65,1.1,3.25),.25,white);label("REUSABLE 3D PROP",(.15,1.1,2.3),.21,cyan)
  export(fibers,ASSET_DIR/"muscle_fiber_bundle_preview.glb");export(weights,ASSET_DIR/"dumbbell_prop.glb")
- bpy.ops.object.camera_add(location=(0,-8.8,3.3));cam=bpy.context.object;cam.name="Preview_Camera";bpy.context.scene.camera=cam;cam.data.lens=48
- for f,a in ((1,-.45),(48,0),(96,.45)):
+ bpy.ops.object.camera_add(location=(0,-8.8,3.3));cam=bpy.context.object;cam.name="Preview_Camera";bpy.context.scene.camera=cam;cam.data.lens=28
+ for f,a in ((1,-.04),(30,0),(60,.04)):
   cam.location=(9.5*math.sin(a),-8.8*math.cos(a),3.1+.25*math.sin(a*2));point(cam,(0,.3,1.25));cam.keyframe_insert(data_path="location",frame=f);cam.keyframe_insert(data_path="rotation_euler",frame=f)
  for typ,loc,power,size in (("AREA",(-3.5,-4.5,7),1250,6),("AREA",(4,2,5),950,5),("AREA",(0,-1,2.8),320,4)):
   bpy.ops.object.light_add(type=typ,location=loc);l=bpy.context.object;l.data.energy=power;l.data.shape="DISK";l.data.size=size
