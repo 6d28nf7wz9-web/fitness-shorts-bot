@@ -5,6 +5,7 @@ import subprocess
 
 from wan_stock_assist import try_animate_stock
 from relevance import relevance as footage_relevance
+from artcraft_scene_provider import generate_fallback as generate_artcraft_fallback
 
 from clips import (
     CLIPS_DIR,
@@ -263,6 +264,7 @@ def main():
 
     used_ids = set()
     info = []
+    artcraft_state = {"generated": 0}
 
     for scene_index, scene in enumerate(scenes, 1):
         seconds = float(
@@ -314,16 +316,46 @@ def main():
                 sentence_context = cut_contexts[part_index]
                 cut_keywords = _cut_keywords(scene, sentence_context, keywords)
                 keyword = "|".join(cut_keywords)
-                query, hit, url, portrait = choose_clip(
-                    keyword, each, used_ids, context=sentence_context
+                part_file = os.path.join(
+                    CLIPS_DIR, f"s{scene_index}_{part_index}.mp4"
                 )
-                match_score = _require_exact_footage_match(hit, keyword, sentence_context)
+                try:
+                    query, hit, url, portrait = choose_clip(
+                        keyword, each, used_ids, context=sentence_context
+                    )
+                    match_score = _require_exact_footage_match(hit, keyword, sentence_context)
+                except RuntimeError as match_error:
+                    message = str(match_error)
+                    if not any(marker in message for marker in (
+                        "No specific footage match",
+                        "No unused scene-matched footage remains",
+                        "Selected B-roll failed exact semantic match",
+                    )):
+                        raise
+                    generated = generate_artcraft_fallback(
+                        scene, sentence_context, each,
+                        os.path.join(RAW_DIR, f"artcraft_s{scene_index}_{part_index}.mp4"),
+                        artcraft_state,
+                    )
+                    if not generated:
+                        raise
+                    process(generated, part_file, each, True)
+                    part_files.append(part_file)
+                    scene_clips.append({
+                        "source": "artcraft",
+                        "query": "ArtCraft generated scene-specific B-roll",
+                        "keyword": keyword,
+                        "sentence_context": sentence_context,
+                        "relevance_score": 2,
+                        "match_status": "prompted_generation",
+                        "seconds": round(each, 2),
+                    })
+                    print(f"  cut {part_index + 1}: ArtCraft generated vertical B-roll")
+                    continue
+
                 clip_id = hit.get("id")
                 raw_file = os.path.join(
                     RAW_DIR, f"s{scene_index}_{part_index}.mp4"
-                )
-                part_file = os.path.join(
-                    CLIPS_DIR, f"s{scene_index}_{part_index}.mp4"
                 )
 
                 try:
@@ -375,7 +407,7 @@ def main():
             _concat_parts(part_files, output_file, scene_index)
             info.append({
                 "scene": scene_index,
-                "source": "stock",
+                "source": "mixed" if any(item.get("source") == "artcraft" for item in scene_clips) else "stock",
                 "narration": narration,
                 "keywords": keywords,
                 "file": output_file,
