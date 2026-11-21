@@ -174,7 +174,7 @@ def main():
     scene=bpy.context.scene
     try: scene.render.engine="BLENDER_EEVEE_NEXT"
     except Exception: scene.render.engine="BLENDER_EEVEE"
-    scene.render.resolution_x=W; scene.render.resolution_y=H; scene.render.resolution_percentage=100
+    if hasattr(scene,"eevee"): scene.eevee.taa_render_samples=8\n    scene.render.resolution_x=W; scene.render.resolution_y=H; scene.render.resolution_percentage=100
     scene.render.fps=FPS; scene.frame_start=1; scene.frame_end=FRAMES
     scene.world.color=(.018,.028,.045); scene.view_settings.view_transform="Standard"
     scene.render.image_settings.file_format="FFMPEG"; scene.render.ffmpeg.format="MPEG4"
