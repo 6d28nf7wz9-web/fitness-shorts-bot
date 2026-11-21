@@ -1,0 +1,47 @@
+name: 3D Asset Preview
+on:
+  pull_request:
+    paths:
+      - "asset_pipeline.py"
+      - "blender_asset_preview.py"
+      - "asset_generation/**"
+      - "tests/test_asset_pipeline.py"
+      - ".github/workflows/3d-assets-preview.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-3d-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Blender and FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender ffmpeg
+      - name: Test asset catalog and safe routing
+        run: python -m unittest discover -s tests -p "test_asset_pipeline.py" -v
+      - name: Render 3D scene and reusable GLB assets
+        run: blender -b --python blender_asset_preview.py
+      - name: Validate preview and exported assets
+        run: |
+          test -s output/3d_preview/preview.mp4
+          test -s output/3d_preview/preview.blend
+          test -s assets_3d/generated/muscle_fiber_bundle_preview.glb
+          test -s assets_3d/generated/dumbbell_prop.glb
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/3d_preview/preview.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate -of default=noprint_wrappers=1 output/3d_preview/preview.mp4
+      - name: Upload preview and asset pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-3d-preview-and-assets
+          path: |
+            output/3d_preview/preview.mp4
+            output/3d_preview/preview.blend
+            assets_3d/catalog.json
+            assets_3d/generated/*.glb
+          retention-days: 14
