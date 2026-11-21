@@ -45,7 +45,7 @@ class ContinuousVisualMotionContractTests(unittest.TestCase):
         self.assertIn("presenter_gesture(", cues)
         self.assertIn("presenter_expression(", cues)
         self.assertIn("apply_expression_mouth_states", avatar)
-        self.assertIn("SHORT_AVATAR_FRAME = 220", avatar)
+        self.assertIn("SHORT_AVATAR_FRAME = 250", avatar)
         self.assertIn("pad={SHORT_AVATAR_FRAME}:{SHORT_AVATAR_FRAME}", avatar)
         self.assertIn("overlay=x={SHORT_AVATAR_X}", avatar)
         self.assertIn("overlay=x={SHORT_AVATAR_X}", avatar)
