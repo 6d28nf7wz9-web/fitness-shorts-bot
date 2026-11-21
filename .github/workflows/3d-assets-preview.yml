@@ -31,6 +31,7 @@ jobs:
         run: |
           test -s output/3d_preview/preview.mp4
           test -s output/3d_preview/preview.blend
+          test -s output/3d_preview/scene_asset_plan.json
           test -s assets_3d/generated/muscle_fiber_bundle_preview.glb
           test -s assets_3d/generated/dumbbell_prop.glb
           ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 output/3d_preview/preview.mp4
@@ -42,6 +43,7 @@ jobs:
           path: |
             output/3d_preview/preview.mp4
             output/3d_preview/preview.blend
+            output/3d_preview/scene_asset_plan.json
             assets_3d/catalog.json
             assets_3d/generated/*.glb
           retention-days: 14
