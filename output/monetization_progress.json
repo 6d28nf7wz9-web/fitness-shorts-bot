@@ -1,31 +1,31 @@
 {
-  "generated_at": "2026-11-20T15:28:46.733104+00:00",
-  "data_through": "2026-11-18",
+  "generated_at": "2026-11-21T15:20:49.898511+00:00",
+  "data_through": "2026-11-19",
   "channel": {
     "identity_verified": true,
     "channel_id": "UC9t30aJ_9gSxrNaBhFvRnEg",
     "channel_title": "Fit Fuel",
     "subscribers": 7,
-    "total_channel_views_lifetime": 11952,
+    "total_channel_views_lifetime": 12003,
     "owner_provided_baseline_subscribers": 60,
     "subscriber_count_difference_vs_owner_baseline": -53
   },
   "last_90_days": {
-    "uploaded_public_shorts_in_log": 42,
-    "shorts_video_views_proxy": 2468,
-    "shorts_engaged_views": 488,
-    "shorts_videos_with_analytics_rows": 31,
-    "shorts_upload_log_video_count": 42
+    "uploaded_public_shorts_in_log": 44,
+    "shorts_video_views_proxy": 2581,
+    "shorts_engaged_views": 504,
+    "shorts_videos_with_analytics_rows": 34,
+    "shorts_upload_log_video_count": 44
   },
   "last_365_days": {
-    "channel_estimated_watch_minutes_all_content": 1276,
-    "channel_estimated_watch_hours_all_content": 21.27
+    "channel_estimated_watch_minutes_all_content": 1291,
+    "channel_estimated_watch_hours_all_content": 21.52
   },
   "standard_ads_revenue_milestones": {
     "subscribers_target": 1000,
     "subscribers_progress_percent": 0.7,
     "shorts_valid_public_views_target_90d": 10000000,
-    "shorts_video_views_proxy_progress_percent": 0.02,
+    "shorts_video_views_proxy_progress_percent": 0.03,
     "public_watch_hours_target_12m": 4000,
     "public_watch_hours_progress_percent": null,
     "public_watch_hours_note": "Not calculated from estimatedMinutesWatched: this API metric includes content that may not qualify. Verify eligible public watch hours in YouTube Studio > Earn."
