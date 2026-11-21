@@ -57,7 +57,12 @@ def main():
   cam.location=(9.5*math.sin(a),-8.8*math.cos(a),3.1+.25*math.sin(a*2));point(cam,(0,.3,1.25));cam.keyframe_insert(data_path="location",frame=f);cam.keyframe_insert(data_path="rotation_euler",frame=f)
  for typ,loc,power,size in (("AREA",(-3.5,-4.5,7),1250,6),("AREA",(4,2,5),950,5),("AREA",(0,-1,2.8),320,4)):
   bpy.ops.object.light_add(type=typ,location=loc);l=bpy.context.object;l.data.energy=power;l.data.shape="DISK";l.data.size=size
- scene=bpy.context.scene;try: scene.render.engine="BLENDER_EEVEE_NEXT"
+ scene=bpy.context.scene
+ try:
+  scene.render.engine="BLENDER_EEVEE_NEXT"
+ except Exception:
+  scene.render.engine="BLENDER_EEVEE"
+ if hasattr(scene,"eevee"): scene.eevee.taa_render_samples=24
  except Exception: scene.render.engine="BLENDER_EEVEE"
  if hasattr(scene,"eevee"): scene.eevee.taa_render_samples=24
  scene.render.resolution_x=W;scene.render.resolution_y=H;scene.render.resolution_percentage=100;scene.render.fps=FPS;scene.frame_start=1;scene.frame_end=FRAMES;scene.world.color=(.025,.035,.055)
@@ -67,5 +72,8 @@ def main():
  {"asset_id":"muscle-fiber-bundle-preview","category":"scientific","file":"generated/muscle_fiber_bundle_preview.glb","source":"procedural-preview","license":"project-generated","review_status":"pending","scientific_accuracy_required":True,"notes":"Stylized teaching schematic; not validated anatomy."},
  {"asset_id":"dumbbell-prop","category":"prop","file":"generated/dumbbell_prop.glb","source":"procedural-preview","license":"project-generated","review_status":"pending","scientific_accuracy_required":False,"notes":"Generic exercise prop; pending visual review."}]}
  Path("assets_3d/catalog.json").write_text(json.dumps(catalog,indent=2)+"\n",encoding="utf-8")
+ scenes=[{"narration":"Stylized muscle fibers contract under resistance training.","visual_title":"Muscle Fiber Model"},{"narration":"A reusable dumbbell is an exercise prop.","visual_title":"Reusable Dumbbell"}]
+ manifest=build_render_manifest(scenes,catalog=catalog)
+ (OUT/"scene_asset_plan.json").write_text(json.dumps(manifest,indent=2)+"\\n",encoding="utf-8")
  print("3D preview rendered:",OUT/"preview.mp4")
 if __name__=="__main__":main()
