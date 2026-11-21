@@ -6,6 +6,7 @@ import subprocess
 from wan_stock_assist import try_animate_stock
 from relevance import relevance as footage_relevance
 from artcraft_scene_provider import generate_fallback as generate_artcraft_fallback
+from scene_intelligence import route_scene
 
 from clips import (
     CLIPS_DIR,
@@ -282,6 +283,7 @@ def main():
         ).strip()
 
         keywords = _ordered_keywords(scene)
+        route = route_scene(scene)
         output_file = os.path.join(
             CLIPS_DIR,
             f"scene_{scene_index}.mp4"
@@ -292,6 +294,26 @@ def main():
             f"({seconds:.2f}s)"
         )
         print(f"  narration: {narration}")
+        print(f"  visual route: {route['source']} ({route['reason']})")
+
+        # Mechanistic science is rendered by Blender downstream. Do not waste
+        # stock searches or invoke ArtCraft for a scene that needs a controlled
+        # scientific explanation.
+        if route["source"] == "blender":
+            _render_science_fallback(output_file, seconds)
+            info.append({
+                "scene": scene_index,
+                "source": "science_visual",
+                "route": route,
+                "narration": narration,
+                "keywords": keywords,
+                "file": output_file,
+                "seconds": seconds,
+                "clips": [],
+                "pixabay_ids": [],
+                "fallback_reason": "Routed to Blender scientific visual",
+            })
+            continue
 
         parts = max(
             MIN_PARTS,
