@@ -53,6 +53,10 @@ jobs:
           python -m unittest discover -s tests -p "test_clips_fast_targets.py" -v
           python -m unittest discover -s tests -p "test_continuous_visual_motion.py" -v
           python -m unittest discover -s tests -p "test_avatar_motion_cues.py" -v
+      - name: Test ArtCraft opt-in scene provider (mocked; no provider calls)
+        run: |
+          python -m pip install requests
+          python -m unittest discover -s tests -p "test_artcraft_scene_provider.py" -v
       - name: Test image-to-video adapters (mocked; no provider calls)
         run: |
           python -m pip install requests
