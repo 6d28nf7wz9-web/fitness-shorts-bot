@@ -1,6 +1,6 @@
 import json,tempfile,unittest
 from pathlib import Path
-from asset_pipeline import approved_assets,select_asset_for_scene,validate_asset_entry,write_catalog
+from asset_pipeline import approved_assets,build_render_manifest,select_asset_for_scene,validate_asset_entry,write_catalog
 class AssetPipelineTests(unittest.TestCase):
  def make_asset(self,root,name="dumbbell.glb"):
   p=Path(root)/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(b"glTF"+b"\0"*256);return p
@@ -21,6 +21,12 @@ class AssetPipelineTests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as d:
    self.make_asset(d,"muscle.glb");e={"asset_id":"muscle-demo","category":"scientific","file":"muscle.glb","source":"procedural-preview","license":"project-generated","review_status":"approved","scientific_accuracy_required":True}
    with self.assertRaises(ValueError):validate_asset_entry(e,root=d)
+ def test_render_manifest_connects_scene_intelligence_and_fallback(self):
+  manifest=build_render_manifest([{"narration":"Muscle fibers contract."},{"narration":"A coach demonstrates a squat."}],{"catalog_version":1,"assets":[]})
+  self.assertEqual(manifest["scene_count"],2)
+  self.assertEqual(manifest["scenes"][0]["scene_plan"]["intent"],"scientific_anatomy")
+  self.assertIsNone(manifest["scenes"][0]["asset_selection"]["asset"])
+  self.assertEqual(manifest["scenes"][1]["scene_plan"]["intent"],"exercise_demo")
  def test_catalog_round_trip(self):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/"catalog.json";data=write_catalog([],p);self.assertEqual(json.loads(p.read_text()),data)
