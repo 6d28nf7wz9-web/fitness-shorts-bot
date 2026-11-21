@@ -22,11 +22,11 @@ jobs:
       - name: Install Blender and FFmpeg
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender ffmpeg python3-numpy
+          sudo apt-get install -y blender ffmpeg python3-numpy libegl1 libgl1
       - name: Test asset catalog and safe routing
         run: python -m unittest discover -s tests -p "test_asset_pipeline.py" -v
       - name: Render 3D scene and reusable GLB assets
-        run: PYTHONPATH=/usr/lib/python3/dist-packages blender -b --python blender_asset_preview.py
+        run: PYTHONPATH=/usr/lib/python3/dist-packages LIBGL_ALWAYS_SOFTWARE=1 blender -b --python blender_asset_preview.py
       - name: Validate preview and exported assets
         run: |
           test -s output/3d_preview/preview.mp4
