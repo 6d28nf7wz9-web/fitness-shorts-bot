@@ -16,9 +16,9 @@ OUT_FPS = 30
 AVATAR_DIR = os.getenv("AVATAR_DIR", "avatar")
 CACHE_DIR = "output/avatar_cache"
 BOB = 2  # subtle movement stays inside the fixed presenter frame
-SHORT_AVATAR_FRAME = 220
-SHORT_AVATAR_X = 28
-SHORT_AVATAR_Y = 188
+SHORT_AVATAR_FRAME = 250
+SHORT_AVATAR_X = 34
+SHORT_AVATAR_Y = 110
 
 # h = presenter height; x and bottom keep it outside the Shorts title/caption safe zones.
 # The Shorts presenter sits in the upper-left corner, below the brand line and above titles.
