@@ -22,7 +22,7 @@ jobs:
       - name: Install Blender and FFmpeg
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender ffmpeg
+          sudo apt-get install -y blender ffmpeg python3-numpy
       - name: Test asset catalog and safe routing
         run: python -m unittest discover -s tests -p "test_asset_pipeline.py" -v
       - name: Render 3D scene and reusable GLB assets
