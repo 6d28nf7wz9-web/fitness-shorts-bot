@@ -125,8 +125,23 @@ def main():
     anatomy=[]
     shoulder=smooth_sphere("Shoulder joint", (0,0,6.0),(.68,.43,.62),cartilage); anatomy.append(shoulder)
     elbow=smooth_sphere("Elbow joint", (0,0,1.35),(.58,.4,.55),cartilage); anatomy.append(elbow)
-    # Bone shafts remain behind the muscle belly.
+    # Bone shafts remain behind the muscle belly; the forearm is a separate
+    # articulated assembly so elbow flexion is visible rather than implied.
     humerus=cylinder_between("Humerus bone",(0,.13,5.75),(0,.13,1.65),.19,bone); anatomy.append(humerus)
+    radius=cylinder_between("Radius bone",(0,.18,1.12),(.04,.18,.12),.105,bone)
+    ulna=cylinder_between("Ulna bone",(.22,.22,1.12),(.22,.22,.12),.115,bone)
+    wrist=smooth_sphere("Wrist joint",(.12,.18,.08),(.25,.23,.22),cartilage)
+    forearm=[radius,ulna,wrist]
+    elbow_pivot=bpy.data.objects.new("Elbow_Flexion_Pivot",None)
+    bpy.context.collection.objects.link(elbow_pivot)
+    elbow_pivot.location=(0,0,1.35)
+    for part in forearm:
+        part.parent=elbow_pivot
+        part.matrix_parent_inverse=elbow_pivot.matrix_world.inverted()
+    for frame,angle in ((1,0.0),(FPS*2,-.18),(FPS*4,-.42),(FPS*6,-.2),(FRAMES,0.0)):
+        elbow_pivot.rotation_euler[1]=angle
+        elbow_pivot.keyframe_insert(data_path="rotation_euler",frame=frame)
+    anatomy.extend(forearm)
     # Muscle belly and visible fascicle striations.
     belly=smooth_sphere("Biceps muscle belly",(0,-.22,3.65),(.57,.42,1.68),muscle); anatomy.append(belly)
     for side in (-1,1):
@@ -155,14 +170,15 @@ def main():
     root=bpy.data.objects.new("Anatomy_Animation_Root",None); bpy.context.collection.objects.link(root)
     for o in anatomy: o.parent=root
     root.rotation_mode="XYZ"
-    for frame,angle,stretch in ((1,-.08,1.0),(FPS*2,.0,1.045),(FPS*4,.08,1.0),(FPS*6,0,1.035),(FRAMES, -.08,1.0)):
-        root.rotation_euler=(0,angle,math.sin(frame/FRAMES*math.pi*2)*.025)
+    for frame,angle,stretch in ((1,-.16,1.0),(FPS*2,-.04,1.045),(FPS*4,.16,1.0),(FPS*6,.04,1.035),(FRAMES,-.16,1.0)):
+        root.rotation_euler=(0,angle,math.sin(frame/FRAMES*math.pi*2)*.08)
         root.scale=(1,1,stretch); root.keyframe_insert(data_path="rotation_euler",frame=frame)
         root.keyframe_insert(data_path="scale",frame=frame)
 
     # Layout: title, diagram, callout rails and captions occupy separate safe zones.
-    label("HOW MUSCLE FORCE WORKS",(0,-1.25,8.15),.43,white)
-    label("BICEPS  /  ANATOMY STUDY",(0,-1.25,7.55),.22,muted)
+    # Keep the headline inside the portrait safe width (1080x1920).
+    label("MUSCLE FORCE",(0,-1.25,8.18),.27,white)
+    label("BICEPS  /  ANATOMY STUDY",(0,-1.25,7.68),.19,muted)
     label("SHOULDER JOINT",(1.25,-.9,6.2),.19,white,"LEFT")
     label("PROXIMAL TENDON",(1.25,-.9,5.45),.17,muted,"LEFT")
     label("MUSCLE BELLY",(-1.55,-.9,3.65),.2,white,"RIGHT")
