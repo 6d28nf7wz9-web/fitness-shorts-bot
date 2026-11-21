@@ -62,7 +62,6 @@ def main():
   scene.render.engine="BLENDER_EEVEE_NEXT"
  except Exception:
   scene.render.engine="BLENDER_EEVEE"
- if hasattr(scene,"eevee"): scene.eevee.taa_render_samples=24
  except Exception: scene.render.engine="BLENDER_EEVEE"
  if hasattr(scene,"eevee"): scene.eevee.taa_render_samples=24
  scene.render.resolution_x=W;scene.render.resolution_y=H;scene.render.resolution_percentage=100;scene.render.fps=FPS;scene.frame_start=1;scene.frame_end=FRAMES;scene.world.color=(.025,.035,.055)
