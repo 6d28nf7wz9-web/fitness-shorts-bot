@@ -176,16 +176,11 @@ def main():
     for frame,zs,xs in ((1,1.0,1.0),(FRAMES//4,.92,1.07),(FRAMES//2,.86,1.13),(3*FRAMES//4,.93,1.06),(FRAMES,1.0,1.0)):
         belly.scale=(xs,1.0,zs)
         belly.keyframe_insert(data_path="scale",frame=frame)
-    root=bpy.data.objects.new("Anatomy_Animation_Root",None); bpy.context.collection.objects.link(root)
-    for o in anatomy:
-        world=o.matrix_world.copy()
-        o.parent=root
-        o.matrix_world=world
-    root.rotation_mode="XYZ"
-    for frame,angle in ((1,-.035),(FRAMES//2,.035),(FRAMES,-.035)):
-        root.rotation_euler=(0,angle,0)
-        root.keyframe_insert(data_path="rotation_euler",frame=frame)
+    root=bpy.data.objects.new("Anatomy_Animation_Root",None)
+    bpy.context.collection.objects.link(root)
 
+    # Cue boundaries are needed before visibility keyframes are authored.
+    cues=narration_timeline()
     # Compact portrait-safe labels; callouts reveal in their narration beat.
     label("MUSCLE FORCE",(0,-1.25,8.18),.27,white)
     label("BICEPS / ANATOMY STUDY",(0,-1.25,7.68),.16,muted)
