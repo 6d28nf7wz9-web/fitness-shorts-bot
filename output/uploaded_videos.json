@@ -532,5 +532,19 @@
     "uploaded_at": "2026-11-20T14:43:23.506797+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "DEHptVl1MLE",
+    "title": "What Testosterone Actually Does to Muscle",
+    "topic": "How Testosterone Drives Growth",
+    "series": "Hormone Lab",
+    "episode_number": 7,
+    "episode_topic": "What testosterone actually does for muscle",
+    "hook": "Does testosterone build muscle by itself?",
+    "script_word_count": 51,
+    "scene_count": 4,
+    "uploaded_at": "2026-11-21T06:10:22.905938+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
