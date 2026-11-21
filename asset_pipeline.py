@@ -49,3 +49,13 @@ def select_asset_for_scene(scene_plan,catalog=None,root=ASSET_ROOT):
 def write_catalog(entries,path="assets_3d/catalog.json"):
     data={"catalog_version":CATALOG_VERSION,"assets":entries}; p=Path(path); p.parent.mkdir(parents=True,exist_ok=True)
     p.write_text(json.dumps(data,indent=2,ensure_ascii=False)+"\n",encoding="utf-8"); return data
+
+def build_render_manifest(scenes, catalog=None, root=ASSET_ROOT):
+    """Connect scene-intent planning to approved asset selection for renderers."""
+    from three_d_intelligence import plan_scene
+    rows=[]
+    for index,scene in enumerate(scenes,1):
+        plan=plan_scene(scene)
+        selection=select_asset_for_scene(plan,catalog=catalog,root=root)
+        rows.append({"scene_number":index,"scene_plan":plan,"asset_selection":selection})
+    return {"manifest_version":1,"scene_count":len(rows),"scenes":rows}
