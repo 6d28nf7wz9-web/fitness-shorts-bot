@@ -68,24 +68,37 @@ def export(objects,path):
     bpy.ops.export_scene.gltf(filepath=str(path),export_format="GLB",use_selection=True)
 
 def narration_timeline():
-    """Build scene/voice cue boundaries from actual audio_info when available."""
+    """Map four visual beats to actual voice duration, with a safe demo fallback."""
     cues=[]
     audio_path=Path("output/audio_info.json")
     audio=[]
     if audio_path.exists():
         try: audio=json.loads(audio_path.read_text(encoding="utf-8"))
         except Exception: audio=[]
-    if not isinstance(audio,list) or not audio: audio=[{"seconds":DURATION}]
-    cursor=0.0
+    total=0.0
+    if isinstance(audio,list) and audio:
+        for item in audio:
+            try: total += max(0.0,float(item.get("seconds",0)))
+            except Exception: pass
+    if total <= 0: total=DURATION
     names=["ANATOMY OVERVIEW","TENDON & JOINT","FORCE DIRECTION","MUSCLE CONTRACTION"]
-    for i,item in enumerate(audio[:4]):
-        try: seconds=max(.5,float(item.get("seconds",DURATION/len(audio))))
-        except Exception: seconds=DURATION/len(audio)
-        cues.append({"cue":names[min(i,len(names)-1)],"start":round(cursor,3),"end":round(cursor+seconds,3),"audio_index":i})
-        cursor+=seconds
-    scale=DURATION/max(cursor,.001)
-    for cue in cues:
-        cue["start"]=round(cue["start"]*scale,3); cue["end"]=round(cue["end"]*scale,3)
+    # When the source has 4+ scene clips, retain their relative narration timing.
+    if isinstance(audio,list) and len(audio)>=4:
+        raw=[]
+        for i,item in enumerate(audio[:4]):
+            try: seconds=max(.1,float(item.get("seconds",0)))
+            except Exception: seconds=total/4
+            raw.append(seconds)
+        denom=sum(raw) or total
+        cursor=0.0
+        for name,seconds in zip(names,raw):
+            span=DURATION*seconds/denom
+            cues.append({"cue":name,"start":round(cursor,3),"end":round(cursor+span,3)})
+            cursor+=span
+    else:
+        span=DURATION/4
+        for i,name in enumerate(names):
+            cues.append({"cue":name,"start":round(i*span,3),"end":round((i+1)*span,3)})
     return cues
 
 def main():
