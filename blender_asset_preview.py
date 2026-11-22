@@ -258,7 +258,7 @@ def main():
         if any(not p.is_file() or p.stat().st_size<1000 for p in audio_paths):
             raise RuntimeError("audio_info.json exists but one or more real narration MP3s are missing")
         concat=OUT/"voice_concat.txt"
-        concat.write_text("".join("file '"+str(p.resolve())+"'\\n" for p in audio_paths),encoding="utf-8")
+        concat.write_text("".join("file '"+str(p.resolve())+"'\n" for p in audio_paths),encoding="utf-8")
         voice=OUT/"voice_track.m4a"
         subprocess.run(["ffmpeg","-y","-v","error","-f","concat","-safe","0","-i",str(concat),"-c:a","aac","-b:a","192k",str(voice)],check=True)
         silent=OUT/"preview_silent.mp4"
