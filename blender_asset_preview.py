@@ -127,9 +127,9 @@ def main():
     # Bone shafts remain behind the muscle belly; the forearm is a separate
     # articulated assembly so elbow flexion is visible rather than implied.
     humerus=cylinder_between("Humerus bone",(.34,.10,5.75),(.34,.10,1.65),.145,bone); anatomy.append(humerus)
-    radius=cylinder_between("Radius bone",(-.17,.18,1.12),(-.13,.18,.12),.095,bone)
-    ulna=cylinder_between("Ulna bone",(.24,.22,1.12),(.24,.22,.12),.105,bone)
-    wrist=smooth_sphere("Wrist joint",(.12,.18,.08),(.25,.23,.22),cartilage)
+    radius=cylinder_between("Radius bone",(-.17,.18,1.12),(-.10,.18,-.78),.105,bone)
+    ulna=cylinder_between("Ulna bone",(.24,.22,1.12),(.17,.22,-.78),.115,bone)
+    wrist=smooth_sphere("Wrist joint",(.035,.18,-.82),(.25,.23,.22),cartilage)
     forearm=[radius,ulna,wrist]
     elbow_pivot=bpy.data.objects.new("Elbow_Flexion_Pivot",None)
     bpy.context.collection.objects.link(elbow_pivot)
@@ -161,8 +161,8 @@ def main():
         ring=smooth_sphere("Joint cartilage",(0,-.22,z),(.39,.19,.32),cyan); anatomy.append(ring)
 
     # Force vector arrow to the upper-right of the muscle; animated pulse/rotation.
-    shaft=cylinder_between("Force vector shaft",(.48,-.48,2.25),(.48,-.48,1.65),.052,cyan)
-    tip=tapered_tendon("Force vector arrowhead",(.48,-.48,1.65),(.48,-.48,1.35),.14,.004,cyan)
+    shaft=cylinder_between("Force vector shaft",(.56,-.52,.92),(.56,-.52,-.18),.052,cyan)
+    tip=tapered_tendon("Force vector arrowhead",(.56,-.52,-.18),(.56,-.52,-.48),.14,.004,cyan)
     force=[shaft,tip]
     for o in force:
         world=o.matrix_world.copy()
