@@ -69,7 +69,10 @@ jobs:
           probe=subprocess.run(["ffprobe","-v","error","-show_entries","stream=codec_type","-of","json","output/3d_preview/preview.mp4"],capture_output=True,text=True,check=True)
           streams=json.loads(probe.stdout).get("streams",[])
           has_audio=any(x.get("codec_type")=="audio" for x in streams)
-          assert has_audio == bool(sync.get("audio_attached")), f"Audio stream mismatch: metadata={sync.get('audio_attached')} stream={has_audio}"
+          assert sync.get("audio_attached") is True, "Real narration must be attached; silent preview is not accepted"
+          assert has_audio, "Preview has no audio stream"
+          assert len(sync.get("audio_files", [])) == len(sync.get("cues", [])), "Narration files and visual cue map are not aligned"
+          assert sync.get("timing_source") == "real_scene_tts", "Narration sync must use real TTS timing"
           assert expected >= 7.5, f"Preview unexpectedly short: {expected}"
           PY
       - name: Upload preview, sync map and asset pack
