@@ -126,9 +126,9 @@ def main():
     elbow=smooth_sphere("Elbow joint", (0,0,1.35),(.58,.4,.55),cartilage); anatomy.append(elbow)
     # Bone shafts remain behind the muscle belly; the forearm is a separate
     # articulated assembly so elbow flexion is visible rather than implied.
-    humerus=cylinder_between("Humerus bone",(0,.13,5.75),(0,.13,1.65),.19,bone); anatomy.append(humerus)
-    radius=cylinder_between("Radius bone",(0,.18,1.12),(.04,.18,.12),.105,bone)
-    ulna=cylinder_between("Ulna bone",(.22,.22,1.12),(.22,.22,.12),.115,bone)
+    humerus=cylinder_between("Humerus bone",(.34,.10,5.75),(.34,.10,1.65),.145,bone); anatomy.append(humerus)
+    radius=cylinder_between("Radius bone",(-.17,.18,1.12),(-.13,.18,.12),.095,bone)
+    ulna=cylinder_between("Ulna bone",(.24,.22,1.12),(.24,.22,.12),.105,bone)
     wrist=smooth_sphere("Wrist joint",(.12,.18,.08),(.25,.23,.22),cartilage)
     forearm=[radius,ulna,wrist]
     elbow_pivot=bpy.data.objects.new("Elbow_Flexion_Pivot",None)
@@ -143,7 +143,7 @@ def main():
         elbow_pivot.keyframe_insert(data_path="rotation_euler",frame=frame)
     anatomy.extend(forearm)
     # Muscle belly and visible fascicle striations.
-    belly=smooth_sphere("Biceps muscle belly",(0,-.22,3.65),(.57,.42,1.68),muscle); anatomy.append(belly)
+    belly=smooth_sphere("Biceps muscle belly",(0,-.22,3.65),(.43,.31,1.52),muscle); anatomy.append(belly)
     for side in (-1,1):
         for j in range(5):
             x=side*(.12+j*.065)
@@ -173,8 +173,9 @@ def main():
             o.keyframe_insert(data_path="scale",frame=frame)
 
     # Muscle belly shortens and bulges independently; elbow pivot drives forearm.
-    for frame,zs,xs in ((1,1.0,1.0),(FRAMES//4,.92,1.07),(FRAMES//2,.86,1.13),(3*FRAMES//4,.93,1.06),(FRAMES,1.0,1.0)):
-        belly.scale=(xs,1.0,zs)
+    base_scale=belly.scale.copy()
+    for frame,zs,xs in ((1,1.0,1.0),(FRAMES//4,.94,1.06),(FRAMES//2,.88,1.12),(3*FRAMES//4,.94,1.06),(FRAMES,1.0,1.0)):
+        belly.scale=(base_scale.x*xs,base_scale.y,base_scale.z*zs)
         belly.keyframe_insert(data_path="scale",frame=frame)
     root=bpy.data.objects.new("Anatomy_Animation_Root",None)
     bpy.context.collection.objects.link(root)
