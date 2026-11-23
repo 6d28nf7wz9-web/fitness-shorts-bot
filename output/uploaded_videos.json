@@ -588,5 +588,19 @@
     "uploaded_at": "2026-11-23T11:24:04.921921+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "rrJMEjqQrfs",
+    "title": "Why Your Plateau Isn’t Just Low Testosterone",
+    "topic": "Plateau Drivers Beyond Testosterone",
+    "series": "Hormone Lab",
+    "episode_number": 8,
+    "episode_topic": "Can low testosterone explain every gym plateau?",
+    "hook": "Plateaus aren't just low testosterone.",
+    "script_word_count": 51,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-23T16:08:25.380334+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
