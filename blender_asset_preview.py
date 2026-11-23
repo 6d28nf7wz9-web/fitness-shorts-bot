@@ -128,8 +128,8 @@ def main():
     # Bone shafts remain behind the muscle belly; the forearm is a separate
     # articulated assembly so elbow flexion is visible rather than implied.
     humerus=cylinder_between("Humerus bone",(.34,.10,5.75),(.34,.10,1.65),.145,bone); anatomy.append(humerus)
-    radius=cylinder_between("Radius bone",(-.13,.02,1.34),(-.08,.02,-1.02),.085,bone)
-    ulna=cylinder_between("Ulna bone",(.16,.10,1.34),(.11,.10,-1.02),.095,bone)
+    radius=cylinder_between("Radius bone",(0,.02,1.35),(-.08,.02,-1.02),.085,bone)
+    ulna=cylinder_between("Ulna bone",(0,.10,1.35),(.11,.10,-1.02),.095,bone)
     wrist=smooth_sphere("Wrist joint",(.015,.04,-1.08),(.19,.18,.17),cartilage)
     forearm=[radius,ulna,wrist]
     elbow_pivot=bpy.data.objects.new("Elbow_Flexion_Pivot",None)
