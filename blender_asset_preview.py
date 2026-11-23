@@ -139,6 +139,19 @@ def main():
         world=part.matrix_world.copy()
         part.parent=elbow_pivot
         part.matrix_world=world
+    # Inspect the actual Blender mesh endpoints (not just the source coordinates)
+    # at every flexion pose; proximal bone caps must stay seated on the pivot.
+    for audit_angle in (0.0,-.38,-.92,-.55,0.0):
+        elbow_pivot.rotation_euler[1]=audit_angle
+        bpy.context.view_layer.update()
+        for bone_obj in (radius,ulna):
+            proximal_local_z=min(v.co.z for v in bone_obj.data.vertices)
+            proximal_world=bone_obj.matrix_world @ Vector((0,0,proximal_local_z))
+            if (proximal_world-elbow_pivot.location).length > .16:
+                raise RuntimeError(f"{bone_obj.name} detached from elbow pivot at flexion {audit_angle:.2f}")
+    elbow_pivot.rotation_euler[1]=0.0
+    bpy.context.view_layer.update()
+    print("BLENDER_MESH_GEOMETRY_AUDIT PASS: radius and ulna remain seated through flexion")
     for frame,angle in ((1,0.0),(int(FRAMES*.25),-.38),(int(FRAMES*.5),-.92),(int(FRAMES*.75),-.55),(FRAMES,0.0)):
         elbow_pivot.rotation_euler[1]=angle
         elbow_pivot.keyframe_insert(data_path="rotation_euler",frame=frame)
