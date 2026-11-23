@@ -144,11 +144,24 @@ def main():
     for audit_angle in (0.0,-.38,-.92,-.55,0.0):
         elbow_pivot.rotation_euler[1]=audit_angle
         bpy.context.view_layer.update()
+        depsgraph=bpy.context.evaluated_depsgraph_get()
         for bone_obj in (radius,ulna):
-            proximal_local_z=min(v.co.z for v in bone_obj.data.vertices)
-            proximal_world=bone_obj.matrix_world @ Vector((0,0,proximal_local_z))
-            if (proximal_world-elbow_pivot.location).length > .16:
-                raise RuntimeError(f"{bone_obj.name} detached from elbow pivot at flexion {audit_angle:.2f}")
+            evaluated=bone_obj.evaluated_get(depsgraph)
+            mesh=evaluated.to_mesh()
+            try:
+                # Measure evaluated world-space vertices: this includes the
+                # bevel modifier and avoids assuming the cylinder's local axis.
+                nearest=min(
+                    (evaluated.matrix_world @ vertex.co - elbow_pivot.matrix_world.translation).length
+                    for vertex in mesh.vertices
+                )
+            finally:
+                evaluated.to_mesh_clear()
+            if nearest > .16:
+                raise RuntimeError(
+                    f"{bone_obj.name} detached from elbow pivot at flexion "
+                    f"{audit_angle:.2f} (nearest mesh vertex {nearest:.3f})"
+                )
     elbow_pivot.rotation_euler[1]=0.0
     bpy.context.view_layer.update()
     print("BLENDER_MESH_GEOMETRY_AUDIT PASS: radius and ulna remain seated through flexion")
