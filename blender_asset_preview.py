@@ -7,6 +7,7 @@ from mathutils import Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from asset_pipeline import build_render_manifest
+from anatomy_geometry_audit import audit_geometry
 
 OUT=Path(os.getenv("FITFUEL_3D_OUT","output/3d_preview"))
 ASSET_DIR=Path("assets_3d/generated")
@@ -127,8 +128,8 @@ def main():
     # Bone shafts remain behind the muscle belly; the forearm is a separate
     # articulated assembly so elbow flexion is visible rather than implied.
     humerus=cylinder_between("Humerus bone",(.34,.10,5.75),(.34,.10,1.65),.145,bone); anatomy.append(humerus)
-    radius=cylinder_between("Radius bone",(-.13,.02,1.08),(-.08,.02,-1.02),.085,bone)
-    ulna=cylinder_between("Ulna bone",(.16,.10,1.08),(.11,.10,-1.02),.095,bone)
+    radius=cylinder_between("Radius bone",(-.13,.02,1.34),(-.08,.02,-1.02),.085,bone)
+    ulna=cylinder_between("Ulna bone",(.16,.10,1.34),(.11,.10,-1.02),.095,bone)
     wrist=smooth_sphere("Wrist joint",(.015,.04,-1.08),(.19,.18,.17),cartilage)
     forearm=[radius,ulna,wrist]
     elbow_pivot=bpy.data.objects.new("Elbow_Flexion_Pivot",None)
@@ -209,7 +210,7 @@ def main():
     curve_line("Muscle callout",[(-.48,-.78,3.65),(-.82,-.78,3.65),(-1.08,-.78,3.72)],.01,muted)
     curve_line("Elbow callout",[(.25,-.78,1.35),(.82,-.78,1.35),(1.08,-.78,1.22)],.01,muted)
 
-    # Camera: portrait orthographic framing with all content inside the safe area.
+    # Audit articulated forearm anchors at every authored flexion pose before rendering.\n    geometry_issues=audit_geometry()\n    if geometry_issues:\n        raise RuntimeError("Anatomy geometry audit failed: "+"; ".join(geometry_issues))\n    print("ANATOMY_GEOMETRY_AUDIT PASS: forearm anchors remain seated across flexion poses")\n\n    # Camera: portrait orthographic framing with all content inside the safe area.
     bpy.ops.object.camera_add(location=(0,-15,4.05))
     cam=bpy.context.object; cam.name="Portrait camera"; cam.data.type="ORTHO"; cam.data.ortho_scale=10.4
     aim(cam,(0,0,4.05)); bpy.context.scene.camera=cam
