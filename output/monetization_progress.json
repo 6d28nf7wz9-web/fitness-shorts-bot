@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-11-21T15:20:49.898511+00:00",
-  "data_through": "2026-11-19",
+  "generated_at": "2026-11-23T11:09:18.417620+00:00",
+  "data_through": "2026-11-21",
   "channel": {
     "identity_verified": true,
     "channel_id": "UC9t30aJ_9gSxrNaBhFvRnEg",
     "channel_title": "Fit Fuel",
     "subscribers": 7,
-    "total_channel_views_lifetime": 12003,
+    "total_channel_views_lifetime": 12070,
     "owner_provided_baseline_subscribers": 60,
     "subscriber_count_difference_vs_owner_baseline": -53
   },
   "last_90_days": {
-    "uploaded_public_shorts_in_log": 44,
-    "shorts_video_views_proxy": 2581,
-    "shorts_engaged_views": 504,
-    "shorts_videos_with_analytics_rows": 34,
-    "shorts_upload_log_video_count": 44
+    "uploaded_public_shorts_in_log": 45,
+    "shorts_video_views_proxy": 2677,
+    "shorts_engaged_views": 523,
+    "shorts_videos_with_analytics_rows": 38,
+    "shorts_upload_log_video_count": 45
   },
   "last_365_days": {
-    "channel_estimated_watch_minutes_all_content": 1291,
-    "channel_estimated_watch_hours_all_content": 21.52
+    "channel_estimated_watch_minutes_all_content": 1306,
+    "channel_estimated_watch_hours_all_content": 21.77
   },
   "standard_ads_revenue_milestones": {
     "subscribers_target": 1000,
