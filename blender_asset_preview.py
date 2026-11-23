@@ -127,9 +127,9 @@ def main():
     # Bone shafts remain behind the muscle belly; the forearm is a separate
     # articulated assembly so elbow flexion is visible rather than implied.
     humerus=cylinder_between("Humerus bone",(.34,.10,5.75),(.34,.10,1.65),.145,bone); anatomy.append(humerus)
-    radius=cylinder_between("Radius bone",(-.13,.02,1.48),(-.08,.02,-.76),.085,bone)
-    ulna=cylinder_between("Ulna bone",(.16,.10,1.48),(.11,.10,-.76),.095,bone)
-    wrist=smooth_sphere("Wrist joint",(.015,.04,-.82),(.19,.18,.17),cartilage)
+    radius=cylinder_between("Radius bone",(-.13,.02,1.08),(-.08,.02,-1.02),.085,bone)
+    ulna=cylinder_between("Ulna bone",(.16,.10,1.08),(.11,.10,-1.02),.095,bone)
+    wrist=smooth_sphere("Wrist joint",(.015,.04,-1.08),(.19,.18,.17),cartilage)
     forearm=[radius,ulna,wrist]
     elbow_pivot=bpy.data.objects.new("Elbow_Flexion_Pivot",None)
     bpy.context.collection.objects.link(elbow_pivot)
@@ -161,8 +161,8 @@ def main():
         ring=smooth_sphere("Joint cartilage",(0,-.22,z),(.39,.19,.32),cyan); anatomy.append(ring)
 
     # Force vector arrow to the upper-right of the muscle; animated pulse/rotation.
-    shaft=cylinder_between("Force vector shaft",(.39,-.48,1.02),(.39,-.48,-.34),.038,cyan)
-    tip=tapered_tendon("Force vector arrowhead",(.39,-.48,-.34),(.39,-.48,-.62),.115,.003,cyan)
+    shaft=cylinder_between("Force vector shaft",(.48,-.50,.92),(.48,-.50,-.78),.038,cyan)
+    tip=tapered_tendon("Force vector arrowhead",(.48,-.50,-.78),(.48,-.50,-1.08),.115,.003,cyan)
     force=[shaft,tip]
     for o in force:
         world=o.matrix_world.copy()
@@ -206,7 +206,7 @@ def main():
                     for key in fc.keyframe_points: key.interpolation="CONSTANT"
     label("CONTRACTION > TENSION > MOVEMENT",(0,-1.25,-.05),.13,cyan)
     curve_line("Shoulder callout",[(.25,-.78,6.0),(.82,-.78,6.0),(1.08,-.78,6.15)],.01,muted)
-    curve_line("Muscle callout",[(-.2,-.78,3.65),(-.82,-.78,3.65),(-1.08,-.78,3.72)],.01,muted)
+    curve_line("Muscle callout",[(-.48,-.78,3.65),(-.82,-.78,3.65),(-1.08,-.78,3.72)],.01,muted)
     curve_line("Elbow callout",[(.25,-.78,1.35),(.82,-.78,1.35),(1.08,-.78,1.22)],.01,muted)
 
     # Camera: portrait orthographic framing with all content inside the safe area.
