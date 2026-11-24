@@ -59,7 +59,7 @@
     "window_days": 28,
     "period_start": "2026-10-26",
     "period_end": "2026-11-22",
-    "last_sync": "2026-11-24T01:51:43.934636+00:00",
+    "last_sync": "2026-11-24T23:37:16.444578+00:00",
     "videos": {
       "XwcpIJM1eqU": {
         "views": 1170,
@@ -73,7 +73,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733718+00:00"
+        "synced_at": "2026-11-24T23:37:12.559376+00:00"
       },
       "dm6TAQFe9Zo": {
         "views": 555,
@@ -87,7 +87,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733739+00:00"
+        "synced_at": "2026-11-24T23:37:12.559394+00:00"
       },
       "GRZDZzrxtdI": {
         "views": 515,
@@ -101,7 +101,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733747+00:00"
+        "synced_at": "2026-11-24T23:37:12.559400+00:00"
       },
       "gHl9vWJiinI": {
         "views": 447,
@@ -115,7 +115,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733752+00:00"
+        "synced_at": "2026-11-24T23:37:12.559404+00:00"
       },
       "KKY6c8SzI-M": {
         "views": 347,
@@ -129,7 +129,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733757+00:00"
+        "synced_at": "2026-11-24T23:37:12.559407+00:00"
       },
       "TiYIPGVm3P0": {
         "views": 325,
@@ -143,13 +143,13 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733762+00:00"
+        "synced_at": "2026-11-24T23:37:12.559411+00:00"
       },
       "hfpygls4hBM": {
-        "views": 262,
-        "engaged_views": 99,
+        "views": 263,
+        "engaged_views": 100,
         "average_view_duration_seconds": 16.0,
-        "average_view_percentage": 56.53,
+        "average_view_percentage": 56.96,
         "likes": 4,
         "comments": 0,
         "shares": 0,
@@ -157,7 +157,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733767+00:00"
+        "synced_at": "2026-11-24T23:37:12.559414+00:00"
       },
       "IhiwWfUHVNU": {
         "views": 256,
@@ -171,7 +171,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733773+00:00"
+        "synced_at": "2026-11-24T23:37:12.559417+00:00"
       },
       "0_lxScfaqno": {
         "views": 237,
@@ -185,7 +185,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733778+00:00"
+        "synced_at": "2026-11-24T23:37:12.559421+00:00"
       },
       "Aq4HSc0G_98": {
         "views": 233,
@@ -199,7 +199,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733783+00:00"
+        "synced_at": "2026-11-24T23:37:12.559425+00:00"
       },
       "dBvgISRMbVM": {
         "views": 215,
@@ -213,7 +213,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733787+00:00"
+        "synced_at": "2026-11-24T23:37:12.559429+00:00"
       },
       "yYUsiT2dY1I": {
         "views": 206,
@@ -227,7 +227,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733794+00:00"
+        "synced_at": "2026-11-24T23:37:12.559433+00:00"
       },
       "kJ2RoNvV9XQ": {
         "views": 202,
@@ -241,10 +241,10 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733799+00:00"
+        "synced_at": "2026-11-24T23:37:12.559436+00:00"
       },
       "NhlGMZM2_og": {
-        "views": 185,
+        "views": 187,
         "engaged_views": 18,
         "average_view_duration_seconds": 15.0,
         "average_view_percentage": 88.8,
@@ -255,7 +255,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733804+00:00"
+        "synced_at": "2026-11-24T23:37:12.559440+00:00"
       },
       "_OiEiTu6NMA": {
         "views": 182,
@@ -269,7 +269,21 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733809+00:00"
+        "synced_at": "2026-11-24T23:37:12.559444+00:00"
+      },
+      "uZdRCaN8lfQ": {
+        "views": 126,
+        "engaged_views": 44,
+        "average_view_duration_seconds": 9.0,
+        "average_view_percentage": 32.55,
+        "likes": 2,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-26",
+        "period_end": "2026-11-22",
+        "synced_at": "2026-11-24T23:37:12.559448+00:00"
       },
       "z_lr2iGE9MM": {
         "views": 125,
@@ -283,7 +297,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733814+00:00"
+        "synced_at": "2026-11-24T23:37:12.559451+00:00"
       },
       "m9RqM0cAIxQ": {
         "views": 121,
@@ -297,21 +311,21 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733820+00:00"
+        "synced_at": "2026-11-24T23:37:12.559455+00:00"
       },
-      "uZdRCaN8lfQ": {
-        "views": 120,
-        "engaged_views": 42,
-        "average_view_duration_seconds": 10.0,
-        "average_view_percentage": 33.85,
-        "likes": 2,
+      "g405EgEt3Ng": {
+        "views": 107,
+        "engaged_views": 102,
+        "average_view_duration_seconds": 21.0,
+        "average_view_percentage": 13.27,
+        "likes": 1,
         "comments": 0,
         "shares": 0,
         "subscribers_gained": 0,
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733824+00:00"
+        "synced_at": "2026-11-24T23:37:12.559464+00:00"
       },
       "KtGBNWQhZyo": {
         "views": 106,
@@ -325,21 +339,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733829+00:00"
-      },
-      "g405EgEt3Ng": {
-        "views": 104,
-        "engaged_views": 99,
-        "average_view_duration_seconds": 21.0,
-        "average_view_percentage": 13.37,
-        "likes": 1,
-        "comments": 0,
-        "shares": 0,
-        "subscribers_gained": 0,
-        "subscribers_lost": 0,
-        "period_start": "2026-10-26",
-        "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733833+00:00"
+        "synced_at": "2026-11-24T23:37:12.559467+00:00"
       },
       "x0NlAy7ucBI": {
         "views": 100,
@@ -353,7 +353,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733838+00:00"
+        "synced_at": "2026-11-24T23:37:12.559471+00:00"
       },
       "L_rjKtKYZxU": {
         "views": 97,
@@ -367,7 +367,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733843+00:00"
+        "synced_at": "2026-11-24T23:37:12.559475+00:00"
       },
       "sZM3yIltbek": {
         "views": 96,
@@ -381,7 +381,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733848+00:00"
+        "synced_at": "2026-11-24T23:37:12.559479+00:00"
       },
       "G0YuiKS1nk8": {
         "views": 90,
@@ -395,7 +395,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733853+00:00"
+        "synced_at": "2026-11-24T23:37:12.559483+00:00"
       },
       "euAvCjxlmdY": {
         "views": 86,
@@ -409,7 +409,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733857+00:00"
+        "synced_at": "2026-11-24T23:37:12.559486+00:00"
       },
       "lE-kWVPnOek": {
         "views": 76,
@@ -423,7 +423,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733862+00:00"
+        "synced_at": "2026-11-24T23:37:12.559489+00:00"
       },
       "KAjT8d9-mwY": {
         "views": 73,
@@ -437,7 +437,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733867+00:00"
+        "synced_at": "2026-11-24T23:37:12.559493+00:00"
       },
       "lO3SsmLnaXY": {
         "views": 68,
@@ -451,7 +451,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733877+00:00"
+        "synced_at": "2026-11-24T23:37:12.559498+00:00"
       },
       "msHZJNfsAXk": {
         "views": 63,
@@ -465,7 +465,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733884+00:00"
+        "synced_at": "2026-11-24T23:37:12.559501+00:00"
       },
       "qgS1GiRvdk4": {
         "views": 55,
@@ -479,21 +479,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733888+00:00"
-      },
-      "eY65XWM7Vxo": {
-        "views": 54,
-        "engaged_views": 6,
-        "average_view_duration_seconds": 16.0,
-        "average_view_percentage": 76.77,
-        "likes": 0,
-        "comments": 0,
-        "shares": 0,
-        "subscribers_gained": 0,
-        "subscribers_lost": 0,
-        "period_start": "2026-10-26",
-        "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733892+00:00"
+        "synced_at": "2026-11-24T23:37:12.559506+00:00"
       },
       "VFdqNPZ4xRE": {
         "views": 54,
@@ -507,7 +493,21 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733897+00:00"
+        "synced_at": "2026-11-24T23:37:12.559509+00:00"
+      },
+      "eY65XWM7Vxo": {
+        "views": 54,
+        "engaged_views": 6,
+        "average_view_duration_seconds": 16.0,
+        "average_view_percentage": 76.77,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-26",
+        "period_end": "2026-11-22",
+        "synced_at": "2026-11-24T23:37:12.559514+00:00"
       },
       "5PNVItvN1I0": {
         "views": 53,
@@ -521,7 +521,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733901+00:00"
+        "synced_at": "2026-11-24T23:37:12.559517+00:00"
       },
       "iKzzKB7j6KI": {
         "views": 47,
@@ -535,7 +535,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733906+00:00"
+        "synced_at": "2026-11-24T23:37:12.559520+00:00"
       },
       "H-ml4IekN1Q": {
         "views": 47,
@@ -549,7 +549,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733910+00:00"
+        "synced_at": "2026-11-24T23:37:12.559523+00:00"
       },
       "pRcDNfmrprc": {
         "views": 46,
@@ -563,7 +563,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733915+00:00"
+        "synced_at": "2026-11-24T23:37:12.559527+00:00"
       },
       "MLvjNklfHDA": {
         "views": 46,
@@ -577,7 +577,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733919+00:00"
+        "synced_at": "2026-11-24T23:37:12.559530+00:00"
       },
       "rC6rQSM3aaQ": {
         "views": 45,
@@ -591,7 +591,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733927+00:00"
+        "synced_at": "2026-11-24T23:37:12.559533+00:00"
       },
       "b243aiNVjOY": {
         "views": 43,
@@ -605,7 +605,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733931+00:00"
+        "synced_at": "2026-11-24T23:37:12.559537+00:00"
       },
       "IvLCfu1M4I8": {
         "views": 42,
@@ -619,7 +619,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733935+00:00"
+        "synced_at": "2026-11-24T23:37:12.559541+00:00"
       },
       "Z1hvswOskHE": {
         "views": 40,
@@ -633,7 +633,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733940+00:00"
+        "synced_at": "2026-11-24T23:37:12.559545+00:00"
       },
       "ytYqa6FIChE": {
         "views": 40,
@@ -647,7 +647,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733945+00:00"
+        "synced_at": "2026-11-24T23:37:12.559548+00:00"
       },
       "1AySKo1F_Vc": {
         "views": 39,
@@ -661,7 +661,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733950+00:00"
+        "synced_at": "2026-11-24T23:37:12.559551+00:00"
       },
       "mPRGJmPnOXU": {
         "views": 39,
@@ -675,7 +675,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733957+00:00"
+        "synced_at": "2026-11-24T23:37:12.559555+00:00"
       },
       "gvmAf471JWM": {
         "views": 35,
@@ -689,7 +689,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733963+00:00"
+        "synced_at": "2026-11-24T23:37:12.559558+00:00"
       },
       "Y3m6LsIshkE": {
         "views": 27,
@@ -703,7 +703,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733967+00:00"
+        "synced_at": "2026-11-24T23:37:12.559561+00:00"
       },
       "Zwi9XIcm9sU": {
         "views": 26,
@@ -717,7 +717,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733972+00:00"
+        "synced_at": "2026-11-24T23:37:12.559564+00:00"
       },
       "1j9qzQGiiTw": {
         "views": 26,
@@ -731,7 +731,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733978+00:00"
+        "synced_at": "2026-11-24T23:37:12.559567+00:00"
       },
       "Db45ORL1kwU": {
         "views": 26,
@@ -745,7 +745,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733982+00:00"
+        "synced_at": "2026-11-24T23:37:12.559572+00:00"
       },
       "0FbjN8r5QtA": {
         "views": 22,
@@ -759,7 +759,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733987+00:00"
+        "synced_at": "2026-11-24T23:37:12.559576+00:00"
       },
       "eRmwjwlL2EM": {
         "views": 19,
@@ -773,7 +773,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733991+00:00"
+        "synced_at": "2026-11-24T23:37:12.559580+00:00"
       },
       "9_kla9tiNfI": {
         "views": 19,
@@ -787,7 +787,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733995+00:00"
+        "synced_at": "2026-11-24T23:37:12.559583+00:00"
       },
       "Qvmg-YuBADk": {
         "views": 19,
@@ -801,7 +801,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734000+00:00"
+        "synced_at": "2026-11-24T23:37:12.559586+00:00"
       },
       "L6FJhGypvIE": {
         "views": 17,
@@ -815,7 +815,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734004+00:00"
+        "synced_at": "2026-11-24T23:37:12.559590+00:00"
       },
       "tJBzHcTT_Lc": {
         "views": 16,
@@ -829,7 +829,21 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734009+00:00"
+        "synced_at": "2026-11-24T23:37:12.559593+00:00"
+      },
+      "um8KJPFS1-o": {
+        "views": 14,
+        "engaged_views": 2,
+        "average_view_duration_seconds": 4.0,
+        "average_view_percentage": 20.21,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "subscribers_gained": 0,
+        "subscribers_lost": 0,
+        "period_start": "2026-10-26",
+        "period_end": "2026-11-22",
+        "synced_at": "2026-11-24T23:37:12.559596+00:00"
       },
       "bcc9zBLqaC0": {
         "views": 14,
@@ -843,7 +857,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734013+00:00"
+        "synced_at": "2026-11-24T23:37:12.559599+00:00"
       },
       "SY1kufsY-Dc": {
         "views": 14,
@@ -857,7 +871,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734018+00:00"
+        "synced_at": "2026-11-24T23:37:12.559603+00:00"
       },
       "DEHptVl1MLE": {
         "views": 14,
@@ -871,7 +885,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734024+00:00"
+        "synced_at": "2026-11-24T23:37:12.559606+00:00"
       },
       "eKksvXiMhj4": {
         "views": 14,
@@ -885,7 +899,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734028+00:00"
+        "synced_at": "2026-11-24T23:37:12.559611+00:00"
       },
       "5B5GfFB5AQ0": {
         "views": 13,
@@ -899,7 +913,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734033+00:00"
+        "synced_at": "2026-11-24T23:37:12.559614+00:00"
       },
       "QUTxwSrtKFs": {
         "views": 12,
@@ -913,7 +927,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734037+00:00"
+        "synced_at": "2026-11-24T23:37:12.559617+00:00"
       },
       "5UA0tg_AY34": {
         "views": 12,
@@ -927,7 +941,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734043+00:00"
+        "synced_at": "2026-11-24T23:37:12.559620+00:00"
       },
       "-iwoeQp5zK0": {
         "views": 12,
@@ -941,7 +955,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734047+00:00"
+        "synced_at": "2026-11-24T23:37:12.559623+00:00"
       },
       "X6N2aPtpUeY": {
         "views": 10,
@@ -955,7 +969,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734052+00:00"
+        "synced_at": "2026-11-24T23:37:12.559628+00:00"
       },
       "IP1Y866TG6s": {
         "views": 10,
@@ -969,7 +983,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734057+00:00"
+        "synced_at": "2026-11-24T23:37:12.559632+00:00"
       },
       "FSvY_DE6kQs": {
         "views": 9,
@@ -983,7 +997,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734061+00:00"
+        "synced_at": "2026-11-24T23:37:12.559635+00:00"
       },
       "9zU1hgEFkI8": {
         "views": 9,
@@ -997,7 +1011,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734065+00:00"
+        "synced_at": "2026-11-24T23:37:12.559638+00:00"
       },
       "njRj31OnEIY": {
         "views": 7,
@@ -1011,7 +1025,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734072+00:00"
+        "synced_at": "2026-11-24T23:37:12.559642+00:00"
       },
       "oJJf-uKo6CM": {
         "views": 7,
@@ -1025,21 +1039,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734076+00:00"
-      },
-      "um8KJPFS1-o": {
-        "views": 7,
-        "engaged_views": 2,
-        "average_view_duration_seconds": 4.0,
-        "average_view_percentage": 20.21,
-        "likes": 0,
-        "comments": 0,
-        "shares": 0,
-        "subscribers_gained": 0,
-        "subscribers_lost": 0,
-        "period_start": "2026-10-26",
-        "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734080+00:00"
+        "synced_at": "2026-11-24T23:37:12.559646+00:00"
       },
       "hwYWnMAAY-g": {
         "views": 7,
@@ -1053,7 +1053,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734085+00:00"
+        "synced_at": "2026-11-24T23:37:12.559650+00:00"
       },
       "Kk5RuT54Jjw": {
         "views": 7,
@@ -1067,7 +1067,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734090+00:00"
+        "synced_at": "2026-11-24T23:37:12.559653+00:00"
       },
       "1_JnlvWZxcQ": {
         "views": 6,
@@ -1081,7 +1081,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734095+00:00"
+        "synced_at": "2026-11-24T23:37:12.559658+00:00"
       },
       "ZR2kr60LSnQ": {
         "views": 6,
@@ -1095,7 +1095,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734099+00:00"
+        "synced_at": "2026-11-24T23:37:12.559661+00:00"
       },
       "yfJOsAcSwZ4": {
         "views": 6,
@@ -1109,7 +1109,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734104+00:00"
+        "synced_at": "2026-11-24T23:37:12.559664+00:00"
       },
       "OaAnfJ6cKrg": {
         "views": 5,
@@ -1123,7 +1123,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734108+00:00"
+        "synced_at": "2026-11-24T23:37:12.559668+00:00"
       },
       "ZabjAZDYDEk": {
         "views": 5,
@@ -1137,7 +1137,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734112+00:00"
+        "synced_at": "2026-11-24T23:37:12.559671+00:00"
       },
       "xH4vypqh1AA": {
         "views": 5,
@@ -1151,7 +1151,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734118+00:00"
+        "synced_at": "2026-11-24T23:37:12.559674+00:00"
       },
       "rdMD4HzeSWo": {
         "views": 5,
@@ -1165,7 +1165,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734125+00:00"
+        "synced_at": "2026-11-24T23:37:12.559677+00:00"
       },
       "hOnsuQF6BP8": {
         "views": 4,
@@ -1179,7 +1179,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734129+00:00"
+        "synced_at": "2026-11-24T23:37:12.559682+00:00"
       },
       "6uQfwiytYhM": {
         "views": 3,
@@ -1193,7 +1193,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734134+00:00"
+        "synced_at": "2026-11-24T23:37:12.559685+00:00"
       },
       "-FoJqqV2AFc": {
         "views": 3,
@@ -1207,7 +1207,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734138+00:00"
+        "synced_at": "2026-11-24T23:37:12.559690+00:00"
       },
       "ecI0B5q7SYk": {
         "views": 3,
@@ -1221,7 +1221,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734142+00:00"
+        "synced_at": "2026-11-24T23:37:12.559693+00:00"
       },
       "brXo69DRZNE": {
         "views": 3,
@@ -1235,7 +1235,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734147+00:00"
+        "synced_at": "2026-11-24T23:37:12.559696+00:00"
       },
       "AetL-PDyDAE": {
         "views": 3,
@@ -1249,7 +1249,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734151+00:00"
+        "synced_at": "2026-11-24T23:37:12.559700+00:00"
       },
       "TrJFXOfxdyI": {
         "views": 3,
@@ -1263,7 +1263,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734156+00:00"
+        "synced_at": "2026-11-24T23:37:12.559703+00:00"
       },
       "HNvUmBU3VlM": {
         "views": 3,
@@ -1277,7 +1277,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734161+00:00"
+        "synced_at": "2026-11-24T23:37:12.559707+00:00"
       },
       "4gUGFp9UhF4": {
         "views": 2,
@@ -1291,7 +1291,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734168+00:00"
+        "synced_at": "2026-11-24T23:37:12.559710+00:00"
       },
       "yypcTbOv258": {
         "views": 2,
@@ -1305,7 +1305,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734172+00:00"
+        "synced_at": "2026-11-24T23:37:12.559713+00:00"
       },
       "ENY33ZJX7co": {
         "views": 1,
@@ -1319,7 +1319,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734177+00:00"
+        "synced_at": "2026-11-24T23:37:12.559719+00:00"
       },
       "MiIe9ejTaU8": {
         "views": 1,
@@ -1333,7 +1333,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734181+00:00"
+        "synced_at": "2026-11-24T23:37:12.559723+00:00"
       },
       "XmfqqV5n5Sw": {
         "views": 1,
@@ -1347,7 +1347,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734186+00:00"
+        "synced_at": "2026-11-24T23:37:12.559727+00:00"
       },
       "nr7lDrmLdoQ": {
         "views": 1,
@@ -1361,7 +1361,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734190+00:00"
+        "synced_at": "2026-11-24T23:37:12.559730+00:00"
       }
     }
   },
@@ -1385,7 +1385,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733809+00:00"
+        "synced_at": "2026-11-24T23:37:12.559444+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 182,
@@ -1417,7 +1417,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733752+00:00"
+        "synced_at": "2026-11-24T23:37:12.559404+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 445,
@@ -1449,7 +1449,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733910+00:00"
+        "synced_at": "2026-11-24T23:37:12.559523+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 46,
@@ -1481,7 +1481,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733931+00:00"
+        "synced_at": "2026-11-24T23:37:12.559537+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 43,
@@ -1513,7 +1513,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733787+00:00"
+        "synced_at": "2026-11-24T23:37:12.559429+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 215,
@@ -1548,7 +1548,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733783+00:00"
+        "synced_at": "2026-11-24T23:37:12.559425+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 205,
@@ -1691,7 +1691,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733862+00:00"
+        "synced_at": "2026-11-24T23:37:12.559489+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 48,
@@ -1727,7 +1727,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733927+00:00"
+        "synced_at": "2026-11-24T23:37:12.559533+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 45,
@@ -1763,7 +1763,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733853+00:00"
+        "synced_at": "2026-11-24T23:37:12.559483+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 90,
@@ -1799,7 +1799,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734018+00:00"
+        "synced_at": "2026-11-24T23:37:12.559603+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 12,
@@ -1837,7 +1837,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733877+00:00"
+        "synced_at": "2026-11-24T23:37:12.559498+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 66,
@@ -1875,7 +1875,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733982+00:00"
+        "synced_at": "2026-11-24T23:37:12.559572+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 16,
@@ -1913,7 +1913,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734009+00:00"
+        "synced_at": "2026-11-24T23:37:12.559593+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 11,
@@ -1951,7 +1951,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733848+00:00"
+        "synced_at": "2026-11-24T23:37:12.559479+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 96,
@@ -1989,7 +1989,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733820+00:00"
+        "synced_at": "2026-11-24T23:37:12.559455+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 121,
@@ -2027,7 +2027,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733888+00:00"
+        "synced_at": "2026-11-24T23:37:12.559506+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 55,
@@ -2065,7 +2065,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733867+00:00"
+        "synced_at": "2026-11-24T23:37:12.559493+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 69,
@@ -2103,7 +2103,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733892+00:00"
+        "synced_at": "2026-11-24T23:37:12.559514+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 54,
@@ -2141,7 +2141,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733857+00:00"
+        "synced_at": "2026-11-24T23:37:12.559486+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 86,
@@ -2179,7 +2179,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733901+00:00"
+        "synced_at": "2026-11-24T23:37:12.559517+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 44,
@@ -2206,7 +2206,7 @@
       "privacy": "public",
       "status": "uploaded",
       "analytics": {
-        "views": 185,
+        "views": 187,
         "engaged_views": 18,
         "average_view_duration_seconds": 15.0,
         "average_view_percentage": 88.8,
@@ -2217,7 +2217,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733804+00:00"
+        "synced_at": "2026-11-24T23:37:12.559440+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 183,
@@ -2255,7 +2255,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733906+00:00"
+        "synced_at": "2026-11-24T23:37:12.559520+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 32,
@@ -2293,7 +2293,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733940+00:00"
+        "synced_at": "2026-11-24T23:37:12.559545+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 40,
@@ -2331,7 +2331,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733915+00:00"
+        "synced_at": "2026-11-24T23:37:12.559527+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 46,
@@ -2369,7 +2369,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734090+00:00"
+        "synced_at": "2026-11-24T23:37:12.559653+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 7,
@@ -2407,7 +2407,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733935+00:00"
+        "synced_at": "2026-11-24T23:37:12.559541+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 42,
@@ -2445,7 +2445,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733897+00:00"
+        "synced_at": "2026-11-24T23:37:12.559509+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 54,
@@ -2483,7 +2483,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733963+00:00"
+        "synced_at": "2026-11-24T23:37:12.559558+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 33,
@@ -2521,7 +2521,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733957+00:00"
+        "synced_at": "2026-11-24T23:37:12.559555+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 39,
@@ -2559,7 +2559,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733919+00:00"
+        "synced_at": "2026-11-24T23:37:12.559530+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 46,
@@ -2597,7 +2597,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733967+00:00"
+        "synced_at": "2026-11-24T23:37:12.559561+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 27,
@@ -2635,7 +2635,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734052+00:00"
+        "synced_at": "2026-11-24T23:37:12.559628+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 10,
@@ -2673,7 +2673,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734043+00:00"
+        "synced_at": "2026-11-24T23:37:12.559620+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 12,
@@ -2711,7 +2711,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734181+00:00"
+        "synced_at": "2026-11-24T23:37:12.559723+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 0,
@@ -2749,7 +2749,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733991+00:00"
+        "synced_at": "2026-11-24T23:37:12.559580+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 19,
@@ -2787,7 +2787,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734000+00:00"
+        "synced_at": "2026-11-24T23:37:12.559586+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 14,
@@ -2825,7 +2825,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.733995+00:00"
+        "synced_at": "2026-11-24T23:37:12.559583+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 19,
@@ -2863,7 +2863,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734024+00:00"
+        "synced_at": "2026-11-24T23:37:12.559606+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 11,
@@ -2901,7 +2901,7 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734108+00:00"
+        "synced_at": "2026-11-24T23:37:12.559668+00:00"
       },
       "first_week_analytics": {
         "views_first_7_days": 5,
@@ -2928,7 +2928,7 @@
       "privacy": "public",
       "status": "uploaded",
       "analytics": {
-        "views": 7,
+        "views": 14,
         "engaged_views": 2,
         "average_view_duration_seconds": 4.0,
         "average_view_percentage": 20.21,
@@ -2939,13 +2939,13 @@
         "subscribers_lost": 0,
         "period_start": "2026-10-26",
         "period_end": "2026-11-22",
-        "synced_at": "2026-11-24T01:51:37.734080+00:00"
+        "synced_at": "2026-11-24T23:37:12.559596+00:00"
       },
       "first_week_analytics": {
-        "views_first_7_days": 7,
+        "views_first_7_days": 14,
         "engaged_views_first_7_days": 2,
-        "average_view_percentage_first_7_days": 20.21,
-        "average_view_duration_seconds_first_7_days": 4.0,
+        "average_view_percentage_first_7_days": 10.11,
+        "average_view_duration_seconds_first_7_days": 2.0,
         "days_since_upload_in_report": 2,
         "first_7_days_complete": false,
         "period_start": "2026-11-21",
@@ -2993,6 +2993,48 @@
       "uploaded_at": "2026-11-23T22:46:17.766571+00:00",
       "privacy": "public",
       "status": "uploaded"
+    },
+    {
+      "video_id": "mEDOzbC-sm4",
+      "title": "Can Supplements Replace Progressive Overload?",
+      "topic": "Supplements Versus Mechanical Tension",
+      "series": "Natural vs Enhanced",
+      "episode_number": 9,
+      "episode_topic": "Can supplements replace progressive overload?",
+      "hook": "No powder can replace adding weight to the bar.",
+      "script_word_count": 55,
+      "scene_count": 4,
+      "uploaded_at": "2026-11-24T03:24:12.831965+00:00",
+      "privacy": "public",
+      "status": "uploaded"
+    },
+    {
+      "video_id": "-nNx4pGWbUA",
+      "title": "Why Steroids Pause Testicular Hormone Feedback",
+      "topic": "Testicular Hormone Feedback",
+      "series": "Steroid Reality Check",
+      "episode_number": 9,
+      "episode_topic": "Why can steroid use affect fertility and testicular function?",
+      "hook": "Steroids can shut down male fertility.",
+      "script_word_count": 50,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-24T15:59:00.086252+00:00",
+      "privacy": "public",
+      "status": "uploaded"
+    },
+    {
+      "video_id": "GBcimEEQ8Xo",
+      "title": "Why Men Need Estrogen for Muscle",
+      "topic": "Male Estrogen Body Composition Role",
+      "series": "Hormone Lab",
+      "episode_number": 9,
+      "episode_topic": "How estrogen matters in the male body",
+      "hook": "Crushing your estrogen completely ruins muscle gains.",
+      "script_word_count": 54,
+      "scene_count": 5,
+      "uploaded_at": "2026-11-24T21:17:09.817817+00:00",
+      "privacy": "public",
+      "status": "uploaded"
     }
   ],
   "topic_insights": [
@@ -3032,9 +3074,9 @@
     {
       "topic": "High vs Low Rep Hypertrophy",
       "videos": 1,
-      "total_views": 185,
+      "total_views": 187,
       "total_engaged_views": 18,
-      "avg_views_per_video": 185,
+      "avg_views_per_video": 187,
       "avg_engaged_views_per_video": 18,
       "avg_view_percentage": 88.8,
       "avg_view_duration_seconds": 15.0,
@@ -3406,9 +3448,9 @@
     {
       "topic": "Enhanced Physiques vs Natural Expectations",
       "videos": 1,
-      "total_views": 7,
+      "total_views": 14,
       "total_engaged_views": 2,
-      "avg_views_per_video": 7,
+      "avg_views_per_video": 14,
       "avg_engaged_views_per_video": 2,
       "avg_view_percentage": 20.21,
       "avg_view_duration_seconds": 4.0,
@@ -3450,7 +3492,7 @@
     {
       "series": "Gym Myth Court",
       "videos": 8,
-      "avg_views_per_video": 65,
+      "avg_views_per_video": 66,
       "avg_engaged_views_per_video": 9,
       "avg_view_percentage": 69.6,
       "subscribers_gained": 1,
@@ -3495,7 +3537,7 @@
     {
       "series": "Natural vs Enhanced",
       "videos": 8,
-      "avg_views_per_video": 31,
+      "avg_views_per_video": 32,
       "avg_engaged_views_per_video": 4,
       "avg_view_percentage": 40.4,
       "subscribers_gained": 0,
@@ -4216,10 +4258,10 @@
         "period_end": "2026-11-22"
       },
       "um8KJPFS1-o": {
-        "views_first_7_days": 7,
+        "views_first_7_days": 14,
         "engaged_views_first_7_days": 2,
-        "average_view_percentage_first_7_days": 20.21,
-        "average_view_duration_seconds_first_7_days": 4.0,
+        "average_view_percentage_first_7_days": 10.11,
+        "average_view_duration_seconds_first_7_days": 2.0,
         "days_since_upload_in_report": 2,
         "first_7_days_complete": false,
         "period_start": "2026-11-21",
