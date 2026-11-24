@@ -740,9 +740,9 @@ def repair_keywords(data):
             ):
                 valid.append(fallback)
 
-        if not valid:
-            valid = ["gym workout", "healthy food"]
-
+        # Never inject generic training/food footage terms when the scene
+        # has no usable authored search target. Leaving this empty makes the
+        # existing script validator reject the draft and request a repair.
         scene["keyword"] = " | ".join(valid[:3])
 
     return data
