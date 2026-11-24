@@ -67,8 +67,15 @@ def _svg(category, labels):
 def build_visual_panel(scene, index=1):
     category = classify_scene(scene)
     title, labels = CATEGORIES[category]
+    style = str(scene.get("presentation_style") or "diagram").lower()
+    motion = str(scene.get("motion_cue") or "draw_on").lower()
+    role = str(scene.get("scene_role") or "explain").lower()
+    allowed_styles = {"hook", "payoff", "diagram", "stat_card", "comparison", "timeline", "presenter_focus", "broll_focus"}
+    if style not in allowed_styles:
+        style = "diagram"
     panel = (
-        f'<div class="science-panel panel-{category}" data-scene="{int(index)}" data-layout="{category}">'
+        f'<div class="science-panel panel-{category} presentation-{style} role-{role}" '
+        f'data-scene="{int(index)}" data-layout="{category}" data-motion="{html.escape(motion, quote=True)}">'
         f'<div class="science-kicker">FITFUEL • SCIENCE VISUAL</div>'
         f'<div class="science-heading">{html.escape(title)}</div>{_svg(category, labels)}</div>'
     )
