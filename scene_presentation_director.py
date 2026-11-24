@@ -5,6 +5,8 @@ No 3D, external services, or runtime dependencies.
 """
 import re
 
+from visual_engine import classify_scene
+
 STYLES = ("diagram", "stat_card", "comparison", "timeline", "presenter_focus", "broll_focus")
 
 INTENTS = (
@@ -36,7 +38,7 @@ def direct_scenes(scenes):
     count = len(scenes)
     for index, original in enumerate(scenes):
         scene = dict(original)
-        category = str(scene.get("visual_category") or scene.get("visual_type") or "").lower()
+        category = classify_scene(scene)
         narration = str(scene.get("narration", "")).lower()
         if index == 0:
             style, motion = "hook", "snap_reveal"
