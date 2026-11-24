@@ -35,7 +35,7 @@ def classify_scene(scene):
     """Prefer explicit scene direction, then infer from narration and labels."""
     explicit = str(scene.get("visual_type") or scene.get("visual_category") or "").lower().strip()
     explicit = ALIASES.get(explicit, explicit)
-    if explicit in CATEGORIES and explicit != "general":
+    if explicit in CATEGORIES:
         return explicit
     text = " ".join(str(scene.get(k, "")) for k in
                     ("narration", "keyword", "visual_title", "visual_subtitle")).lower()
@@ -117,6 +117,11 @@ def visual_css():
 .presentation-presenter_focus .science-svg{transform:scale(.82);opacity:.8}
 .presentation-broll_focus{background:rgba(5,13,23,.62);border-color:rgba(255,255,255,.12)}
 .presentation-broll_focus .science-svg{transform:scale(.78);opacity:.72}
+.presentation-presenter_focus{animation:presenter-emphasis .6s ease-out both}
+.presentation-presenter_focus .science-heading{text-align:center}
+.presentation-broll_focus{animation:broll-match .5s ease-out both}
+[data-motion="gesture_emphasis"] .science-svg{animation:gesture-emphasis .65s ease-out both}
+[data-motion="match_cut"] .science-heading{animation:match-cut-title .45s ease-out both}
 [data-motion="snap_reveal"] .science-heading{animation:hook-text .45s ease-out both}
 [data-motion="draw_on"] .science-svg path,[data-motion="draw_on"] .science-svg circle{animation:draw-reveal 1s ease-out both}
 [data-motion="count_up"] .science-svg{animation:stat-pop .65s cubic-bezier(.2,.8,.2,1) both}
@@ -131,6 +136,10 @@ def visual_css():
 @keyframes stat-pop{from{opacity:.2;transform:scale(.72)}to{opacity:1;transform:scale(.88)}}
 @keyframes split-in{from{opacity:.2;transform:scaleX(.65)}to{opacity:1;transform:scaleX(.94)}}
 @keyframes step-in{from{opacity:.2;transform:translateY(30px)}to{opacity:1;transform:translateY(8px)}}
+@keyframes presenter-emphasis{from{opacity:.45;transform:translateY(18px) scale(.96)}to{opacity:.94;transform:translateY(0) scale(1)}}
+@keyframes broll-match{from{opacity:.25;filter:blur(5px)}to{opacity:1;filter:blur(0)}}
+@keyframes gesture-emphasis{0%{opacity:.25;transform:scale(.72) translateY(22px)}70%{opacity:1;transform:scale(.9) translateY(-4px)}100%{transform:scale(.82) translateY(0)}}
+@keyframes match-cut-title{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
 @media(prefers-reduced-motion:reduce){.science-panel,.science-panel *{animation:none!important;transition:none!important}}
 @keyframes orbit-dash{to{stroke-dashoffset:-56}}@keyframes visual-breathe{to{transform:scale(1.025);opacity:.7}}@keyframes signal-flow{to{stroke-dashoffset:-56}}@keyframes fiber-pulse{to{stroke-dashoffset:40;opacity:.55}}@keyframes water-wave{to{transform:translateY(-10px)}}@keyframes bubble-rise{to{transform:translateY(-28px);opacity:.35}}
 """
