@@ -138,6 +138,10 @@ def main():
     for part in forearm:
         world=part.matrix_world.copy()
         part.parent=elbow_pivot
+        # Explicitly cancel the pivot's world transform before restoring the
+        # part's world matrix. This avoids Blender retaining an unintended
+        # parent-space offset when the pivot is translated from the origin.
+        part.matrix_parent_inverse=elbow_pivot.matrix_world.inverted()
         part.matrix_world=world
     # Inspect the actual Blender mesh endpoints (not just the source coordinates)
     # at every flexion pose; proximal bone caps must stay seated on the pivot.
