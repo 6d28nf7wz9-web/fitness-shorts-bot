@@ -135,6 +135,10 @@ def main():
     elbow_pivot=bpy.data.objects.new("Elbow_Flexion_Pivot",None)
     bpy.context.collection.objects.link(elbow_pivot)
     elbow_pivot.location=(0,0,1.35)
+    # Flush the newly-created pivot transform before computing its inverse.
+    # Without this update Blender may still report an identity matrix here,
+    # adding the pivot translation twice when children are parented.
+    bpy.context.view_layer.update()
     for part in forearm:
         world=part.matrix_world.copy()
         part.parent=elbow_pivot
