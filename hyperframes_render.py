@@ -12,6 +12,7 @@ import shutil
 from pathlib import Path
 
 from visual_engine import build_visual_panel, visual_css
+from scene_presentation_director import direct_scenes
 
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
@@ -62,7 +63,7 @@ def main():
         script = json.load(f)
     with open("output/audio_info.json", encoding="utf-8") as f:
         audio = json.load(f)
-    scenes = script.get("scenes", [])
+    scenes = direct_scenes(script.get("scenes", []))
     if not scenes or len(scenes) != len(audio):
         raise SystemExit("HyperFrames: scene/audio count mismatch")
 
