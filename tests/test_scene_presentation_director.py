@@ -46,6 +46,21 @@ class ScenePresentationDirectorTests(unittest.TestCase):
         self.assertIn('data-motion="count_up"', panel)
         self.assertIn("presentation-stat_card", panel)
 
+    def test_explicit_general_hook_and_payoff_keep_general_visuals(self):
+        scenes = direct_scenes([
+            {"visual_category": "general", "narration": "Muscle recovery mistake"},
+            {"visual_category": "general", "narration": "Muscle recovery solution"},
+        ])
+        self.assertEqual(build_visual_panel(scenes[0])[0], "general")
+        self.assertEqual(build_visual_panel(scenes[1])[0], "general")
+
+    def test_every_motion_cue_has_a_rendered_css_treatment(self):
+        from visual_engine import visual_css
+        css = visual_css()
+        for cue in ("snap_reveal", "draw_on", "count_up", "split_reveal",
+                    "step_build", "gesture_emphasis", "match_cut", "resolve_hold"):
+            self.assertIn('[data-motion="' + cue + '"]', css)
+
     def test_empty_scene_list_is_safe(self):
         self.assertEqual(direct_scenes([]), [])
 
