@@ -726,20 +726,8 @@ def repair_keywords(data):
             ):
                 valid.append(keyword)
 
-        for fallback in fallbacks_for(
-            scene.get("narration", "")
-        ):
-            if len(valid) >= 3:
-                break
-
-            if (
-                keyword_is_relevant(fallback)
-                and fallback.lower() not in [
-                    value.lower() for value in valid
-                ]
-            ):
-                valid.append(fallback)
-
+        # Search terms must be authored for this exact scene. Do not
+        # infer generic category fallbacks from narration.
         # Never inject generic training/food footage terms when the scene
         # has no usable authored search target. Leaving this empty makes the
         # existing script validator reject the draft and request a repair.
