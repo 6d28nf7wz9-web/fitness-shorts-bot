@@ -40,6 +40,12 @@ class VisualVarietyTests(unittest.TestCase):
             "visual_type": "heart", "narration": "A workout improves performance"
         }), "heart")
 
+    def test_explicit_general_category_is_not_reclassified_from_narration(self):
+        self.assertEqual(classify_scene({
+            "visual_category": "general",
+            "narration": "Stop making this muscle recovery mistake",
+        }), "general")
+
     def test_unknown_topic_uses_general_timeline(self):
         category, panel = build_visual_panel({"narration": "A useful daily habit"})
         self.assertEqual(category, "general")
