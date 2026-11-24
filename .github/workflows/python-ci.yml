@@ -32,6 +32,7 @@ jobs:
           python -m unittest discover -s tests -p "test_gen_script_timeout.py" -v
           python -m unittest discover -s tests -p "test_gen_script_quota.py" -v
           python -m unittest discover -s tests -p "test_long_script.py" -v
+          python -m unittest discover -s tests -p "test_script_keyword_repair.py" -v
       - name: Test Shorts metadata packaging validation
         run: python -m unittest discover -s tests -p "test_packaging_validation.py" -v
       - name: Test free multi-provider AI failover
