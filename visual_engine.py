@@ -102,5 +102,35 @@ def visual_css():
 .panel-exercise{--accent:#d4a5ff;--glow:#8051bd;border-radius:28px 28px 100px 28px}.panel-exercise .limb-line{fill:none;stroke:#d4a5ff;stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.panel-exercise .joint{fill:#fff;stroke:#d4a5ff;stroke-width:6}.panel-exercise .motion-arc{fill:none;stroke:#f0c8ff;stroke-width:4;stroke-dasharray:12 10;animation:signal-flow 2s linear infinite}
 .panel-hormones{--accent:#a8b9ff;--glow:#586bdb;border-radius:55px 55px 20px 20px}.panel-hormones .molecule-bonds{fill:none;stroke:#a8b9ff;stroke-width:7;stroke-dasharray:10 8;animation:signal-flow 3s linear infinite}.panel-hormones .molecule-node{fill:#d9e0ff;stroke:#697ee8;stroke-width:5;animation:visual-breathe 2.5s ease-in-out infinite alternate}
 .panel-general{--accent:#72e6c2;--glow:#3e9fba;border-radius:34px}.panel-general .timeline-line{stroke:#72e6c2;stroke-width:5;stroke-dasharray:12 12}.panel-general .timeline-node{fill:#10283a;stroke:#72e6c2;stroke-width:5}.panel-general .timeline-node.main{fill:#23506a;stroke:#fff}.panel-general .timeline-check{fill:none;stroke:#72e6c2;stroke-width:12;stroke-linecap:round;stroke-linejoin:round}
+/* Scene presentation rhythm: the same scientific panel gets a distinct composition per beat. */
+.presentation-hook{border:3px solid var(--accent);box-shadow:0 0 0 8px rgba(255,255,255,.05),0 28px 90px var(--glow);animation:hook-enter .55s cubic-bezier(.2,.8,.2,1) both}
+.presentation-hook .science-heading{font-size:34px;letter-spacing:3px;text-shadow:0 0 22px var(--glow)}
+.presentation-hook .science-svg{transform:scale(1.08);transform-origin:50% 50%}
+.presentation-payoff{border:2px solid var(--accent);box-shadow:0 0 55px var(--glow);animation:payoff-settle .7s ease-out both}
+.presentation-stat_card .science-svg{transform:scale(.88);filter:drop-shadow(0 10px 20px var(--glow))}
+.presentation-stat_card .science-heading{font-size:29px}
+.presentation-comparison{border-radius:18px 70px 18px 70px}
+.presentation-comparison .science-svg{transform:scaleX(.94)}
+.presentation-timeline{border-radius:80px 18px 80px 18px}
+.presentation-timeline .science-svg{transform:translateY(8px)}
+.presentation-presenter_focus{left:120px;right:120px;opacity:.94}
+.presentation-presenter_focus .science-svg{transform:scale(.82);opacity:.8}
+.presentation-broll_focus{background:rgba(5,13,23,.62);border-color:rgba(255,255,255,.12)}
+.presentation-broll_focus .science-svg{transform:scale(.78);opacity:.72}
+[data-motion="snap_reveal"] .science-heading{animation:hook-text .45s ease-out both}
+[data-motion="draw_on"] .science-svg path,[data-motion="draw_on"] .science-svg circle{animation:draw-reveal 1s ease-out both}
+[data-motion="count_up"] .science-svg{animation:stat-pop .65s cubic-bezier(.2,.8,.2,1) both}
+[data-motion="split_reveal"] .science-svg{animation:split-in .6s ease-out both}
+[data-motion="step_build"] .science-svg{animation:step-in .7s ease-out both}
+[data-motion="resolve_hold"] .science-heading{animation:payoff-text .6s ease-out both}
+@keyframes hook-enter{from{opacity:0;transform:translateY(30px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes hook-text{from{opacity:0;letter-spacing:8px}to{opacity:1;letter-spacing:3px}}
+@keyframes payoff-settle{from{opacity:.55;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes payoff-text{from{opacity:.4;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes draw-reveal{from{opacity:.2;stroke-dashoffset:180}to{opacity:1;stroke-dashoffset:0}}
+@keyframes stat-pop{from{opacity:.2;transform:scale(.72)}to{opacity:1;transform:scale(.88)}}
+@keyframes split-in{from{opacity:.2;transform:scaleX(.65)}to{opacity:1;transform:scaleX(.94)}}
+@keyframes step-in{from{opacity:.2;transform:translateY(30px)}to{opacity:1;transform:translateY(8px)}}
+@media(prefers-reduced-motion:reduce){.science-panel,.science-panel *{animation:none!important;transition:none!important}}
 @keyframes orbit-dash{to{stroke-dashoffset:-56}}@keyframes visual-breathe{to{transform:scale(1.025);opacity:.7}}@keyframes signal-flow{to{stroke-dashoffset:-56}}@keyframes fiber-pulse{to{stroke-dashoffset:40;opacity:.55}}@keyframes water-wave{to{transform:translateY(-10px)}}@keyframes bubble-rise{to{transform:translateY(-28px);opacity:.35}}
 """
