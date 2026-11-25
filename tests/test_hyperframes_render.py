@@ -44,6 +44,13 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn('HYPERFRAMES_RENDER: "1"', workflow)
         self.assertNotIn(r"public\n", workflow)
 
+    def test_render_fixture_composites_audio_reactive_presenter(self):
+        with open(".github/workflows/hyperframes-integration.yml", encoding="utf-8") as f:
+            workflow = f.read()
+        self.assertIn("python -m pip install numpy pillow", workflow)
+        self.assertIn("python avatar.py short", workflow)
+        self.assertIn("test -s output/final.mp4.avatar", workflow)
+
 
     def test_scene_visuals_classify_common_fitness_topics(self):
         self.assertEqual(classify_scene({"narration": "Water improves hydration"}), "hydration")
