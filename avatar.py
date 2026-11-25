@@ -14,7 +14,7 @@ STATE_FPS = 30
 OUT_FPS = 30
 AVATAR_DIR = os.getenv("AVATAR_DIR", "avatar")
 CACHE_DIR = "output/avatar_cache"
-BOB = 6  # pixels of gentle up and down movement
+BOB = 9  # pixels of speech-reactive emphasis movement
 
 # h = presenter height; x and bottom keep it outside the Shorts title/caption safe zones.
 # The Shorts presenter sits in the upper-left corner, below the brand line and above titles.
@@ -198,6 +198,7 @@ def render(video, samples, layout):
     total = max(len(states), 1)
     shares = ", ".join(f"{k} {states.count(k) * 100 // total}%" for k in NAMES + ["blink"])
     print("Mouth shapes used:", shares)
+    print("Presenter motion: speech-paced lateral drift + emphasis bounce enabled")
 
     os.makedirs(CACHE_DIR, exist_ok=True)
     list_path = f"{CACHE_DIR}/list_{os.getpid()}.txt"
