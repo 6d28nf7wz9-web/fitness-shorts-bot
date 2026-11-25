@@ -75,7 +75,7 @@ def build_visual_panel(scene, index=1):
         style = "diagram"
     panel = (
         f'<div class="science-panel panel-{category} presentation-{style} role-{role}" '
-        f'data-scene="{int(index)}" data-layout="{category}" data-motion="{html.escape(motion, quote=True)}">'
+        f'data-scene="{int(index)}" data-layout="{category}" data-variant="{(int(index)-1)%3}" data-motion="{html.escape(motion, quote=True)}">'
         f'<div class="science-kicker">FITFUEL • SCIENCE VISUAL</div>'
         f'<div class="science-heading">{html.escape(title)}</div>{_svg(category, labels)}</div>'
     )
@@ -85,11 +85,11 @@ def build_visual_panel(scene, index=1):
 def visual_css():
     """Shared frame styling plus distinct silhouettes, palettes and motion."""
     return """
-.science-panel{position:absolute;left:72px;right:72px;top:1000px;height:540px;border-radius:28px;overflow:hidden;background:rgba(5,13,23,.78);border:1px solid rgba(255,255,255,.18);box-shadow:0 24px 70px rgba(0,0,0,.38)}
+.science-panel{position:absolute;left:72px;right:72px;top:1000px;height:540px;border-radius:24px!important;overflow:hidden;background:rgba(5,13,23,.78);border:1px solid rgba(255,255,255,.18);box-shadow:0 24px 70px rgba(0,0,0,.38)}
 .science-panel:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,var(--glow),transparent 68%);opacity:.38;animation:visual-breathe 5s ease-in-out infinite alternate}
 .science-kicker{position:absolute;top:24px;left:32px;color:var(--accent);font-size:16px;letter-spacing:4px;font-weight:800}
 .science-heading{position:absolute;top:58px;left:32px;color:#fff;font-size:25px;letter-spacing:2px;font-weight:900}
-.science-svg{position:absolute;left:3%;top:95px;width:94%;height:420px;overflow:visible}
+.science-svg{position:absolute;left:5%;top:108px;width:90%;height:400px;overflow:hidden;contain:strict}
 .science-svg text{text-anchor:middle;font-family:Arial,sans-serif;font-weight:900;letter-spacing:2px}
 .svg-label{fill:#fff;font-size:19px}.svg-small{fill:#07111d;font-size:11px}
 .panel-muscle{--accent:#ffb15e;--glow:#ff7b3d;border-radius:48% 18% 42% 18%}
@@ -102,6 +102,14 @@ def visual_css():
 .panel-exercise{--accent:#d4a5ff;--glow:#8051bd;border-radius:28px 28px 100px 28px}.panel-exercise .limb-line{fill:none;stroke:#d4a5ff;stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.panel-exercise .joint{fill:#fff;stroke:#d4a5ff;stroke-width:6}.panel-exercise .motion-arc{fill:none;stroke:#f0c8ff;stroke-width:4;stroke-dasharray:12 10;animation:signal-flow 2s linear infinite}
 .panel-hormones{--accent:#a8b9ff;--glow:#586bdb;border-radius:55px 55px 20px 20px}.panel-hormones .molecule-bonds{fill:none;stroke:#a8b9ff;stroke-width:7;stroke-dasharray:10 8;animation:signal-flow 3s linear infinite}.panel-hormones .molecule-node{fill:#d9e0ff;stroke:#697ee8;stroke-width:5;animation:visual-breathe 2.5s ease-in-out infinite alternate}
 .panel-general{--accent:#72e6c2;--glow:#3e9fba;border-radius:34px}.panel-general .timeline-line{stroke:#72e6c2;stroke-width:5;stroke-dasharray:12 12}.panel-general .timeline-node{fill:#10283a;stroke:#72e6c2;stroke-width:5}.panel-general .timeline-node.main{fill:#23506a;stroke:#fff}.panel-general .timeline-check{fill:none;stroke:#72e6c2;stroke-width:12;stroke-linecap:round;stroke-linejoin:round}
+/* Rectangular safe card + per-scene composition variation. */
+.science-panel[data-variant="1"] .science-svg{transform:scale(.88) translateY(8px);filter:drop-shadow(0 12px 18px rgba(0,0,0,.35))}
+.science-panel[data-variant="2"] .science-svg{transform:scale(.94) rotate(-2deg);filter:saturate(1.2) contrast(1.08)}
+.science-panel[data-variant="1"]{background:linear-gradient(135deg,rgba(8,20,34,.96),rgba(14,34,50,.88))}
+.science-panel[data-variant="2"]{background:linear-gradient(35deg,rgba(5,13,23,.96),rgba(24,30,50,.9))}
+.science-panel .science-svg text{paint-order:stroke;stroke:rgba(4,10,18,.72);stroke-width:3px;stroke-linejoin:round}
+.science-panel .svg-label{font-size:17px}
+.science-panel .svg-small{font-size:13px}
 /* Scene presentation rhythm: the same scientific panel gets a distinct composition per beat. */
 .presentation-hook{border:3px solid var(--accent);box-shadow:0 0 0 8px rgba(255,255,255,.05),0 28px 90px var(--glow);animation:hook-enter .55s cubic-bezier(.2,.8,.2,1) both}
 .presentation-hook .science-heading{font-size:34px;letter-spacing:3px;text-shadow:0 0 22px var(--glow)}
