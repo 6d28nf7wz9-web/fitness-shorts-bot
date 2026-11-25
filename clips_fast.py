@@ -28,7 +28,11 @@ def _ordered_keywords(scene):
     ]
 
     if not keywords:
-        keywords = ["gym workout", "healthy food"]
+        raise RuntimeError(
+            "Scene is missing authored stock keywords. Refusing to use generic "
+            "'gym workout'/'healthy food' footage because it can be unrelated "
+            "to the narration. Regenerate or repair output/script.json."
+        )
 
     return keywords
 

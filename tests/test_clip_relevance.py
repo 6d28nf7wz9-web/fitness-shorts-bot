@@ -245,5 +245,72 @@ class ClipRelevanceRegressionTests(unittest.TestCase):
         self.assertTrue(all(len(query) <= 100 for query in variants))
 
 
+
+    def test_quality_gate_blocks_even_one_weak_cut_in_a_mixed_scene(self):
+        scenes = [
+            {"narration": "Steroids can shut down natural hormone signals."},
+            {"narration": "Synthetic hormones may suppress the brain signals that normally regulate testosterone production."},
+            {"narration": "Lower signaling can reduce sperm production and affect fertility over time in men."},
+            {"narration": "Discuss hormone use with a qualified clinician before making any decisions about treatment."},
+        ]
+        clip_info = [
+            {
+                "scene": index,
+                "source": "stock",
+                "clips": [
+                    {"pixabay_id": 30000 + index, "keyword": "testosterone", "tags": "testosterone hormone science"},
+                    {"pixabay_id": 40000 + index, "keyword": "gym workout", "tags": "castle building architecture night"},
+                ],
+            }
+            for index in range(1, 5)
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = os.path.join(tmp, "output")
+            os.makedirs(output_dir)
+            with open(os.path.join(output_dir, "script.json"), "w", encoding="utf-8") as f:
+                json.dump({"title": "Hormone facts", "scenes": scenes}, f)
+            with open(os.path.join(output_dir, "clips_info.json"), "w", encoding="utf-8") as f:
+                json.dump(clip_info, f)
+
+            original_cwd = os.getcwd()
+            try:
+                os.chdir(tmp)
+                captured = io.StringIO()
+                with redirect_stdout(captured):
+                    with self.assertRaises(SystemExit) as raised:
+                        quality_check_main()
+                self.assertEqual(raised.exception.code, 1)
+                self.assertIn("1/2 footage cuts lack", captured.getvalue())
+            finally:
+                os.chdir(original_cwd)
+
+    def test_quality_gate_requires_clip_metadata(self):
+        scenes = [
+            {"narration": "Steroids can shut down natural hormone signals."},
+            {"narration": "Synthetic hormones may suppress the brain signals that normally regulate testosterone production."},
+            {"narration": "Lower signaling can reduce sperm production and affect fertility over time in men."},
+            {"narration": "Discuss hormone use with a qualified clinician before making any decisions about treatment."},
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = os.path.join(tmp, "output")
+            os.makedirs(output_dir)
+            with open(os.path.join(output_dir, "script.json"), "w", encoding="utf-8") as f:
+                json.dump({"title": "Hormone facts", "scenes": scenes}, f)
+
+            original_cwd = os.getcwd()
+            try:
+                os.chdir(tmp)
+                captured = io.StringIO()
+                with redirect_stdout(captured):
+                    with self.assertRaises(SystemExit) as raised:
+                        quality_check_main()
+                self.assertEqual(raised.exception.code, 1)
+                self.assertIn("Clip metadata is missing", captured.getvalue())
+            finally:
+                os.chdir(original_cwd)
+
+
 if __name__ == "__main__":
     unittest.main()

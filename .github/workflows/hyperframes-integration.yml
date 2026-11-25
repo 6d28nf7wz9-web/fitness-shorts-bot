@@ -5,15 +5,21 @@ on:
     branches: [main]
     paths:
       - 'hyperframes_render.py'
+      - 'visual_engine.py'
+      - 'scene_presentation_director.py'
       - 'assemble.py'
       - '.github/workflows/hyperframes-integration.yml'
   pull_request:
     branches: [main]
     paths:
       - 'hyperframes_render.py'
+      - 'visual_engine.py'
+      - 'scene_presentation_director.py'
       - 'assemble.py'
       - '.github/workflows/hyperframes-integration.yml'
       - 'tests/test_hyperframes_render.py'
+      - 'tests/test_scene_presentation_director.py'
+      - 'tests/test_visual_variety.py'
   workflow_dispatch:
 
 permissions:
@@ -31,34 +37,75 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Install FFmpeg and HyperFrames
+      - name: Install FFmpeg, HyperFrames and presenter runtime
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg fonts-dejavu-core
           npm install --global hyperframes@0.9.31
+          python -m pip install --upgrade pip
+          python -m pip install numpy pillow
           hyperframes doctor
-      - name: Create safe synthetic fixture (no YouTube upload)
+      - name: Create diverse safe synthetic fixture (no YouTube upload)
         run: |
           mkdir -p output/clips output/audio
           python - <<'PY'
           import json, subprocess
-          scenes = []
-          audio = []
-          for i in range(1, 5):
+          topics = [
+              ("Hook", "Stop making this recovery mistake.", "general"),
+              ("Muscle", "Muscle growth depends on recovery and progressive overload.", "muscle"),
+              ("Nutrition", "A balanced meal supports digestion and energy.", "nutrition"),
+              ("Heart", "Heart rate and blood flow deliver oxygen.", "heart"),
+              ("Energy balance", "A calorie deficit changes fat loss over time.", "fat_loss"),
+              ("Hydration", "Water and electrolytes support performance.", "hydration"),
+              ("Hormones", "Insulin and cortisol are hormone signals.", "hormones"),
+              ("Movement", "A squat changes joint range and movement mechanics.", "exercise"),
+              ("Payoff", "Use this recovery strategy consistently. Follow FitFuel.", "general"),
+          ]
+          scenes, audio = [], []
+          for i, (title, narration, category) in enumerate(topics, 1):
               subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i",f"testsrc2=s=1080x1920:r=30:d=2","-an","-c:v","libx264","-pix_fmt","yuv420p",f"output/clips/scene_{i}.mp4"],check=True)
               voice=f"output/audio/voice_{i}.wav"
-              subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i","sine=frequency=440:duration=2","-c:a","pcm_s16le",voice],check=True)
-              scenes.append({"narration":f"Test narration for scene {i} stays readable.","visual_title":f"TEST SCENE {i}","visual_subtitle":"SAFE TEXT LAYOUT"})
+              subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i",f"sine=frequency={400+i*25}:duration=2","-c:a","pcm_s16le",voice],check=True)
+              scenes.append({"narration":narration,"visual_title":title,"visual_subtitle":"FITFUEL SCIENCE PREVIEW","visual_category":category})
               audio.append({"scene":i,"seconds":2.0,"file":voice})
-          json.dump({"title":"HyperFrames fixture","scenes":scenes},open("output/script.json","w"))
+          json.dump({"title":"FitFuel diverse visual fixture","scenes":scenes},open("output/script.json","w"))
           json.dump(audio,open("output/audio_info.json","w"))
           PY
       - name: Render HyperFrames composition
         run: python hyperframes_render.py
+      - name: Verify scene-specific visuals and motion metadata
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          html = Path("output/hyperframes/index.html").read_text(encoding="utf-8")
+          required = ["panel-muscle", "panel-nutrition", "panel-heart", "panel-fat_loss", "panel-hydration", "panel-hormones", "panel-exercise"]
+          missing = [item for item in required if item not in html]
+          assert not missing, f"Missing category-specific visuals: {missing}"
+          assert 'presentation-hook' in html, "Hook treatment was not rendered"
+          assert 'presentation-payoff' in html, "Payoff treatment was not rendered"
+          assert 'data-motion="snap_reveal"' in html, "Hook motion cue missing"
+          assert 'data-motion="resolve_hold"' in html, "Payoff motion cue missing"
+          print("Verified 7 distinct science categories, hook/payoff and motion metadata.")
+          PY
       - name: Assemble final fixture with captions and audio
         run: python assemble.py
+      - name: Add audio-reactive FitFuel presenter
+        run: |
+          python avatar.py short
+          test -s output/final.mp4.avatar
+
       - name: Verify output dimensions and duration
         run: |
-          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 output/final.mp4
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 output/final.mp4)" = "1080"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=s=x:p=0 output/final.mp4)" = "1920"
           ffprobe -v error -show_entries format=duration -of csv=p=0 output/final.mp4
           test -s output/final.mp4
+      - name: Upload visual preview artifact (never published)
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-2d-scene-preview
+          path: |
+            output/final.mp4
+            output/hyperframes/index.html
+          if-no-files-found: error
+          retention-days: 7

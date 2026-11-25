@@ -35,7 +35,7 @@ def main():
         errors.append("Title exceeds 60 characters")
 
     if not os.path.exists(clip_path):
-        warnings.append("Clip metadata not found yet; run clips_fast.py before this gate.")
+        errors.append("Clip metadata is missing; refusing to pass the quality gate before footage verification.")
     else:
         with open(clip_path, encoding="utf-8") as f:
             clips = json.load(f)
@@ -59,15 +59,10 @@ def main():
                 score = relevance(hit, part.get("keyword", ""), narration)
                 if score < 2:
                     weak.append(str(part.get("pixabay_id")))
-            if weak and len(weak) == len(parts):
+            if weak:
                 errors.append(
-                    f"Scene {i}: all {len(parts)} footage cuts lack a specific scene match "
-                    f"(IDs {', '.join(weak[:4])}); blocking upload"
-                )
-            elif weak:
-                warnings.append(
                     f"Scene {i}: {len(weak)}/{len(parts)} footage cuts lack a specific scene match "
-                    f"(IDs {', '.join(weak[:4])})"
+                    f"(IDs {', '.join(weak[:4])}); blocking upload"
                 )
 
     print(f"Quality gate: {len(scenes)} scenes, {total} spoken words")

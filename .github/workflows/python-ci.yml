@@ -22,12 +22,17 @@ jobs:
         run: python -m compileall -q .
       - name: Validate schedules and YouTube upload quota
         run: python check_setup.py
+      - name: Test scene-specific visual engine and presentation director
+        run: |
+          python -m unittest discover -s tests -p "test_visual_variety.py" -v
+          python -m unittest discover -s tests -p "test_scene_presentation_director.py" -v
       - name: Test bounded Gemini script generation
         run: |
           python -m pip install google-genai
           python -m unittest discover -s tests -p "test_gen_script_timeout.py" -v
           python -m unittest discover -s tests -p "test_gen_script_quota.py" -v
           python -m unittest discover -s tests -p "test_long_script.py" -v
+          python -m unittest discover -s tests -p "test_script_keyword_repair.py" -v
       - name: Test Shorts metadata packaging validation
         run: python -m unittest discover -s tests -p "test_packaging_validation.py" -v
       - name: Test free multi-provider AI failover
@@ -47,6 +52,10 @@ jobs:
         run: |
           python -m pip install requests
           python -m unittest discover -s tests -p "test_clip_relevance.py" -v
+      - name: Test fail-closed stock keyword selection
+        run: |
+          python -m pip install requests
+          python -m unittest discover -s tests -p "test_clips_fast_keywords.py" -v
       - name: Test offline growth report
         run: python -m unittest discover -s tests -p "test_growth_report.py" -v
       - name: Test analytics-driven topic and hook intelligence
