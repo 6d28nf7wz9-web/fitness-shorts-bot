@@ -16,6 +16,16 @@ class VisualPolishTests(unittest.TestCase):
         self.assertIn("border-radius:24px!important", css)
         self.assertIn("overflow:hidden;contain:strict", css)
 
+    def test_every_science_category_uses_the_same_rectangular_safe_frame(self):
+        for category in ("muscle", "nutrition", "heart", "fat_loss", "hydration", "exercise", "hormones", "general"):
+            _, panel = build_visual_panel({"visual_type": category}, 1)
+            self.assertIn('class="science-panel', panel)
+            self.assertIn('preserveAspectRatio="xMidYMid meet"', panel)
+        css = visual_css()
+        self.assertIn("border-radius:24px!important;overflow:hidden!important", css)
+        self.assertIn("clip-path:inset(0 round 24px)", css)
+        self.assertIn("max-width:90%;max-height:400px", css)
+
     def test_word_karaoke_tags_are_valid_ass_commands(self):
         script = {"scenes": [{"narration": "Build muscle with enough protein"}]}
         captions = build_captions(script, [{"seconds": 3.0}])
