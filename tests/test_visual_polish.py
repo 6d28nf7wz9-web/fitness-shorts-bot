@@ -26,6 +26,17 @@ class VisualPolishTests(unittest.TestCase):
         self.assertIn("clip-path:inset(0 round 24px)", css)
         self.assertIn("max-width:90%;max-height:400px", css)
 
+    def test_long_science_labels_are_scaled_not_truncated(self):
+        category, panel = build_visual_panel({
+            "visual_type": "muscle",
+            "visual_title": "A scientific label that is deliberately much longer than the safe frame"
+        }, 1)
+        self.assertEqual(category, "muscle")
+        self.assertIn("PROTEIN", panel)
+        # SVG label text is preserved and constrained to its viewBox width.
+        self.assertIn('textLength="', panel)
+        self.assertIn('lengthAdjust="spacingAndGlyphs"', panel)
+
     def test_word_karaoke_tags_are_valid_ass_commands(self):
         script = {"scenes": [{"narration": "Build muscle with enough protein"}]}
         captions = build_captions(script, [{"seconds": 3.0}])
