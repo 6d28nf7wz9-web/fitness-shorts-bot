@@ -66,12 +66,12 @@ def _svg(category, labels):
     # are constrained to the safe inner width while retaining their full content.
     def constrain_long_labels(match):
         tag = match.group(0)
-        label = re.sub(r"<[^>]+>", "", match.group(1))
+        label = re.sub(r"<[^>]+>", "", match.group(2))
         if len(label) <= 24:
             return tag
         width = min(640, max(220, int(len(label) * 9.5)))
         return tag.replace(">", f' textLength="{width}" lengthAdjust="spacingAndGlyphs">', 1)
-    return re.sub(r"<text\\b([^>]*)>(.*?)</text>", lambda m: constrain_long_labels(m), svg)
+    return re.sub(r"<text\\b([^>]*)>(.*?)</text>", constrain_long_labels, svg)
 
 
 def build_visual_panel(scene, index=1):
