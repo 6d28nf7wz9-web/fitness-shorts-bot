@@ -207,7 +207,7 @@ def render(video, samples, layout):
     tmp = video[:-4] + "_av.mp4"
     fc = (
         f"[1:v]fps={OUT_FPS},format=rgba[av];"
-        f"[0:v][av]overlay=x={cfg['x']}:y='H-h-{cfg['bottom']}+{BOB}*sin(2*PI*t*0.9)'"
+        f"[0:v][av]overlay=x='{cfg['x']}+12*sin(2*PI*t*0.42)+5*sin(2*PI*t*1.15)':y='H-h-{cfg['bottom']}+{BOB}*sin(2*PI*t*0.9)+4*abs(sin(2*PI*t*2.1))'"
         f":eof_action=repeat:format=auto[v]"
     )
     cmd = [
