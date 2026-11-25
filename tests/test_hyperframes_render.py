@@ -21,7 +21,7 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertLessEqual(len(lines), 4)
         self.assertTrue(all(len(line) <= 32 for line in lines))
         self.assertGreaterEqual(size, 48)
-        self.assertLessEqual(size, 43)
+        self.assertLessEqual(size, 78)
         self.assertTrue(lines[-1].endswith("…"))
 
     def test_long_subtitle_is_bounded_to_safe_box(self):
@@ -29,7 +29,7 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertLessEqual(len(lines), 3)
         self.assertTrue(all(len(line) <= 43 for line in lines))
         self.assertGreaterEqual(size, 30)
-        self.assertLessEqual(size, 78)
+        self.assertLessEqual(size, 43)
         self.assertTrue(lines[-1].endswith("…"))
 
     def test_empty_subtitle_has_safe_fallback(self):
