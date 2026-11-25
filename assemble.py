@@ -80,7 +80,12 @@ def build_captions(script, audio):
             d = duration * w / total_w
             color = yellow if k % 3 == 2 else ""
             fs = "{\\fs%d}" % fit_size(c)
-            lines.append(f"Dialogue: 0,{ass_time(t)},{ass_time(t + d)},Cap,,0,0,0,,{pop}{color}{fs}{c}")
+            karaoke = ""
+            word_weights = [max(len(word), 1) for word in c.split()]
+            word_total = sum(word_weights) or 1
+            for word, word_weight in zip(c.split(), word_weights):
+                karaoke += "{\\k%d}%s " % (max(1, int(round(d * 100 * word_weight / word_total))), word)
+            lines.append(f"Dialogue: 0,{ass_time(t)},{ass_time(t + d)},Cap,,0,0,0,,{pop}{color}{fs}{karaoke.strip()}")
             t += d
             k += 1
         scene_start += duration
