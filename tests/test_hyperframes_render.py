@@ -50,9 +50,14 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         upload_step = workflow.split("      - name: Upload to YouTube", 1)[1].split(
             "      - name: Save preview video artifact", 1
         )[0]
-        self.assertIn("if: ${{ !inputs.preview_only }}", upload_step)
-        self.assertIn("SKIP_UPLOAD: ${{ inputs.preview_only && '1' || '' }}", workflow)
+        self.assertIn("github.event_name == 'schedule'", upload_step)
+        self.assertIn("github.event_name == 'push'", workflow)
+        self.assertIn("SKIP_UPLOAD: ${{ (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.preview_only)) && '1' || '' }}", workflow)
         self.assertIn("default: true", workflow)
+        preview_step = workflow.split("      - name: Save preview video artifact", 1)[1].split(
+            "      - name: Save learning data", 1
+        )[0]
+        self.assertIn("github.event_name == 'push'", preview_step)
 
     def test_render_fixture_composites_audio_reactive_presenter(self):
         with open(".github/workflows/hyperframes-integration.yml", encoding="utf-8") as f:
