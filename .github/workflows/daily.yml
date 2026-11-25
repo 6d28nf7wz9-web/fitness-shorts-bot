@@ -97,7 +97,10 @@ jobs:
           python assemble.py
           python avatar.py short
 
-      - name: Upload to YouTube (skipped in preview-only mode)
+      # The workflow-level condition is the primary safety barrier; upload.py
+      # also checks SKIP_UPLOAD before creating a YouTube client.
+      - name: Upload to YouTube
+        if: ${{ !inputs.preview_only }}
         run: python upload.py
 
       - name: Save preview video artifact
