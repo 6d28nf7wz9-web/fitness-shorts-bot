@@ -44,13 +44,22 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn('HYPERFRAMES_RENDER: "1"', workflow)
         self.assertNotIn(r"public\n", workflow)
 
+    def test_preview_workflow_has_independent_upload_barrier(self):
+        with open(".github/workflows/daily.yml", encoding="utf-8") as f:
+            workflow = f.read()
+        upload_step = workflow.split("      - name: Upload to YouTube", 1)[1].split(
+            "      - name: Save preview video artifact", 1
+        )[0]
+        self.assertIn("if: ${{ !inputs.preview_only }}", upload_step)
+        self.assertIn("SKIP_UPLOAD: ${{ inputs.preview_only && '1' || '' }}", workflow)
+        self.assertIn("default: true", workflow)
+
     def test_render_fixture_composites_audio_reactive_presenter(self):
         with open(".github/workflows/hyperframes-integration.yml", encoding="utf-8") as f:
             workflow = f.read()
         self.assertIn("python -m pip install numpy pillow", workflow)
         self.assertIn("python avatar.py short", workflow)
         self.assertIn("test -s output/final.mp4.avatar", workflow)
-
 
     def test_scene_visuals_classify_common_fitness_topics(self):
         self.assertEqual(classify_scene({"narration": "Water improves hydration"}), "hydration")
