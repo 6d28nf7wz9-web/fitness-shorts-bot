@@ -128,13 +128,19 @@ def scene_terms(keyword, context=""):
     return specific if specific else terms
 
 
-def keyword_is_relevant(text):
+def keyword_is_relevant(text, context=""):
+    """Validate authored stock queries using the scene meaning as supporting context."""
     w = keyword_words(text)
+    context_words = words_of(context)
 
     if w & _STRONG:
         return True
 
-    if w & _WEAK and w & _CONTEXT:
+    if w & _WEAK and ((w & _CONTEXT) or (context_words & _CONTEXT)):
+        return True
+
+    # Allow specific scene queries when narration/visuals establish fitness context.
+    if (w & _WEAK) and (context_words & (_STRONG | _CONTEXT)):
         return True
 
     phrases = [
