@@ -11,6 +11,7 @@ from clips import (
     download,
     process,
 )
+from relevance import relevance
 
 PART_SECONDS = float(os.getenv("PART_SECONDS", "2.6"))
 MAX_PARTS = 4
@@ -206,9 +207,24 @@ def main():
 
             part_files.append(part_file)
 
+            match_score = relevance(hit, keyword, narration)
+            if match_score < 1:
+                raise RuntimeError(
+                    f"Scene {scene_index} cut {part_index + 1} failed the post-selection "
+                    f"relevance check (score={match_score}); refusing unrelated footage."
+                )
+            match_level = "specific" if match_score >= 2 else "category"
+            if match_level != "specific" and os.getenv("ALLOW_CATEGORY_ONLY_CLIPS", "0") != "1":
+                raise RuntimeError(
+                    f"Scene {scene_index} cut {part_index + 1} is only a category-level "
+                    "match; refusing to render it as a specific match."
+                )
+
             scene_clips.append({
                 "source": clip_source,
                 "query": query,
+                "relevance_score": match_score,
+                "match_level": match_level,
                 "keyword": keyword,
                 "pixabay_id": clip_id,
                 "page": hit.get("pageURL"),
@@ -230,7 +246,8 @@ def main():
 
             print(
                 f"  cut {part_index + 1}: "
-                f"'{query}' -> {kind}, id {clip_id}"
+                f"'{query}' -> {kind}, id {clip_id}, "
+                f"match={match_level} (score {match_score})"
             )
 
             print(
