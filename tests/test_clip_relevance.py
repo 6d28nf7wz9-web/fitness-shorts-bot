@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from clips import choose_clip, keyword_variants
 from quality_check import main as quality_check_main
-from relevance import relevance
+from relevance import keyword_is_relevant, relevance
 
 
 def make_hit(hit_id, tags):
@@ -31,6 +31,19 @@ def make_hit(hit_id, tags):
 
 
 class ClipRelevanceRegressionTests(unittest.TestCase):
+    def test_weak_stock_query_is_validated_against_scene_context(self):
+        self.assertFalse(keyword_is_relevant("water bottle hydration"))
+        self.assertTrue(keyword_is_relevant(
+            "water bottle hydration",
+            "Hydration supports performance during workout training."
+        ))
+
+    def test_unrelated_weak_query_stays_rejected(self):
+        self.assertFalse(keyword_is_relevant(
+            "water bottle on table",
+            "A person discusses a general history topic."
+        ))
+
     def test_category_fallback_cannot_turn_food_footage_into_a_training_match(self):
         food_hit = make_hit(
             11638,
