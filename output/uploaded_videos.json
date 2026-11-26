@@ -700,5 +700,19 @@
     "uploaded_at": "2026-11-26T15:25:50.694056+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "m7P_H67-dr0",
+    "title": "Cortisol: Villain or Misunderstood Ally?",
+    "topic": "Cortisol Misunderstood Villain",
+    "series": "Hormone Lab",
+    "episode_number": 10,
+    "episode_topic": "Cortisol: stress hormone or misunderstood villain?",
+    "hook": "Cortisol isn’t the enemy you think.",
+    "script_word_count": 54,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-26T20:14:36.198138+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
