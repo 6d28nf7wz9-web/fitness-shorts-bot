@@ -1,6 +1,6 @@
 import unittest
 
-from visual_engine import build_visual_panel, visual_css
+from visual_engine import build_visual_panel, visual_css, scene_archetype
 from assemble import build_captions
 
 
@@ -36,6 +36,22 @@ class VisualPolishTests(unittest.TestCase):
         # SVG label text is preserved and constrained to its viewBox width.
         self.assertIn('textLength="', panel)
         self.assertIn('lengthAdjust="spacingAndGlyphs"', panel)
+
+    def test_scene_specific_visual_models_change_with_the_claim(self):
+        a = {"narration": "Protein synthesis creates new muscle proteins"}
+        b = {"narration": "Progressive overload means lifting heavier loads"}
+        c = {"narration": "Sleep and rest support muscle recovery"}
+        self.assertEqual(scene_archetype(a, "muscle"), "synthesis")
+        self.assertEqual(scene_archetype(b, "muscle"), "overload")
+        self.assertEqual(scene_archetype(c, "muscle"), "recovery")
+        _, pa = build_visual_panel(a, 1)
+        _, pb = build_visual_panel(b, 2)
+        self.assertIn('data-archetype="synthesis"', pa)
+        self.assertNotEqual(pa, pb)
+
+    def test_nutrition_visual_models_match_the_claim(self):
+        self.assertEqual(scene_archetype({"narration": "Protein absorption"}, "nutrition"), "protein_path")
+        self.assertEqual(scene_archetype({"narration": "Meal timing before training"}, "nutrition"), "timing")
 
     def test_word_karaoke_tags_are_valid_ass_commands(self):
         script = {"scenes": [{"narration": "Build muscle with enough protein"}]}
