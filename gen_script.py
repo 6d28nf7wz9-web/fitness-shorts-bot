@@ -545,7 +545,7 @@ def performance_context(memory):
 def build_prompt(content_type, used, trends, memory, research, series=None):
     series = series or SERIES[len(used) % len(SERIES)]
     recent = (
-        ", ".join(str(topic) for topic in used[-80:])
+        ", ".join(str(topic) for topic in used[-25:])
         if used
         else "none yet"
     )
@@ -556,7 +556,7 @@ def build_prompt(content_type, used, trends, memory, research, series=None):
         lines = "\n".join(
             f"- {trend.get('topic')} "
             f"(safe angle: {trend.get('safe_angle', '')})"
-            for trend in trends[:8]
+            for trend in trends[:5]
         )
 
         trend_block = (
@@ -566,8 +566,8 @@ def build_prompt(content_type, used, trends, memory, research, series=None):
         )
 
     research_block = chr(10).join(
-        f"- PMID {p['pmid']} | {p.get('title', '')} | {p.get('journal', '')} ({p.get('year', '')}) | DOI: {p.get('doi') or 'none'} | Abstract: {p.get('abstract', '')}"
-        for p in research
+        f"- PMID {p['pmid']} | {p.get('title', '')} | {p.get('journal', '')} ({p.get('year', '')}) | DOI: {p.get('doi') or 'none'} | Abstract: {str(p.get('abstract', '')).strip()[:420]}"
+        for p in research[:4]
     ) or "No PubMed records retrieved. Use conservative established guidance only and return sources=[]; never fabricate citations."
 
     return f'''
@@ -676,6 +676,9 @@ VISUAL SEARCH RULES:
 
 - Every scene needs 2-3 DIFFERENT, realistic,
   filmable stock-footage searches separated by |.
+- At least one search per scene MUST contain an explicit fitness/food anchor
+  such as athlete, workout, gym, muscle, exercise, protein, chicken, oats,
+  cooking, meal prep, or eating; never use abstract-only search terms.
 - Every search must visibly show the exact action,
   food, or equipment being discussed.
 - Include concrete terms such as dumbbell, squat, barbell,
@@ -713,16 +716,17 @@ def repair_keywords(data):
 
         valid = []
 
+        context = " ".join(str(scene.get(key, "")) for key in (
+            "narration", "visual_title", "visual_subtitle", "visual_instruction"
+        ))
         for keyword in (
             item.strip()
             for item in original.split("|")
         ):
             if (
                 keyword
-                and keyword_is_relevant(keyword)
-                and keyword.lower() not in [
-                    value.lower() for value in valid
-                ]
+                and keyword_is_relevant(keyword, context)
+                and keyword.lower() not in [value.lower() for value in valid]
             ):
                 valid.append(keyword)
 
@@ -815,8 +819,11 @@ def validate(data):
         if not keywords:
             return "empty keyword"
 
+        scene_context = " ".join(str(scene.get(key, "")) for key in (
+            "narration", "visual_title", "visual_subtitle", "visual_instruction"
+        ))
         if not any(
-            keyword_is_relevant(keyword)
+            keyword_is_relevant(keyword, scene_context)
             for keyword in keywords
         ):
             return (
