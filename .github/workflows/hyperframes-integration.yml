@@ -63,7 +63,7 @@ jobs:
           ]
           scenes, audio = [], []
           for i, (title, narration, category) in enumerate(topics, 1):
-              subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i",f"testsrc2=s=1080x1920:r=30:d=2","-an","-c:v","libx264","-pix_fmt","yuv420p",f"output/clips/scene_{i}.mp4"],check=True)
+              subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i",f"color=c=0x172b3d:s=1080x1920:r=30:d=2,noise=alls=10:allf=t+u,drawbox=x=110:y=320:w=190:h=1250:color=0x263e50@0.78:t=fill,drawbox=x=690:y=470:w=260:h=1050:color=0x344b5d@0.62:t=fill,drawbox=x=400:y=250:w=18:h=1450:color=0xc7a66a@0.30:t=fill,boxblur=18:2","-an","-c:v","libx264","-pix_fmt","yuv420p",f"output/clips/scene_{i}.mp4"],check=True)
               voice=f"output/audio/voice_{i}.wav"
               subprocess.run(["ffmpeg","-y","-loglevel","error","-f","lavfi","-i",f"sine=frequency={400+i*25}:duration=2","-c:a","pcm_s16le",voice],check=True)
               scenes.append({"narration":narration,"visual_title":title,"visual_subtitle":"FITFUEL SCIENCE PREVIEW","visual_category":category})
