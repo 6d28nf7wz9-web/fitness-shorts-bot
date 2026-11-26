@@ -24,6 +24,19 @@ class ScriptKeywordRepairTests(unittest.TestCase):
         repaired = repair_keywords(data)
         self.assertEqual(repaired["scenes"][0]["keyword"], "")
 
+    def test_keeps_weak_keyword_when_scene_context_makes_it_relevant(self):
+        data = {
+            "scenes": [{
+                "narration": "Hydration supports performance during workout training.",
+                "keyword": "water bottle hydration",
+            }]
+        }
+        repaired = repair_keywords(data)
+        self.assertEqual(
+            repaired["scenes"][0]["keyword"],
+            "water bottle hydration",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
