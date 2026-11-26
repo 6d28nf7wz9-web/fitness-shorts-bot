@@ -83,6 +83,37 @@ def main():
 .subbox{position:absolute;left:130px;right:130px;top:790px;height:150px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center}
 .sub{font-weight:700;line-height:1.22;color:#72e6c2;text-shadow:0 3px 18px #000;max-width:820px;overflow-wrap:anywhere}
 
+/* Real scene composition changes: each presentation style relocates and resizes
+   the title, supporting copy and science panel instead of only changing its SVG. */
+.scene-layout-hook .titlebox{top:330px;height:260px;justify-content:flex-start;text-align:left}
+.scene-layout-hook .subbox{top:650px;left:90px;right:280px;justify-content:flex-start;text-align:left}
+.scene-layout-hook .science-panel{top:990px;height:570px}
+.scene-layout-payoff .titlebox{top:350px;height:240px}
+.scene-layout-payoff .subbox{top:650px}
+.scene-layout-payoff .science-panel{top:930px;height:590px;left:110px;right:110px}
+.scene-layout-stat_card .titlebox{top:300px;height:210px}
+.scene-layout-stat_card .subbox{top:560px}
+.scene-layout-stat_card .science-panel{top:850px;height:470px;left:130px;right:130px}
+.scene-layout-comparison .titlebox{top:330px;height:240px;left:100px;right:100px}
+.scene-layout-comparison .subbox{top:610px}
+.scene-layout-comparison .science-panel{top:900px;left:95px;right:95px;height:570px;border:2px solid rgba(255,255,255,.3)}
+.scene-layout-comparison .science-panel:after{content:"";position:absolute;top:105px;bottom:30px;left:50%;border-left:2px dashed rgba(255,255,255,.42)}
+.scene-layout-timeline .titlebox{top:300px;height:220px;left:140px;right:140px}
+.scene-layout-timeline .subbox{top:555px}
+.scene-layout-timeline .science-panel{top:830px;height:640px;left:105px;right:105px}
+.scene-layout-presenter_focus .titlebox{top:430px;left:95px;right:550px;height:420px;justify-content:flex-start;text-align:left}
+.scene-layout-presenter_focus .subbox{top:900px;left:95px;right:550px;justify-content:flex-start;text-align:left}
+.scene-layout-presenter_focus .science-panel{top:690px;left:555px;right:42px;height:620px}
+.scene-layout-presenter_focus .science-svg{left:2%;width:96%;height:430px}
+.scene-layout-broll_focus .titlebox{top:390px;height:240px}
+.scene-layout-broll_focus .subbox{top:670px}
+.scene-layout-broll_focus .science-panel{top:1290px;left:135px;right:135px;height:300px;opacity:.9}
+.scene-layout-broll_focus .science-svg{top:70px;height:210px}
+.scene-layout-broll_focus .science-heading{top:28px}
+.scene-layout-diagram .science-panel{top:990px;height:550px}
+.scene-layout-hook .title,.scene-layout-payoff .title{letter-spacing:-1px}
+.scene-layout-comparison .science-panel{background:linear-gradient(90deg,rgba(8,25,42,.96) 0 49.7%,rgba(20,30,48,.96) 50.3% 100%)}
+.scene-layout-broll_focus .shade{background:linear-gradient(180deg,rgba(4,10,18,.65),rgba(4,10,18,.08) 42%,rgba(4,10,18,.76))}
 """
     css += visual_css()
     blocks = []
@@ -104,7 +135,7 @@ def main():
         blocks.append(f'<video id="bg{i}" data-start="{start}" data-duration="{enddur}" data-track-index="0" data-volume="0" muted src="assets/scene_{i}.mp4"></video>')
         _, science_panel = build_visual_panel(scene, i)
         blocks.append(f"""
-<div id="overlay{i}" class="clip" data-start="{start}" data-duration="{enddur}" data-track-index="2">
+<div id="overlay{i}" class="clip scene-layout-{html.escape(str(scene.get("presentation_style") or "diagram"))}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
