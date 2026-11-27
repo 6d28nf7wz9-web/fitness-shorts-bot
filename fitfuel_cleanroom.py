@@ -11,30 +11,28 @@ from stock_sources import track_coverr_download
 OUT=Path("output/cleanroom"); W,H,FPS=1080,1920,30
 STOP={"the","a","an","and","or","but","to","of","in","on","for","with","is","are","was","were","be","this","that","your","you","it","as","by","from","how","why","what","when","can","will","do","does","not","than","then"}
 SYNONYMS={
- "muscle":{"muscle","muscles","hypertrophy","growth","biceps","triceps"},
- "protein":{"protein","amino","aminoacid","whey","chicken","eggs"},
+ "muscle":{"muscle","muscles","hypertrophy","biceps","triceps","bodybuilding","bodybuilder"},
+ "protein":{"protein","amino","whey","chicken","eggs"},
  "sleep":{"sleep","sleeping","bed","rest","recovery"},
- "hydration":{"water","hydration","dehydration","fluid","electrolyte","sodium"},
+ "hydration":{"water","hydration","dehydration","fluid","electrolyte"},
  "heart":{"heart","cardio","pulse","heartbeat","blood","circulation"},
- "fat":{"fat","adipose","weight","calorie","deficit","neat","walking","steps"},
- "exercise":{"exercise","training","workout","lifting","squat","deadlift","running","athlete"},
+ "fat":{"fat","adipose","weight","calorie","deficit"},
+ "exercise":{"exercise","training","workout","lifting","squat","deadlift","athlete"},
  "food":{"food","meal","nutrition","cooking","eating","diet","kitchen"},
- "hormone":{"hormone","insulin","cortisol","testosterone","estrogen","ghrelin","leptin"}}
-def words(text):
- return [x for x in re.findall(r"[a-z0-9]+",str(text or "").lower()) if x not in STOP and len(x)>2]
-def expand(tokens):
- out=set(tokens)
- for token in tokens:
-  for group in SYNONYMS.values():
-   if token in group: out.update(group)
- return out
+ "hormone":{"hormone","insulin","cortisol","testosterone","estrogen","ghrelin","leptin"},
+ "genetics":{"genetic","genetics","dna","gene","genes","hereditary","chromosome"}}
+GENERIC={"fitness","sport","sports","person","people","healthy","active","lifestyle","strong","fit","exercise","workout","training","athlete"}
 def score_clip(hit,narration,keywords):
- metadata=" ".join(str(hit.get(k,"")) for k in ("tags","pageURL","user","title","description"))
- meta=set(words(metadata)); raw=set(words(" ".join(keywords))); target=expand(words(narration)+list(raw))
- if not meta or not target: return 0.0,[]
- overlap=target & meta; exact=raw & meta
- specificity=len(exact)/max(1,len(raw)); coverage=len(overlap)/max(1,min(8,len(target)))
- return round(min(1.0,coverage*1.8+specificity*.45),4),sorted(overlap)
+ metadata=" ".join(str(hit.get(k,"")) for k in ("tags","title","description"))
+ meta=set(words(metadata)); raw=set(words(" ".join(keywords))); narrative=set(words(narration))
+ specific=expand((raw|narrative)-GENERIC)
+ exact=specific & meta
+ meaningful=exact-GENERIC
+ if not meta or not specific or not meaningful: return 0.0,[]
+ coverage=len(meaningful)/max(1,min(5,len(specific-GENERIC)))
+ query_match=len((raw-GENERIC)&meta)/max(1,len(raw-GENERIC))
+ return round(min(1.0,coverage*0.72+query_match*0.28),4),sorted(meaningful)
+
 def build_storyboard(script,audio):
  scenes=script.get("scenes") or []
  if not scenes or len(scenes)!=len(audio): raise ValueError("script/audio scene count mismatch or empty script")
@@ -63,13 +61,13 @@ def retrieve(board,used):
     info=pick_file(hit)
     if not info: continue
     url,width,height=info; relevance,matched=score_clip(hit,scene["narration"],scene["keywords"])
-    if relevance<float(os.getenv("CLEANROOM_MIN_RELEVANCE","0.18")): continue
+    if relevance<float(os.getenv("CLEANROOM_MIN_RELEVANCE","0.34")): continue
     rank=(relevance,bool(height>width),int(hit.get("duration") or 0))
     if ident not in candidates or rank>candidates[ident]["rank"]:
      candidates[ident]={"rank":rank,"id":ident,"url":url,"width":width,"height":height,
       "page":hit.get("pageURL"),"author":hit.get("user"),"tags":hit.get("tags",""),
-      "source":ident.split(":",1)[0],"matched_terms":matched,"query":query}
-  if not candidates: raise RuntimeError(f"Scene {scene['scene']}: no unused relevant stock clip for {scene['keywords']}")
+      "source":ident.split(":",1)[0],"matched_terms":matched,"relevance":relevance,"query":query}
+  if not candidates: raise RuntimeError(f"Scene {scene['scene']}: no stock clip passed strict topic relevance; refusing unrelated footage for {scene['keywords']}")
   selected=max(candidates.values(),key=lambda x:x["rank"]); used.add(selected["id"])
   results.append({**{k:v for k,v in selected.items() if k!="rank"},"scene":scene["scene"],
    "start":scene["start"],"duration":scene["duration"],"narration":scene["narration"]})
@@ -133,7 +131,7 @@ def main():
  final=render(board,clips,audio); report={"passed":final.exists() and final.stat().st_size>100000,"file":str(final),
   "scene_count":len(clips),"unique_stock_assets":len({x["id"] for x in clips}),
   "sources":sorted({x.get("source","unknown") for x in clips}),
-  "all_scenes_have_distinct_assets":len({x["id"] for x in clips})==len(clips),
+  "all_scenes_have_distinct_assets":len({x["id"] for x in clips})==len(clips),\n  "minimum_relevance":min((x.get("relevance",0) for x in clips),default=0),
   "visual_engine":"clean-room full-bleed editorial stock","publishing":"disabled"}
  (OUT/"review.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
  if not report["passed"]: raise SystemExit("Clean-room render failed output gate")
