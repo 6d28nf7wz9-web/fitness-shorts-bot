@@ -83,7 +83,6 @@ jobs:
           assert report["scene_count"] == 9, report
           print("Production Director manifest validated for all 9 fixture scenes.")
           PY
-          PY
       - name: Render HyperFrames composition
         run: python hyperframes_render.py
       - name: Verify scene-specific visuals and motion metadata
