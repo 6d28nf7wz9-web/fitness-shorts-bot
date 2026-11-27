@@ -2,18 +2,6 @@ name: FitFuel clean-room preview
 
 on:
   workflow_dispatch:
-    inputs:
-      topic:
-        description: "Optional topic override; leave blank for the generator's next topic"
-        required: false
-        type: string
-        default: ""
-      max_duration:
-        description: "Maximum narration length in seconds"
-        required: false
-        type: number
-        default: 55
-
 permissions:
   contents: read
 
