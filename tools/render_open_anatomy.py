@@ -73,7 +73,6 @@ area("Cool rim",(center.x-size.x*1.5,center.y+size.y*0.8,center.z+size.z*0.7),21
 area("Top strip",(center.x,center.y,size.z+mx.z+1),1200,(1.0,0.2,0.18),size.x*1.2)
 scene=bpy.context.scene
 scene.render.engine="CYCLES" if os.environ.get("USE_CYCLES")=="1" else "BLENDER_EEVEE_NEXT"
-scene.eevee.taa_render_samples=32 if hasattr(scene,"eevee") else 32
 scene.render.resolution_x=720; scene.render.resolution_y=1280; scene.render.resolution_percentage=100
 scene.render.image_settings.file_format="PNG"
 scene.view_settings.view_transform="AgX"
