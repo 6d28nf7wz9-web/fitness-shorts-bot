@@ -1,5 +1,9 @@
 name: FitFuel Medical CGI proof
 on:
+  push:
+    branches: [feat/fitfuel-clean-room-engine]
+    paths:
+      - '.github/workflows/medical-cgi-proof.yml'
   workflow_dispatch:
     inputs:
       clip:
