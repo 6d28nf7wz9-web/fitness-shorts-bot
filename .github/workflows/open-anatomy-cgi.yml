@@ -1,0 +1,74 @@
+name: FitFuel Open Anatomy CGI proof
+on:
+  push:
+    branches: [feat/fitfuel-clean-room-engine]
+    paths:
+      - '.github/workflows/open-anatomy-cgi.yml'
+      - 'tools/render_open_anatomy.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fitfuel-open-anatomy-cgi
+  cancel-in-progress: false
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/fitfuel-clean-room-engine
+      - name: Install render dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libx11-6 libxi6 libxrender1 libxxf86vm1 libxfixes3 libxkbcommon0 libsm6 libglib2.0-0 libegl1 libgl1
+      - name: Install Blender 5.2.5
+        run: |
+          curl -L --fail --retry 3 https://download.blender.org/release/Blender5.2/blender-5.2.5-linux-x64.tar.xz -o /tmp/blender.tar.xz
+          mkdir -p "$HOME/blender"
+          tar -xJf /tmp/blender.tar.xz -C "$HOME/blender" --strip-components=1
+          echo "$HOME/blender" >> "$GITHUB_PATH"
+          "$HOME/blender/blender" --background --factory-startup --python-expr "import bpy; print(bpy.app.version_string)"
+      - name: Download open anatomy model package
+        run: |
+          mkdir -p /tmp/anatomy-package
+          curl -L --fail --retry 3 https://cdn.jsdelivr.net/npm/open-anatomy-3d@0.1.0/models/anatomy-male.glb -o /tmp/anatomy-package/anatomy-male.glb
+          test "$(stat -c%s /tmp/anatomy-package/anatomy-male.glb)" -gt 1000000
+          cp /tmp/anatomy-package/anatomy-male.glb /tmp/anatomy-package/model.glb
+          curl -L --fail https://cdn.jsdelivr.net/npm/open-anatomy-3d@0.1.0/ATTRIBUTION.md -o /tmp/anatomy-package/ATTRIBUTION.md
+      - name: Render anatomical scene and motion proof
+        env:
+          ANATOMY_GLB: /tmp/anatomy-package/model.glb
+          CGI_OUT: /tmp/fitfuel-cgi
+        run: |
+          mkdir -p "$CGI_OUT"
+          blender --background --factory-startup --python tools/render_open_anatomy.py
+          test -s "$CGI_OUT/anatomy-muscle-hero.png"
+          test -s "$CGI_OUT/anatomy-muscle-cinematic.mp4"
+          ffprobe -v error -show_entries stream=codec_type,width,height -show_entries format=duration,size -of json "$CGI_OUT/anatomy-muscle-cinematic.mp4" > "$CGI_OUT/ffprobe.json"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("/tmp/fitfuel-cgi/ffprobe.json").read_text())
+          v=next(x for x in p["streams"] if x["codec_type"]=="video")
+          assert (v["width"],v["height"])==(720,1280),v
+          assert float(p["format"]["duration"])>=2,p
+          print("Open Anatomy CGI proof passed:",p["format"])
+          PY
+      - name: Create preview contact image
+        run: |
+          ffmpeg -y -i /tmp/fitfuel-cgi/anatomy-muscle-cinematic.mp4 -vf "select='eq(n,0)+eq(n,18)+eq(n,36)+eq(n,54)+eq(n,71)',scale=216:384,tile=5x1" -frames:v 1 /tmp/fitfuel-cgi/contact.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-open-anatomy-cgi-proof
+          path: |
+            /tmp/fitfuel-cgi/anatomy-muscle-cinematic.mp4
+            /tmp/fitfuel-cgi/anatomy-muscle-hero.png
+            /tmp/fitfuel-cgi/contact.png
+            /tmp/fitfuel-cgi/ffprobe.json
+            /tmp/anatomy-package/ATTRIBUTION.md
+            /tmp/fitfuel-cgi/model_inventory.txt
+            /tmp/fitfuel-cgi/render_mode.txt
+          retention-days: 7
+          if-no-files-found: error
