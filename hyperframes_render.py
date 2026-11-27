@@ -13,6 +13,7 @@ from pathlib import Path
 
 from visual_engine import build_visual_panel, visual_css
 from scene_presentation_director import direct_scenes
+from visual_beats import build_visual_beat_overlays, visual_beat_css
 
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
@@ -115,7 +116,7 @@ def main():
 .scene-layout-comparison .science-panel{background:linear-gradient(90deg,rgba(8,25,42,.96) 0 49.7%,rgba(20,30,48,.96) 50.3% 100%)}
 .scene-layout-broll_focus .shade{background:linear-gradient(180deg,rgba(4,10,18,.65),rgba(4,10,18,.08) 42%,rgba(4,10,18,.76))}
 """
-    css += visual_css()
+    css += visual_css() + visual_beat_css()
     blocks = []
     cursor = 0.0
     for i, (scene, meta) in enumerate(zip(scenes, audio), 1):
@@ -133,14 +134,14 @@ def main():
             raise SystemExit(f"Missing visual scene {i}: {source}")
         shutil.copy2(source, assets / f"scene_{i}.mp4")
         blocks.append(f'<video id="bg{i}" data-start="{start}" data-duration="{enddur}" data-track-index="0" data-volume="0" muted src="assets/scene_{i}.mp4"></video>')
-        _, science_panel = build_visual_panel(scene, i)
+        beat_overlays = ''.join(build_visual_beat_overlays(scene, dur, i, cursor))
         blocks.append(f"""
 <div id="overlay{i}" class="clip scene-layout-{html.escape(str(scene.get("presentation_style") or "diagram"))}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
  <div class="subbox"><div class="sub" style="font-size:{sub_size}px">{sub_html}</div></div>
- {science_panel}
+ {beat_overlays}
 </div>""")
         cursor += dur
     html_doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FitFuel HyperFrames render</title><style>{css}
