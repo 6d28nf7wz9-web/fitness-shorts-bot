@@ -728,5 +728,19 @@
     "uploaded_at": "2026-11-27T01:05:14.971626+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "YaqqHtfZr4E",
+    "title": "Why Your Genes Slow Muscle Gains (and What to Do)",
+    "topic": "Genetics Slowing Muscle Gains",
+    "series": "Natural vs Enhanced",
+    "episode_number": 11,
+    "episode_topic": "Why genetics change the pace of muscle growth",
+    "hook": "Your genes might be sabotaging muscle growth.",
+    "script_word_count": 60,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-27T15:15:33.069139+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
