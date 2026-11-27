@@ -1,6 +1,15 @@
 name: FitFuel clean-room preview
 
 on:
+  push:
+    branches: [feat/fitfuel-clean-room-engine]
+    paths:
+      - 'fitfuel_cleanroom.py'
+      - '.github/workflows/cleanroom-preview.yml'
+      - 'gen_script.py'
+      - 'voice.py'
+      - 'clips.py'
+      - 'stock_sources.py'
   workflow_dispatch:
 permissions:
   contents: read
