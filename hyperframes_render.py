@@ -115,6 +115,39 @@ def main():
 .scene-layout-hook .title,.scene-layout-payoff .title{letter-spacing:-1px}
 .scene-layout-comparison .science-panel{background:linear-gradient(90deg,rgba(8,25,42,.96) 0 49.7%,rgba(20,30,48,.96) 50.3% 100%)}
 .scene-layout-broll_focus .shade{background:linear-gradient(180deg,rgba(4,10,18,.65),rgba(4,10,18,.08) 42%,rgba(4,10,18,.76))}
+/* Motion design system: distinct entrances and emphasis for each scene role. */
+#root:after{content:"";position:absolute;z-index:30;left:0;bottom:0;height:7px;width:100%;background:linear-gradient(90deg,#72e6c2,#8bd7ff);transform-origin:left;animation:scene-progress var(--scene-duration,4s) linear both}
+.titlebox,.subbox{will-change:transform,opacity}
+.scene-layout-hook .title{animation:hook-impact .62s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-hook .sub{animation:copy-rise .55s .18s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-payoff .title{animation:payoff-settle .8s cubic-bezier(.2,.8,.2,1) both}
+.scene-layout-payoff .science-panel{animation:panel-bloom .7s .12s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-stat_card .science-panel{animation:stat-pop .55s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-comparison .science-panel{animation:split-open .7s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-timeline .science-panel{animation:timeline-rise .65s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-presenter_focus .title{animation:copy-rise .55s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-presenter_focus .science-panel{animation:panel-slide-left .65s .1s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-broll_focus .science-panel{animation:panel-rise .65s .12s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-diagram .science-panel{animation:diagram-draw .7s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-hook .brand,.scene-layout-payoff .brand{animation:brand-track .8s ease-out both}
+.science-panel{transform-origin:center;will-change:transform,opacity}
+.visual-beat-clip{animation:beat-cut .18s ease-out both}
+.visual-beat{animation:panel-bloom .36s cubic-bezier(.16,1,.3,1) both}
+.visual-beat-label{animation:label-focus .3s .06s ease-out both}
+@keyframes hook-impact{0%{opacity:0;transform:translateY(90px) scale(1.08);filter:blur(10px)}65%{opacity:1;transform:translateY(-7px) scale(1);filter:blur(0)}100%{transform:translateY(0)}}
+@keyframes copy-rise{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:translateY(0)}}
+@keyframes payoff-settle{0%{opacity:0;transform:scale(.82);filter:blur(8px)}70%{opacity:1;transform:scale(1.025);filter:blur(0)}100%{transform:scale(1)}}
+@keyframes panel-bloom{from{opacity:0;transform:translateY(50px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes stat-pop{0%{opacity:0;transform:scale(.72) rotate(-2deg)}75%{opacity:1;transform:scale(1.035) rotate(0)}100%{transform:scale(1)}}
+@keyframes split-open{from{opacity:0;clip-path:inset(0 50% 0 50%)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+@keyframes timeline-rise{from{opacity:0;transform:translateY(100px)}to{opacity:1;transform:translateY(0)}}
+@keyframes panel-slide-left{from{opacity:0;transform:translateX(100px) scale(.92)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes panel-rise{from{opacity:0;transform:translateY(70px)}to{opacity:1;transform:translateY(0)}}
+@keyframes diagram-draw{from{opacity:0;transform:scale(.9);filter:blur(5px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+@keyframes brand-track{from{opacity:0;letter-spacing:15px}to{opacity:1;letter-spacing:7px}}
+@keyframes label-focus{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes beat-cut{from{opacity:0}to{opacity:1}}
+@keyframes scene-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 """
     css += visual_css() + visual_beat_css()
     blocks = []
@@ -136,7 +169,7 @@ def main():
         blocks.append(f'<video id="bg{i}" data-start="{start}" data-duration="{enddur}" data-track-index="0" data-volume="0" muted src="assets/scene_{i}.mp4"></video>')
         beat_overlays = ''.join(build_visual_beat_overlays(scene, dur, i, cursor))
         blocks.append(f"""
-<div id="overlay{i}" class="clip scene-layout-{html.escape(str(scene.get("presentation_style") or "diagram"))}" data-start="{start}" data-duration="{enddur}" data-track-index="2">
+<div id="overlay{i}" class="clip scene-layout-{html.escape(str(scene.get("presentation_style") or "diagram"))} motion-{html.escape(str(scene.get("motion_cue") or "draw_on"))}" style="--scene-duration:{enddur}s" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
