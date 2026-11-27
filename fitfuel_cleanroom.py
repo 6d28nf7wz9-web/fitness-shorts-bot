@@ -66,7 +66,7 @@ def retrieve(board,used):
     if ident not in candidates or rank>candidates[ident]["rank"]:
      candidates[ident]={"rank":rank,"id":ident,"url":url,"width":width,"height":height,
       "page":hit.get("pageURL"),"author":hit.get("user"),"tags":hit.get("tags",""),
-      "source":ident.split(":",1)[0],"matched_terms":matched,"relevance":relevance,"query":query}
+      "source":ident.split(":",1)[0] if ":" in ident else "pixabay","matched_terms":matched,"relevance":relevance,"query":query}
   if not candidates: raise RuntimeError(f"Scene {scene['scene']}: no stock clip passed strict topic relevance; refusing unrelated footage for {scene['keywords']}")
   selected=max(candidates.values(),key=lambda x:x["rank"]); used.add(selected["id"])
   results.append({**{k:v for k,v in selected.items() if k!="rank"},"scene":scene["scene"],
