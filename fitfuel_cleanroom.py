@@ -141,7 +141,8 @@ def main():
  final=render(board,clips,audio); report={"passed":final.exists() and final.stat().st_size>100000,"file":str(final),
   "scene_count":len(clips),"unique_stock_assets":len({x["id"] for x in clips}),
   "sources":sorted({x.get("source","unknown") for x in clips}),
-  "all_scenes_have_distinct_assets":len({x["id"] for x in clips})==len(clips),\n  "minimum_relevance":min((x.get("relevance",0) for x in clips),default=0),
+  "all_scenes_have_distinct_assets":len({x["id"] for x in clips})==len(clips),
+  "minimum_relevance":min((x.get("relevance",0) for x in clips),default=0),
   "visual_engine":"clean-room full-bleed editorial stock","publishing":"disabled"}
  (OUT/"review.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
  if not report["passed"]: raise SystemExit("Clean-room render failed output gate")
