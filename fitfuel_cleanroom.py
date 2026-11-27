@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse, json, os, re, subprocess
 from pathlib import Path
 from clips import search as search_stock, pick_file, download
+from stock_sources import track_coverr_download
 
 OUT=Path("output/cleanroom"); W,H,FPS=1080,1920,30
 STOP={"the","a","an","and","or","but","to","of","in","on","for","with","is","are","was","were","be","this","that","your","you","it","as","by","from","how","why","what","when","can","will","do","does","not","than","then"}
@@ -67,7 +68,7 @@ def retrieve(board,used):
     if ident not in candidates or rank>candidates[ident]["rank"]:
      candidates[ident]={"rank":rank,"id":ident,"url":url,"width":width,"height":height,
       "page":hit.get("pageURL"),"author":hit.get("user"),"tags":hit.get("tags",""),
-      "matched_terms":matched,"query":query}
+      "source":ident.split(":",1)[0],"matched_terms":matched,"query":query}
   if not candidates: raise RuntimeError(f"Scene {scene['scene']}: no unused relevant stock clip for {scene['keywords']}")
   selected=max(candidates.values(),key=lambda x:x["rank"]); used.add(selected["id"])
   results.append({**{k:v for k,v in selected.items() if k!="rank"},"scene":scene["scene"],
@@ -106,6 +107,7 @@ def render(board,clips,audio):
  OUT.mkdir(parents=True,exist_ok=True); parts=[]
  for item in clips:
   i=item["scene"]; raw=OUT/f"source_{i}.mp4"; part=OUT/f"shot_{i}.mp4"; download(item["url"],str(raw))
+  if item.get("source")=="coverr": track_coverr_download(item["id"].split(":",1)[1])
   dur=float(item["duration"])
   vf=f"scale=1200:2134:force_original_aspect_ratio=increase,crop=1080:1920,eq=contrast=1.06:saturation=1.08:brightness=-0.015,zoompan=z='min(zoom+0.00035,1.045)':d=1:s=1080x1920:fps={FPS},fps={FPS},format=yuv420p"
   run(["ffmpeg","-y","-loglevel","error","-stream_loop","-1","-i",str(raw),"-t",str(dur),"-vf",vf,"-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p",str(part)])
@@ -129,7 +131,10 @@ def main():
  if args.plan_only: print(f"Clean-room plan ready: {board['scene_count']} scenes / {board['duration']} sec"); return
  clips=retrieve(board,set()); (OUT/"footage_manifest.json").write_text(json.dumps(clips,indent=2),encoding="utf-8")
  final=render(board,clips,audio); report={"passed":final.exists() and final.stat().st_size>100000,"file":str(final),
-  "scene_count":len(clips),"unique_stock_assets":len({x["id"] for x in clips}),"visual_engine":"clean-room full-bleed editorial stock","publishing":"disabled"}
+  "scene_count":len(clips),"unique_stock_assets":len({x["id"] for x in clips}),
+  "sources":sorted({x.get("source","unknown") for x in clips}),
+  "all_scenes_have_distinct_assets":len({x["id"] for x in clips})==len(clips),
+  "visual_engine":"clean-room full-bleed editorial stock","publishing":"disabled"}
  (OUT/"review.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
  if not report["passed"]: raise SystemExit("Clean-room render failed output gate")
  print(json.dumps(report,indent=2))
