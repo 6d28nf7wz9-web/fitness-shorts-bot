@@ -35,7 +35,7 @@ jobs:
       NASA_VIDEO_SEARCH: "1"
       I2V_ENABLED: "0"
       WAN_STOCK_ASSIST: "0"
-      CLEANROOM_MIN_RELEVANCE: "0.18"
+      CLEANROOM_MIN_RELEVANCE: "0.34"
       TTS_VOICE: en-US-AndrewNeural
     steps:
       - uses: actions/checkout@v4
