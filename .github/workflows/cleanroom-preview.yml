@@ -1,0 +1,88 @@
+name: FitFuel clean-room preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Optional topic override; leave blank for the generator's next topic"
+        required: false
+        type: string
+        default: ""
+      max_duration:
+        description: "Maximum narration length in seconds"
+        required: false
+        type: number
+        default: 55
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fitfuel-cleanroom-preview
+  cancel-in-progress: false
+
+jobs:
+  render-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      PYTHONUNBUFFERED: "1"
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      GROQ_MODEL: openai/gpt-oss-120b
+      OPENROUTER_MODEL: openrouter/free
+      PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      NASA_VIDEO_SEARCH: "1"
+      I2V_ENABLED: "0"
+      WAN_STOCK_ASSIST: "0"
+      CLEANROOM_MIN_RELEVANCE: "0.18"
+      TTS_VOICE: en-US-AndrewNeural
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install FFmpeg and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Install project dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Generate a fresh script
+        run: python gen_script.py
+      - name: Generate scene voiceovers
+        run: python voice.py
+      - name: Build with the clean-room engine only
+        run: python fitfuel_cleanroom.py
+      - name: Verify MP4 streams and duration
+        run: |
+          ffprobe -v error -show_entries stream=codec_type,width,height -show_entries format=duration,size -of json output/cleanroom/final.mp4 | tee output/cleanroom/ffprobe.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("output/cleanroom/ffprobe.json").read_text())
+          streams=p.get("streams",[])
+          assert any(s.get("codec_type")=="video" and s.get("width")==1080 and s.get("height")==1920 for s in streams), streams
+          assert any(s.get("codec_type")=="audio" for s in streams), streams
+          assert float(p["format"]["duration"]) > 1, p
+          assert int(p["format"]["size"]) > 100000, p
+          print("MP4 validation passed:", p["format"])
+          PY
+      - name: Upload clean-room preview and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-cleanroom-preview
+          path: |
+            output/cleanroom/final.mp4
+            output/cleanroom/storyboard.json
+            output/cleanroom/footage_manifest.json
+            output/cleanroom/review.json
+            output/cleanroom/ffprobe.json
+          retention-days: 7
+          if-no-files-found: error
