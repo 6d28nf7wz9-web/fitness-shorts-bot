@@ -75,6 +75,16 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn("scene-layout-presenter_focus .science-panel", renderer)
         self.assertIn("scene-layout-comparison .science-panel:after", renderer)
 
+    def test_renderer_has_distinct_motion_design_for_scene_roles(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        for animation in ("hook-impact", "payoff-settle", "stat-pop", "split-open",
+                          "timeline-rise", "panel-slide-left", "diagram-draw",
+                          "scene-progress"):
+            self.assertIn(f"@keyframes {animation}", renderer)
+        self.assertIn("motion-{html.escape(str(scene.get", renderer)
+        self.assertIn("--scene-duration:{enddur}s", renderer)
+
     def test_integration_fixture_uses_cinematic_background_not_test_pattern(self):
         with open(".github/workflows/hyperframes-integration.yml", encoding="utf-8") as f:
             workflow = f.read()
