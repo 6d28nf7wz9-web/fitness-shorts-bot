@@ -35,5 +35,5 @@ class ProductionDirectorTests(unittest.TestCase):
         self.assertTrue(any("overlaps" in e for e in report["errors"]))
 
 
-if __main__ == "__main__":
+if __name__ == "__main__":
     unittest.main()
