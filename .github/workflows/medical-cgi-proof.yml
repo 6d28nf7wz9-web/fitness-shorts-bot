@@ -1,0 +1,78 @@
+name: FitFuel Medical CGI proof
+on:
+  workflow_dispatch:
+    inputs:
+      clip:
+        description: Anatomy clip to render
+        required: true
+        type: choice
+        options:
+          - long-arc-quad
+          - ankle-pumps
+permissions:
+  contents: read
+concurrency:
+  group: fitfuel-medical-cgi-proof
+  cancel-in-progress: false
+jobs:
+  render-medical-cgi:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout FitFuel
+        uses: actions/checkout@v4
+        with:
+          ref: feat/fitfuel-clean-room-engine
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libx11-6 libxi6 libxrender1 libxxf86vm1 libxfixes3 libxkbcommon0 libsm6 libglib2.0-0 libegl1 libgl1
+      - name: Install Blender 5.2.5 LTS
+        run: |
+          curl -L --fail --retry 3 https://download.blender.org/release/Blender5.2/blender-5.2.5-linux-x64.tar.xz -o /tmp/blender.tar.xz
+          mkdir -p "$HOME/blender"
+          tar -xJf /tmp/blender.tar.xz -C "$HOME/blender" --strip-components=1
+          echo "$HOME/blender" >> "$GITHUB_PATH"
+          "$HOME/blender/blender" --background --factory-startup --python-expr "import bpy; print('BLENDER_VERSION=' + bpy.app.version_string)"
+      - name: Clone anatomy-clips source
+        run: git clone --depth 1 https://github.com/CalmDownNova/anatomy-clips.git /tmp/anatomy-clips
+      - name: Install anatomy atlas
+        working-directory: /tmp/anatomy-clips
+        run: python3 make_clip.py setup
+      - name: Render selected anatomy clip
+        working-directory: /tmp/anatomy-clips
+        env:
+          SELECTED_CLIP: ${{ inputs.clip }}
+        run: |
+          python3 make_clip.py list
+          python3 make_clip.py "$SELECTED_CLIP"
+          test -s "out/$SELECTED_CLIP/bone_muscle.mp4"
+          test -s "out/$SELECTED_CLIP/contact-bone_muscle.png"
+      - name: Build vertical FitFuel-ready proof
+        working-directory: /tmp/anatomy-clips
+        env:
+          SELECTED_CLIP: ${{ inputs.clip }}
+        run: |
+          ffmpeg -y -i "out/$SELECTED_CLIP/bone_muscle.mp4" -filter_complex "[0:v]split=2[bg][fg];[bg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=28:8,eq=brightness=-0.25[back];[fg]scale=1000:-2[front];[back][front]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]" -map "[v]" -an -c:v libx264 -preset veryfast -crf 20 -movflags +faststart "out/$SELECTED_CLIP/fitfuel-vertical.mp4"
+          ffprobe -v error -show_entries stream=codec_type,width,height -show_entries format=duration,size -of json "out/$SELECTED_CLIP/fitfuel-vertical.mp4" > "out/$SELECTED_CLIP/ffprobe.json"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("out/${{ inputs.clip }}/ffprobe.json").read_text())
+          v=next(s for s in p["streams"] if s["codec_type"]=="video")
+          assert (v["width"],v["height"])==(1080,1920), v
+          assert float(p["format"]["duration"])>=2, p
+          print("Vertical CGI proof passed:", p["format"])
+          PY
+      - name: Upload CGI proof and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitfuel-medical-cgi-${{ inputs.clip }}
+          path: |
+            /tmp/anatomy-clips/out/${{ inputs.clip }}/bone_muscle.mp4
+            /tmp/anatomy-clips/out/${{ inputs.clip }}/bone.mp4
+            /tmp/anatomy-clips/out/${{ inputs.clip }}/contact-bone_muscle.png
+            /tmp/anatomy-clips/out/${{ inputs.clip }}/fitfuel-vertical.mp4
+            /tmp/anatomy-clips/out/${{ inputs.clip }}/ffprobe.json
+          retention-days: 7
+          if-no-files-found: error
