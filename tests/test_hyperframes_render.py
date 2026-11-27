@@ -66,6 +66,33 @@ class HyperFramesTextLayoutTests(unittest.TestCase):
         self.assertIn("python avatar.py short", workflow)
         self.assertIn("test -s output/final.mp4.avatar", workflow)
 
+    def test_render_has_distinct_scene_layout_compositions(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        for layout in ("hook", "payoff", "stat_card", "comparison", "timeline",
+                       "presenter_focus", "broll_focus", "diagram"):
+            self.assertIn(f".scene-layout-{layout}", renderer)
+        self.assertIn("scene-layout-presenter_focus .science-panel", renderer)
+        self.assertIn("scene-layout-comparison .science-panel:after", renderer)
+
+    def test_renderer_has_distinct_motion_design_for_scene_roles(self):
+        with open("hyperframes_render.py", encoding="utf-8") as f:
+            renderer = f.read()
+        for animation in ("hook-impact", "payoff-settle", "stat-pop", "split-open",
+                          "timeline-rise", "panel-slide-left", "diagram-draw",
+                          "scene-progress"):
+            self.assertIn(f"@keyframes {animation}", renderer)
+        self.assertIn("motion-{html.escape(str(scene.get", renderer)
+        self.assertIn("--scene-duration:{enddur}s", renderer)
+
+    def test_integration_fixture_uses_cinematic_background_not_test_pattern(self):
+        with open(".github/workflows/hyperframes-integration.yml", encoding="utf-8") as f:
+            workflow = f.read()
+        self.assertIn("noise=alls=10", workflow)
+        self.assertIn("boxblur=18:2", workflow)
+        self.assertIn("drawbox=x=110", workflow)
+        self.assertNotIn("testsrc2=s=1080x1920", workflow)
+
     def test_scene_visuals_classify_common_fitness_topics(self):
         self.assertEqual(classify_scene({"narration": "Water improves hydration"}), "hydration")
         self.assertEqual(classify_scene({"narration": "Protein supports muscle growth"}), "muscle")

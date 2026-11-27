@@ -13,6 +13,7 @@ from pathlib import Path
 
 from visual_engine import build_visual_panel, visual_css
 from scene_presentation_director import direct_scenes
+from visual_beats import build_visual_beat_overlays, visual_beat_css
 
 ROOT = Path("output/hyperframes")
 W, H, FPS = 1080, 1920, 30
@@ -83,8 +84,72 @@ def main():
 .subbox{position:absolute;left:130px;right:130px;top:790px;height:150px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center}
 .sub{font-weight:700;line-height:1.22;color:#72e6c2;text-shadow:0 3px 18px #000;max-width:820px;overflow-wrap:anywhere}
 
+/* Real scene composition changes: each presentation style relocates and resizes
+   the title, supporting copy and science panel instead of only changing its SVG. */
+.scene-layout-hook .titlebox{top:330px;height:260px;justify-content:flex-start;text-align:left}
+.scene-layout-hook .subbox{top:650px;left:90px;right:280px;justify-content:flex-start;text-align:left}
+.scene-layout-hook .science-panel{top:990px;height:570px}
+.scene-layout-payoff .titlebox{top:350px;height:240px}
+.scene-layout-payoff .subbox{top:650px}
+.scene-layout-payoff .science-panel{top:930px;height:590px;left:110px;right:110px}
+.scene-layout-stat_card .titlebox{top:300px;height:210px}
+.scene-layout-stat_card .subbox{top:560px}
+.scene-layout-stat_card .science-panel{top:850px;height:470px;left:130px;right:130px}
+.scene-layout-comparison .titlebox{top:330px;height:240px;left:100px;right:100px}
+.scene-layout-comparison .subbox{top:610px}
+.scene-layout-comparison .science-panel{top:900px;left:95px;right:95px;height:570px;border:2px solid rgba(255,255,255,.3)}
+.scene-layout-comparison .science-panel:after{content:"";position:absolute;top:105px;bottom:30px;left:50%;border-left:2px dashed rgba(255,255,255,.42)}
+.scene-layout-timeline .titlebox{top:300px;height:220px;left:140px;right:140px}
+.scene-layout-timeline .subbox{top:555px}
+.scene-layout-timeline .science-panel{top:830px;height:640px;left:105px;right:105px}
+.scene-layout-presenter_focus .titlebox{top:430px;left:95px;right:550px;height:420px;justify-content:flex-start;text-align:left}
+.scene-layout-presenter_focus .subbox{top:900px;left:95px;right:550px;justify-content:flex-start;text-align:left}
+.scene-layout-presenter_focus .science-panel{top:690px;left:555px;right:42px;height:620px}
+.scene-layout-presenter_focus .science-svg{left:2%;width:96%;height:430px}
+.scene-layout-broll_focus .titlebox{top:390px;height:240px}
+.scene-layout-broll_focus .subbox{top:670px}
+.scene-layout-broll_focus .science-panel{top:1290px;left:135px;right:135px;height:300px;opacity:.9}
+.scene-layout-broll_focus .science-svg{top:70px;height:210px}
+.scene-layout-broll_focus .science-heading{top:28px}
+.scene-layout-diagram .science-panel{top:990px;height:550px}
+.scene-layout-hook .title,.scene-layout-payoff .title{letter-spacing:-1px}
+.scene-layout-comparison .science-panel{background:linear-gradient(90deg,rgba(8,25,42,.96) 0 49.7%,rgba(20,30,48,.96) 50.3% 100%)}
+.scene-layout-broll_focus .shade{background:linear-gradient(180deg,rgba(4,10,18,.65),rgba(4,10,18,.08) 42%,rgba(4,10,18,.76))}
+/* Motion design system: distinct entrances and emphasis for each scene role. */
+#root:after{content:"";position:absolute;z-index:30;left:0;bottom:0;height:7px;width:100%;background:linear-gradient(90deg,#72e6c2,#8bd7ff);transform-origin:left;animation:scene-progress var(--scene-duration,4s) linear both}
+.titlebox,.subbox{will-change:transform,opacity}
+.scene-layout-hook .title{animation:hook-impact .62s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-hook .sub{animation:copy-rise .55s .18s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-payoff .title{animation:payoff-settle .8s cubic-bezier(.2,.8,.2,1) both}
+.scene-layout-payoff .science-panel{animation:panel-bloom .7s .12s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-stat_card .science-panel{animation:stat-pop .55s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-comparison .science-panel{animation:split-open .7s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-timeline .science-panel{animation:timeline-rise .65s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-presenter_focus .title{animation:copy-rise .55s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-presenter_focus .science-panel{animation:panel-slide-left .65s .1s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-broll_focus .science-panel{animation:panel-rise .65s .12s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-diagram .science-panel{animation:diagram-draw .7s cubic-bezier(.16,1,.3,1) both}
+.scene-layout-hook .brand,.scene-layout-payoff .brand{animation:brand-track .8s ease-out both}
+.science-panel{transform-origin:center;will-change:transform,opacity}
+.visual-beat-clip{animation:beat-cut .18s ease-out both}
+.visual-beat{animation:panel-bloom .36s cubic-bezier(.16,1,.3,1) both}
+.visual-beat-label{animation:label-focus .3s .06s ease-out both}
+@keyframes hook-impact{0%{opacity:0;transform:translateY(90px) scale(1.08);filter:blur(10px)}65%{opacity:1;transform:translateY(-7px) scale(1);filter:blur(0)}100%{transform:translateY(0)}}
+@keyframes copy-rise{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:translateY(0)}}
+@keyframes payoff-settle{0%{opacity:0;transform:scale(.82);filter:blur(8px)}70%{opacity:1;transform:scale(1.025);filter:blur(0)}100%{transform:scale(1)}}
+@keyframes panel-bloom{from{opacity:0;transform:translateY(50px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes stat-pop{0%{opacity:0;transform:scale(.72) rotate(-2deg)}75%{opacity:1;transform:scale(1.035) rotate(0)}100%{transform:scale(1)}}
+@keyframes split-open{from{opacity:0;clip-path:inset(0 50% 0 50%)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+@keyframes timeline-rise{from{opacity:0;transform:translateY(100px)}to{opacity:1;transform:translateY(0)}}
+@keyframes panel-slide-left{from{opacity:0;transform:translateX(100px) scale(.92)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes panel-rise{from{opacity:0;transform:translateY(70px)}to{opacity:1;transform:translateY(0)}}
+@keyframes diagram-draw{from{opacity:0;transform:scale(.9);filter:blur(5px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+@keyframes brand-track{from{opacity:0;letter-spacing:15px}to{opacity:1;letter-spacing:7px}}
+@keyframes label-focus{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes beat-cut{from{opacity:0}to{opacity:1}}
+@keyframes scene-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 """
-    css += visual_css()
+    css += visual_css() + visual_beat_css()
     blocks = []
     cursor = 0.0
     for i, (scene, meta) in enumerate(zip(scenes, audio), 1):
@@ -102,15 +167,15 @@ def main():
             raise SystemExit(f"Missing visual scene {i}: {source}")
         shutil.copy2(source, assets / f"scene_{i}.mp4")
         blocks.append(f'<video id="bg{i}" data-start="{start}" data-duration="{enddur}" data-track-index="0" data-volume="0" muted src="assets/scene_{i}.mp4"></video>')
-        _, science_panel = build_visual_panel(scene, i)
+        beat_overlays = ''.join(build_visual_beat_overlays(scene, dur, i, cursor))
         blocks.append(f"""
-<div id="overlay{i}" class="clip" data-start="{start}" data-duration="{enddur}" data-track-index="2">
+<div id="overlay{i}" class="clip scene-layout-{html.escape(str(scene.get("presentation_style") or "diagram"))} motion-{html.escape(str(scene.get("motion_cue") or "draw_on"))}" style="--scene-duration:{enddur}s" data-start="{start}" data-duration="{enddur}" data-track-index="2">
  <div class="shade"></div><div class="grid"></div>
  <div class="brand">FITFUEL / SCIENCE EXPLAINED</div>
  <div class="titlebox"><div class="title" style="font-size:{title_size}px">{title_html}</div></div>
  <div class="subbox"><div class="sub" style="font-size:{sub_size}px">{sub_html}</div></div>
- {science_panel}
-</div>""")
+</div>
+{beat_overlays}""")
         cursor += dur
     html_doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FitFuel HyperFrames render</title><style>{css}
 video{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}}

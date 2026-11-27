@@ -13,6 +13,7 @@ on:
       - "hyperframes_render.py"
       - "visual_engine.py"
       - "scene_presentation_director.py"
+      - "production_engine.py"
       - "avatar.py"
   schedule:
     - cron: "17 5 * * *"
@@ -101,6 +102,9 @@ jobs:
           # Still disabled until the owner explicitly approves paid Wan generations.
           WAN_STOCK_ASSIST: "0"
         run: python clips_fast.py
+
+      - name: Build and validate production director manifest
+        run: python production_engine.py
 
       - name: Validate script and footage
         run: python quality_check.py

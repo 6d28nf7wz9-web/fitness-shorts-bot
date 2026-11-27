@@ -45,7 +45,25 @@ def classify_scene(scene):
     return "general"
 
 
-def _svg(category, labels):
+def scene_archetype(scene, category):
+    """Select a scene-specific visual model from the actual spoken claim."""
+    text = " ".join(str(scene.get(k, "")) for k in ("narration", "visual_title", "visual_subtitle")).lower()
+    rules = {
+        "muscle": [("synthesis", r"protein synthesis|amino acid|mps"), ("overload", r"progressive overload|heavier|load|strength"), ("recovery", r"recover|rest day|sleep|repair|soreness")],
+        "nutrition": [("protein_path", r"protein|amino acid"), ("timing", r"meal timing|before training|after training|breakfast"), ("digestion", r"digest|fiber|gut|absorption")],
+        "exercise": [("hinge", r"hinge|romanian deadlift|deadlift"), ("squat", r"squat|knee"), ("range", r"range of motion|stretch|mobility")],
+        "heart": [("blood_flow", r"blood flow|circulation"), ("heart_rate", r"heart rate|pulse|beats"), ("oxygen", r"oxygen|vo2|cardio")],
+        "hydration": [("electrolytes", r"electrolyte|sodium|potassium"), ("fluid_balance", r"dehydrat|sweat|fluid balance"), ("performance", r"endurance|performance|water")],
+        "fat_loss": [("daily_steps", r"steps|walking|neat"), ("intake_output", r"calorie|energy balance|deficit"), ("fat_storage", r"fat loss|body fat")],
+        "hormones": [("appetite", r"ghrelin|leptin|hunger|appetite"), ("signal", r"insulin|testosterone|cortisol"), ("feedback", r"feedback|regulat|response")],
+    }
+    for name, pattern in rules.get(category, []):
+        if re.search(pattern, text):
+            return name
+    return "core"
+
+
+def _svg(category, labels, archetype='core'):
     """Build a genuinely different visual silhouette for each science category."""
     a, b, c = [html.escape(str(x), quote=True) for x in labels]
     head = '<svg class="science-svg" viewBox="0 0 760 430" role="img" aria-label="{}">'.format(
@@ -61,7 +79,24 @@ def _svg(category, labels):
         "hormones": f'<path d="M190 210 L300 115 L440 150 L565 245 L440 330 L300 305Z" class="molecule-bonds"/><circle cx="190" cy="210" r="34" class="molecule-node"/><circle cx="300" cy="115" r="28" class="molecule-node"/><circle cx="440" cy="150" r="40" class="molecule-node"/><circle cx="565" cy="245" r="32" class="molecule-node"/><circle cx="440" cy="330" r="26" class="molecule-node"/><circle cx="300" cy="305" r="36" class="molecule-node"/><text x="190" y="216" class="svg-small">{a}</text><text x="440" y="156" class="svg-small">{b}</text><text x="380" y="405" class="svg-label">{c}</text>',
         "general": f'<path d="M120 215 H640" class="timeline-line"/><circle cx="150" cy="215" r="55" class="timeline-node"/><circle cx="380" cy="215" r="72" class="timeline-node main"/><circle cx="610" cy="215" r="55" class="timeline-node"/><path d="M350 215 l20 20 42 -48" class="timeline-check"/><text x="150" y="300" class="svg-label">{a}</text><text x="380" y="325" class="svg-label">{b}</text><text x="610" y="300" class="svg-label">{c}</text>',
     }
-    svg = head.replace('role="img"', 'preserveAspectRatio="xMidYMid meet" overflow="hidden" role="img"') + shapes[category] + "</svg>"
+    overlays = {
+        "synthesis": '<g class="science-extra"><circle cx="190" cy="220" r="35"/><circle cx="380" cy="220" r="50"/><circle cx="570" cy="220" r="35"/><path d="M225 220 H330 M430 220 H535"/></g>',
+        "overload": '<g class="science-extra"><path d="M180 190 H580 M230 145 V235 M270 160 V220 M490 160 V220 M530 145 V235"/></g>',
+        "recovery": '<g class="science-extra"><circle cx="380" cy="220" r="105"/><path d="M380 115 A105 105 0 0 1 485 220 M485 220 L455 195 M380 325 A105 105 0 0 1 275 220"/></g>',
+        "protein_path": '<g class="science-extra"><circle cx="220" cy="220" r="28"/><circle cx="380" cy="170" r="38"/><circle cx="540" cy="220" r="28"/><path d="M248 210 L342 180 M418 180 L512 210"/></g>',
+        "timing": '<g class="science-extra"><circle cx="380" cy="220" r="115"/><path d="M380 125 V220 L455 260"/></g>',
+        "digestion": '<g class="science-extra"><path d="M300 120 C240 180 280 220 350 210 C430 195 360 300 450 310 C510 315 520 350 460 360"/></g>',
+        "hinge": '<g class="science-extra"><path d="M250 120 L390 220 L520 320 M390 220 L350 330 M390 220 L510 180"/></g>',
+        "squat": '<g class="science-extra"><circle cx="380" cy="110" r="25"/><path d="M380 135 L380 220 L300 310 M380 220 L460 310"/></g>',
+        "range": '<g class="science-extra"><path d="M230 300 A150 150 0 0 1 530 150 M530 150 L490 155 M530 150 L515 190"/></g>',
+        "electrolytes": '<g class="science-extra"><circle cx="280" cy="220" r="42"/><circle cx="480" cy="220" r="42"/><path d="M280 185 V255 M245 220 H315 M450 220 H510"/></g>',
+        "blood_flow": '<g class="science-extra"><path d="M150 200 C260 90 500 330 610 200 M150 250 C260 360 500 120 610 250"/></g>',
+        "heart_rate": '<g class="science-extra"><path d="M150 230 H280 L330 150 L390 300 L445 205 L480 230 H610"/></g>',
+        "daily_steps": '<g class="science-extra"><path d="M180 300 L280 240 L370 270 L470 170 L580 125 M545 125 H580 V160"/></g>',
+        "appetite": '<g class="science-extra"><path d="M250 250 Q380 100 510 250 Q380 350 250 250Z"/><circle cx="380" cy="230" r="32"/></g>',
+        "signal": '<g class="science-extra"><circle cx="250" cy="220" r="38"/><path d="M288 220 H472 M450 198 L472 220 L450 242"/><circle cx="510" cy="220" r="38"/></g>'
+    }
+    svg = head.replace('role="img"', 'preserveAspectRatio="xMidYMid meet" overflow="hidden" role="img"') + shapes[category] + overlays.get(archetype, "") + "</svg>"
     # SVG text is the common source of clipping in scientific panels. Long labels
     # are constrained to the safe inner width while retaining their full content.
     def constrain_long_labels(match):
@@ -83,11 +118,12 @@ def build_visual_panel(scene, index=1):
     allowed_styles = {"hook", "payoff", "diagram", "stat_card", "comparison", "timeline", "presenter_focus", "broll_focus"}
     if style not in allowed_styles:
         style = "diagram"
+    archetype = scene_archetype(scene, category)
     panel = (
         f'<div class="science-panel panel-{category} presentation-{style} role-{role}" '
-        f'data-scene="{int(index)}" data-layout="{category}" data-variant="{(int(index)-1)%3}" data-motion="{html.escape(motion, quote=True)}">'
+        f'data-scene="{int(index)}" data-layout="{category}" data-archetype="{archetype}" data-variant="{(int(index)-1)%3}" data-motion="{html.escape(motion, quote=True)}">'
         f'<div class="science-kicker">FITFUEL • SCIENCE VISUAL</div>'
-        f'<div class="science-heading">{html.escape(title)}</div>{_svg(category, labels)}</div>'
+        f'<div class="science-heading">{html.escape(title)}</div>{_svg(category, labels, archetype)}</div>'
     )
     return category, panel
 
@@ -95,7 +131,7 @@ def build_visual_panel(scene, index=1):
 def visual_css():
     """Shared frame styling plus distinct silhouettes, palettes and motion."""
     return """
-.science-panel{position:absolute;left:72px;right:72px;top:1000px;height:540px;border-radius:24px!important;overflow:hidden;background:rgba(5,13,23,.78);border:1px solid rgba(255,255,255,.18);box-shadow:0 24px 70px rgba(0,0,0,.38)}
+.science-extra{fill:none;stroke:#fff;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;opacity:.9}.science-extra circle{fill:rgba(114,230,194,.18);stroke:var(--accent);stroke-width:7}\n.science-panel{position:absolute;left:72px;right:72px;top:1000px;height:540px;border-radius:24px!important;overflow:hidden;background:rgba(5,13,23,.78);border:1px solid rgba(255,255,255,.18);box-shadow:0 24px 70px rgba(0,0,0,.38)}
 .science-panel:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,var(--glow),transparent 68%);opacity:.38;animation:visual-breathe 5s ease-in-out infinite alternate}
 .science-kicker{position:absolute;top:24px;left:32px;color:var(--accent);font-size:16px;letter-spacing:4px;font-weight:800}
 .science-heading{position:absolute;top:58px;left:32px;color:#fff;font-size:25px;letter-spacing:2px;font-weight:900}
