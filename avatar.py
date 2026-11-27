@@ -19,7 +19,7 @@ BOB = 9  # pixels of speech-reactive emphasis movement
 # h = presenter height; x and bottom keep it outside the Shorts title/caption safe zones.
 # The Shorts presenter sits in the upper-left corner, below the brand line and above titles.
 LAYOUTS = {
-    "short": {"h": 220, "x": "32", "bottom": 1520},
+    "short": {"h": 300, "x": "32", "bottom": 1520},
     "long": {"h": 280, "x": "W-w-40", "bottom": 24},
 }
 
