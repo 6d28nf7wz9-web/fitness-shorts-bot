@@ -22,6 +22,16 @@ SYNONYMS={
  "hormone":{"hormone","insulin","cortisol","testosterone","estrogen","ghrelin","leptin"},
  "genetics":{"genetic","genetics","dna","gene","genes","hereditary","chromosome"}}
 GENERIC={"fitness","sport","sports","person","people","healthy","active","lifestyle","strong","fit","exercise","workout","training","athlete"}
+def words(value):
+ return re.findall(r"[a-z0-9]+",str(value or "").lower())
+
+def expand(tokens):
+ expanded=set(tokens)
+ for token in list(tokens):
+  for group in SYNONYMS.values():
+   if token in group:
+    expanded.update(group)
+ return expanded
 def score_clip(hit,narration,keywords):
  metadata=" ".join(str(hit.get(k,"")) for k in ("tags","title","description"))
  meta=set(words(metadata)); raw=set(words(" ".join(keywords))); narrative=set(words(narration))
