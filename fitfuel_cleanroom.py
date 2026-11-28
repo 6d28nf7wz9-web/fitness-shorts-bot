@@ -32,16 +32,45 @@ def expand(tokens):
    if token in group:
     expanded.update(group)
  return expanded
+# Match against specific visual concepts, not loose single words such as "row" or "tissue".
+VISUAL_CONCEPTS = {
+ "resistance_training": {"gym","weightlifting","weight training","lifting weights","barbell","dumbbell","bench press","bicep curl","biceps curl","squat","deadlift","lat pulldown","resistance training","strength training","workout"},
+ "muscle_anatomy": {"muscle","muscles","muscle fiber","muscle fibres","muscle fibers","biceps","triceps","hypertrophy","skeletal muscle","muscle tissue","anatomy"},
+ "genetics": {"dna","gene","genes","genetics","genetic","chromosome","double helix","genome","molecular"},
+ "running": {"running","runner","jogging","sprinting"},
+ "nutrition": {"nutrition","food","meal","protein","eggs","chicken","cooking","diet"},
+ "sleep_recovery": {"sleep","sleeping","recovery","rest","bed"},
+ "cardio": {"cardio","heart rate","treadmill","cycling","rowing machine"}
+}
+AMBIGUOUS = {"row","rowing","tissue","growth","close","macro","fit","sport","training","person","healthy","active","nature","water","body"}
+def concept_hits(text):
+ value=" ".join(words(text))
+ hits=set()
+ for concept, phrases in VISUAL_CONCEPTS.items():
+  for phrase in phrases:
+   if " " in phrase:
+    if phrase in value: hits.add(concept); break
+   elif phrase in set(words(value)):
+    hits.add(concept); break
+ return hits
 def score_clip(hit,narration,keywords):
  metadata=" ".join(str(hit.get(k,"")) for k in ("tags","title","description"))
- meta=set(words(metadata)); raw=set(words(" ".join(keywords))); narrative=set(words(narration))
- specific=expand((raw|narrative)-GENERIC)
- exact=specific & meta
- meaningful=exact-GENERIC
- if not meta or not specific or not meaningful: return 0.0,[]
- coverage=len(meaningful)/max(1,min(5,len(specific-GENERIC)))
- query_match=len((raw-GENERIC)&meta)/max(1,len(raw-GENERIC))
- return round(min(1.0,coverage*0.72+query_match*0.28),4),sorted(meaningful)
+ meta_concepts=concept_hits(metadata)
+ query_concepts=concept_hits(" ".join(keywords))
+ narrative_concepts=concept_hits(narration)
+ # A clip must match a concrete concept explicitly requested by the scene.
+ target=query_concepts or narrative_concepts
+ matched=meta_concepts & target
+ if not matched: return 0.0,[]
+ # Penalize off-topic material unless it also carries clear fitness/anatomy evidence.
+ meta_words=set(words(metadata))
+ off_topic={"boat","canoe","paddling","leaf","leaves","plant","plants","botanical","garden","flower","ocean","sea","beach"}
+ if meta_words & off_topic and not (meta_concepts & {"resistance_training","muscle_anatomy","genetics","nutrition","cardio","sleep_recovery"}):
+  return 0.0,[]
+ query_match=len(meta_concepts & query_concepts)/max(1,len(query_concepts))
+ narrative_match=len(meta_concepts & narrative_concepts)/max(1,len(narrative_concepts))
+ score=min(1.0,0.72*query_match+0.28*narrative_match)
+ return round(score,4),sorted(matched)
 
 def build_storyboard(script,audio):
  scenes=script.get("scenes") or []
