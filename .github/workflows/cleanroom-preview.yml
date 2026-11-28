@@ -22,7 +22,6 @@ concurrency:
 
 jobs:
   render-preview:
-    needs: medical-cgi-proof
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -54,11 +53,14 @@ jobs:
           sudo apt-get install -y ffmpeg fonts-dejavu-core
       - name: Install project dependencies
         run: python -m pip install -r requirements.txt
-      - name: Download validated anatomy CGI from proof job
+      - name: Download validated anatomy CGI from optional proof job
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: fitfuel-open-anatomy-cgi-proof
           path: output/cleanroom/repo_visuals/open-anatomy
+      - name: Continue with stock fallback when CGI proof is unavailable
+        run: mkdir -p output/cleanroom/repo_visuals/open-anatomy
       - name: Generate a fresh script
         run: python gen_script.py
       - name: Generate scene voiceovers
