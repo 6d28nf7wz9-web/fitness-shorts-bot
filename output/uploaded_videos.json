@@ -770,5 +770,19 @@
     "uploaded_at": "2026-11-28T00:36:36.640879+00:00",
     "privacy": "public",
     "status": "uploaded"
+  },
+  {
+    "video_id": "5SKMAjZwJIg",
+    "title": "Does More Sweat Mean a Better Workout? Myth Busted",
+    "topic": "Sweat Doesn’t Equal Better Workout",
+    "series": "Gym Myth Court",
+    "episode_number": 12,
+    "episode_topic": "Is sweating more a sign of a better workout?",
+    "hook": "More sweat doesn’t equal a better workout.",
+    "script_word_count": 55,
+    "scene_count": 5,
+    "uploaded_at": "2026-11-28T14:21:35.237923+00:00",
+    "privacy": "public",
+    "status": "uploaded"
   }
 ]
