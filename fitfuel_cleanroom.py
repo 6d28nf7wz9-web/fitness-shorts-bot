@@ -7,6 +7,7 @@ import argparse, json, os, re, subprocess
 from pathlib import Path
 from clips import search as search_stock, pick_file, download
 from stock_sources import track_coverr_download
+from tools.fitfuel_visual_adapters import select_visual, integration_status
 
 OUT=Path("output/cleanroom"); W,H,FPS=1080,1920,30
 STOP={"the","a","an","and","or","but","to","of","in","on","for","with","is","are","was","were","be","this","that","your","you","it","as","by","from","how","why","what","when","can","will","do","does","not","than","then"}
@@ -92,6 +93,12 @@ def build_storyboard(script,audio):
 def retrieve(board,used):
  results=[]
  for scene in board["scenes"]:
+  visual=select_visual(scene)
+  if not visual["fallback"]:
+   results.append({"scene":scene["scene"],"start":scene["start"],"duration":scene["duration"],
+    "narration":scene["narration"],"source":visual["source"],"local_path":visual["path"],
+    "repo":visual["repo"],"visual_kind":visual["kind"],"relevance":1.0,"matched_terms":[visual["kind"]]})
+   continue
   candidates={}
   for query in scene["keywords"][:4]:
    for hit in search_stock(query):
@@ -143,8 +150,13 @@ def run(cmd): subprocess.run(cmd,check=True)
 def render(board,clips,audio):
  OUT.mkdir(parents=True,exist_ok=True); parts=[]
  for item in clips:
-  i=item["scene"]; raw=OUT/f"source_{i}.mp4"; part=OUT/f"shot_{i}.mp4"; download(item["url"],str(raw))
-  if item.get("source")=="coverr": track_coverr_download(item["id"].split(":",1)[1])
+  i=item["scene"]; raw=OUT/f"source_{i}.mp4"; part=OUT/f"shot_{i}.mp4"
+  if item.get("local_path"):
+   import shutil
+   shutil.copy2(item["local_path"],raw)
+  else:
+   download(item["url"],str(raw))
+  if item.get("source")=="coverr" and item.get("id"): track_coverr_download(item["id"].split(":",1)[1])
   dur=float(item["duration"])
   # Preserve the complete source frame: no center-crop and no artificial zoom.
   # A softly blurred, darkened copy fills the 9:16 canvas behind the uncropped
@@ -185,7 +197,9 @@ def main():
   "sources":sorted({x.get("source","unknown") for x in clips}),
   "all_scenes_have_distinct_assets":len({x["id"] for x in clips})==len(clips),
   "minimum_relevance":min((x.get("relevance",0) for x in clips),default=0),
-  "visual_engine":"clean-room full-bleed editorial stock","publishing":"disabled"}
+  "visual_engine":"hybrid repository-science CGI + relevance-gated stock",
+  "visual_sources":{k:sum(1 for x in clips if x.get("source")==k) for k in sorted({x.get("source","unknown") for x in clips})},
+  "adapter_status":integration_status(),"publishing":"disabled"}
  (OUT/"review.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
  if not report["passed"]: raise SystemExit("Clean-room render failed output gate")
  print(json.dumps(report,indent=2))
