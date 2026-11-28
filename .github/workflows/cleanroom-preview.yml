@@ -22,6 +22,7 @@ concurrency:
 
 jobs:
   render-preview:
+    needs: medical-cgi-proof
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -53,6 +54,11 @@ jobs:
           sudo apt-get install -y ffmpeg fonts-dejavu-core
       - name: Install project dependencies
         run: python -m pip install -r requirements.txt
+      - name: Download validated anatomy CGI from proof job
+        uses: actions/download-artifact@v4
+        with:
+          name: fitfuel-open-anatomy-cgi-proof
+          path: output/cleanroom/repo_visuals/open-anatomy
       - name: Generate a fresh script
         run: python gen_script.py
       - name: Generate scene voiceovers
@@ -117,6 +123,7 @@ jobs:
         run: |
           blender --background --factory-startup --python tools/render_open_anatomy.py
           test -s /tmp/fitfuel-cgi/anatomy-muscle-hero.png
+          ffmpeg -y -loglevel error -framerate 24 -i /tmp/fitfuel-cgi/frame_%04d.png -c:v libx264 -pix_fmt yuv420p -movflags +faststart /tmp/fitfuel-cgi/anatomy-muscle-cinematic.mp4
           test -s /tmp/fitfuel-cgi/anatomy-muscle-cinematic.mp4
           ffprobe -v error -show_entries stream=codec_type,width,height -show_entries format=duration,size -of json /tmp/fitfuel-cgi/anatomy-muscle-cinematic.mp4 > /tmp/fitfuel-cgi/ffprobe.json
           python3 - <<'PY'
