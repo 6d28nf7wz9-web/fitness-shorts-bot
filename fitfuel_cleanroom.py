@@ -117,8 +117,21 @@ def render(board,clips,audio):
   i=item["scene"]; raw=OUT/f"source_{i}.mp4"; part=OUT/f"shot_{i}.mp4"; download(item["url"],str(raw))
   if item.get("source")=="coverr": track_coverr_download(item["id"].split(":",1)[1])
   dur=float(item["duration"])
-  vf=f"scale=1200:2134:force_original_aspect_ratio=increase,crop=1080:1920,eq=contrast=1.06:saturation=1.08:brightness=-0.015,zoompan=z='min(zoom+0.00035,1.045)':d=1:s=1080x1920:fps={FPS},fps={FPS},format=yuv420p"
-  run(["ffmpeg","-y","-loglevel","error","-stream_loop","-1","-i",str(raw),"-t",str(dur),"-vf",vf,"-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p",str(part)])
+  # Preserve the complete source frame: no center-crop and no artificial zoom.
+  # A softly blurred, darkened copy fills the 9:16 canvas behind the uncropped
+  # foreground so both portrait and landscape footage remain edge-to-edge.
+  vf=(
+   f"[0:v]split=2[bg][fg];"
+   f"[bg]scale={W}:{H}:force_original_aspect_ratio=increase,"
+   f"crop={W}:{H},boxblur=28:12,eq=brightness=-0.28:saturation=0.82[back];"
+   f"[fg]scale={W}:{H}:force_original_aspect_ratio=decrease,"
+   f"eq=contrast=1.04:saturation=1.06:brightness=-0.01[front];"
+   f"[back][front]overlay=(W-w)/2:(H-h)/2,"
+   f"fps={FPS},format=yuv420p[v]"
+  )
+  run(["ffmpeg","-y","-loglevel","error","-stream_loop","-1","-i",str(raw),"-t",str(dur),
+       "-filter_complex",vf,"-map","[v]","-an","-c:v","libx264","-preset","veryfast",
+       "-crf","19","-pix_fmt","yuv420p",str(part)])
   raw.unlink(missing_ok=True); parts.append(part)
  concat=OUT/"shots.txt"; concat.write_text("".join(f"file '{p.resolve()}'\n" for p in parts),encoding="utf-8")
  visual=OUT/"visual.mp4"; run(["ffmpeg","-y","-loglevel","error","-f","concat","-safe","0","-i",str(concat),"-c","copy",str(visual)]); concat.unlink(missing_ok=True)
