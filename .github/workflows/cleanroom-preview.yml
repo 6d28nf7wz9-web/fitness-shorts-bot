@@ -11,6 +11,7 @@ on:
       - 'clips.py'
       - 'stock_sources.py'
       - 'tools/render_open_anatomy.py'
+      - 'tools/fitfuel_visual_adapters.py'
   workflow_dispatch:
 permissions:
   contents: read
