@@ -88,6 +88,6 @@ base=cam.location.copy()
 for frame,scale in [(1,1.0),(72,0.93)]:
     cam.location=center+(base-center)*scale
     cam.keyframe_insert(data_path="location",frame=frame)
-scene.render.filepath=str(out/"anatomy-muscle-cinematic.mp4")
+scene.render.filepath=str(out/"frame_")
 bpy.ops.render.render(animation=True)
 print("CGI_RENDER_OK",len(meshes),len(visible),mode)
