@@ -193,9 +193,9 @@ def main():
  if args.plan_only: print(f"Clean-room plan ready: {board['scene_count']} scenes / {board['duration']} sec"); return
  clips=retrieve(board,set()); (OUT/"footage_manifest.json").write_text(json.dumps(clips,indent=2),encoding="utf-8")
  final=render(board,clips,audio); report={"passed":final.exists() and final.stat().st_size>100000,"file":str(final),
-  "scene_count":len(clips),"unique_stock_assets":len({x["id"] for x in clips}),
+  "scene_count":len(clips),"unique_visual_assets":len({x.get("id") or x.get("local_path") for x in clips}),
   "sources":sorted({x.get("source","unknown") for x in clips}),
-  "all_scenes_have_distinct_assets":len({x["id"] for x in clips})==len(clips),
+  "all_scenes_have_distinct_assets":len({x.get("id") or x.get("local_path") for x in clips})==len(clips),
   "minimum_relevance":min((x.get("relevance",0) for x in clips),default=0),
   "visual_engine":"hybrid repository-science CGI + relevance-gated stock",
   "visual_sources":{k:sum(1 for x in clips if x.get("source")==k) for k in sorted({x.get("source","unknown") for x in clips})},
