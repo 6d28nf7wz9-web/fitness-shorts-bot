@@ -72,7 +72,7 @@ area("Key softbox",(center.x+size.x*1.4,center.y-size.y*1.6,center.z+size.z*1.4)
 area("Cool rim",(center.x-size.x*1.5,center.y+size.y*0.8,center.z+size.z*0.7),2100,(0.22,0.48,1.0),size.x*1.6)
 area("Top strip",(center.x,center.y,size.z+mx.z+1),1200,(1.0,0.2,0.18),size.x*1.2)
 scene=bpy.context.scene
-scene.render.engine="CYCLES" if os.environ.get("USE_CYCLES")=="1" else "BLENDER_EEVEE_NEXT"
+scene.render.engine="CYCLES" if os.environ.get("USE_CYCLES")=="1" else "BLENDER_EEVEE"
 scene.render.resolution_x=720; scene.render.resolution_y=1280; scene.render.resolution_percentage=100
 scene.render.image_settings.file_format="PNG"
 scene.view_settings.view_transform="AgX"
